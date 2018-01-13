@@ -6,4 +6,14 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(Talvos)
 
+# Enable rpath on OS X
+set(CMAKE_MACOSX_RPATH 1)
+
+if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
+
+include_directories(include)
+
+add_subdirectory(lib)
 add_subdirectory(tools)

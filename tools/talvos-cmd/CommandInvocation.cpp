@@ -6,8 +6,13 @@
 #include <iostream>
 
 #include "CommandInvocation.h"
+#include "talvos/Module.h"
 
 using namespace std;
+
+CommandInvocation::CommandInvocation() {}
+
+CommandInvocation::~CommandInvocation() {}
 
 bool CommandInvocation::load(const char *FileName)
 {
@@ -22,8 +27,12 @@ bool CommandInvocation::load(const char *FileName)
   // Load SPIR-V module
   string SPVFileName;
   getline(ConfigFile, SPVFileName);
-  // TODO: Actually load it
-  cout << "Loading " << SPVFileName << endl;
+  Module = talvos::Module::load(SPVFileName);
+  if (!Module)
+  {
+    cerr << "Failed to load SPIR-V module" << endl;
+    return false;
+  }
 
   // TODO: Parse remainder of config file
 

@@ -3,22 +3,15 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-#include <fstream>
+#include <string>
 
 namespace talvos
 {
-class Module;
-}
 
-class CommandInvocation
+class Module
 {
 public:
-  CommandInvocation();
-  ~CommandInvocation();
-  bool load(const char *FileName);
-  void run();
-
-private:
-  std::ifstream ConfigFile;
-  std::unique_ptr<talvos::Module> Module;
+  static std::unique_ptr<Module> load(const std::string &FileName);
 };
+
+} // namespace talvos
