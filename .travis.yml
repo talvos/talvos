@@ -1,0 +1,10 @@
+dist: trusty
+
+language: cpp
+compiler:
+  - gcc
+  - clang
+
+script:
+  - cmake .
+  - make -j 2
