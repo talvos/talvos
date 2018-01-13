@@ -3,6 +3,7 @@
 # This file is distributed under a three-clause BSD license. For full license
 # terms please see the LICENSE file distributed with this source code.
 
-add_executable(talvos-cmd talvos-cmd.cpp)
+add_executable(talvos-cmd talvos-cmd.cpp
+               CommandInvocation.cpp CommandInvocation.h)
 
 install(TARGETS talvos-cmd DESTINATION bin)

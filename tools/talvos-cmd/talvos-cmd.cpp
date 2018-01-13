@@ -7,6 +7,8 @@
 #include <cstring>
 #include <iostream>
 
+#include "CommandInvocation.h"
+
 using namespace std;
 
 static const char *ConfigFileName;
@@ -19,8 +21,11 @@ int main(int argc, char *argv[])
   if (!parseArguments(argc, argv))
     return 1;
 
-  // TODO: Process config file
-  cout << ConfigFileName << endl;
+  CommandInvocation Cmd;
+  if (!Cmd.load(ConfigFileName))
+    return 1;
+
+  Cmd.run();
 
   return 0;
 }
