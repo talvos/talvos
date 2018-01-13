@@ -1,0 +1,7 @@
+Language:        Cpp
+# BasedOnStyle:  LLVM
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: true
+  AfterFunction: true
+  BeforeElse: true
