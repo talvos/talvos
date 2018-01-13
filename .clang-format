@@ -5,4 +5,5 @@ BraceWrapping:
   AfterClass: true
   AfterControlStatement: true
   AfterFunction: true
+  AfterNamespace: true
   BeforeElse: true
