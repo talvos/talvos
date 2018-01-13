@@ -3,9 +3,14 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <fstream>
+
 class CommandInvocation
 {
 public:
   bool load(const char *FileName);
   void run();
+
+private:
+  std::ifstream ConfigFile;
 };
