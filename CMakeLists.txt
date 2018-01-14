@@ -6,6 +6,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(Talvos)
 
+include(CheckIncludeFileCXX)
+
 # Enable rpath on OS X
 set(CMAKE_MACOSX_RPATH 1)
 
