@@ -8,7 +8,7 @@ set(SPIRV_TOOLS_INCLUDE_DIR "" CACHE STRING
     "Directory containing SPIRV-Tools headers")
 set(CMAKE_REQUIRED_INCLUDES "${SPIRV_TOOLS_INCLUDE_DIR}")
 check_include_file_cxx("spirv-tools/libspirv.hpp" SPIRV_TOOLS_HEADER_FOUND)
-if (NOT ${SPIRV_TOOLS_HEADER_FOUND})
+if (NOT SPIRV_TOOLS_HEADER_FOUND)
   message(FATAL_ERROR
           "SPIRV-Tools header required, try setting SPIRV_TOOLS_INCLUDE_DIR.")
 endif()
