@@ -3,6 +3,7 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <cassert>
 #include <cstdio>
 #include <iostream>
 #include <spirv-tools/libspirv.hpp>
@@ -12,9 +13,32 @@
 namespace talvos
 {
 
-spv_result_t ParseHeader(void *user_data, spv_endianness_t endian,
-                         uint32_t /* magic */, uint32_t version,
-                         uint32_t generator, uint32_t id_bound, uint32_t schema)
+class ModuleBuilder
+{
+public:
+  ModuleBuilder() { Mod = std::unique_ptr<Module>(new Module); }
+
+  void processInstruction(const spv_parsed_instruction_t *Instruction)
+  {
+    assert(Mod);
+    // TODO: Implement
+    std::cout << "Opcode " << Instruction->opcode << std::endl;
+  };
+
+  std::unique_ptr<Module> takeModule()
+  {
+    assert(Mod);
+    return std::move(Mod);
+  }
+
+private:
+  std::unique_ptr<Module> Mod;
+};
+
+spv_result_t HandleHeader(void *user_data, spv_endianness_t endian,
+                          uint32_t /* magic */, uint32_t version,
+                          uint32_t generator, uint32_t id_bound,
+                          uint32_t schema)
 {
   // TODO: Do something with id_bound
   std::cout << "Module ID bound = " << id_bound << std::endl;
@@ -22,18 +46,15 @@ spv_result_t ParseHeader(void *user_data, spv_endianness_t endian,
 }
 
 spv_result_t
-ParseInstruction(void *user_data,
-                 const spv_parsed_instruction_t *parsed_instruction)
+HandleInstruction(void *user_data,
+                  const spv_parsed_instruction_t *parsed_instruction)
 {
-  // TODO: Implement
-  std::cout << "Opcode " << parsed_instruction->opcode << std::endl;
+  ((ModuleBuilder *)user_data)->processInstruction(parsed_instruction);
   return SPV_SUCCESS;
 }
 
 std::unique_ptr<Module> Module::load(const std::string &FileName)
 {
-  std::unique_ptr<Module> M(new Module());
-
   // Open file
   FILE *SPVFile = fopen(FileName.c_str(), "rb");
   if (!SPVFile)
@@ -50,18 +71,20 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
   fread(Words, 1, NumBytes, SPVFile);
   fclose(SPVFile);
 
+  ModuleBuilder MB;
+
   // Parse binary
   spv_diagnostic diagnostic = nullptr;
   spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
-  spvBinaryParse(SPVContext.CContext(), M.get(), Words, NumBytes / 4,
-                 ParseHeader, ParseInstruction, &diagnostic);
+  spvBinaryParse(SPVContext.CContext(), &MB, Words, NumBytes / 4, HandleHeader,
+                 HandleInstruction, &diagnostic);
   if (diagnostic)
   {
     spvDiagnosticPrint(diagnostic);
     return nullptr;
   }
 
-  return M;
+  return MB.takeModule();
 }
 
 } // namespace talvos
