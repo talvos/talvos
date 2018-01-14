@@ -6,5 +6,8 @@ compiler:
   - clang
 
 script:
-  - cmake .
+  - wget https://github.com/KhronosGroup/SPIRV-Tools/releases/download/master-tot/SPIRV-Tools-master-linux-RelWithDebInfo.zip
+  - unzip SPIRV-Tools-master-linux-RelWithDebInfo.zip -d SPIRV-Tools
+  - cmake . -DSPIRV_TOOLS_INCLUDE_DIR=$PWD/SPIRV-Tools/include
+            -DSPIRV_TOOLS_LIBRARY_DIR=$PWD/SPIRV-Tools/lib
   - make -j 2
