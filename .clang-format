@@ -6,4 +6,6 @@ BraceWrapping:
   AfterControlStatement: true
   AfterFunction: true
   AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
   BeforeElse: true
