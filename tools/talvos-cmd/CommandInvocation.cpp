@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "CommandInvocation.h"
-#include "talvos/Invocation.h"
+#include "talvos/Interpreter.h"
 #include "talvos/Module.h"
 
 using namespace std;
@@ -42,6 +42,6 @@ bool CommandInvocation::load(const char *FileName)
 
 void CommandInvocation::run()
 {
-  // TODO: Implement properly
-  talvos::Invocation I(Module->getFunction());
+  // TODO: Problem domain
+  talvos::interpret(Module->getFunction());
 }

@@ -3,28 +3,15 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-#ifndef TALVOS_INVOCATION_H
-#define TALVOS_INVOCATION_H
+#ifndef TALVOS_INTERPRETER_H
+#define TALVOS_INTERPRETER_H
 
 namespace talvos
 {
 
 struct Function;
-struct Instruction;
 
-class Invocation
-{
-public:
-  enum State { READY, FINISHED };
-
-public:
-  Invocation(const Function *F);
-  State getState() const;
-  void step();
-
-private:
-  const Instruction *CurrentInstruction;
-};
+void interpret(const Function *F);
 
 } // namespace talvos
 

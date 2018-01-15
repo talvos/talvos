@@ -3,6 +3,7 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <cassert>
 #include <iostream>
 
 #include "talvos/Invocation.h"
@@ -14,13 +15,19 @@ namespace talvos
 Invocation::Invocation(const Function *F)
 {
   CurrentInstruction = F->FirstInstruction;
+}
 
-  // TODO: Move this to run/step etc
-  while (CurrentInstruction)
-  {
-    std::cout << "Executing " << CurrentInstruction->Opcode << std::endl;
-    CurrentInstruction = CurrentInstruction->Next;
-  }
+Invocation::State Invocation::getState() const
+{
+  return CurrentInstruction ? READY : FINISHED;
+}
+
+void Invocation::step()
+{
+  assert(CurrentInstruction);
+  // TODO: Execute properly
+  std::cout << "Executing " << CurrentInstruction->Opcode << std::endl;
+  CurrentInstruction = CurrentInstruction->Next;
 }
 
 } // namespace talvos
