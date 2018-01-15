@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <spirv/unified1/spirv.h>
 
 #include "talvos/Invocation.h"
 #include "talvos/Module.h"
@@ -17,6 +18,24 @@ Invocation::Invocation(const Function *F)
   CurrentInstruction = F->FirstInstruction;
 }
 
+void Invocation::executeAccessChain()
+{
+  // TODO: Implement
+  std::cout << "Executing OpAccessChain" << std::endl;
+}
+
+void Invocation::executeLoad()
+{
+  // TODO: Implement
+  std::cout << "Executing OpLoad" << std::endl;
+}
+
+void Invocation::executeStore()
+{
+  // TODO: Implement
+  std::cout << "Executing OpStore" << std::endl;
+}
+
 Invocation::State Invocation::getState() const
 {
   return CurrentInstruction ? READY : FINISHED;
@@ -25,8 +44,26 @@ Invocation::State Invocation::getState() const
 void Invocation::step()
 {
   assert(CurrentInstruction);
-  // TODO: Execute properly
-  std::cout << "Executing " << CurrentInstruction->Opcode << std::endl;
+
+  // Dispatch instruction to handler method.
+  switch (CurrentInstruction->Opcode)
+  {
+#define DISPATCH(Op, Func)                                                     \
+  case Op:                                                                     \
+    execute##Func();                                                           \
+    break;
+
+    DISPATCH(SpvOpAccessChain, AccessChain);
+    DISPATCH(SpvOpLoad, Load);
+    DISPATCH(SpvOpStore, Store);
+
+#undef DISPATCH
+
+  default:
+    std::cout << "Unhandled opcode " << CurrentInstruction->Opcode << std::endl;
+  }
+
+  // TODO: Handle branch/call/ret
   CurrentInstruction = CurrentInstruction->Next;
 }
 

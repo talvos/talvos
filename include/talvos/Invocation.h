@@ -22,6 +22,11 @@ public:
   State getState() const;
   void step();
 
+  // Instruction handlers.
+  void executeAccessChain();
+  void executeLoad();
+  void executeStore();
+
 private:
   const Instruction *CurrentInstruction;
 };
