@@ -8,6 +8,8 @@
 #include <iostream>
 #include <spirv-tools/libspirv.hpp>
 
+#include <spirv/unified1/spirv.h>
+
 #include "talvos/Module.h"
 
 namespace talvos
@@ -16,13 +18,48 @@ namespace talvos
 class ModuleBuilder
 {
 public:
-  ModuleBuilder() { Mod = std::unique_ptr<Module>(new Module); }
+  ModuleBuilder()
+  {
+    Mod = std::unique_ptr<Module>(new Module);
+    CurrentFunction = nullptr;
+    PreviousInstruction = nullptr;
+  }
 
-  void processInstruction(const spv_parsed_instruction_t *Instruction)
+  void processInstruction(const spv_parsed_instruction_t *Inst)
   {
     assert(Mod);
-    // TODO: Implement
-    std::cout << "Opcode " << Instruction->opcode << std::endl;
+
+    if (Inst->opcode == SpvOpFunction)
+    {
+      assert(CurrentFunction == nullptr);
+      // TODO: Cleanup - when is this destroyed?
+      // Should be owned by Module? Module::createFunction()?
+      CurrentFunction = new Function;
+    }
+    else if (Inst->opcode == SpvOpFunctionEnd)
+    {
+      assert(CurrentFunction);
+      Mod->addFunction(CurrentFunction);
+      CurrentFunction = nullptr;
+      PreviousInstruction = nullptr;
+    }
+    else if (CurrentFunction)
+    {
+      // TODO: Cleanup - when is this destroyed, by parent Function?
+      Instruction *I = new Instruction;
+      // TODO: Type and operands
+      I->Opcode = Inst->opcode;
+      I->Next = nullptr;
+      if (!CurrentFunction->FirstInstruction)
+        CurrentFunction->FirstInstruction = I;
+      else if (PreviousInstruction)
+        PreviousInstruction->Next = I;
+      PreviousInstruction = I;
+    }
+    else
+    {
+      std::cout << "Unhandled opcode " << Inst->opcode << std::endl;
+    }
   };
 
   std::unique_ptr<Module> takeModule()
@@ -33,6 +70,8 @@ public:
 
 private:
   std::unique_ptr<Module> Mod;
+  Function *CurrentFunction;
+  Instruction *PreviousInstruction;
 };
 
 spv_result_t HandleHeader(void *user_data, spv_endianness_t endian,
@@ -51,6 +90,12 @@ HandleInstruction(void *user_data,
 {
   ((ModuleBuilder *)user_data)->processInstruction(parsed_instruction);
   return SPV_SUCCESS;
+}
+
+void Module::addFunction(Function *Func)
+{
+  // TODO: Support multiple functions
+  this->Func = Func;
 }
 
 std::unique_ptr<Module> Module::load(const std::string &FileName)

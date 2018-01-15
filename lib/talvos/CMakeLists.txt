@@ -3,6 +3,14 @@
 # This file is distributed under a three-clause BSD license. For full license
 # terms please see the LICENSE file distributed with this source code.
 
+# Check for SPIRV headers
+set(SPIRV_INCLUDE_DIR "" CACHE STRING "Directory containing SPIR-V headers")
+set(CMAKE_REQUIRED_INCLUDES "${SPIRV_INCLUDE_DIR}")
+check_include_file_cxx("spirv/unified1/spirv.hpp" SPIRV_HEADER_FOUND)
+if (NOT SPIRV_HEADER_FOUND)
+  message(FATAL_ERROR "SPIR-V header required, try setting SPIRV_INCLUDE_DIR.")
+endif()
+
 # Check for SPIRV-Tools header
 set(SPIRV_TOOLS_INCLUDE_DIR "" CACHE STRING
     "Directory containing SPIRV-Tools headers")
@@ -24,6 +32,7 @@ if (NOT SPIRV_TOOLS_LIB)
 endif()
 
 add_library(talvos SHARED Module.cpp)
+target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")
 target_link_libraries(talvos "${SPIRV_TOOLS_LIB}")
 
