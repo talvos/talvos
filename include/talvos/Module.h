@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#ifndef TALVOS_MODULE_H
+#define TALVOS_MODULE_H
+
 #include <memory>
 #include <string>
 
@@ -36,3 +39,5 @@ private:
 };
 
 } // namespace talvos
+
+#endif
