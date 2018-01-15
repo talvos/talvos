@@ -98,6 +98,12 @@ void Module::addFunction(Function *Func)
   this->Func = Func;
 }
 
+Function* Module::getFunction() const
+{
+  // TODO: Support multiple functions
+  return this->Func;
+}
+
 std::unique_ptr<Module> Module::load(const std::string &FileName)
 {
   // Open file
