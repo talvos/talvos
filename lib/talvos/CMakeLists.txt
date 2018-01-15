@@ -31,9 +31,12 @@ if (NOT SPIRV_TOOLS_LIB)
           "SPIRV-Tools library required, try setting SPIRV_TOOLS_LIBRARY_DIR.")
 endif()
 
-add_library(talvos SHARED Module.cpp)
+set(TALVOS_HEADERS
+    ${CMAKE_SOURCE_DIR}/include/talvos/Module.h)
+add_library(talvos SHARED Module.cpp ${TALVOS_HEADERS})
 target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")
 target_link_libraries(talvos "${SPIRV_TOOLS_LIB}")
 
 install(TARGETS talvos DESTINATION lib)
+install(FILES ${TALVOS_HEADERS} DESTINATION include/talvos)
