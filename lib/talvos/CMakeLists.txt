@@ -32,8 +32,9 @@ if (NOT SPIRV_TOOLS_LIB)
 endif()
 
 set(TALVOS_HEADERS
+    ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h)
-add_library(talvos SHARED Module.cpp ${TALVOS_HEADERS})
+add_library(talvos SHARED Invocation.cpp Module.cpp ${TALVOS_HEADERS})
 target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")
 target_link_libraries(talvos "${SPIRV_TOOLS_LIB}")
