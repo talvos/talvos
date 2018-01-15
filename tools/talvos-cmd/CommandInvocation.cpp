@@ -17,7 +17,7 @@ CommandInvocation::~CommandInvocation() {}
 
 bool CommandInvocation::load(const char *FileName)
 {
-  // Open config file
+  // Open config file.
   ConfigFile.open(FileName);
   if (ConfigFile.fail())
   {
@@ -25,7 +25,7 @@ bool CommandInvocation::load(const char *FileName)
     return false;
   }
 
-  // Load SPIR-V module
+  // Load SPIR-V module.
   string SPVFileName;
   getline(ConfigFile, SPVFileName);
   Module = talvos::Module::load(SPVFileName);

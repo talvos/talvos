@@ -107,7 +107,7 @@ Function* Module::getFunction() const
 
 std::unique_ptr<Module> Module::load(const std::string &FileName)
 {
-  // Open file
+  // Open file.
   FILE *SPVFile = fopen(FileName.c_str(), "rb");
   if (!SPVFile)
   {
@@ -115,7 +115,7 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
     return nullptr;
   }
 
-  // Read file data
+  // Read file data.
   fseek(SPVFile, 0, SEEK_END);
   long NumBytes = ftell(SPVFile);
   uint32_t Words[NumBytes];
@@ -125,7 +125,7 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
 
   ModuleBuilder MB;
 
-  // Parse binary
+  // Parse binary.
   spv_diagnostic diagnostic = nullptr;
   spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
   spvBinaryParse(SPVContext.CContext(), &MB, Words, NumBytes / 4, HandleHeader,

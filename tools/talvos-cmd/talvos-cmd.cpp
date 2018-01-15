@@ -69,7 +69,7 @@ static bool parseArguments(int argc, char *argv[])
     }
   }
 
-  // Ensure a configuration file has been specified
+  // Ensure a configuration file has been specified.
   if (ConfigFileName == NULL)
   {
     printUsage();
