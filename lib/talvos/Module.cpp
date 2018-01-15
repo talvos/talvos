@@ -35,6 +35,7 @@ public:
       // TODO: Cleanup - when is this destroyed?
       // Should be owned by Module? Module::createFunction()?
       CurrentFunction = new Function;
+      CurrentFunction->FirstInstruction = nullptr;
     }
     else if (Inst->opcode == SpvOpFunctionEnd)
     {
