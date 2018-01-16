@@ -137,6 +137,18 @@ void Module::addResult(uint32_t Id, const Result &R)
   Results[Id] = R;
 }
 
+std::vector<Result> Module::cloneResults() const
+{
+  std::vector<Result> ClonedResults;
+  ClonedResults.resize(Results.size());
+  for (int i = 0; i < Results.size(); i++)
+  {
+    if (Results[i].isSet())
+      ClonedResults[i] = Results[i].clone();
+  }
+  return ClonedResults;
+}
+
 Function *Module::getFunction() const
 {
   // TODO: Support multiple functions

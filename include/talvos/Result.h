@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstring>
 
 namespace talvos
 {
@@ -25,6 +26,15 @@ public:
     return R;
   }
 
+  Result clone() const
+  {
+    Result R;
+    // TODO: Use size of this result
+    R.Data = new uint8_t[4];
+    memcpy(R.Data, this->Data, 4);
+    return R;
+  }
+
   void destroy() { delete[] Data; }
 
   template <typename T> T get() const
@@ -33,6 +43,8 @@ public:
     assert(Data);
     return *((T *)Data);
   }
+
+  bool isSet() const { return Data ? true : false; };
 
 private:
   // TODO: Type, size, etc

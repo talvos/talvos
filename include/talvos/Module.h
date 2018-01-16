@@ -38,6 +38,7 @@ public:
   ~Module();
   void addFunction(Function *Func);
   void addResult(uint32_t Id, const Result &R);
+  std::vector<Result> cloneResults() const;
   Function *getFunction() const;
   uint32_t getIdBound() const { return IdBound; }
   static std::unique_ptr<Module> load(const std::string &FileName);

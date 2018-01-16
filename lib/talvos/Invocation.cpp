@@ -18,7 +18,7 @@ namespace talvos
 Invocation::Invocation(const Module *M, const Function *F)
 {
   CurrentInstruction = F->FirstInstruction;
-  Results.resize(M->getIdBound());
+  Results = M->cloneResults();
 }
 
 Invocation::~Invocation()
@@ -33,6 +33,11 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Results[Inst->Operands[1]] = Result::create<void *>(nullptr);
 
   std::cout << "Executing OpAccessChain" << std::endl;
+  for (int i = 3; i < Inst->NumOperands; i++)
+  {
+    uint32_t Idx = OP(i, uint32_t);
+    std::cout << " - Index " << (i - 3) << " = " << Idx << std::endl;
+  }
 }
 
 void Invocation::executeLoad(const Instruction *Inst)
