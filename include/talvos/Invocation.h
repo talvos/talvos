@@ -6,11 +6,16 @@
 #ifndef TALVOS_INVOCATION_H
 #define TALVOS_INVOCATION_H
 
+#include <vector>
+
+#include "talvos/Result.h"
+
 namespace talvos
 {
 
 struct Function;
 struct Instruction;
+class Module;
 
 class Invocation
 {
@@ -18,7 +23,8 @@ public:
   enum State { READY, FINISHED };
 
 public:
-  Invocation(const Function *F);
+  Invocation(const Module *M, const Function *F);
+  ~Invocation();
   State getState() const;
   void step();
 
@@ -29,6 +35,7 @@ public:
 
 private:
   const Instruction *CurrentInstruction;
+  std::vector<Result> Results;
 };
 
 } // namespace talvos

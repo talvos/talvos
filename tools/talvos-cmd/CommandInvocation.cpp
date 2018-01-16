@@ -43,5 +43,5 @@ bool CommandInvocation::load(const char *FileName)
 void CommandInvocation::run()
 {
   // TODO: Problem domain
-  talvos::interpret(Module->getFunction());
+  talvos::interpret(Module.get(), Module->getFunction());
 }

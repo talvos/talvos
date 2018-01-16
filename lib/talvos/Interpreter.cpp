@@ -9,10 +9,10 @@
 namespace talvos
 {
 
-void interpret(const Function *F)
+void interpret(const Module *M, const Function *F)
 {
   // TODO: Launch more than one invocation
-  Invocation I(F);
+  Invocation I(M, F);
 
   // TODO: Handle barriers
   while (I.getState() == Invocation::READY)
