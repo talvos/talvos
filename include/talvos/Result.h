@@ -27,7 +27,7 @@ public:
 
   void destroy() { delete[] Data; }
 
-  template <typename T> T get()
+  template <typename T> T get() const
   {
     // TODO: assert size
     assert(Data);
