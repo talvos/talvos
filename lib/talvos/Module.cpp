@@ -54,7 +54,11 @@ public:
       // TODO: Are all operands IDs?
       I->Operands = new uint32_t[I->NumOperands];
       for (int i = 0; i < Inst->num_operands; i++)
+      {
+        // TODO: Handle larger operands
+        assert(Inst->operands[i].num_words == 1);
         I->Operands[i] = Inst->words[Inst->operands[i].offset];
+      }
       I->Next = nullptr;
       if (!CurrentFunction->FirstInstruction)
         CurrentFunction->FirstInstruction = I;
