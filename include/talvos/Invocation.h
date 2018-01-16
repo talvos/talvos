@@ -23,9 +23,9 @@ public:
   void step();
 
   // Instruction handlers.
-  void executeAccessChain();
-  void executeLoad();
-  void executeStore();
+  void executeAccessChain(const Instruction *Inst);
+  void executeLoad(const Instruction *Inst);
+  void executeStore(const Instruction *Inst);
 
 private:
   const Instruction *CurrentInstruction;

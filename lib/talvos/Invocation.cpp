@@ -18,19 +18,19 @@ Invocation::Invocation(const Function *F)
   CurrentInstruction = F->FirstInstruction;
 }
 
-void Invocation::executeAccessChain()
+void Invocation::executeAccessChain(const Instruction *Inst)
 {
   // TODO: Implement
   std::cout << "Executing OpAccessChain" << std::endl;
 }
 
-void Invocation::executeLoad()
+void Invocation::executeLoad(const Instruction *Inst)
 {
   // TODO: Implement
   std::cout << "Executing OpLoad" << std::endl;
 }
 
-void Invocation::executeStore()
+void Invocation::executeStore(const Instruction *Inst)
 {
   // TODO: Implement
   std::cout << "Executing OpStore" << std::endl;
@@ -50,7 +50,7 @@ void Invocation::step()
   {
 #define DISPATCH(Op, Func)                                                     \
   case Op:                                                                     \
-    execute##Func();                                                           \
+    execute##Func(CurrentInstruction);                                         \
     break;
 
     DISPATCH(SpvOpAccessChain, AccessChain);
