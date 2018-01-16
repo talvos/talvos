@@ -10,7 +10,7 @@
 #include "talvos/Invocation.h"
 #include "talvos/Module.h"
 
-#define OP(Index, Type) Results[Inst->Operands[Index]].get<Type>()
+#define OP(Index, Type) Objects[Inst->Operands[Index]].get<Type>()
 
 namespace talvos
 {
@@ -18,19 +18,19 @@ namespace talvos
 Invocation::Invocation(const Module *M, const Function *F)
 {
   CurrentInstruction = F->FirstInstruction;
-  Results = M->cloneResults();
+  Objects = M->cloneObjects();
 }
 
 Invocation::~Invocation()
 {
-  for (Result &R : Results)
-    R.destroy();
+  for (Object &Obj : Objects)
+    Obj.destroy();
 }
 
 void Invocation::executeAccessChain(const Instruction *Inst)
 {
   // TODO: Implement
-  Results[Inst->Operands[1]] = Result::create<void *>(nullptr);
+  Objects[Inst->Operands[1]] = Object::create<void *>(nullptr);
 
   std::cout << "Executing OpAccessChain" << std::endl;
   for (int i = 3; i < Inst->NumOperands; i++)
@@ -45,7 +45,7 @@ void Invocation::executeLoad(const Instruction *Inst)
   void *Src = OP(2, void *);
 
   // TODO: Load actual data
-  Results[Inst->Operands[1]] = Result::create<uint32_t>(42);
+  Objects[Inst->Operands[1]] = Object::create<uint32_t>(42);
 
   std::cout << "Load from " << Src << std::endl;
 }
@@ -55,7 +55,7 @@ void Invocation::executeStore(const Instruction *Inst)
   void *Dest = OP(0, void *);
 
   // TODO: Store actual data
-  uint32_t Obj = Results[Inst->Operands[1]].get<uint32_t>();
+  uint32_t Obj = Objects[Inst->Operands[1]].get<uint32_t>();
 
   std::cout << "Store " << Obj << " to " << Dest << std::endl;
 }

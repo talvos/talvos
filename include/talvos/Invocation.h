@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include "talvos/Result.h"
+#include "talvos/Object.h"
 
 namespace talvos
 {
@@ -35,7 +35,7 @@ public:
 
 private:
   const Instruction *CurrentInstruction;
-  std::vector<Result> Results;
+  std::vector<Object> Objects;
 };
 
 } // namespace talvos

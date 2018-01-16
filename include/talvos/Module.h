@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "talvos/Result.h"
+#include "talvos/Object.h"
 
 namespace talvos
 {
@@ -37,8 +37,8 @@ public:
   Module(uint32_t IdBound);
   ~Module();
   void addFunction(Function *Func);
-  void addResult(uint32_t Id, const Result &R);
-  std::vector<Result> cloneResults() const;
+  void addObject(uint32_t Id, const Object &Obj);
+  std::vector<Object> cloneObjects() const;
   Function *getFunction() const;
   uint32_t getIdBound() const { return IdBound; }
   static std::unique_ptr<Module> load(const std::string &FileName);
@@ -47,7 +47,7 @@ private:
   // TODO: Allow multiple functions
   Function *Func;
   uint32_t IdBound;
-  std::vector<Result> Results;
+  std::vector<Object> Objects;
 };
 
 } // namespace talvos

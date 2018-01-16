@@ -35,7 +35,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Interpreter.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Result.h)
+    ${CMAKE_SOURCE_DIR}/include/talvos/Object.h)
 set(TALVOS_SOURCES
     Interpreter.cpp
     Invocation.cpp

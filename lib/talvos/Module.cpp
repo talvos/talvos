@@ -11,7 +11,6 @@
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Module.h"
-#include "talvos/Result.h"
 
 namespace talvos
 {
@@ -75,7 +74,7 @@ public:
       {
         // TODO: Use actual type
         uint32_t Value = Inst->words[Inst->operands[2].offset];
-        Mod->addResult(Inst->result_id, Result::create<uint32_t>(Value));
+        Mod->addObject(Inst->result_id, Object::create<uint32_t>(Value));
         break;
       }
       default:
@@ -116,13 +115,13 @@ HandleInstruction(void *user_data,
 Module::Module(uint32_t IdBound)
 {
   this->IdBound = IdBound;
-  this->Results.resize(IdBound);
+  this->Objects.resize(IdBound);
 }
 
 Module::~Module()
 {
-  for (Result &R : Results)
-    R.destroy();
+  for (Object &Obj : Objects)
+    Obj.destroy();
 }
 
 void Module::addFunction(Function *Func)
@@ -131,22 +130,22 @@ void Module::addFunction(Function *Func)
   this->Func = Func;
 }
 
-void Module::addResult(uint32_t Id, const Result &R)
+void Module::addObject(uint32_t Id, const Object &Obj)
 {
-  assert(Id < Results.size());
-  Results[Id] = R;
+  assert(Id < Objects.size());
+  Objects[Id] = Obj;
 }
 
-std::vector<Result> Module::cloneResults() const
+std::vector<Object> Module::cloneObjects() const
 {
-  std::vector<Result> ClonedResults;
-  ClonedResults.resize(Results.size());
-  for (int i = 0; i < Results.size(); i++)
+  std::vector<Object> ClonedObjects;
+  ClonedObjects.resize(Objects.size());
+  for (int i = 0; i < Objects.size(); i++)
   {
-    if (Results[i].isSet())
-      ClonedResults[i] = Results[i].clone();
+    if (Objects[i].isSet())
+      ClonedObjects[i] = Objects[i].clone();
   }
-  return ClonedResults;
+  return ClonedObjects;
 }
 
 Function *Module::getFunction() const

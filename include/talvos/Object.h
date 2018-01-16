@@ -3,8 +3,8 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-#ifndef TALVOS_RESULT_H
-#define TALVOS_RESULT_H
+#ifndef TALVOS_OBJECT_H
+#define TALVOS_OBJECT_H
 
 #include <cassert>
 #include <cstdint>
@@ -13,26 +13,26 @@
 namespace talvos
 {
 
-class Result
+class Object
 {
 public:
-  Result() { Data = nullptr; }
+  Object() { Data = nullptr; }
 
-  template <typename T> static Result create(T Value)
+  template <typename T> static Object create(T Value)
   {
-    Result R;
-    R.Data = new uint8_t[sizeof(T)];
-    *((T *)R.Data) = Value;
-    return R;
+    Object Obj;
+    Obj.Data = new uint8_t[sizeof(T)];
+    *((T *)Obj.Data) = Value;
+    return Obj;
   }
 
-  Result clone() const
+  Object clone() const
   {
-    Result R;
-    // TODO: Use size of this result
-    R.Data = new uint8_t[4];
-    memcpy(R.Data, this->Data, 4);
-    return R;
+    Object Obj;
+    // TODO: Use size of this object
+    Obj.Data = new uint8_t[4];
+    memcpy(Obj.Data, this->Data, 4);
+    return Obj;
   }
 
   void destroy() { delete[] Data; }
