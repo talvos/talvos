@@ -15,8 +15,10 @@ namespace talvos
 struct Instruction
 {
   uint16_t Opcode;
-  uint32_t Type;
-  // TODO: Operands
+  uint16_t NumOperands;
+  uint32_t ResultType;
+  // TODO: Currently assumes all operands are 32-bit IDs
+  uint32_t *Operands;
   Instruction *Next;
 };
 

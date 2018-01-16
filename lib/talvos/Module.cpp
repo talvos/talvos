@@ -48,8 +48,13 @@ public:
     {
       // TODO: Cleanup - when is this destroyed, by parent Function?
       Instruction *I = new Instruction;
-      // TODO: Type and operands
       I->Opcode = Inst->opcode;
+      I->NumOperands = Inst->num_operands;
+      // TODO: ResultType
+      // TODO: Are all operands IDs?
+      I->Operands = new uint32_t[I->NumOperands];
+      for (int i = 0; i < Inst->num_operands; i++)
+        I->Operands[i] = Inst->words[Inst->operands[i].offset];
       I->Next = nullptr;
       if (!CurrentFunction->FirstInstruction)
         CurrentFunction->FirstInstruction = I;
