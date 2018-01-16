@@ -107,7 +107,7 @@ void Module::addFunction(Function *Func)
   this->Func = Func;
 }
 
-Function* Module::getFunction() const
+Function *Module::getFunction() const
 {
   // TODO: Support multiple functions
   return this->Func;

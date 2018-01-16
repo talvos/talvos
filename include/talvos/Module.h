@@ -32,7 +32,7 @@ class Module
 {
 public:
   void addFunction(Function *Func);
-  Function* getFunction() const;
+  Function *getFunction() const;
   static std::unique_ptr<Module> load(const std::string &FileName);
 
 private:
