@@ -18,9 +18,10 @@ namespace talvos
 class ModuleBuilder
 {
 public:
-  ModuleBuilder()
+  void init(uint32_t IdBound)
   {
-    Mod = std::unique_ptr<Module>(new Module);
+    assert(!Mod && "Module already initialized");
+    Mod = std::unique_ptr<Module>(new Module(IdBound));
     CurrentFunction = nullptr;
     PreviousInstruction = nullptr;
   }
@@ -88,8 +89,7 @@ spv_result_t HandleHeader(void *user_data, spv_endianness_t endian,
                           uint32_t generator, uint32_t id_bound,
                           uint32_t schema)
 {
-  // TODO: Do something with id_bound
-  std::cout << "Module ID bound = " << id_bound << std::endl;
+  ((ModuleBuilder *)user_data)->init(id_bound);
   return SPV_SUCCESS;
 }
 
@@ -100,6 +100,8 @@ HandleInstruction(void *user_data,
   ((ModuleBuilder *)user_data)->processInstruction(parsed_instruction);
   return SPV_SUCCESS;
 }
+
+Module::Module(uint32_t IdBound) { this->IdBound = IdBound; }
 
 void Module::addFunction(Function *Func)
 {

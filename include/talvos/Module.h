@@ -31,13 +31,16 @@ struct Function
 class Module
 {
 public:
+  Module(uint32_t IdBound);
   void addFunction(Function *Func);
   Function *getFunction() const;
+  uint32_t getIdBound() const { return IdBound; }
   static std::unique_ptr<Module> load(const std::string &FileName);
 
 private:
   // TODO: Allow multiple functions
   Function *Func;
+  uint32_t IdBound;
 };
 
 } // namespace talvos
