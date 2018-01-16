@@ -16,7 +16,6 @@ struct Instruction
 {
   uint16_t Opcode;
   uint16_t NumOperands;
-  uint32_t ResultType;
   // TODO: Currently assumes all operands are 32-bit IDs
   uint32_t *Operands;
   Instruction *Next;

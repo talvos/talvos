@@ -50,7 +50,6 @@ public:
       Instruction *I = new Instruction;
       I->Opcode = Inst->opcode;
       I->NumOperands = Inst->num_operands;
-      // TODO: ResultType
       // TODO: Are all operands IDs?
       I->Operands = new uint32_t[I->NumOperands];
       for (int i = 0; i < Inst->num_operands; i++)
