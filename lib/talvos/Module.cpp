@@ -11,6 +11,7 @@
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Module.h"
+#include "talvos/Result.h"
 
 namespace talvos
 {
@@ -68,7 +69,18 @@ public:
     }
     else
     {
-      std::cout << "Unhandled opcode " << Inst->opcode << std::endl;
+      switch (Inst->opcode)
+      {
+      case SpvOpConstant:
+      {
+        // TODO: Use actual type
+        uint32_t Value = Inst->words[Inst->operands[2].offset];
+        Mod->addResult(Inst->result_id, Result::create<uint32_t>(Value));
+        break;
+      }
+      default:
+        std::cout << "Unhandled opcode " << Inst->opcode << std::endl;
+      }
     }
   };
 
@@ -101,12 +113,28 @@ HandleInstruction(void *user_data,
   return SPV_SUCCESS;
 }
 
-Module::Module(uint32_t IdBound) { this->IdBound = IdBound; }
+Module::Module(uint32_t IdBound)
+{
+  this->IdBound = IdBound;
+  this->Results.resize(IdBound);
+}
+
+Module::~Module()
+{
+  for (Result &R : Results)
+    R.destroy();
+}
 
 void Module::addFunction(Function *Func)
 {
   // TODO: Support multiple functions
   this->Func = Func;
+}
+
+void Module::addResult(uint32_t Id, const Result &R)
+{
+  assert(Id < Results.size());
+  Results[Id] = R;
 }
 
 Function *Module::getFunction() const

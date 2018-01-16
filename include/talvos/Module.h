@@ -8,6 +8,9 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "talvos/Result.h"
 
 namespace talvos
 {
@@ -32,7 +35,9 @@ class Module
 {
 public:
   Module(uint32_t IdBound);
+  ~Module();
   void addFunction(Function *Func);
+  void addResult(uint32_t Id, const Result &R);
   Function *getFunction() const;
   uint32_t getIdBound() const { return IdBound; }
   static std::unique_ptr<Module> load(const std::string &FileName);
@@ -41,6 +46,7 @@ private:
   // TODO: Allow multiple functions
   Function *Func;
   uint32_t IdBound;
+  std::vector<Result> Results;
 };
 
 } // namespace talvos
