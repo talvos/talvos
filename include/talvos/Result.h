@@ -17,13 +17,6 @@ class Result
 public:
   Result() { Data = nullptr; }
 
-  template <typename T> T get()
-  {
-    // TODO: assert size
-    assert(Data);
-    return *((T *)Data);
-  }
-
   template <typename T> static Result create(T Value)
   {
     Result R;
@@ -33,6 +26,13 @@ public:
   }
 
   void destroy() { delete[] Data; }
+
+  template <typename T> T get()
+  {
+    // TODO: assert size
+    assert(Data);
+    return *((T *)Data);
+  }
 
 private:
   // TODO: Type, size, etc
