@@ -77,6 +77,10 @@ public:
         Mod->addObject(Inst->result_id, Object::create<uint32_t>(Value));
         break;
       }
+      case SpvOpVariable:
+        Mod->addVariable(Inst->result_id,
+                         Inst->words[Inst->operands[2].offset]);
+        break;
       default:
         std::cout << "Unhandled opcode " << Inst->opcode << std::endl;
       }
@@ -134,6 +138,15 @@ void Module::addObject(uint32_t Id, const Object &Obj)
 {
   assert(Id < Objects.size());
   Objects[Id] = Obj;
+}
+
+void Module::addVariable(uint32_t Id, uint32_t StorageClass)
+{
+  assert(Variables.count(Id) == 0);
+
+  Variable V;
+  // TODO: Type, initializers etc
+  Variables.insert({Id, V});
 }
 
 std::vector<Object> Module::cloneObjects() const

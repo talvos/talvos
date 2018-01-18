@@ -6,6 +6,7 @@
 #ifndef TALVOS_MODULE_H
 #define TALVOS_MODULE_H
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -38,6 +39,7 @@ public:
   ~Module();
   void addFunction(Function *Func);
   void addObject(uint32_t Id, const Object &Obj);
+  void addVariable(uint32_t Id, uint32_t StorageClass);
   std::vector<Object> cloneObjects() const;
   Function *getFunction() const;
   uint32_t getIdBound() const { return IdBound; }
@@ -48,6 +50,15 @@ private:
   Function *Func;
   uint32_t IdBound;
   std::vector<Object> Objects;
+
+  struct Variable
+  {
+    // TODO: Type
+    uint32_t StorageClass;
+    // TODO: Initializer
+  };
+  typedef std::map<uint32_t, Variable> VariableMap;
+  VariableMap Variables;
 };
 
 } // namespace talvos
