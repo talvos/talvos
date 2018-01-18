@@ -77,6 +77,23 @@ public:
         Mod->addObject(Inst->result_id, Object::create<uint32_t>(Value));
         break;
       }
+      case SpvOpDecorate:
+      {
+        uint32_t Target = Inst->words[Inst->operands[0].offset];
+        uint32_t Decoration = Inst->words[Inst->operands[1].offset];
+        switch (Decoration)
+        {
+        case SpvDecorationBinding:
+          Mod->setBinding(Target, Inst->words[Inst->operands[2].offset]);
+          break;
+        case SpvDecorationDescriptorSet:
+          Mod->setDescriptorSet(Target, Inst->words[Inst->operands[2].offset]);
+          break;
+        default:
+          std::cout << "Unhandled decoration " << Decoration << std::endl;
+        }
+        break;
+      }
       case SpvOpVariable:
         Mod->addVariable(Inst->result_id,
                          Inst->words[Inst->operands[2].offset]);
@@ -142,8 +159,6 @@ void Module::addObject(uint32_t Id, const Object &Obj)
 
 void Module::addVariable(uint32_t Id, uint32_t StorageClass)
 {
-  assert(Variables.count(Id) == 0);
-
   Variable V;
   // TODO: Type, initializers etc
   Variables.insert({Id, V});
@@ -199,6 +214,16 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
   }
 
   return MB.takeModule();
+}
+
+void Module::setBinding(uint32_t Variable, uint32_t Binding)
+{
+  Variables[Variable].Binding = Binding;
+}
+
+void Module::setDescriptorSet(uint32_t Variable, uint32_t DescriptorSet)
+{
+  Variables[Variable].DescriptorSet = DescriptorSet;
 }
 
 } // namespace talvos

@@ -45,6 +45,9 @@ public:
   uint32_t getIdBound() const { return IdBound; }
   static std::unique_ptr<Module> load(const std::string &FileName);
 
+  void setBinding(uint32_t Variable, uint32_t Binding);
+  void setDescriptorSet(uint32_t Variable, uint32_t DescriptorSet);
+
 private:
   // TODO: Allow multiple functions
   Function *Func;
@@ -56,6 +59,9 @@ private:
     // TODO: Type
     uint32_t StorageClass;
     // TODO: Initializer
+
+    uint32_t DescriptorSet;
+    uint32_t Binding;
   };
   typedef std::map<uint32_t, Variable> VariableMap;
   VariableMap Variables;
