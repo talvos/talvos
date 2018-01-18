@@ -160,8 +160,15 @@ void Module::addObject(uint32_t Id, const Object &Obj)
 void Module::addVariable(uint32_t Id, uint32_t StorageClass)
 {
   Variable V;
+
+  // Variable may already have been created by decorations
+  if (Variables.count(Id))
+    V = Variables[Id];
+
   // TODO: Type, initializers etc
-  Variables.insert({Id, V});
+  V.StorageClass = StorageClass;
+
+  Variables[Id] = V;
 }
 
 std::vector<Object> Module::cloneObjects() const
@@ -181,6 +188,8 @@ Function *Module::getFunction() const
   // TODO: Support multiple functions
   return this->Func;
 }
+
+const VariableMap Module::getVariables() const { return Variables; }
 
 std::unique_ptr<Module> Module::load(const std::string &FileName)
 {

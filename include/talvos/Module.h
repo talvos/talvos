@@ -32,6 +32,17 @@ struct Function
   Instruction *FirstInstruction;
 };
 
+struct Variable
+{
+  // TODO: Type
+  uint32_t StorageClass;
+  // TODO: Initializer
+
+  uint32_t DescriptorSet;
+  uint32_t Binding;
+};
+typedef std::map<uint32_t, Variable> VariableMap;
+
 class Module
 {
 public:
@@ -43,6 +54,7 @@ public:
   std::vector<Object> cloneObjects() const;
   Function *getFunction() const;
   uint32_t getIdBound() const { return IdBound; }
+  const VariableMap getVariables() const;
   static std::unique_ptr<Module> load(const std::string &FileName);
 
   void setBinding(uint32_t Variable, uint32_t Binding);
@@ -53,17 +65,6 @@ private:
   Function *Func;
   uint32_t IdBound;
   std::vector<Object> Objects;
-
-  struct Variable
-  {
-    // TODO: Type
-    uint32_t StorageClass;
-    // TODO: Initializer
-
-    uint32_t DescriptorSet;
-    uint32_t Binding;
-  };
-  typedef std::map<uint32_t, Variable> VariableMap;
   VariableMap Variables;
 };
 

@@ -10,7 +10,7 @@ namespace talvos
 {
 
 struct Function;
-struct Module;
+class Module;
 
 void interpret(const Module *M, const Function *F);
 
