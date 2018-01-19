@@ -13,6 +13,8 @@
 namespace talvos
 {
 
+class Memory;
+
 class Object
 {
 public:
@@ -45,6 +47,10 @@ public:
   }
 
   bool isSet() const { return Data ? true : false; };
+
+  static Object load(Memory *Mem, size_t Address);
+
+  void store(Memory *Mem, size_t Address) const;
 
 private:
   // TODO: Type, size, etc

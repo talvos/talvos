@@ -8,6 +8,7 @@
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Invocation.h"
+#include "talvos/Memory.h"
 #include "talvos/Module.h"
 
 #define OP(Index, Type) Objects[Inst->Operands[Index]].get<Type>()
@@ -42,22 +43,17 @@ void Invocation::executeAccessChain(const Instruction *Inst)
 
 void Invocation::executeLoad(const Instruction *Inst)
 {
-  void *Src = OP(2, void *);
-
-  // TODO: Load actual data
-  Objects[Inst->Operands[1]] = Object::create<uint32_t>(42);
-
-  std::cout << "Load from " << Src << std::endl;
+  uint32_t Id = Inst->Operands[1];
+  size_t Src = OP(2, size_t);
+  // TODO: Use result type
+  Objects[Id] = Object::load(GlobalMemory, Src);
 }
 
 void Invocation::executeStore(const Instruction *Inst)
 {
-  void *Dest = OP(0, void *);
-
-  // TODO: Store actual data
-  uint32_t Obj = Objects[Inst->Operands[1]].get<uint32_t>();
-
-  std::cout << "Store " << Obj << " to " << Dest << std::endl;
+  uint32_t Id = Inst->Operands[1];
+  size_t Dest = OP(0, size_t);
+  Objects[Id].store(GlobalMemory, Dest);
 }
 
 Invocation::State Invocation::getState() const

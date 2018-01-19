@@ -15,6 +15,7 @@ namespace talvos
 
 struct Function;
 struct Instruction;
+class Memory;
 class Module;
 
 class Invocation
@@ -36,6 +37,7 @@ public:
 private:
   const Instruction *CurrentInstruction;
   std::vector<Object> Objects;
+  Memory *GlobalMemory;
 };
 
 } // namespace talvos

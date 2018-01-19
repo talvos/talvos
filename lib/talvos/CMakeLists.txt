@@ -34,12 +34,15 @@ endif()
 set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Interpreter.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h)
 set(TALVOS_SOURCES
     Interpreter.cpp
     Invocation.cpp
-    Module.cpp)
+    Memory.cpp
+    Module.cpp
+    Object.cpp)
 add_library(talvos SHARED ${TALVOS_SOURCES} ${TALVOS_HEADERS})
 target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")
