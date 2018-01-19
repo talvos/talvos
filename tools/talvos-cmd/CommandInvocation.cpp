@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "CommandInvocation.h"
+#include "talvos/Device.h"
 #include "talvos/DispatchCommand.h"
 #include "talvos/Module.h"
 
@@ -42,7 +43,11 @@ bool CommandInvocation::load(const char *FileName)
 
 void CommandInvocation::run()
 {
+  talvos::Device *Dev = new talvos::Device;
+
   // TODO: Problem domain
-  talvos::DispatchCommand Command(Module.get(), Module->getFunction());
+  talvos::DispatchCommand Command(Dev, Module.get(), Module->getFunction());
   Command.run();
+
+  delete Dev;
 }

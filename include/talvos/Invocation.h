@@ -15,6 +15,7 @@ namespace talvos
 
 struct Function;
 struct Instruction;
+class Device;
 class Memory;
 class Module;
 
@@ -24,7 +25,7 @@ public:
   enum State { READY, FINISHED };
 
 public:
-  Invocation(const Module *M, const Function *F);
+  Invocation(Device *D, const Module *M, const Function *F);
   ~Invocation();
   State getState() const;
   void step();

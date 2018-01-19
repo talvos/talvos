@@ -10,15 +10,17 @@ namespace talvos
 {
 
 struct Function;
+class Device;
 class Module;
 
 class DispatchCommand
 {
 public:
-  DispatchCommand(const Module *M, const Function *F);
+  DispatchCommand(Device *D, const Module *M, const Function *F);
   void run();
 
 private:
+  Device *Dev;
   const Module *Mod;
   const Function *Func;
 };

@@ -14,8 +14,9 @@
 namespace talvos
 {
 
-DispatchCommand::DispatchCommand(const Module *M, const Function *F)
+DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F)
 {
+  Dev = D;
   Mod = M;
   Func = F;
 
@@ -41,7 +42,7 @@ DispatchCommand::DispatchCommand(const Module *M, const Function *F)
 void DispatchCommand::run()
 {
   // TODO: Launch more than one invocation
-  Invocation I(Mod, Func);
+  Invocation I(Dev, Mod, Func);
 
   // TODO: Handle barriers
   while (I.getState() == Invocation::READY)

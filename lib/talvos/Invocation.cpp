@@ -7,6 +7,7 @@
 #include <iostream>
 #include <spirv/unified1/spirv.h>
 
+#include "talvos/Device.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
@@ -16,7 +17,7 @@
 namespace talvos
 {
 
-Invocation::Invocation(const Module *M, const Function *F)
+Invocation::Invocation(Device *Dev, const Module *M, const Function *F)
 {
   CurrentInstruction = F->FirstInstruction;
   Objects = M->cloneObjects();
