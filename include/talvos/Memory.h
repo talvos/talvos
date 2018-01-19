@@ -16,6 +16,7 @@ namespace talvos
 class Memory
 {
 public:
+  Memory();
   size_t allocate(size_t NumBytes);
   void load(uint8_t *Result, size_t Address, size_t NumBytes);
   void release(size_t Address);

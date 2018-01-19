@@ -16,6 +16,12 @@
 namespace talvos
 {
 
+Memory::Memory()
+{
+  // Skip the first buffer identifier (0).
+  Buffers.resize(1);
+}
+
 size_t Memory::allocate(size_t NumBytes)
 {
   // Allocate buffer.
