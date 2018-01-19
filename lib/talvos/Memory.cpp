@@ -51,7 +51,7 @@ size_t Memory::allocate(size_t NumBytes)
 void Memory::load(uint8_t *Data, size_t Address, size_t NumBytes)
 {
   size_t Id = (Address >> OFFSET_BITS);
-  size_t Offset = (Address & ~(1UL << OFFSET_BITS));
+  size_t Offset = (Address & (((size_t)-1) >> BUFFER_BITS));
 
   // TODO: Generate useful error message for invalid memory accesses
   assert(Id < Buffers.size());
@@ -75,7 +75,7 @@ void Memory::release(size_t Address)
 void Memory::store(size_t Address, size_t NumBytes, const uint8_t *Data)
 {
   size_t Id = (Address >> OFFSET_BITS);
-  size_t Offset = (Address & ~(1UL << OFFSET_BITS));
+  size_t Offset = (Address & (((size_t)-1) >> BUFFER_BITS));
 
   // TODO: Generate useful error message for invalid memory accesses
   assert(Id < Buffers.size());
