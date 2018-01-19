@@ -3,8 +3,8 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-#ifndef TALVOS_INTERPRETER_H
-#define TALVOS_INTERPRETER_H
+#ifndef TALVOS_DISPATCHCOMMAND_H
+#define TALVOS_DISPATCHCOMMAND_H
 
 namespace talvos
 {
@@ -12,7 +12,16 @@ namespace talvos
 struct Function;
 class Module;
 
-void interpret(const Module *M, const Function *F);
+class DispatchCommand
+{
+public:
+  DispatchCommand(const Module *M, const Function *F);
+  void run();
+
+private:
+  const Module *Mod;
+  const Function *Func;
+};
 
 } // namespace talvos
 

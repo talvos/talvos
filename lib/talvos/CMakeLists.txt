@@ -32,13 +32,13 @@ if (NOT SPIRV_TOOLS_LIB)
 endif()
 
 set(TALVOS_HEADERS
-    ${CMAKE_SOURCE_DIR}/include/talvos/Interpreter.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/DispatchCommand.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h)
 set(TALVOS_SOURCES
-    Interpreter.cpp
+    DispatchCommand.cpp
     Invocation.cpp
     Memory.cpp
     Module.cpp

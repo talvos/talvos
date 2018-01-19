@@ -7,15 +7,18 @@
 
 #include <spirv/unified1/spirv.h>
 
-#include "talvos/Interpreter.h"
+#include "talvos/DispatchCommand.h"
 #include "talvos/Invocation.h"
 #include "talvos/Module.h"
 
 namespace talvos
 {
 
-void interpret(const Module *M, const Function *F)
+DispatchCommand::DispatchCommand(const Module *M, const Function *F)
 {
+  Mod = M;
+  Func = F;
+
   const VariableMap Variables = M->getVariables();
   for (VariableMap::value_type V : Variables)
   {
@@ -33,9 +36,12 @@ void interpret(const Module *M, const Function *F)
                 << std::endl;
     }
   }
+}
 
+void DispatchCommand::run()
+{
   // TODO: Launch more than one invocation
-  Invocation I(M, F);
+  Invocation I(Mod, Func);
 
   // TODO: Handle barriers
   while (I.getState() == Invocation::READY)
