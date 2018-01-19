@@ -17,8 +17,9 @@
 namespace talvos
 {
 
-Invocation::Invocation(Device *Dev, const Module *M, const Function *F)
+Invocation::Invocation(Device *D, const Module *M, const Function *F)
 {
+  Dev = D;
   CurrentInstruction = F->FirstInstruction;
   Objects = M->cloneObjects();
 }
@@ -47,14 +48,14 @@ void Invocation::executeLoad(const Instruction *Inst)
   uint32_t Id = Inst->Operands[1];
   size_t Src = OP(2, size_t);
   // TODO: Use result type
-  Objects[Id] = Object::load(GlobalMemory, Src);
+  Objects[Id] = Object::load(Dev->getGlobalMemory(), Src);
 }
 
 void Invocation::executeStore(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
   size_t Dest = OP(0, size_t);
-  Objects[Id].store(GlobalMemory, Dest);
+  Objects[Id].store(Dev->getGlobalMemory(), Dest);
 }
 
 Invocation::State Invocation::getState() const

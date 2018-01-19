@@ -38,7 +38,7 @@ public:
 private:
   const Instruction *CurrentInstruction;
   std::vector<Object> Objects;
-  Memory *GlobalMemory;
+  Device *Dev;
 };
 
 } // namespace talvos
