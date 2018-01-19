@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <vector>
 
 namespace talvos
 {
@@ -15,8 +16,19 @@ namespace talvos
 class Memory
 {
 public:
+  size_t allocate(size_t NumBytes);
   void load(uint8_t *Result, size_t Address, size_t NumBytes);
+  void release(size_t Address);
   void store(size_t Address, size_t NumBytes, const uint8_t *Data);
+
+private:
+  struct Buffer
+  {
+    size_t NumBytes;
+    uint8_t *Data;
+  };
+  std::vector<Buffer> Buffers;
+  std::vector<size_t> FreeBuffers;
 };
 
 } // namespace talvos
