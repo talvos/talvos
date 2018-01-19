@@ -44,8 +44,14 @@ size_t Memory::allocate(size_t NumBytes)
 
 void Memory::load(uint8_t *Data, size_t Address, size_t NumBytes)
 {
-  // TODO: Perform load
-  std::cout << "Loading " << NumBytes << " bytes from " << Address << std::endl;
+  size_t Id = (Address >> OFFSET_BITS);
+  size_t Offset = (Address & ~(1UL << OFFSET_BITS));
+
+  // TODO: Generate useful error message for invalid memory accesses
+  assert(Id < Buffers.size());
+  assert(Buffers[Id].Data);
+
+  memcpy(Data, Buffers[Id].Data + Offset, NumBytes);
 }
 
 void Memory::release(size_t Address)
@@ -62,8 +68,14 @@ void Memory::release(size_t Address)
 
 void Memory::store(size_t Address, size_t NumBytes, const uint8_t *Data)
 {
-  // TODO: Perform store
-  std::cout << "Storing " << NumBytes << " bytes to " << Address << std::endl;
+  size_t Id = (Address >> OFFSET_BITS);
+  size_t Offset = (Address & ~(1UL << OFFSET_BITS));
+
+  // TODO: Generate useful error message for invalid memory accesses
+  assert(Id < Buffers.size());
+  assert(Buffers[Id].Data);
+
+  memcpy(Buffers[Id].Data + Offset, Data, NumBytes);
 }
 
 } // namespace talvos
