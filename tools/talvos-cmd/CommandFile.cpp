@@ -113,6 +113,9 @@ void CommandFile::parseDescriptorSet()
 
 void CommandFile::parseDispatch()
 {
+  if (!Module)
+    throw "DISPATCH reached with no prior MODULE command";
+
   size_t NumGroupsX = get<size_t>("dispatch size X");
   size_t NumGroupsY = get<size_t>("dispatch size Y");
   size_t NumGroupsZ = get<size_t>("dispatch size Z");
