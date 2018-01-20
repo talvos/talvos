@@ -21,18 +21,26 @@ int main(int argc, char *argv[])
   if (!parseArguments(argc, argv))
     return 1;
 
-  // Open command file.
-  std::ifstream File;
-  File.open(FileName);
-  if (File.fail())
+  CommandFile *CF;
+  if (FileName)
   {
-    cerr << "Unable to open config file '" << FileName << "'" << endl;
-    return 1;
+    // Open command file.
+    std::ifstream File;
+    File.open(FileName);
+    if (File.fail())
+    {
+      cerr << "Unable to open config file '" << FileName << "'" << endl;
+      return 1;
+    }
+    CF = new CommandFile(File);
+  }
+  else
+  {
+    CF = new CommandFile(std::cin);
   }
 
   // Run commands.
-  CommandFile Cmd(File);
-  if (!Cmd.run())
+  if (!CF->run())
     return 1;
 
   return 0;
@@ -77,19 +85,12 @@ static bool parseArguments(int argc, char *argv[])
     }
   }
 
-  // Ensure a configuration file has been specified.
-  if (FileName == NULL)
-  {
-    printUsage();
-    return false;
-  }
-
   return true;
 }
 
 static void printUsage()
 {
-  cout << "Usage: talvos-cmd [OPTIONS] CONFIG" << endl;
+  cout << "Usage: talvos-cmd [OPTIONS] [COMMAND_FILE]" << endl;
   cout << "       talvos-cmd [--help | --version]" << endl;
   cout << endl;
   cout << "Options:" << endl;
