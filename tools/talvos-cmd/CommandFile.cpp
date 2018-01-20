@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "CommandInvocation.h"
+#include "CommandFile.h"
 #include "talvos/Device.h"
 #include "talvos/DispatchCommand.h"
 #include "talvos/Memory.h"
@@ -13,23 +13,30 @@
 
 using namespace std;
 
-CommandInvocation::CommandInvocation() {}
+CommandFile::CommandFile() {}
 
-CommandInvocation::~CommandInvocation() {}
+CommandFile::~CommandFile() {}
 
-bool CommandInvocation::load(const char *FileName)
+bool CommandFile::open(const char *FileName)
 {
   // Open config file.
-  ConfigFile.open(FileName);
-  if (ConfigFile.fail())
+  File.open(FileName);
+  if (File.fail())
   {
     cerr << "Unable to open config file '" << FileName << "'" << endl;
     return false;
   }
 
+  return true;
+}
+
+bool CommandFile::run()
+{
+  talvos::Device *Dev = new talvos::Device;
+
   // Load SPIR-V module.
   string SPVFileName;
-  getline(ConfigFile, SPVFileName);
+  getline(File, SPVFileName);
   Module = talvos::Module::load(SPVFileName);
   if (!Module)
   {
@@ -39,13 +46,6 @@ bool CommandInvocation::load(const char *FileName)
 
   // TODO: Parse remainder of config file
 
-  return true;
-}
-
-void CommandInvocation::run()
-{
-  talvos::Device *Dev = new talvos::Device;
-
   // TODO: Problem domain
   talvos::DispatchCommand Command(Dev, Module.get(), Module->getFunction());
   Command.run();
@@ -53,4 +53,6 @@ void CommandInvocation::run()
   Dev->getGlobalMemory()->dump();
 
   delete Dev;
+
+  return true;
 }

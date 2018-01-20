@@ -4,7 +4,7 @@
 # terms please see the LICENSE file distributed with this source code.
 
 add_executable(talvos-cmd talvos-cmd.cpp
-               CommandInvocation.cpp CommandInvocation.h)
+               CommandFile.cpp CommandFile.h)
 target_link_libraries(talvos-cmd talvos)
 
 install(TARGETS talvos-cmd DESTINATION bin)

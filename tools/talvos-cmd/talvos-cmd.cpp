@@ -7,11 +7,11 @@
 #include <cstring>
 #include <iostream>
 
-#include "CommandInvocation.h"
+#include "CommandFile.h"
 
 using namespace std;
 
-static const char *ConfigFileName;
+static const char *FileName;
 
 static bool parseArguments(int argc, char *argv[]);
 static void printUsage();
@@ -21,11 +21,13 @@ int main(int argc, char *argv[])
   if (!parseArguments(argc, argv))
     return 1;
 
-  CommandInvocation Cmd;
-  if (!Cmd.load(ConfigFileName))
+  CommandFile Cmd;
+
+  if (!Cmd.open(FileName))
     return 1;
 
-  Cmd.run();
+  if (!Cmd.run())
+    return 1;
 
   return 0;
 }
@@ -57,9 +59,9 @@ static bool parseArguments(int argc, char *argv[])
     }
     else
     {
-      if (ConfigFileName == NULL)
+      if (FileName == NULL)
       {
-        ConfigFileName = argv[i];
+        FileName = argv[i];
       }
       else
       {
@@ -70,7 +72,7 @@ static bool parseArguments(int argc, char *argv[])
   }
 
   // Ensure a configuration file has been specified.
-  if (ConfigFileName == NULL)
+  if (FileName == NULL)
   {
     printUsage();
     return false;

@@ -11,15 +11,15 @@ namespace talvos
 class Module;
 }
 
-class CommandInvocation
+class CommandFile
 {
 public:
-  CommandInvocation();
-  ~CommandInvocation();
-  bool load(const char *FileName);
-  void run();
+  CommandFile();
+  bool open(const char *FileName);
+  ~CommandFile();
+  bool run();
 
 private:
-  std::ifstream ConfigFile;
+  std::ifstream File;
   std::unique_ptr<talvos::Module> Module;
 };
