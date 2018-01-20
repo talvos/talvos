@@ -8,6 +8,7 @@
 
 namespace talvos
 {
+class Device;
 class Module;
 }
 
@@ -19,6 +20,18 @@ public:
   bool run();
 
 private:
+  template <typename T> T get(const char *ParseAction);
+
+  void parseAllocate();
+  void parseDescriptorSet();
+  void parseDispatch();
+  void parseDump();
+  void parseEntry();
+  void parseModule();
+
   std::istream &Stream;
+  talvos::Device *Device;
   std::unique_ptr<talvos::Module> Module;
+
+  std::string CurrentParseAction;
 };
