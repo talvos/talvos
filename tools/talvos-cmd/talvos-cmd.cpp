@@ -22,10 +22,10 @@ int main(int argc, char *argv[])
     return 1;
 
   CommandFile *CF;
+  std::ifstream File;
   if (FileName)
   {
     // Open command file.
-    std::ifstream File;
     File.open(FileName);
     if (File.fail())
     {
