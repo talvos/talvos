@@ -80,6 +80,7 @@ void Memory::load(uint8_t *Data, size_t Address, size_t NumBytes)
   // TODO: Generate useful error message for invalid memory accesses
   assert(Id < Buffers.size());
   assert(Buffers[Id].Data);
+  assert((Offset + NumBytes) <= Buffers[Id].NumBytes);
 
   memcpy(Data, Buffers[Id].Data + Offset, NumBytes);
 }
@@ -104,6 +105,7 @@ void Memory::store(size_t Address, size_t NumBytes, const uint8_t *Data)
   // TODO: Generate useful error message for invalid memory accesses
   assert(Id < Buffers.size());
   assert(Buffers[Id].Data);
+  assert((Offset + NumBytes) <= Buffers[Id].NumBytes);
 
   memcpy(Buffers[Id].Data + Offset, Data, NumBytes);
 }
