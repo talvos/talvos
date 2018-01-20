@@ -8,6 +8,7 @@
 #include "CommandInvocation.h"
 #include "talvos/Device.h"
 #include "talvos/DispatchCommand.h"
+#include "talvos/Memory.h"
 #include "talvos/Module.h"
 
 using namespace std;
@@ -48,6 +49,8 @@ void CommandInvocation::run()
   // TODO: Problem domain
   talvos::DispatchCommand Command(Dev, Module.get(), Module->getFunction());
   Command.run();
+
+  Dev->getGlobalMemory()->dump();
 
   delete Dev;
 }

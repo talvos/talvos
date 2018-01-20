@@ -4,6 +4,7 @@
 // terms please see the LICENSE file distributed with this source code.
 
 #include <cassert>
+#include <iomanip>
 #include <iostream>
 
 #include "talvos/Memory.h"
@@ -46,6 +47,29 @@ size_t Memory::allocate(size_t NumBytes)
   }
 
   return (Id << OFFSET_BITS);
+}
+
+void Memory::dump() const
+{
+  for (size_t B = 1; B < Buffers.size(); B++)
+  {
+    if (!Buffers[B].Data)
+      continue;
+
+    for (size_t i = 0; i < Buffers[B].NumBytes; i++)
+    {
+      if (i % 4 == 0)
+      {
+        std::cout << std::endl
+                  << std::hex << std::uppercase << std::setw(16)
+                  << std::setfill(' ') << std::right
+                  << ((((size_t)B) << OFFSET_BITS) | i) << ":";
+      }
+      std::cout << " " << std::hex << std::uppercase << std::setw(2)
+                << std::setfill('0') << (int)Buffers[B].Data[i];
+    }
+  }
+  std::cout << std::endl;
 }
 
 void Memory::load(uint8_t *Data, size_t Address, size_t NumBytes)
