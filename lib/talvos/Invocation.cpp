@@ -38,15 +38,19 @@ Invocation::~Invocation()
 
 void Invocation::executeAccessChain(const Instruction *Inst)
 {
-  // TODO: Implement
-  Objects[Inst->Operands[1]] = Object::create<void *>(nullptr);
+  // Base pointer.
+  size_t Result = OP(2, size_t);
 
-  std::cout << "Executing OpAccessChain" << std::endl;
+  // Loop over indices.
   for (int i = 3; i < Inst->NumOperands; i++)
   {
+    // TODO: Handle indices of different sizes.
     uint32_t Idx = OP(i, uint32_t);
-    std::cout << " - Index " << (i - 3) << " = " << Idx << std::endl;
+    // TODO: Use actual type.
+    Result += Idx * sizeof(uint32_t);
   }
+
+  Objects[Inst->Operands[1]] = Object::create<size_t>(Result);
 }
 
 void Invocation::executeLoad(const Instruction *Inst)
