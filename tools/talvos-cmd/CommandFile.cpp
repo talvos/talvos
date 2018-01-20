@@ -60,13 +60,17 @@ template <typename T> T CommandFile::get(const char *ParseAction)
 void CommandFile::parseAllocate()
 {
   string Name = get<string>("allocation name");
+  if (Buffers.count(Name))
+    throw "duplicate allocation name";
+
   string Type = get<string>("allocation type");
   if (Type == "BUFFER")
   {
     size_t NumBytes = get<size_t>("allocation size");
 
-    // TODO: Allocate buffer.
-    std::cout << "Allocating buffer of size " << NumBytes << std::endl;
+    // Allocate buffer.
+    size_t Pointer = Device->getGlobalMemory()->allocate(NumBytes);
+    Buffers[Name] = Pointer;
 
     // Process initializer.
     string Init = get<string>("allocation initializer");

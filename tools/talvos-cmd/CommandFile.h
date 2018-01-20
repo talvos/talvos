@@ -4,6 +4,7 @@
 // terms please see the LICENSE file distributed with this source code.
 
 #include <fstream>
+#include <map>
 #include <memory>
 
 namespace talvos
@@ -32,6 +33,7 @@ private:
   std::istream &Stream;
   talvos::Device *Device;
   std::unique_ptr<talvos::Module> Module;
+  std::map<std::string, size_t> Buffers;
 
   std::string CurrentParseAction;
 };
