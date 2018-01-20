@@ -14,12 +14,11 @@ class Module;
 class CommandFile
 {
 public:
-  CommandFile();
-  bool open(const char *FileName);
+  CommandFile(std::istream &Stream);
   ~CommandFile();
   bool run();
 
 private:
-  std::ifstream File;
+  std::istream &Stream;
   std::unique_ptr<talvos::Module> Module;
 };

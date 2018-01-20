@@ -21,11 +21,17 @@ int main(int argc, char *argv[])
   if (!parseArguments(argc, argv))
     return 1;
 
-  CommandFile Cmd;
-
-  if (!Cmd.open(FileName))
+  // Open command file.
+  std::ifstream File;
+  File.open(FileName);
+  if (File.fail())
+  {
+    cerr << "Unable to open config file '" << FileName << "'" << endl;
     return 1;
+  }
 
+  // Run commands.
+  CommandFile Cmd(File);
   if (!Cmd.run())
     return 1;
 

@@ -13,22 +13,9 @@
 
 using namespace std;
 
-CommandFile::CommandFile() {}
+CommandFile::CommandFile(std::istream &Stream) : Stream(Stream) {}
 
 CommandFile::~CommandFile() {}
-
-bool CommandFile::open(const char *FileName)
-{
-  // Open config file.
-  File.open(FileName);
-  if (File.fail())
-  {
-    cerr << "Unable to open config file '" << FileName << "'" << endl;
-    return false;
-  }
-
-  return true;
-}
 
 bool CommandFile::run()
 {
@@ -36,7 +23,7 @@ bool CommandFile::run()
 
   // Load SPIR-V module.
   string SPVFileName;
-  getline(File, SPVFileName);
+  getline(Stream, SPVFileName);
   Module = talvos::Module::load(SPVFileName);
   if (!Module)
   {
