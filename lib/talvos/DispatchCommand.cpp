@@ -21,18 +21,19 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
   Mod = M;
   Func = F;
 
-  const VariableMap Variables = M->getVariables();
-  for (VariableMap::value_type V : Variables)
+  for (VariableMap::value_type V : M->getVariables())
   {
-    // TODO: Set variable result to real value
     if (V.second.StorageClass == SpvStorageClassStorageBuffer)
     {
-      std::cout << "Buffer variable %" << V.first
-                << " with D/B = " << V.second.DescriptorSet << "/"
-                << V.second.Binding << std::endl;
+      // Look-up variable in descriptor set and set pointer value.
+      std::pair<size_t, size_t> Binding = {V.second.DescriptorSet,
+                                           V.second.Binding};
+      if (DS.count(Binding))
+        Variables.push_back({V.first, DS.at(Binding)});
     }
     else
     {
+      // TODO: Handle this
       std::cout << "Variable %" << V.first
                 << " with StorageClass = " << V.second.StorageClass
                 << std::endl;
@@ -43,7 +44,7 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
 void DispatchCommand::run()
 {
   // TODO: Launch more than one invocation
-  Invocation I(Dev, Mod, Func);
+  Invocation I(Dev, Mod, Func, Variables);
 
   // TODO: Handle barriers
   while (I.getState() == Invocation::READY)

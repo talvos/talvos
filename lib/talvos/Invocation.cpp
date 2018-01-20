@@ -17,11 +17,17 @@
 namespace talvos
 {
 
-Invocation::Invocation(Device *D, const Module *M, const Function *F)
+Invocation::Invocation(
+    Device *D, const Module *M, const Function *F,
+    const std::vector<std::pair<uint32_t, size_t>> &Variables)
 {
   Dev = D;
   CurrentInstruction = F->FirstInstruction;
   Objects = M->cloneObjects();
+
+  // Copy variable pointer values.
+  for (auto V : Variables)
+    Objects[V.first] = Object::create<size_t>(V.second);
 }
 
 Invocation::~Invocation()

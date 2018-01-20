@@ -25,7 +25,8 @@ public:
   enum State { READY, FINISHED };
 
 public:
-  Invocation(Device *D, const Module *M, const Function *F);
+  Invocation(Device *D, const Module *M, const Function *F,
+             const std::vector<std::pair<uint32_t, size_t>> &Variables);
   ~Invocation();
   State getState() const;
   void step();

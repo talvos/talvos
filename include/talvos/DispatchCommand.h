@@ -7,6 +7,7 @@
 #define TALVOS_DISPATCHCOMMAND_H
 
 #include <map>
+#include <vector>
 
 namespace talvos
 {
@@ -28,6 +29,7 @@ private:
   Device *Dev;
   const Module *Mod;
   const Function *Func;
+  std::vector<std::pair<uint32_t, size_t>> Variables;
 };
 
 } // namespace talvos
