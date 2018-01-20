@@ -7,6 +7,8 @@
 #include <map>
 #include <memory>
 
+#include "talvos/DispatchCommand.h"
+
 namespace talvos
 {
 class Device;
@@ -34,6 +36,7 @@ private:
   talvos::Device *Device;
   std::unique_ptr<talvos::Module> Module;
   std::map<std::string, size_t> Buffers;
+  talvos::DescriptorSet DescriptorSet;
 
   std::string CurrentParseAction;
 };

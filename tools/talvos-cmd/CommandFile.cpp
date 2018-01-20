@@ -109,10 +109,10 @@ void CommandFile::parseDescriptorSet()
   size_t Set = get<size_t>("descriptor set");
   size_t Binding = get<size_t>("binding");
   string Name = get<string>("resource name");
+  if (!Buffers.count(Name))
+    throw "invalid resource identifier";
 
-  // TODO: Handle this
-  std::cout << "Binding " << Name << " to " << Set << ":" << Binding
-            << std::endl;
+  DescriptorSet[{Set, Binding}] = Buffers[Name];
 }
 
 void CommandFile::parseDispatch()
@@ -128,7 +128,8 @@ void CommandFile::parseDispatch()
   std::cout << "Dispatch " << NumGroupsX << " x " << NumGroupsY << " x "
             << NumGroupsZ << " groups" << std::endl;
 
-  talvos::DispatchCommand Command(Device, Module.get(), Module->getFunction());
+  talvos::DispatchCommand Command(Device, Module.get(), Module->getFunction(),
+                                  DescriptorSet);
   Command.run();
 }
 

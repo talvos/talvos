@@ -14,7 +14,8 @@
 namespace talvos
 {
 
-DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F)
+DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
+                                 const DescriptorSet &DS)
 {
   Dev = D;
   Mod = M;

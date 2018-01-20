@@ -6,6 +6,8 @@
 #ifndef TALVOS_DISPATCHCOMMAND_H
 #define TALVOS_DISPATCHCOMMAND_H
 
+#include <map>
+
 namespace talvos
 {
 
@@ -13,10 +15,13 @@ struct Function;
 class Device;
 class Module;
 
+typedef std::map<std::pair<size_t, size_t>, size_t> DescriptorSet;
+
 class DispatchCommand
 {
 public:
-  DispatchCommand(Device *D, const Module *M, const Function *F);
+  DispatchCommand(Device *D, const Module *M, const Function *F,
+                  const DescriptorSet &DS);
   void run();
 
 private:
