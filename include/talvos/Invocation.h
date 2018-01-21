@@ -25,7 +25,8 @@ public:
   enum State { READY, FINISHED };
 
 public:
-  Invocation(Device *D, const Module *M, const Function *F,
+  Invocation(Device *D, const Module *M, const Function *F, uint32_t GroupIdX,
+             uint32_t GroupIdY, uint32_t GroupIdZ,
              const std::vector<std::pair<uint32_t, Object>> &Variables);
   ~Invocation();
   State getState() const;
@@ -40,6 +41,8 @@ private:
   const Instruction *CurrentInstruction;
   std::vector<Object> Objects;
   Device *Dev;
+
+  uint32_t GlobalId[3];
   Memory *PrivateMemory;
 
   Memory *getMemory(uint32_t StorageClass);

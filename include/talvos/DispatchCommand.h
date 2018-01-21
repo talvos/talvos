@@ -23,7 +23,8 @@ class DispatchCommand
 {
 public:
   DispatchCommand(Device *D, const Module *M, const Function *F,
-                  const DescriptorSet &DS);
+                  uint32_t GroupCountX, uint32_t GroupCountY,
+                  uint32_t GroupCountZ, const DescriptorSet &DS);
   ~DispatchCommand();
   void run();
 
@@ -32,6 +33,9 @@ private:
   const Module *Mod;
   const Function *Func;
   std::vector<std::pair<uint32_t, Object>> Variables;
+  uint32_t GroupCountX;
+  uint32_t GroupCountY;
+  uint32_t GroupCountZ;
 };
 
 } // namespace talvos

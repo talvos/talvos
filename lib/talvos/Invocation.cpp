@@ -19,13 +19,19 @@ namespace talvos
 {
 
 Invocation::Invocation(
-    Device *D, const Module *M, const Function *F,
+    Device *D, const Module *M, const Function *F, uint32_t GroupIdX,
+    uint32_t GroupIdY, uint32_t GroupIdZ,
     const std::vector<std::pair<uint32_t, Object>> &Variables)
 {
   Dev = D;
   PrivateMemory = new Memory;
   CurrentInstruction = F->FirstInstruction;
   Objects = M->cloneObjects();
+
+  // TODO: Handle local size larger than 1
+  GlobalId[0] = GroupIdX;
+  GlobalId[1] = GroupIdY;
+  GlobalId[2] = GroupIdZ;
 
   // Copy variable pointer values.
   for (auto V : Variables)
@@ -39,8 +45,6 @@ Invocation::Invocation(
     case SpvBuiltInGlobalInvocationId:
     {
       // Allocate and initialize global ID.
-      // TODO: Use actual invocation ID
-      uint32_t GlobalId[3] = {0, 0, 0};
       size_t Address = PrivateMemory->allocate(sizeof(GlobalId));
       PrivateMemory->store(Address, sizeof(GlobalId), (uint8_t *)GlobalId);
       Objects[V.first] = Object::create<size_t>(V.second.Ty, Address);

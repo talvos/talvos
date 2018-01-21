@@ -120,15 +120,11 @@ void CommandFile::parseDispatch()
   if (!Module)
     throw "DISPATCH reached with no prior MODULE command";
 
-  size_t NumGroupsX = get<size_t>("dispatch size X");
-  size_t NumGroupsY = get<size_t>("dispatch size Y");
-  size_t NumGroupsZ = get<size_t>("dispatch size Z");
-
-  // TODO: Problem domain
-  std::cout << "Dispatch " << NumGroupsX << " x " << NumGroupsY << " x "
-            << NumGroupsZ << " groups" << std::endl;
-
+  uint32_t GroupsCountX = get<uint32_t>("group count X");
+  uint32_t GroupsCountY = get<uint32_t>("group count Y");
+  uint32_t GroupsCountZ = get<uint32_t>("group count Z");
   talvos::DispatchCommand Command(Device, Module.get(), Module->getFunction(),
+                                  GroupsCountX, GroupsCountY, GroupsCountZ,
                                   DescriptorSet);
   Command.run();
 }

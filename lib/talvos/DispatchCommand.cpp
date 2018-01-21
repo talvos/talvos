@@ -15,11 +15,15 @@ namespace talvos
 {
 
 DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
-                                 const DescriptorSet &DS)
+                                 uint32_t GroupCountX, uint32_t GroupCountY,
+                                 uint32_t GroupCountZ, const DescriptorSet &DS)
 {
   Dev = D;
   Mod = M;
   Func = F;
+  this->GroupCountX = GroupCountX;
+  this->GroupCountY = GroupCountY;
+  this->GroupCountZ = GroupCountZ;
 
   // Resolve buffer variables.
   for (BufferVariableMap::value_type V : M->getBufferVariables())
@@ -43,13 +47,21 @@ DispatchCommand::~DispatchCommand()
 
 void DispatchCommand::run()
 {
-  // TODO: Launch more than one invocation
-  Invocation I(Dev, Mod, Func, Variables);
-
-  // TODO: Handle barriers
-  while (I.getState() == Invocation::READY)
+  for (int Z = 0; Z < GroupCountZ; Z++)
   {
-    I.step();
+    for (int Y = 0; Y < GroupCountY; Y++)
+    {
+      for (int X = 0; X < GroupCountX; X++)
+      {
+        Invocation I(Dev, Mod, Func, X, Y, Z, Variables);
+
+        // TODO: Handle barriers
+        while (I.getState() == Invocation::READY)
+        {
+          I.step();
+        }
+      }
+    }
   }
 }
 
