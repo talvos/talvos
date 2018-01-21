@@ -22,18 +22,41 @@ Invocation::Invocation(
     const std::vector<std::pair<uint32_t, size_t>> &Variables)
 {
   Dev = D;
+  PrivateMemory = new Memory;
   CurrentInstruction = F->FirstInstruction;
   Objects = M->cloneObjects();
 
   // Copy variable pointer values.
   for (auto V : Variables)
     Objects[V.first] = Object::create<size_t>(V.second);
+
+  // Set up input variables.
+  for (InputVariableMap::value_type V : M->getInputVariables())
+  {
+    switch (V.second)
+    {
+    case SpvBuiltInGlobalInvocationId:
+    {
+      // Allocate and initialize global ID.
+      // TODO: Use actual invocation ID
+      uint32_t GlobalId[3] = {0, 0, 0};
+      size_t Address = PrivateMemory->allocate(sizeof(GlobalId));
+      PrivateMemory->store(Address, sizeof(GlobalId), (uint8_t *)GlobalId);
+      Objects[V.first] = Object::create<size_t>(Address);
+      break;
+    }
+    default:
+      std::cout << "Unhandled input variable builtin: " << V.second
+                << std::endl;
+    }
+  }
 }
 
 Invocation::~Invocation()
 {
   for (Object &Obj : Objects)
     Obj.destroy();
+  delete PrivateMemory;
 }
 
 void Invocation::executeAccessChain(const Instruction *Inst)
@@ -58,6 +81,7 @@ void Invocation::executeLoad(const Instruction *Inst)
   uint32_t Id = Inst->Operands[1];
   size_t Src = OP(2, size_t);
   // TODO: Use result type
+  // TODO: Use correct memory for storage class.
   Objects[Id] = Object::load(Dev->getGlobalMemory(), Src);
 }
 
@@ -65,6 +89,7 @@ void Invocation::executeStore(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
   size_t Dest = OP(0, size_t);
+  // TODO: Use correct memory for storage class.
   Objects[Id].store(Dev->getGlobalMemory(), Dest);
 }
 

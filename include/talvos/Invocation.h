@@ -40,6 +40,7 @@ private:
   const Instruction *CurrentInstruction;
   std::vector<Object> Objects;
   Device *Dev;
+  Memory *PrivateMemory;
 };
 
 } // namespace talvos
