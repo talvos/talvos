@@ -37,14 +37,16 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Object.h)
+    ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Type.h)
 set(TALVOS_SOURCES
     Device.cpp
     DispatchCommand.cpp
     Invocation.cpp
     Memory.cpp
     Module.cpp
-    Object.cpp)
+    Object.cpp
+    Type.cpp)
 add_library(talvos SHARED ${TALVOS_SOURCES} ${TALVOS_HEADERS})
 target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")

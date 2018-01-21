@@ -11,6 +11,7 @@
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Module.h"
+#include "talvos/Type.h"
 
 namespace talvos
 {
@@ -97,6 +98,55 @@ public:
         }
         break;
       }
+      case SpvOpTypeInt:
+      {
+        uint32_t Id = Inst->words[Inst->operands[0].offset];
+        uint32_t Width = Inst->words[Inst->operands[1].offset];
+        Mod->addType(Id, Type::getInt(Width));
+        break;
+      }
+      case SpvOpTypePointer:
+      {
+        uint32_t Id = Inst->words[Inst->operands[0].offset];
+        uint32_t StorageClass = Inst->words[Inst->operands[1].offset];
+        const Type *ElemType =
+            Mod->getType(Inst->words[Inst->operands[2].offset]);
+        Mod->addType(Id, Type::getPointer(StorageClass, ElemType));
+        break;
+      }
+      case SpvOpTypeRuntimeArray:
+      {
+        uint32_t Id = Inst->words[Inst->operands[0].offset];
+        const Type *ElemType =
+            Mod->getType(Inst->words[Inst->operands[1].offset]);
+        Mod->addType(Id, Type::getRuntimeArray(ElemType));
+        break;
+      }
+      case SpvOpTypeStruct:
+      {
+        uint32_t Id = Inst->words[Inst->operands[0].offset];
+        std::vector<const Type *> ElemTypes;
+        for (int i = 1; i < Inst->num_operands; i++)
+          ElemTypes.push_back(
+              Mod->getType(Inst->words[Inst->operands[1].offset]));
+        Mod->addType(Id, Type::getStruct(ElemTypes));
+        break;
+      }
+      case SpvOpTypeVector:
+      {
+        uint32_t Id = Inst->words[Inst->operands[0].offset];
+        const Type *ElemType =
+            Mod->getType(Inst->words[Inst->operands[1].offset]);
+        uint32_t ElemCount = Inst->words[Inst->operands[2].offset];
+        Mod->addType(Id, Type::getVector(ElemType, ElemCount));
+        break;
+      }
+      case SpvOpTypeVoid:
+      {
+        uint32_t Id = Inst->words[Inst->operands[0].offset];
+        Mod->addType(Id, Type::getVoid());
+        break;
+      }
       case SpvOpVariable:
         Mod->addVariable(Inst->result_id,
                          Inst->words[Inst->operands[2].offset]);
@@ -160,6 +210,12 @@ void Module::addObject(uint32_t Id, const Object &Obj)
   Objects[Id] = Obj;
 }
 
+void Module::addType(uint32_t Id, Type *T)
+{
+  assert(!Types.count(Id));
+  Types[Id] = T;
+}
+
 void Module::addVariable(uint32_t Id, uint32_t StorageClass)
 {
   switch (StorageClass)
@@ -211,9 +267,16 @@ const BufferVariableMap &Module::getBufferVariables() const
 {
   return BufferVariables;
 }
+
 const InputVariableMap &Module::getInputVariables() const
 {
   return InputVariables;
+}
+
+const Type *Module::getType(uint32_t Id) const
+{
+  assert(Types.count(Id));
+  return Types.at(Id);
 }
 
 std::unique_ptr<Module> Module::load(const std::string &FileName)

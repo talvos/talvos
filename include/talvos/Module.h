@@ -16,6 +16,8 @@
 namespace talvos
 {
 
+class Type;
+
 struct Instruction
 {
   uint16_t Opcode;
@@ -51,12 +53,14 @@ public:
   ~Module();
   void addFunction(Function *Func);
   void addObject(uint32_t Id, const Object &Obj);
+  void addType(uint32_t Id, Type *T);
   void addVariable(uint32_t Id, uint32_t StorageClass);
   std::vector<Object> cloneObjects() const;
   Function *getFunction() const;
   uint32_t getIdBound() const { return IdBound; }
   const BufferVariableMap &getBufferVariables() const;
   const InputVariableMap &getInputVariables() const;
+  const Type *getType(uint32_t Id) const;
   static std::unique_ptr<Module> load(const std::string &FileName);
 
   void setBinding(uint32_t Variable, uint32_t Binding);
@@ -70,6 +74,7 @@ private:
   std::vector<Object> Objects;
   BufferVariableMap BufferVariables;
   InputVariableMap InputVariables;
+  std::map<uint32_t, Type *> Types;
 };
 
 } // namespace talvos
