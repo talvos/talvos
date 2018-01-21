@@ -84,7 +84,7 @@ void Invocation::executeLoad(const Instruction *Inst)
 
   // TODO: Use result type
   Memory *Mem = getMemory(Src.getType()->getStorageClass());
-  Objects[Id] = Object::load(Mem, Src.get<size_t>());
+  Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<size_t>());
 }
 
 void Invocation::executeStore(const Instruction *Inst)

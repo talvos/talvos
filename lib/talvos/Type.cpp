@@ -10,6 +10,20 @@
 namespace talvos
 {
 
+size_t Type::getSize() const
+{
+  switch (Id)
+  {
+  case INT:
+    return BitWidth / 8;
+  case POINTER:
+    return sizeof(size_t);
+  default:
+    assert(false && "Type::getSize() not implemented for this Type");
+    return 0;
+  }
+}
+
 uint32_t Type::getStorageClass() const
 {
   assert(Id == POINTER);

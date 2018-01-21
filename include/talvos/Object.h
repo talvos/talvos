@@ -10,11 +10,12 @@
 #include <cstdint>
 #include <cstring>
 
+#include "talvos/Type.h"
+
 namespace talvos
 {
 
 class Memory;
-class Type;
 
 class Object
 {
@@ -33,10 +34,9 @@ public:
   Object clone() const
   {
     Object Obj;
-    // TODO: Use size of this object
     Obj.Ty = this->Ty;
-    Obj.Data = new uint8_t[4];
-    memcpy(Obj.Data, this->Data, 4);
+    Obj.Data = new uint8_t[Ty->getSize()];
+    memcpy(Obj.Data, this->Data, Ty->getSize());
     return Obj;
   }
 
@@ -53,7 +53,7 @@ public:
 
   bool isSet() const { return Data ? true : false; };
 
-  static Object load(Memory *Mem, size_t Address);
+  static Object load(const Type *Ty, Memory *Mem, size_t Address);
 
   void store(Memory *Mem, size_t Address) const;
 

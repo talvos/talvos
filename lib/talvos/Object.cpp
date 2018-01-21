@@ -9,19 +9,18 @@
 namespace talvos
 {
 
-Object Object::load(Memory *Mem, size_t Address)
+Object Object::load(const Type *Ty, Memory *Mem, size_t Address)
 {
-  // TODO: Use actual type size
   Object Obj;
-  Obj.Data = new uint8_t[4];
-  Mem->load(Obj.Data, Address, 4);
+  Obj.Ty = Ty;
+  Obj.Data = new uint8_t[Ty->getSize()];
+  Mem->load(Obj.Data, Address, Ty->getSize());
   return Obj;
 }
 
 void Object::store(Memory *Mem, size_t Address) const
 {
-  // TODO: Use actual type size
-  Mem->store(Address, 4, Data);
+  Mem->store(Address, Ty->getSize(), Data);
 }
 
 } // namespace talvos

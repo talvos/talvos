@@ -15,6 +15,7 @@ namespace talvos
 class Type
 {
 public:
+  size_t getSize() const;
   uint32_t getStorageClass() const;
 
   static Type *getInt(uint32_t Width);
