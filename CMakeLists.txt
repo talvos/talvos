@@ -19,3 +19,13 @@ include_directories(include)
 
 add_subdirectory(lib)
 add_subdirectory(tools)
+
+enable_testing()
+
+# Check for Python
+find_package(PythonInterp)
+if (PYTHONINTERP_FOUND)
+  add_subdirectory(test)
+else()
+  message(WARNING "Skipping tests (Python required)")
+endif()
