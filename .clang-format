@@ -4,6 +4,7 @@ BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass: true
   AfterControlStatement: true
+  AfterEnum: true
   AfterFunction: true
   AfterNamespace: true
   AfterStruct: true
