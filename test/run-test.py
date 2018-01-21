@@ -44,6 +44,7 @@ for ln in range(len(lines)):
         for o in range(oln, len(output)):
             if output[o] == pattern:
                 matched = True
+                oln = o
                 break
         if not matched:
             print 'CHECK on line %d not found' % ln
