@@ -32,7 +32,7 @@ struct Function
   Instruction *FirstInstruction;
 };
 
-struct Variable
+struct BufferVariable
 {
   // TODO: Type
   uint32_t StorageClass;
@@ -41,7 +41,8 @@ struct Variable
   uint32_t DescriptorSet;
   uint32_t Binding;
 };
-typedef std::map<uint32_t, Variable> VariableMap;
+typedef std::map<uint32_t, BufferVariable> BufferVariableMap;
+typedef std::map<uint32_t, uint32_t> InputVariableMap;
 
 class Module
 {
@@ -54,10 +55,12 @@ public:
   std::vector<Object> cloneObjects() const;
   Function *getFunction() const;
   uint32_t getIdBound() const { return IdBound; }
-  const VariableMap getVariables() const;
+  const BufferVariableMap &getBufferVariables() const;
+  const InputVariableMap &getInputVariables() const;
   static std::unique_ptr<Module> load(const std::string &FileName);
 
   void setBinding(uint32_t Variable, uint32_t Binding);
+  void setBuiltin(uint32_t Id, uint32_t Builtin);
   void setDescriptorSet(uint32_t Variable, uint32_t DescriptorSet);
 
 private:
@@ -65,7 +68,8 @@ private:
   Function *Func;
   uint32_t IdBound;
   std::vector<Object> Objects;
-  VariableMap Variables;
+  BufferVariableMap BufferVariables;
+  InputVariableMap InputVariables;
 };
 
 } // namespace talvos

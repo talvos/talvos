@@ -21,23 +21,14 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
   Mod = M;
   Func = F;
 
-  for (VariableMap::value_type V : M->getVariables())
+  // Resolve buffer variables.
+  for (BufferVariableMap::value_type V : M->getBufferVariables())
   {
-    if (V.second.StorageClass == SpvStorageClassStorageBuffer)
-    {
-      // Look-up variable in descriptor set and set pointer value.
-      std::pair<size_t, size_t> Binding = {V.second.DescriptorSet,
-                                           V.second.Binding};
-      if (DS.count(Binding))
-        Variables.push_back({V.first, DS.at(Binding)});
-    }
-    else
-    {
-      // TODO: Handle this
-      std::cout << "Variable %" << V.first
-                << " with StorageClass = " << V.second.StorageClass
-                << std::endl;
-    }
+    // Look-up variable in descriptor set and set pointer value.
+    std::pair<size_t, size_t> Binding = {V.second.DescriptorSet,
+                                         V.second.Binding};
+    if (DS.count(Binding))
+      Variables.push_back({V.first, DS.at(Binding)});
   }
 }
 

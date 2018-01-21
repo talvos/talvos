@@ -89,6 +89,9 @@ public:
         case SpvDecorationDescriptorSet:
           Mod->setDescriptorSet(Target, Inst->words[Inst->operands[2].offset]);
           break;
+        case SpvDecorationBuiltIn:
+          Mod->setBuiltin(Target, Inst->words[Inst->operands[2].offset]);
+          break;
         default:
           std::cout << "Unhandled decoration " << Decoration << std::endl;
         }
@@ -159,16 +162,31 @@ void Module::addObject(uint32_t Id, const Object &Obj)
 
 void Module::addVariable(uint32_t Id, uint32_t StorageClass)
 {
-  Variable V;
+  switch (StorageClass)
+  {
+  case SpvStorageClassStorageBuffer:
+  {
+    BufferVariable V;
 
-  // Variable may already have been created by decorations
-  if (Variables.count(Id))
-    V = Variables[Id];
+    // Variable may already have been created by decorations
+    if (BufferVariables.count(Id))
+      V = BufferVariables[Id];
 
-  // TODO: Type, initializers etc
-  V.StorageClass = StorageClass;
+    // TODO: Type, initializers etc
+    V.StorageClass = StorageClass;
 
-  Variables[Id] = V;
+    BufferVariables[Id] = V;
+    break;
+  }
+  case SpvStorageClassInput:
+  {
+    // TODO: All input variables will have been decorated with a builtin?
+    assert(InputVariables.count(Id));
+    break;
+  }
+  default:
+    std::cout << "Unhandled storage class " << StorageClass << std::endl;
+  }
 }
 
 std::vector<Object> Module::cloneObjects() const
@@ -189,7 +207,14 @@ Function *Module::getFunction() const
   return this->Func;
 }
 
-const VariableMap Module::getVariables() const { return Variables; }
+const BufferVariableMap &Module::getBufferVariables() const
+{
+  return BufferVariables;
+}
+const InputVariableMap &Module::getInputVariables() const
+{
+  return InputVariables;
+}
 
 std::unique_ptr<Module> Module::load(const std::string &FileName)
 {
@@ -227,12 +252,25 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
 
 void Module::setBinding(uint32_t Variable, uint32_t Binding)
 {
-  Variables[Variable].Binding = Binding;
+  BufferVariables[Variable].Binding = Binding;
+}
+
+void Module::setBuiltin(uint32_t Id, uint32_t Builtin)
+{
+  switch (Builtin)
+  {
+  case SpvBuiltInGlobalInvocationId:
+    assert(!InputVariables.count(Id));
+    InputVariables[Id] = Builtin;
+    break;
+  default:
+    std::cout << "Unhandled builtin decoration: " << Builtin << std::endl;
+  }
 }
 
 void Module::setDescriptorSet(uint32_t Variable, uint32_t DescriptorSet)
 {
-  Variables[Variable].DescriptorSet = DescriptorSet;
+  BufferVariables[Variable].DescriptorSet = DescriptorSet;
 }
 
 } // namespace talvos
