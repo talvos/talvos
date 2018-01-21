@@ -188,6 +188,7 @@ bool CommandFile::run()
   catch (NotRecognizedException e)
   {
     std::cerr << "ERROR: unrecognized " << CurrentParseAction << std::endl;
+    return false;
   }
   catch (const char *err)
   {
@@ -200,12 +201,16 @@ bool CommandFile::run()
     {
       // EOF is only OK if we're parsing the next command.
       if (CurrentParseAction != "command")
+      {
         std::cerr << "Unexpected EOF while parsing " << CurrentParseAction
                   << std::endl;
+        return false;
+      }
     }
     else
     {
       std::cerr << "Failed to parse " << CurrentParseAction << std::endl;
+      return false;
     }
   }
 
