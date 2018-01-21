@@ -11,6 +11,7 @@
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
+#include "talvos/Type.h"
 
 #define OP(Index, Type) Objects[Inst->Operands[Index]].get<Type>()
 
@@ -79,18 +80,33 @@ void Invocation::executeAccessChain(const Instruction *Inst)
 void Invocation::executeLoad(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
-  size_t Src = OP(2, size_t);
+  const Object &Src = Objects[Inst->Operands[2]];
+
   // TODO: Use result type
-  // TODO: Use correct memory for storage class.
-  Objects[Id] = Object::load(Dev->getGlobalMemory(), Src);
+  Memory *Mem = getMemory(Src.getType()->getStorageClass());
+  Objects[Id] = Object::load(Mem, Src.get<size_t>());
 }
 
 void Invocation::executeStore(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
-  size_t Dest = OP(0, size_t);
-  // TODO: Use correct memory for storage class.
-  Objects[Id].store(Dev->getGlobalMemory(), Dest);
+  const Object &Dest = Objects[Inst->Operands[0]];
+  Memory *Mem = getMemory(Dest.getType()->getStorageClass());
+  Objects[Id].store(Mem, Dest.get<size_t>());
+}
+
+Memory *Invocation::getMemory(uint32_t StorageClass)
+{
+  switch (StorageClass)
+  {
+  case SpvStorageClassStorageBuffer:
+    return Dev->getGlobalMemory();
+  case SpvStorageClassInput:
+    return PrivateMemory;
+  default:
+    assert(false && "Unhandled storage class");
+    return nullptr;
+  }
 }
 
 Invocation::State Invocation::getState() const

@@ -41,6 +41,8 @@ private:
   std::vector<Object> Objects;
   Device *Dev;
   Memory *PrivateMemory;
+
+  Memory *getMemory(uint32_t StorageClass);
 };
 
 } // namespace talvos
