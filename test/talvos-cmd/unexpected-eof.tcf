@@ -1,0 +1,3 @@
+# CHECK Unexpected EOF while parsing allocation size
+# EXIT 1
+ALLOCATE foo BUFFER

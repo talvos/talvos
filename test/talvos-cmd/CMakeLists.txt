@@ -7,6 +7,9 @@ foreach(test
   dispatch-without-module
   duplicate-allocation-name
   empty
+  invalid-allocation-type
+  invalid-resource-name
+  unexpected-eof
 )
   add_test(
     NAME ${test}
