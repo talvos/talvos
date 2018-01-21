@@ -7,6 +7,7 @@
 #define TALVOS_TYPE_H
 
 #include <cstdint>
+#include <cstring>
 #include <vector>
 
 namespace talvos
