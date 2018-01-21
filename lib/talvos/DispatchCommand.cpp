@@ -28,8 +28,17 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
     std::pair<size_t, size_t> Binding = {V.second.DescriptorSet,
                                          V.second.Binding};
     if (DS.count(Binding))
-      Variables.push_back({V.first, DS.at(Binding)});
+    {
+      Object Pointer = Object::create<size_t>(V.second.Ty, DS.at(Binding));
+      Variables.push_back({V.first, Pointer});
+    }
   }
+}
+
+DispatchCommand::~DispatchCommand()
+{
+  for (auto V : Variables)
+    V.second.destroy();
 }
 
 void DispatchCommand::run()

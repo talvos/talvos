@@ -14,15 +14,17 @@ namespace talvos
 {
 
 class Memory;
+class Type;
 
 class Object
 {
 public:
   Object() { Data = nullptr; }
 
-  template <typename T> static Object create(T Value)
+  template <typename T> static Object create(const Type *Ty, T Value)
   {
     Object Obj;
+    Obj.Ty = Ty;
     Obj.Data = new uint8_t[sizeof(T)];
     *((T *)Obj.Data) = Value;
     return Obj;
@@ -32,6 +34,7 @@ public:
   {
     Object Obj;
     // TODO: Use size of this object
+    Obj.Ty = this->Ty;
     Obj.Data = new uint8_t[4];
     memcpy(Obj.Data, this->Data, 4);
     return Obj;
@@ -46,6 +49,8 @@ public:
     return *((T *)Data);
   }
 
+  const Type *getType() const { return Ty; };
+
   bool isSet() const { return Data ? true : false; };
 
   static Object load(Memory *Mem, size_t Address);
@@ -54,6 +59,7 @@ public:
 
 private:
   // TODO: Type, size, etc
+  const Type *Ty;
   uint8_t *Data;
 };
 

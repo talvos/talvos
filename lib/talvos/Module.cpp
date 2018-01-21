@@ -50,6 +50,7 @@ public:
     {
       // TODO: Cleanup - when is this destroyed, by parent Function?
       Instruction *I = new Instruction;
+      I->ResultType = Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
       I->Opcode = Inst->opcode;
       I->NumOperands = Inst->num_operands;
       // TODO: Are all operands IDs?
@@ -73,9 +74,10 @@ public:
       {
       case SpvOpConstant:
       {
+        const Type *Ty = Mod->getType(Inst->type_id);
         // TODO: Use actual type
         uint32_t Value = Inst->words[Inst->operands[2].offset];
-        Mod->addObject(Inst->result_id, Object::create<uint32_t>(Value));
+        Mod->addObject(Inst->result_id, Object::create<uint32_t>(Ty, Value));
         break;
       }
       case SpvOpDecorate:
@@ -148,8 +150,7 @@ public:
         break;
       }
       case SpvOpVariable:
-        Mod->addVariable(Inst->result_id,
-                         Inst->words[Inst->operands[2].offset]);
+        Mod->addVariable(Inst->result_id, Mod->getType(Inst->type_id));
         break;
       default:
         std::cout << "Unhandled opcode " << Inst->opcode << std::endl;
@@ -216,9 +217,9 @@ void Module::addType(uint32_t Id, Type *T)
   Types[Id] = T;
 }
 
-void Module::addVariable(uint32_t Id, uint32_t StorageClass)
+void Module::addVariable(uint32_t Id, const Type *Ty)
 {
-  switch (StorageClass)
+  switch (Ty->getStorageClass())
   {
   case SpvStorageClassStorageBuffer:
   {
@@ -228,8 +229,7 @@ void Module::addVariable(uint32_t Id, uint32_t StorageClass)
     if (BufferVariables.count(Id))
       V = BufferVariables[Id];
 
-    // TODO: Type, initializers etc
-    V.StorageClass = StorageClass;
+    V.Ty = Ty;
 
     BufferVariables[Id] = V;
     break;
@@ -241,7 +241,8 @@ void Module::addVariable(uint32_t Id, uint32_t StorageClass)
     break;
   }
   default:
-    std::cout << "Unhandled storage class " << StorageClass << std::endl;
+    std::cout << "Unhandled storage class " << Ty->getStorageClass()
+              << std::endl;
   }
 }
 
@@ -324,7 +325,7 @@ void Module::setBuiltin(uint32_t Id, uint32_t Builtin)
   {
   case SpvBuiltInGlobalInvocationId:
     assert(!InputVariables.count(Id));
-    InputVariables[Id] = Builtin;
+    InputVariables[Id].Builtin = Builtin;
     break;
   default:
     std::cout << "Unhandled builtin decoration: " << Builtin << std::endl;

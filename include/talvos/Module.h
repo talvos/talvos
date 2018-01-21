@@ -20,6 +20,7 @@ class Type;
 
 struct Instruction
 {
+  const Type *ResultType;
   uint16_t Opcode;
   uint16_t NumOperands;
   // TODO: Currently assumes all operands are 32-bit IDs
@@ -36,15 +37,19 @@ struct Function
 
 struct BufferVariable
 {
-  // TODO: Type
-  uint32_t StorageClass;
-  // TODO: Initializer
-
+  const Type *Ty;
   uint32_t DescriptorSet;
   uint32_t Binding;
 };
+
+struct InputVariable
+{
+  const Type *Ty;
+  uint32_t Builtin;
+};
+
 typedef std::map<uint32_t, BufferVariable> BufferVariableMap;
-typedef std::map<uint32_t, uint32_t> InputVariableMap;
+typedef std::map<uint32_t, InputVariable> InputVariableMap;
 
 class Module
 {
@@ -54,7 +59,7 @@ public:
   void addFunction(Function *Func);
   void addObject(uint32_t Id, const Object &Obj);
   void addType(uint32_t Id, Type *T);
-  void addVariable(uint32_t Id, uint32_t StorageClass);
+  void addVariable(uint32_t Id, const Type *Ty);
   std::vector<Object> cloneObjects() const;
   Function *getFunction() const;
   uint32_t getIdBound() const { return IdBound; }

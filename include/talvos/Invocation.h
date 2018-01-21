@@ -26,7 +26,7 @@ public:
 
 public:
   Invocation(Device *D, const Module *M, const Function *F,
-             const std::vector<std::pair<uint32_t, size_t>> &Variables);
+             const std::vector<std::pair<uint32_t, Object>> &Variables);
   ~Invocation();
   State getState() const;
   void step();

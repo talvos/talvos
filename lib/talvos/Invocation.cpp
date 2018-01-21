@@ -19,7 +19,7 @@ namespace talvos
 
 Invocation::Invocation(
     Device *D, const Module *M, const Function *F,
-    const std::vector<std::pair<uint32_t, size_t>> &Variables)
+    const std::vector<std::pair<uint32_t, Object>> &Variables)
 {
   Dev = D;
   PrivateMemory = new Memory;
@@ -28,12 +28,12 @@ Invocation::Invocation(
 
   // Copy variable pointer values.
   for (auto V : Variables)
-    Objects[V.first] = Object::create<size_t>(V.second);
+    Objects[V.first] = V.second.clone();
 
   // Set up input variables.
   for (InputVariableMap::value_type V : M->getInputVariables())
   {
-    switch (V.second)
+    switch (V.second.Builtin)
     {
     case SpvBuiltInGlobalInvocationId:
     {
@@ -42,11 +42,11 @@ Invocation::Invocation(
       uint32_t GlobalId[3] = {0, 0, 0};
       size_t Address = PrivateMemory->allocate(sizeof(GlobalId));
       PrivateMemory->store(Address, sizeof(GlobalId), (uint8_t *)GlobalId);
-      Objects[V.first] = Object::create<size_t>(Address);
+      Objects[V.first] = Object::create<size_t>(V.second.Ty, Address);
       break;
     }
     default:
-      std::cout << "Unhandled input variable builtin: " << V.second
+      std::cout << "Unhandled input variable builtin: " << V.second.Builtin
                 << std::endl;
     }
   }
@@ -73,7 +73,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
     Result += Idx * sizeof(uint32_t);
   }
 
-  Objects[Inst->Operands[1]] = Object::create<size_t>(Result);
+  Objects[Inst->Operands[1]] = Object::create<size_t>(Inst->ResultType, Result);
 }
 
 void Invocation::executeLoad(const Instruction *Inst)

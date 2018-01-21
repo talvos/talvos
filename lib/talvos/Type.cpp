@@ -8,6 +8,8 @@
 namespace talvos
 {
 
+uint32_t Type::getStorageClass() const { return StorageClass; }
+
 Type *Type::getInt(uint32_t Width)
 {
   Type *T = new Type(INT);

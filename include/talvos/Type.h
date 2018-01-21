@@ -15,6 +15,8 @@ namespace talvos
 class Type
 {
 public:
+  uint32_t getStorageClass() const;
+
   static Type *getInt(uint32_t Width);
   static Type *getPointer(uint32_t StorageClass, const Type *ElemType);
   static Type *getRuntimeArray(const Type *ElemType);

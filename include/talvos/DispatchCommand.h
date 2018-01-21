@@ -15,6 +15,7 @@ namespace talvos
 struct Function;
 class Device;
 class Module;
+class Object;
 
 typedef std::map<std::pair<size_t, size_t>, size_t> DescriptorSet;
 
@@ -23,13 +24,14 @@ class DispatchCommand
 public:
   DispatchCommand(Device *D, const Module *M, const Function *F,
                   const DescriptorSet &DS);
+  ~DispatchCommand();
   void run();
 
 private:
   Device *Dev;
   const Module *Mod;
   const Function *Func;
-  std::vector<std::pair<uint32_t, size_t>> Variables;
+  std::vector<std::pair<uint32_t, Object>> Variables;
 };
 
 } // namespace talvos
