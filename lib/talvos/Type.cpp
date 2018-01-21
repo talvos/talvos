@@ -5,10 +5,16 @@
 
 #include "talvos/Type.h"
 
+#include <cassert>
+
 namespace talvos
 {
 
-uint32_t Type::getStorageClass() const { return StorageClass; }
+uint32_t Type::getStorageClass() const
+{
+  assert(Id == POINTER);
+  return StorageClass;
+}
 
 Type *Type::getInt(uint32_t Width)
 {
