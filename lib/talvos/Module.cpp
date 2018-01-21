@@ -236,8 +236,15 @@ void Module::addVariable(uint32_t Id, const Type *Ty)
   }
   case SpvStorageClassInput:
   {
-    // TODO: All input variables will have been decorated with a builtin?
-    assert(InputVariables.count(Id));
+    InputVariable V;
+
+    // Variable may already have been created by decorations
+    if (InputVariables.count(Id))
+      V = InputVariables[Id];
+
+    V.Ty = Ty;
+
+    InputVariables[Id] = V;
     break;
   }
   default:
