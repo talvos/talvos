@@ -44,7 +44,7 @@ public:
 
   template <typename T> T get() const
   {
-    // TODO: assert size
+    assert(sizeof(T) == Ty->getSize());
     assert(Data);
     return *((T *)Data);
   }
@@ -58,7 +58,6 @@ public:
   void store(Memory *Mem, size_t Address) const;
 
 private:
-  // TODO: Type, size, etc
   const Type *Ty;
   uint8_t *Data;
 };
