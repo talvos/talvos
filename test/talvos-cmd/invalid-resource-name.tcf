@@ -1,4 +1,4 @@
 # CHECK ERROR: invalid resource identifier
 # EXIT 1
-ALLOCATE foo BUFFER 4 FILL INT 0
+ALLOCATE foo BUFFER 4 FILL INT32 0
 DESCRIPTOR_SET 0 0 bar
