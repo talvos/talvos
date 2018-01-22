@@ -3,4 +3,18 @@
 # This file is distributed under a three-clause BSD license. For full license
 # terms please see the LICENSE file distributed with this source code.
 
-add_subdirectory(talvos-cmd)
+foreach(test
+  talvos-cmd/dispatch-without-module
+  talvos-cmd/duplicate-allocation-name
+  talvos-cmd/empty
+  talvos-cmd/invalid-allocation-type
+  talvos-cmd/invalid-resource-name
+  talvos-cmd/unexpected-eof
+)
+  add_test(
+    NAME ${test}
+    COMMAND
+    ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/test/run-test.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/${test}.tcf
+    $<TARGET_FILE:talvos-cmd>)
+endforeach(${test})
