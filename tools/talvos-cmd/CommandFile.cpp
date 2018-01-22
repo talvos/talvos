@@ -70,7 +70,7 @@ void CommandFile::parseAllocate()
 
     // Allocate buffer.
     size_t Address = Device->getGlobalMemory()->allocate(NumBytes);
-    Buffers[Name] = Address;
+    Buffers[Name] = {Address, NumBytes};
 
     // Process initializer.
     string Init = get<string>("allocation initializer");
@@ -145,7 +145,7 @@ void CommandFile::parseDescriptorSet()
   if (!Buffers.count(Name))
     throw "invalid resource identifier";
 
-  DescriptorSet[{Set, Binding}] = Buffers[Name];
+  DescriptorSet[{Set, Binding}] = Buffers[Name].first;
 }
 
 void CommandFile::parseDispatch()
@@ -164,9 +164,38 @@ void CommandFile::parseDispatch()
 
 void CommandFile::parseDump()
 {
-  string Name = get<string>("allocation name");
-  // TODO: Dump specific buffer
-  Device->getGlobalMemory()->dump();
+  string DumpType = get<string>("dump type");
+  if (DumpType == "INT8")
+    dump<int8_t>();
+  else if (DumpType == "UINT8")
+    dump<uint8_t>();
+  else if (DumpType == "INT16")
+    dump<int16_t>();
+  else if (DumpType == "UINT16")
+    dump<uint16_t>();
+  else if (DumpType == "INT32")
+    dump<int32_t>();
+  else if (DumpType == "UINT32")
+    dump<uint32_t>();
+  else if (DumpType == "INT64")
+    dump<int64_t>();
+  else if (DumpType == "UINT64")
+    dump<uint64_t>();
+  else if (DumpType == "FLOAT")
+    dump<float>();
+  else if (DumpType == "DOUBLE")
+    dump<double>();
+  else if (DumpType == "ALL")
+    Device->getGlobalMemory()->dump();
+  else if (DumpType == "RAW")
+  {
+    string Name = get<string>("allocation name");
+    if (!Buffers.count(Name))
+      throw "invalid resource identifier";
+    Device->getGlobalMemory()->dump(Buffers.at(Name).first);
+  }
+  else
+    throw NotRecognizedException();
 }
 
 void CommandFile::parseEntry()
@@ -184,6 +213,27 @@ void CommandFile::parseModule()
   Module = talvos::Module::load(SPVFileName);
   if (!Module)
     throw "failed to load SPIR-V module";
+}
+
+template <typename T> void CommandFile::dump()
+{
+  string Name = get<string>("allocation name");
+  if (!Buffers.count(Name))
+    throw "invalid resource identifier";
+
+  size_t Address = Buffers.at(Name).first;
+  size_t NumBytes = Buffers.at(Name).second;
+
+  std::cout << std::endl
+            << "Buffer '" << Name << "' (" << NumBytes
+            << " bytes):" << std::endl;
+  for (int i = 0; i < NumBytes; i += sizeof(T))
+  {
+    T Value;
+    Device->getGlobalMemory()->load((uint8_t *)&Value, Address + i,
+                                    sizeof(Value));
+    std::cout << "  " << Name << "[" << i << "] = " << Value << std::endl;
+  }
 }
 
 template <typename T> void CommandFile::fill(size_t Address, size_t NumBytes)

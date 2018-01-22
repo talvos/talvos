@@ -32,13 +32,14 @@ private:
   void parseEntry();
   void parseModule();
 
+  template <typename T> void dump();
   template <typename T> void fill(size_t Address, size_t NumBytes);
   template <typename T> void range(size_t Address, size_t NumBytes);
 
   std::istream &Stream;
   talvos::Device *Device;
   std::unique_ptr<talvos::Module> Module;
-  std::map<std::string, size_t> Buffers;
+  std::map<std::string, std::pair<size_t, size_t>> Buffers;
   talvos::DescriptorSet DescriptorSet;
 
   std::string CurrentParseAction;
