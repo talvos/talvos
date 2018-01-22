@@ -19,6 +19,7 @@ public:
   Memory();
   size_t allocate(size_t NumBytes);
   void dump() const;
+  void dump(size_t Address) const;
   void load(uint8_t *Result, size_t Address, size_t NumBytes);
   void release(size_t Address);
   void store(size_t Address, size_t NumBytes, const uint8_t *Data);

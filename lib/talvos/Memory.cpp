@@ -51,23 +51,34 @@ size_t Memory::allocate(size_t NumBytes)
 
 void Memory::dump() const
 {
-  for (size_t B = 1; B < Buffers.size(); B++)
+  for (size_t Id = 1; Id < Buffers.size(); Id++)
   {
-    if (!Buffers[B].Data)
-      continue;
+    if (Buffers[Id].Data)
+      dump(Id << OFFSET_BITS);
+  }
+}
 
-    for (size_t i = 0; i < Buffers[B].NumBytes; i++)
+void Memory::dump(size_t Address) const
+{
+  size_t Id = (Address >> OFFSET_BITS);
+
+  if (!Buffers[Id].Data)
+  {
+    std::cerr << "Memory::dump() invalid address: " << Address << std::endl;
+    return;
+  }
+
+  for (size_t i = 0; i < Buffers[Id].NumBytes; i++)
+  {
+    if (i % 4 == 0)
     {
-      if (i % 4 == 0)
-      {
-        std::cout << std::endl
-                  << std::hex << std::uppercase << std::setw(16)
-                  << std::setfill(' ') << std::right
-                  << ((((size_t)B) << OFFSET_BITS) | i) << ":";
-      }
-      std::cout << " " << std::hex << std::uppercase << std::setw(2)
-                << std::setfill('0') << (int)Buffers[B].Data[i];
+      std::cout << std::endl
+                << std::hex << std::uppercase << std::setw(16)
+                << std::setfill(' ') << std::right
+                << ((((size_t)Id) << OFFSET_BITS) | i) << ":";
     }
+    std::cout << " " << std::hex << std::uppercase << std::setw(2)
+              << std::setfill('0') << (int)Buffers[Id].Data[i];
   }
   std::cout << std::endl;
 }
