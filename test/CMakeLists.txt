@@ -4,6 +4,7 @@
 # terms please see the LICENSE file distributed with this source code.
 
 foreach(test
+  misc/vecadd
   talvos-cmd/dispatch-without-module
   talvos-cmd/duplicate-allocation-name
   talvos-cmd/empty
