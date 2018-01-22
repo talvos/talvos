@@ -69,19 +69,36 @@ void CommandFile::parseAllocate()
     size_t NumBytes = get<size_t>("allocation size");
 
     // Allocate buffer.
-    size_t Pointer = Device->getGlobalMemory()->allocate(NumBytes);
-    Buffers[Name] = Pointer;
+    size_t Address = Device->getGlobalMemory()->allocate(NumBytes);
+    Buffers[Name] = Address;
 
     // Process initializer.
     string Init = get<string>("allocation initializer");
     if (Init == "FILL")
     {
       string InitType = get<string>("fill type");
-      string FillValue = get<string>("fill value");
-
-      // TODO: Handle this
-      std::cout << "Filling buffer with " << InitType << " value " << FillValue
-                << std::endl;
+      if (InitType == "INT8")
+        fill<int8_t>(Address, NumBytes);
+      else if (InitType == "UINT8")
+        fill<uint8_t>(Address, NumBytes);
+      else if (InitType == "INT16")
+        fill<int16_t>(Address, NumBytes);
+      else if (InitType == "UINT16")
+        fill<uint16_t>(Address, NumBytes);
+      else if (InitType == "INT32")
+        fill<int32_t>(Address, NumBytes);
+      else if (InitType == "UINT32")
+        fill<uint32_t>(Address, NumBytes);
+      else if (InitType == "INT64")
+        fill<int64_t>(Address, NumBytes);
+      else if (InitType == "UINT64")
+        fill<uint64_t>(Address, NumBytes);
+      else if (InitType == "FLOAT")
+        fill<float>(Address, NumBytes);
+      else if (InitType == "DOUBLE")
+        fill<double>(Address, NumBytes);
+      else
+        throw NotRecognizedException();
     }
     else if (Init == "SERIES")
     {
@@ -151,6 +168,14 @@ void CommandFile::parseModule()
   Module = talvos::Module::load(SPVFileName);
   if (!Module)
     throw "failed to load SPIR-V module";
+}
+
+template <typename T> void CommandFile::fill(size_t Address, size_t NumBytes)
+{
+  T FillValue = get<T>("fill value");
+  for (int i = 0; i < NumBytes; i += sizeof(FillValue))
+    Device->getGlobalMemory()->store(Address + i, sizeof(FillValue),
+                                     (uint8_t *)&FillValue);
 }
 
 bool CommandFile::run()

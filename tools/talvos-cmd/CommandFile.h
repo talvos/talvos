@@ -32,6 +32,8 @@ private:
   void parseEntry();
   void parseModule();
 
+  template <typename T> void fill(size_t Address, size_t NumBytes);
+
   std::istream &Stream;
   talvos::Device *Device;
   std::unique_ptr<talvos::Module> Module;
