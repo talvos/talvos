@@ -31,19 +31,20 @@ output = proc.communicate()
 retval = proc.returncode
 
 oln = 0
-output = output[0].splitlines()
+outlines = output[0].splitlines()
 
 # Loop over lines in test file
 tcf = open(test_file)
 lines = tcf.read().splitlines()
+expected_exit_code = 0
 for ln in range(len(lines)):
     line = lines[ln]
 
     if line.startswith('# CHECK '):
         pattern = line[8:]
         matched = False
-        for o in range(oln, len(output)):
-            if output[o] == pattern:
+        for o in range(oln, len(outlines)):
+            if outlines[o] == pattern:
                 matched = True
                 oln = o
                 break
@@ -51,8 +52,13 @@ for ln in range(len(lines)):
             print 'CHECK on line %d not found' % ln
             exit(1)
     elif line.startswith('# EXIT '):
-        expected = int(line[7:])
-        if retval != expected:
-            print 'Exit code %d does not match expected value of %d' \
-                % (retval, expected)
-            exit(1)
+        expected_exit_code = int(line[7:])
+if retval != expected_exit_code:
+    if expected_exit_code == 0:
+        print 'Test returned non-zero exit code (full output below)'
+        print
+        print output[0]
+    else:
+        print 'Exit code %d does not match expected value of %d' \
+            % (retval, expected_exit_code)
+    exit(1)
