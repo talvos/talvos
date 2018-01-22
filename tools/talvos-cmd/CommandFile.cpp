@@ -100,15 +100,31 @@ void CommandFile::parseAllocate()
       else
         throw NotRecognizedException();
     }
-    else if (Init == "SERIES")
+    else if (Init == "RANGE")
     {
-      string InitType = get<string>("series type");
-      string SeriesStart = get<string>("series start value");
-      string SeriesInc = get<string>("series increment value");
-
-      // TODO: Handle this
-      std::cout << "Filling buffer with " << InitType << " series "
-                << SeriesStart << " +" << SeriesInc << std::endl;
+      string InitType = get<string>("range type");
+      if (InitType == "INT8")
+        range<int8_t>(Address, NumBytes);
+      else if (InitType == "UINT8")
+        range<uint8_t>(Address, NumBytes);
+      else if (InitType == "INT16")
+        range<int16_t>(Address, NumBytes);
+      else if (InitType == "UINT16")
+        range<uint16_t>(Address, NumBytes);
+      else if (InitType == "INT32")
+        range<int32_t>(Address, NumBytes);
+      else if (InitType == "UINT32")
+        range<uint32_t>(Address, NumBytes);
+      else if (InitType == "INT64")
+        range<int64_t>(Address, NumBytes);
+      else if (InitType == "UINT64")
+        range<uint64_t>(Address, NumBytes);
+      else if (InitType == "FLOAT")
+        range<float>(Address, NumBytes);
+      else if (InitType == "DOUBLE")
+        range<double>(Address, NumBytes);
+      else
+        throw NotRecognizedException();
     }
     else
     {
@@ -176,6 +192,15 @@ template <typename T> void CommandFile::fill(size_t Address, size_t NumBytes)
   for (int i = 0; i < NumBytes; i += sizeof(FillValue))
     Device->getGlobalMemory()->store(Address + i, sizeof(FillValue),
                                      (uint8_t *)&FillValue);
+}
+
+template <typename T> void CommandFile::range(size_t Address, size_t NumBytes)
+{
+  T Value = get<T>("range start");
+  T RangeInc = get<T>("range inc");
+  for (int i = 0; i < NumBytes; i += sizeof(Value), Value += RangeInc)
+    Device->getGlobalMemory()->store(Address + i, sizeof(Value),
+                                     (uint8_t *)&Value);
 }
 
 bool CommandFile::run()

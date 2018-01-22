@@ -33,6 +33,7 @@ private:
   void parseModule();
 
   template <typename T> void fill(size_t Address, size_t NumBytes);
+  template <typename T> void range(size_t Address, size_t NumBytes);
 
   std::istream &Stream;
   talvos::Device *Device;
