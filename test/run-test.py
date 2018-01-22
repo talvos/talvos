@@ -55,7 +55,8 @@ for ln in range(len(lines)):
         expected_exit_code = int(line[7:])
 if retval != expected_exit_code:
     if expected_exit_code == 0:
-        print 'Test returned non-zero exit code (full output below)'
+        print 'Test returned non-zero exit code (%d), full output below.' \
+            % retval
         print
         print output[0]
     else:
