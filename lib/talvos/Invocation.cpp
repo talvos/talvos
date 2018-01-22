@@ -81,6 +81,15 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Objects[Inst->Operands[1]] = Object::create<size_t>(Inst->ResultType, Result);
 }
 
+void Invocation::executeIAdd(const Instruction *Inst)
+{
+  uint32_t Id = Inst->Operands[1];
+  // TODO: Use actual integer type
+  // TODO: Handle vectors
+  uint32_t Result = OP(2, uint32_t) + OP(3, uint32_t);
+  Objects[Id] = Object::create<uint32_t>(Inst->ResultType, Result);
+}
+
 void Invocation::executeLoad(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -129,6 +138,7 @@ void Invocation::step()
     break;
 
     DISPATCH(SpvOpAccessChain, AccessChain);
+    DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpStore, Store);
 
