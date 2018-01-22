@@ -19,11 +19,12 @@ if not os.path.isfile(filename):
 
 test_dir  = os.path.dirname(os.path.realpath(filename))
 test_file = os.path.basename(filename)
+exe = os.path.realpath(sys.argv[2])
 
 os.chdir(test_dir)
 
 # Run talvos-cmd
-cmd = [sys.argv[2]]
+cmd = [exe]
 cmd.append(test_file)
 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 output = proc.communicate()
