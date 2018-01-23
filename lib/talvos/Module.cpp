@@ -115,6 +115,17 @@ public:
         }
         break;
       }
+      case SpvOpExtension:
+      {
+        char *Extension = (char *)(Inst->words + Inst->operands[0].offset);
+        if (strcmp(Extension, "SPV_KHR_storage_buffer_storage_class") &&
+            strcmp(Extension, "SPV_KHR_variable_pointers"))
+        {
+          std::cerr << "WARNING: Unrecognized extension " << Extension
+                    << std::endl;
+        }
+        break;
+      }
       case SpvOpTypeInt:
       {
         uint32_t Width = Inst->words[Inst->operands[1].offset];
