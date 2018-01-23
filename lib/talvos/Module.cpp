@@ -126,6 +126,22 @@ public:
         }
         break;
       }
+      case SpvOpMemoryModel:
+      {
+        uint32_t AddressingMode = Inst->words[Inst->operands[0].offset];
+        uint32_t MemoryModel = Inst->words[Inst->operands[1].offset];
+        if (AddressingMode != SpvAddressingModelLogical)
+        {
+          std::cerr << "WARNING: Unrecognized addressing mode "
+                    << AddressingMode << std::endl;
+        }
+        if (MemoryModel != SpvMemoryModelGLSL450)
+        {
+          std::cerr << "WARNING: Unrecognized memory model " << MemoryModel
+                    << std::endl;
+        }
+        break;
+      }
       case SpvOpTypeInt:
       {
         uint32_t Width = Inst->words[Inst->operands[1].offset];
