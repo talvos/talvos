@@ -142,6 +142,9 @@ public:
         }
         break;
       }
+      case SpvOpSource:
+        // TODO: Do something with this
+        break;
       case SpvOpTypeInt:
       {
         uint32_t Width = Inst->words[Inst->operands[1].offset];
