@@ -227,11 +227,11 @@ template <typename T> void CommandFile::dump()
   std::cout << std::endl
             << "Buffer '" << Name << "' (" << NumBytes
             << " bytes):" << std::endl;
-  for (int i = 0; i < NumBytes; i += sizeof(T))
+  for (int i = 0; i < NumBytes / sizeof(T); i++)
   {
     T Value;
-    Device->getGlobalMemory()->load((uint8_t *)&Value, Address + i,
-                                    sizeof(Value));
+    Device->getGlobalMemory()->load((uint8_t *)&Value, Address + i * sizeof(T),
+                                    sizeof(T));
     std::cout << "  " << Name << "[" << i << "] = " << Value << std::endl;
   }
 }
