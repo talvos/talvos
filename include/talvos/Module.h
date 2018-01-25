@@ -49,8 +49,15 @@ struct InputVariable
   uint32_t Builtin;
 };
 
+struct PrivateVariable
+{
+  const Type *Ty;
+  uint32_t Initializer;
+};
+
 typedef std::map<uint32_t, BufferVariable> BufferVariableMap;
 typedef std::map<uint32_t, InputVariable> InputVariableMap;
+typedef std::map<uint32_t, PrivateVariable> PrivateVariableMap;
 
 class Module
 {
@@ -61,13 +68,14 @@ public:
   void addFunction(Function *Func);
   void addObject(uint32_t Id, const Object &Obj);
   void addType(uint32_t Id, Type *T);
-  void addVariable(uint32_t Id, const Type *Ty);
+  void addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer);
   std::vector<Object> cloneObjects() const;
   Function *getEntryPoint(const std::string &Name) const;
   Function *getFunction(uint32_t Id) const;
   uint32_t getIdBound() const { return IdBound; }
   const BufferVariableMap &getBufferVariables() const;
   const InputVariableMap &getInputVariables() const;
+  const PrivateVariableMap &getPrivateVariables() const;
   const Type *getType(uint32_t Id) const;
 
   static std::unique_ptr<Module> load(const uint32_t *Words, uint32_t NumWords);
@@ -82,6 +90,7 @@ private:
   std::vector<Object> Objects;
   BufferVariableMap BufferVariables;
   InputVariableMap InputVariables;
+  PrivateVariableMap PrivateVariables;
   std::map<uint32_t, Type *> Types;
   std::map<uint32_t, Function *> Functions;
   std::map<std::string, uint32_t> EntryPoints;

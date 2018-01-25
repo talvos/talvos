@@ -249,7 +249,10 @@ public:
         break;
       }
       case SpvOpVariable:
-        Mod->addVariable(Inst->result_id, Mod->getType(Inst->type_id));
+        Mod->addVariable(Inst->result_id, Mod->getType(Inst->type_id),
+                         ((Inst->num_operands > 3)
+                              ? Inst->words[Inst->operands[3].offset]
+                              : 0));
         break;
       default:
         std::cout << "Unhandled opcode " << Inst->opcode << std::endl;
@@ -323,7 +326,7 @@ void Module::addType(uint32_t Id, Type *T)
   Types[Id] = T;
 }
 
-void Module::addVariable(uint32_t Id, const Type *Ty)
+void Module::addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer)
 {
   switch (Ty->getStorageClass())
   {
@@ -351,6 +354,15 @@ void Module::addVariable(uint32_t Id, const Type *Ty)
     V.Ty = Ty;
 
     InputVariables[Id] = V;
+    break;
+  }
+  case SpvStorageClassPrivate:
+  {
+    assert(!PrivateVariables.count(Id));
+    PrivateVariable V;
+    V.Ty = Ty;
+    V.Initializer = Initializer;
+    PrivateVariables[Id] = V;
     break;
   }
   default:
@@ -393,6 +405,11 @@ const BufferVariableMap &Module::getBufferVariables() const
 const InputVariableMap &Module::getInputVariables() const
 {
   return InputVariables;
+}
+
+const PrivateVariableMap &Module::getPrivateVariables() const
+{
+  return PrivateVariables;
 }
 
 const Type *Module::getType(uint32_t Id) const

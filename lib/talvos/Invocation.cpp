@@ -55,6 +55,17 @@ Invocation::Invocation(
                 << std::endl;
     }
   }
+
+  // Set up private variables.
+  for (PrivateVariableMap::value_type V : M->getPrivateVariables())
+  {
+    // Allocate and initialize variable in private memory.
+    size_t NumBytes = V.second.Ty->getElementType()->getSize();
+    size_t Address = PrivateMemory->allocate(NumBytes);
+    assert(V.second.Initializer);
+    Objects[V.second.Initializer].store(PrivateMemory, Address);
+    Objects[V.first] = Object::create<size_t>(V.second.Ty, Address);
+  }
 }
 
 Invocation::~Invocation()
@@ -129,6 +140,7 @@ Memory *Invocation::getMemory(uint32_t StorageClass)
   case SpvStorageClassStorageBuffer:
     return Dev->getGlobalMemory();
   case SpvStorageClassInput:
+  case SpvStorageClassPrivate:
     return PrivateMemory;
   default:
     assert(false && "Unhandled storage class");
