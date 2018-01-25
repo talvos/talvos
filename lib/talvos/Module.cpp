@@ -37,6 +37,7 @@ public:
       // TODO: Cleanup - when is this destroyed?
       // Should be owned by Module? Module::createFunction()?
       CurrentFunction = new Function;
+      CurrentFunction->Id = Inst->result_id;
       CurrentFunction->FirstInstruction = nullptr;
     }
     else if (Inst->opcode == SpvOpFunctionEnd)
@@ -113,6 +114,19 @@ public:
         default:
           std::cout << "Unhandled decoration " << Decoration << std::endl;
         }
+        break;
+      }
+      case SpvOpEntryPoint:
+      {
+        uint32_t ExecutionModel = Inst->words[Inst->operands[0].offset];
+        uint32_t Id = Inst->words[Inst->operands[1].offset];
+        char *Name = (char *)(Inst->words + Inst->operands[2].offset);
+        if (ExecutionModel != SpvExecutionModelGLCompute)
+        {
+          std::cerr << "WARNING: Unrecognized execution model "
+                    << ExecutionModel << std::endl;
+        }
+        Mod->addEntryPoint(Name, Id);
         break;
       }
       case SpvOpExtension:
@@ -238,10 +252,16 @@ Module::~Module()
     Obj.destroy();
 }
 
+void Module::addEntryPoint(std::string Name, uint32_t Id)
+{
+  assert(EntryPoints.count(Name) == 0);
+  EntryPoints[Name] = Id;
+}
+
 void Module::addFunction(Function *Func)
 {
-  // TODO: Support multiple functions
-  this->Func = Func;
+  assert(Functions.count(Func->Id) == 0);
+  Functions[Func->Id] = Func;
 }
 
 void Module::addObject(uint32_t Id, const Object &Obj)
@@ -304,10 +324,18 @@ std::vector<Object> Module::cloneObjects() const
   return ClonedObjects;
 }
 
-Function *Module::getFunction() const
+Function *Module::getEntryPoint(const std::string &Name) const
 {
-  // TODO: Support multiple functions
-  return this->Func;
+  if (!EntryPoints.count(Name))
+    return nullptr;
+  return Functions.at(EntryPoints.at(Name));
+}
+
+Function *Module::getFunction(uint32_t Id) const
+{
+  if (!Functions.count(Id))
+    return nullptr;
+  return Functions.at(Id);
 }
 
 const BufferVariableMap &Module::getBufferVariables() const

@@ -39,6 +39,7 @@ private:
   std::istream &Stream;
   talvos::Device *Device;
   std::unique_ptr<talvos::Module> Module;
+  const talvos::Function *Function;
   std::map<std::string, std::pair<size_t, size_t>> Buffers;
   talvos::DescriptorSet DescriptorSet;
 

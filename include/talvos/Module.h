@@ -32,6 +32,7 @@ struct Function
 {
   // TODO: Name, attributes, etc
   // TODO: Blocks?
+  uint32_t Id;
   Instruction *FirstInstruction;
 };
 
@@ -56,12 +57,14 @@ class Module
 public:
   Module(uint32_t IdBound);
   ~Module();
+  void addEntryPoint(std::string Name, uint32_t Id);
   void addFunction(Function *Func);
   void addObject(uint32_t Id, const Object &Obj);
   void addType(uint32_t Id, Type *T);
   void addVariable(uint32_t Id, const Type *Ty);
   std::vector<Object> cloneObjects() const;
-  Function *getFunction() const;
+  Function *getEntryPoint(const std::string &Name) const;
+  Function *getFunction(uint32_t Id) const;
   uint32_t getIdBound() const { return IdBound; }
   const BufferVariableMap &getBufferVariables() const;
   const InputVariableMap &getInputVariables() const;
@@ -75,13 +78,13 @@ public:
   void setDescriptorSet(uint32_t Variable, uint32_t DescriptorSet);
 
 private:
-  // TODO: Allow multiple functions
-  Function *Func;
   uint32_t IdBound;
   std::vector<Object> Objects;
   BufferVariableMap BufferVariables;
   InputVariableMap InputVariables;
   std::map<uint32_t, Type *> Types;
+  std::map<uint32_t, Function *> Functions;
+  std::map<std::string, uint32_t> EntryPoints;
 };
 
 } // namespace talvos

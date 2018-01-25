@@ -152,13 +152,14 @@ void CommandFile::parseDispatch()
 {
   if (!Module)
     throw "DISPATCH reached with no prior MODULE command";
+  if (!Function)
+    throw "DISPATCH reached with no prior ENTRY command";
 
   uint32_t GroupsCountX = get<uint32_t>("group count X");
   uint32_t GroupsCountY = get<uint32_t>("group count Y");
   uint32_t GroupsCountZ = get<uint32_t>("group count Z");
-  talvos::DispatchCommand Command(Device, Module.get(), Module->getFunction(),
-                                  GroupsCountX, GroupsCountY, GroupsCountZ,
-                                  DescriptorSet);
+  talvos::DispatchCommand Command(Device, Module.get(), Function, GroupsCountX,
+                                  GroupsCountY, GroupsCountZ, DescriptorSet);
   Command.run();
 }
 
@@ -200,10 +201,10 @@ void CommandFile::parseDump()
 
 void CommandFile::parseEntry()
 {
-  string Entry = get<string>("entry name");
-
-  // TODO: Handle this
-  std::cout << "Using entry point " << Entry << std::endl;
+  string Name = get<string>("entry name");
+  Function = Module->getEntryPoint(Name);
+  if (!Function)
+    throw "invalid entry point";
 }
 
 void CommandFile::parseModule()
