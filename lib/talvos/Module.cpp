@@ -519,6 +519,9 @@ void Module::setBuiltin(uint32_t Id, uint32_t Builtin)
     assert(!InputVariables.count(Id));
     InputVariables[Id].Builtin = Builtin;
     break;
+  case SpvBuiltInWorkgroupSize:
+    // TODO: Handle this?
+    break;
   default:
     std::cout << "Unhandled builtin decoration: " << Builtin << std::endl;
   }
