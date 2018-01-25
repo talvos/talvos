@@ -362,7 +362,28 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
   fread(Words, 1, NumBytes, SPVFile);
   fclose(SPVFile);
 
-  return load(Words, NumBytes / 4);
+  // Check for SPIR-V magic number.
+  if (Words[0] == 0x07230203)
+    return load(Words, NumBytes / 4);
+
+  // Assume file is in textual SPIR-V format.
+  // Assemble it to a SPIR-V binary in memory.
+  spv_binary Binary;
+  spv_diagnostic Diagnostic = nullptr;
+  spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
+  spvTextToBinary(SPVContext.CContext(), (const char *)Words, NumBytes, &Binary,
+                  &Diagnostic);
+  if (Diagnostic)
+  {
+    spvDiagnosticPrint(Diagnostic);
+    spvBinaryDestroy(Binary);
+    return nullptr;
+  }
+
+  // Load and return Module.
+  std::unique_ptr<Module> M = load(Binary->code, Binary->wordCount);
+  spvBinaryDestroy(Binary);
+  return M;
 }
 
 void Module::setBinding(uint32_t Variable, uint32_t Binding)
