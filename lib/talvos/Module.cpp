@@ -136,6 +136,9 @@ public:
         case SpvDecorationBuiltIn:
           Mod->setBuiltin(Target, Inst->words[Inst->operands[2].offset]);
           break;
+        case SpvDecorationSpecId:
+          // TODO: Handle this
+          break;
         default:
           std::cout << "Unhandled decoration " << Decoration << std::endl;
         }
