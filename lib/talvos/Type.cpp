@@ -55,6 +55,11 @@ uint32_t Type::getStorageClass() const
   return StorageClass;
 }
 
+bool Type::isComposite() const
+{
+  return (Id == ARRAY || Id == STRUCT || Id == VECTOR);
+}
+
 Type *Type::getArray(const Type *ElemType, uint32_t ElementCount)
 {
   Type *T = new Type(ARRAY);

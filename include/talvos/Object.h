@@ -42,6 +42,8 @@ public:
 
   void destroy() { delete[] Data; }
 
+  Object extract(const std::vector<uint32_t> &Indices) const;
+
   template <typename T> T get() const
   {
     assert(sizeof(T) == Ty->getSize());

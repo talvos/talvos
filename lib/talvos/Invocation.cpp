@@ -83,6 +83,15 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Objects[Inst->Operands[1]] = Object::create<size_t>(Inst->ResultType, Result);
 }
 
+void Invocation::executeCompositeExtract(const Instruction *Inst)
+{
+  uint32_t Id = Inst->Operands[1];
+  // TODO: Handle indices of different sizes.
+  std::vector<uint32_t> Indices(Inst->Operands + 3,
+                                Inst->Operands + Inst->NumOperands);
+  Objects[Id] = Objects[Inst->Operands[2]].extract(Indices);
+}
+
 void Invocation::executeIAdd(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -145,6 +154,7 @@ void Invocation::step()
     break;
 
     DISPATCH(SpvOpAccessChain, AccessChain);
+    DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpReturn, Return);

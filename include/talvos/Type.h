@@ -24,6 +24,7 @@ public:
   const Type *getElementType(uint32_t Index = 0) const;
   size_t getSize() const;
   uint32_t getStorageClass() const;
+  bool isComposite() const;
 
   static Type *getArray(const Type *ElemType, uint32_t ElementCount);
   static Type *getInt(uint32_t Width);

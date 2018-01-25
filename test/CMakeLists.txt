@@ -7,6 +7,7 @@ foreach(test
   misc/multiple-entry-points
   misc/vecadd
   misc/vecadd_binary
+  spirv/composite-extract
   spirv/struct-offset
   talvos-cmd/dispatch-without-module
   talvos-cmd/duplicate-allocation-name

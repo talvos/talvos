@@ -34,6 +34,7 @@ public:
 
   // Instruction handlers.
   void executeAccessChain(const Instruction *Inst);
+  void executeCompositeExtract(const Instruction *Inst);
   void executeIAdd(const Instruction *Inst);
   void executeLoad(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
