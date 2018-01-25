@@ -1,4 +1,4 @@
-MODULE vecadd.spvasm
+MODULE vecadd.spv
 ENTRY vecadd
 
 ALLOCATE a BUFFER 64 RANGE INT32 0 1

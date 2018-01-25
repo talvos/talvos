@@ -5,6 +5,7 @@
 
 foreach(test
   misc/vecadd
+  misc/vecadd_binary
   talvos-cmd/dispatch-without-module
   talvos-cmd/duplicate-allocation-name
   talvos-cmd/empty
