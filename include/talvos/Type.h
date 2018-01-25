@@ -16,6 +16,8 @@ namespace talvos
 class Type
 {
 public:
+  size_t getElementOffset(uint32_t Index) const;
+  const Type *getElementType(uint32_t Index = 0) const;
   size_t getSize() const;
   uint32_t getStorageClass() const;
 
@@ -54,8 +56,9 @@ private:
 
   // Valid for struct type.
   std::vector<const Type *> ElementTypes;
+  std::vector<size_t> ElementOffsets;
 
-  // Valid for vector types.
+  // Valid for array, struct, and vector types.
   uint32_t ElementCount;
 };
 

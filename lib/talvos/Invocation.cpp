@@ -67,15 +67,17 @@ Invocation::~Invocation()
 void Invocation::executeAccessChain(const Instruction *Inst)
 {
   // Base pointer.
-  size_t Result = OP(2, size_t);
+  Object &Base = Objects[Inst->Operands[2]];
+  size_t Result = Base.get<size_t>();
+  const Type *ElemType = Base.getType()->getElementType(0);
 
   // Loop over indices.
   for (int i = 3; i < Inst->NumOperands; i++)
   {
     // TODO: Handle indices of different sizes.
     uint32_t Idx = OP(i, uint32_t);
-    // TODO: Use actual type.
-    Result += Idx * sizeof(uint32_t);
+    Result += ElemType->getElementOffset(Idx);
+    ElemType = ElemType->getElementType(Idx);
   }
 
   Objects[Inst->Operands[1]] = Object::create<size_t>(Inst->ResultType, Result);
