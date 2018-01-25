@@ -1,0 +1,26 @@
+MODULE multiple-entry-points.spvasm
+
+ALLOCATE temp BUFFER 16 FILL INT32 0
+ALLOCATE output BUFFER 16 FILL INT32 0
+
+# TODO: Update once we can allocate scalars
+# ALLOCATE x INT32 42
+ALLOCATE x BUFFER 4 FILL INT32 42
+
+DESCRIPTOR_SET 0 0 temp
+DESCRIPTOR_SET 0 1 output
+DESCRIPTOR_SET 0 2 x
+
+ENTRY foo
+DISPATCH 4 1 1
+
+ENTRY bar
+DISPATCH 4 1 1
+
+DUMP INT32 output
+
+# CHECK Buffer 'output' (16 bytes):
+# CHECK   output[0] = 42
+# CHECK   output[1] = 43
+# CHECK   output[2] = 44
+# CHECK   output[3] = 45
