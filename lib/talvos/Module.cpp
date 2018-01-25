@@ -96,6 +96,23 @@ public:
         Mod->addObject(Inst->result_id, Object::create<uint32_t>(Ty, Value));
         break;
       }
+      case SpvOpConstantComposite:
+      {
+        const Type *Ty = Mod->getType(Inst->type_id);
+
+        // Build list of constituent values.
+        std::vector<Object> Constituents;
+        for (int i = 2; i < Inst->num_operands; i++)
+        {
+          uint32_t Id = Inst->words[Inst->operands[i].offset];
+          Constituents.push_back(Mod->getObject(Id));
+        }
+
+        // Create and add composite.
+        Mod->addObject(Inst->result_id,
+                       Object::createComposite(Ty, Constituents));
+        break;
+      }
       case SpvOpDecorate:
       {
         uint32_t Target = Inst->words[Inst->operands[0].offset];
@@ -411,6 +428,8 @@ const PrivateVariableMap &Module::getPrivateVariables() const
 {
   return PrivateVariables;
 }
+
+const Object &Module::getObject(uint32_t Id) const { return Objects.at(Id); }
 
 const Type *Module::getType(uint32_t Id) const
 {

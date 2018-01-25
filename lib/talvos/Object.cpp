@@ -11,6 +11,21 @@
 namespace talvos
 {
 
+Object Object::createComposite(const Type *Ty,
+                               const std::vector<Object> &Elements)
+{
+  Object Result;
+  Result.Ty = Ty;
+  Result.Data = new uint8_t[Ty->getSize()];
+  for (int i = 0; i < Elements.size(); i++)
+  {
+    assert(Ty->getElementType(i) == Elements[i].getType());
+    memcpy(Result.Data + Ty->getElementOffset(i), Elements[i].Data,
+           Elements[i].getType()->getSize());
+  }
+  return Result;
+}
+
 Object Object::extract(const std::vector<uint32_t> &Indices) const
 {
   // Loop over indices to compute byte offset and result type.

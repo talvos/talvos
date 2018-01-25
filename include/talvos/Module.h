@@ -76,6 +76,7 @@ public:
   const BufferVariableMap &getBufferVariables() const;
   const InputVariableMap &getInputVariables() const;
   const PrivateVariableMap &getPrivateVariables() const;
+  const Object &getObject(uint32_t Id) const;
   const Type *getType(uint32_t Id) const;
 
   static std::unique_ptr<Module> load(const uint32_t *Words, uint32_t NumWords);

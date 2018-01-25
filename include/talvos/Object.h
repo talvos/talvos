@@ -31,6 +31,9 @@ public:
     return Obj;
   }
 
+  static Object createComposite(const Type *Ty,
+                                const std::vector<Object> &Elements);
+
   Object clone() const
   {
     Object Obj;
