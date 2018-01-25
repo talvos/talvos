@@ -13,6 +13,10 @@
 namespace talvos
 {
 
+class Type;
+
+typedef std::vector<std::pair<const Type *, uint32_t>> StructElementTypeList;
+
 class Type
 {
 public:
@@ -24,7 +28,7 @@ public:
   static Type *getInt(uint32_t Width);
   static Type *getPointer(uint32_t StorageClass, const Type *ElemType);
   static Type *getRuntimeArray(const Type *ElemType);
-  static Type *getStruct(const std::vector<const Type *> &ElemTypes);
+  static Type *getStruct(const StructElementTypeList &ElemTypes);
   static Type *getVector(const Type *ElemType, uint32_t ElemCount);
   static Type *getVoid();
 
@@ -55,8 +59,7 @@ private:
   const Type *ElementType;
 
   // Valid for struct type.
-  std::vector<const Type *> ElementTypes;
-  std::vector<size_t> ElementOffsets;
+  StructElementTypeList ElementTypes;
 
   // Valid for array, struct, and vector types.
   uint32_t ElementCount;

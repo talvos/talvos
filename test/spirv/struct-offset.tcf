@@ -1,0 +1,21 @@
+# Test that structure member offsets provided by OpMemberDecorate are handled
+# correctly with a padded structure of type {int,short,int}.
+
+MODULE struct-offset.spvasm
+ENTRY foo
+
+ALLOCATE input  BUFFER 48 RANGE INT32 0 1
+ALLOCATE output BUFFER 16 FILL  INT32 0
+
+DESCRIPTOR_SET 0 0 input
+DESCRIPTOR_SET 0 1 output
+
+DISPATCH 4 1 1
+
+DUMP INT32 output
+
+# CHECK Buffer 'output' (16 bytes):
+# CHECK   output[0] = 2
+# CHECK   output[1] = 5
+# CHECK   output[2] = 8
+# CHECK   output[3] = 11

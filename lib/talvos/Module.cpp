@@ -140,6 +140,22 @@ public:
         }
         break;
       }
+      case SpvOpMemberDecorate:
+      {
+        uint32_t Target = Inst->words[Inst->operands[0].offset];
+        uint32_t Member = Inst->words[Inst->operands[1].offset];
+        uint32_t Decoration = Inst->words[Inst->operands[2].offset];
+        uint32_t Offset = Inst->operands[3].offset;
+        switch (Decoration)
+        {
+        case SpvDecorationOffset:
+          MemberOffsets[{Target, Member}] = Inst->words[Offset];
+          break;
+        default:
+          std::cout << "Unhandled decoration " << Decoration << std::endl;
+        }
+        break;
+      }
       case SpvOpMemoryModel:
       {
         uint32_t AddressingMode = Inst->words[Inst->operands[0].offset];
@@ -182,10 +198,13 @@ public:
       }
       case SpvOpTypeStruct:
       {
-        std::vector<const Type *> ElemTypes;
+        StructElementTypeList ElemTypes;
         for (int i = 1; i < Inst->num_operands; i++)
-          ElemTypes.push_back(
-              Mod->getType(Inst->words[Inst->operands[i].offset]));
+        {
+          uint32_t ElemType = Inst->words[Inst->operands[i].offset];
+          uint32_t ElemOffset = MemberOffsets.at({Inst->result_id, i - 1});
+          ElemTypes.push_back({Mod->getType(ElemType), ElemOffset});
+        }
         Mod->addType(Inst->result_id, Type::getStruct(ElemTypes));
         break;
       }
@@ -221,6 +240,7 @@ private:
   std::unique_ptr<Module> Mod;
   Function *CurrentFunction;
   Instruction *PreviousInstruction;
+  std::map<std::pair<uint32_t, uint32_t>, uint32_t> MemberOffsets;
 };
 
 spv_result_t HandleHeader(void *user_data, spv_endianness_t endian,
