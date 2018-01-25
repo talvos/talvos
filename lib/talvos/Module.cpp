@@ -102,6 +102,9 @@ public:
         uint32_t Decoration = Inst->words[Inst->operands[1].offset];
         switch (Decoration)
         {
+        case SpvDecorationArrayStride:
+          // TODO: Probably need to handle this?
+          break;
         case SpvDecorationBinding:
           Mod->setBinding(Target, Inst->words[Inst->operands[2].offset]);
           break;
