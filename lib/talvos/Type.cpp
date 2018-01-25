@@ -34,6 +34,7 @@ size_t Type::getSize() const
   switch (Id)
   {
   case ARRAY:
+  case VECTOR:
     return ElementCount * ElementType->getSize();
   case INT:
     return BitWidth / 8;
