@@ -66,6 +66,8 @@ public:
   const BufferVariableMap &getBufferVariables() const;
   const InputVariableMap &getInputVariables() const;
   const Type *getType(uint32_t Id) const;
+
+  static std::unique_ptr<Module> load(const uint32_t *Words, uint32_t NumWords);
   static std::unique_ptr<Module> load(const std::string &FileName);
 
   void setBinding(uint32_t Variable, uint32_t Binding);

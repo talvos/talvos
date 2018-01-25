@@ -326,6 +326,24 @@ const Type *Module::getType(uint32_t Id) const
   return Types.at(Id);
 }
 
+std::unique_ptr<Module> Module::load(const uint32_t *Words, uint32_t NumWords)
+{
+  ModuleBuilder MB;
+
+  // Parse binary.
+  spv_diagnostic diagnostic = nullptr;
+  spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
+  spvBinaryParse(SPVContext.CContext(), &MB, Words, NumWords, HandleHeader,
+                 HandleInstruction, &diagnostic);
+  if (diagnostic)
+  {
+    spvDiagnosticPrint(diagnostic);
+    return nullptr;
+  }
+
+  return MB.takeModule();
+}
+
 std::unique_ptr<Module> Module::load(const std::string &FileName)
 {
   // Open file.
@@ -344,20 +362,7 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
   fread(Words, 1, NumBytes, SPVFile);
   fclose(SPVFile);
 
-  ModuleBuilder MB;
-
-  // Parse binary.
-  spv_diagnostic diagnostic = nullptr;
-  spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
-  spvBinaryParse(SPVContext.CContext(), &MB, Words, NumBytes / 4, HandleHeader,
-                 HandleInstruction, &diagnostic);
-  if (diagnostic)
-  {
-    spvDiagnosticPrint(diagnostic);
-    return nullptr;
-  }
-
-  return MB.takeModule();
+  return load(Words, NumBytes / 4);
 }
 
 void Module::setBinding(uint32_t Variable, uint32_t Binding)
