@@ -328,16 +328,23 @@ const Type *Module::getType(uint32_t Id) const
 
 std::unique_ptr<Module> Module::load(const uint32_t *Words, uint32_t NumWords)
 {
-  ModuleBuilder MB;
+  spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
+  spv_diagnostic Diagnostic = nullptr;
+
+  // Validate binary.
+  if (spvValidateBinary(SPVContext.CContext(), Words, NumWords, &Diagnostic))
+  {
+    spvDiagnosticPrint(Diagnostic);
+    return nullptr;
+  }
 
   // Parse binary.
-  spv_diagnostic diagnostic = nullptr;
-  spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
+  ModuleBuilder MB;
   spvBinaryParse(SPVContext.CContext(), &MB, Words, NumWords, HandleHeader,
-                 HandleInstruction, &diagnostic);
-  if (diagnostic)
+                 HandleInstruction, &Diagnostic);
+  if (Diagnostic)
   {
-    spvDiagnosticPrint(diagnostic);
+    spvDiagnosticPrint(Diagnostic);
     return nullptr;
   }
 
