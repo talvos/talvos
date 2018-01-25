@@ -105,6 +105,9 @@ public:
         case SpvDecorationBinding:
           Mod->setBinding(Target, Inst->words[Inst->operands[2].offset]);
           break;
+        case SpvDecorationBlock:
+          // TODO: Need to handle this?
+          break;
         case SpvDecorationDescriptorSet:
           Mod->setDescriptorSet(Target, Inst->words[Inst->operands[2].offset]);
           break;
