@@ -98,6 +98,11 @@ void Invocation::executeLoad(const Instruction *Inst)
   Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<size_t>());
 }
 
+void Invocation::executeReturn(const Instruction *Inst)
+{
+  // TODO: Jump back to callee function if necessary
+}
+
 void Invocation::executeStore(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -140,6 +145,7 @@ void Invocation::step()
     DISPATCH(SpvOpAccessChain, AccessChain);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpLoad, Load);
+    DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpStore, Store);
 
 #undef DISPATCH
