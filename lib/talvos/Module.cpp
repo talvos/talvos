@@ -89,6 +89,7 @@ public:
         break;
       }
       case SpvOpConstant:
+      case SpvOpSpecConstant: // TODO: Handle specialization constants
       {
         const Type *Ty = Mod->getType(Inst->type_id);
         // TODO: Use actual type
@@ -97,6 +98,7 @@ public:
         break;
       }
       case SpvOpConstantComposite:
+      case SpvOpSpecConstantComposite: // TODO: Handle specialization constants
       {
         const Type *Ty = Mod->getType(Inst->type_id);
 
