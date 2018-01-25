@@ -26,6 +26,8 @@ public:
   uint32_t getStorageClass() const;
 
   static Type *getInt(uint32_t Width);
+  static Type *getFunction(const Type *ReturnType,
+                           const std::vector<const Type *> &ArgTypes);
   static Type *getPointer(uint32_t StorageClass, const Type *ElemType);
   static Type *getRuntimeArray(const Type *ElemType);
   static Type *getStruct(const StructElementTypeList &ElemTypes);
@@ -46,6 +48,7 @@ private:
     RUNTIME_ARRAY,
     STRUCT,
     POINTER,
+    FUNCTION,
   };
   uint32_t Id;
 
@@ -63,6 +66,10 @@ private:
 
   // Valid for array, struct, and vector types.
   uint32_t ElementCount;
+
+  // Valid for function types.
+  const Type *ReturnType;
+  std::vector<const Type *> ArgumentTypes;
 };
 
 } // namespace talvos

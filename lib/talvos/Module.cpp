@@ -181,6 +181,19 @@ public:
         Mod->addType(Inst->result_id, Type::getInt(Width));
         break;
       }
+      case SpvOpTypeFunction:
+      {
+        uint32_t ReturnType = Inst->words[Inst->operands[1].offset];
+        std::vector<const Type *> ArgTypes;
+        for (int i = 3; i < Inst->num_operands; i++)
+        {
+          uint32_t ArgType = Inst->words[Inst->operands[i].offset];
+          ArgTypes.push_back(Mod->getType(ArgType));
+        }
+        Mod->addType(Inst->result_id,
+                     Type::getFunction(Mod->getType(ReturnType), ArgTypes));
+        break;
+      }
       case SpvOpTypePointer:
       {
         uint32_t StorageClass = Inst->words[Inst->operands[1].offset];

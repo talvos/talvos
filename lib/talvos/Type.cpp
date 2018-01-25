@@ -59,6 +59,15 @@ Type *Type::getInt(uint32_t Width)
   return T;
 }
 
+Type *Type::getFunction(const Type *ReturnType,
+                        const std::vector<const Type *> &ArgTypes)
+{
+  Type *T = new Type(FUNCTION);
+  T->ReturnType = ReturnType;
+  T->ArgumentTypes = ArgTypes;
+  return T;
+}
+
 Type *Type::getPointer(uint32_t StorageClass, const Type *ElemType)
 {
   Type *T = new Type(POINTER);
