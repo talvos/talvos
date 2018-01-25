@@ -185,7 +185,7 @@ public:
         std::vector<const Type *> ElemTypes;
         for (int i = 1; i < Inst->num_operands; i++)
           ElemTypes.push_back(
-              Mod->getType(Inst->words[Inst->operands[1].offset]));
+              Mod->getType(Inst->words[Inst->operands[i].offset]));
         Mod->addType(Inst->result_id, Type::getStruct(ElemTypes));
         break;
       }
