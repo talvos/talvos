@@ -25,6 +25,7 @@ public:
   size_t getSize() const;
   uint32_t getStorageClass() const;
 
+  static Type *getArray(const Type *ElemType, uint32_t ElementCount);
   static Type *getInt(uint32_t Width);
   static Type *getFunction(const Type *ReturnType,
                            const std::vector<const Type *> &ArgTypes);

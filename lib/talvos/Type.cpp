@@ -33,6 +33,8 @@ size_t Type::getSize() const
 {
   switch (Id)
   {
+  case ARRAY:
+    return ElementCount * ElementType->getSize();
   case INT:
     return BitWidth / 8;
   case POINTER:
@@ -50,6 +52,14 @@ uint32_t Type::getStorageClass() const
 {
   assert(Id == POINTER);
   return StorageClass;
+}
+
+Type *Type::getArray(const Type *ElemType, uint32_t ElementCount)
+{
+  Type *T = new Type(ARRAY);
+  T->ElementType = ElemType;
+  T->ElementCount = ElementCount;
+  return T;
 }
 
 Type *Type::getInt(uint32_t Width)

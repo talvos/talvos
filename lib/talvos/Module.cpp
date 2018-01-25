@@ -181,6 +181,14 @@ public:
       case SpvOpSource:
         // TODO: Do something with this
         break;
+      case SpvOpTypeArray:
+      {
+        const Type *ElemType =
+            Mod->getType(Inst->words[Inst->operands[1].offset]);
+        uint32_t Length = Inst->words[Inst->operands[2].offset];
+        Mod->addType(Inst->result_id, Type::getArray(ElemType, Length));
+        break;
+      }
       case SpvOpTypeInt:
       {
         uint32_t Width = Inst->words[Inst->operands[1].offset];
