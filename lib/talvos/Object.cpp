@@ -17,7 +17,7 @@ Object Object::createComposite(const Type *Ty,
   Object Result;
   Result.Ty = Ty;
   Result.Data = new uint8_t[Ty->getSize()];
-  for (int i = 0; i < Elements.size(); i++)
+  for (size_t i = 0; i < Elements.size(); i++)
   {
     assert(Ty->getElementType(i) == Elements[i].getType());
     memcpy(Result.Data + Ty->getElementOffset(i), Elements[i].Data,
@@ -31,7 +31,7 @@ Object Object::extract(const std::vector<uint32_t> &Indices) const
   // Loop over indices to compute byte offset and result type.
   uint32_t Offset = 0;
   const Type *Ty = this->Ty;
-  for (int i = 0; i < Indices.size(); i++)
+  for (size_t i = 0; i < Indices.size(); i++)
   {
     assert(Ty->isComposite());
     Offset += Ty->getElementOffset(Indices[i]);

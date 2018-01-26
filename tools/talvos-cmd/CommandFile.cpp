@@ -228,7 +228,7 @@ template <typename T> void CommandFile::dump()
   std::cout << std::endl
             << "Buffer '" << Name << "' (" << NumBytes
             << " bytes):" << std::endl;
-  for (int i = 0; i < NumBytes / sizeof(T); i++)
+  for (size_t i = 0; i < NumBytes / sizeof(T); i++)
   {
     T Value;
     Device->getGlobalMemory()->load((uint8_t *)&Value, Address + i * sizeof(T),
@@ -240,7 +240,7 @@ template <typename T> void CommandFile::dump()
 template <typename T> void CommandFile::fill(size_t Address, size_t NumBytes)
 {
   T FillValue = get<T>("fill value");
-  for (int i = 0; i < NumBytes; i += sizeof(FillValue))
+  for (size_t i = 0; i < NumBytes; i += sizeof(FillValue))
     Device->getGlobalMemory()->store(Address + i, sizeof(FillValue),
                                      (uint8_t *)&FillValue);
 }
@@ -249,7 +249,7 @@ template <typename T> void CommandFile::range(size_t Address, size_t NumBytes)
 {
   T Value = get<T>("range start");
   T RangeInc = get<T>("range inc");
-  for (int i = 0; i < NumBytes; i += sizeof(Value), Value += RangeInc)
+  for (size_t i = 0; i < NumBytes; i += sizeof(Value), Value += RangeInc)
     Device->getGlobalMemory()->store(Address + i, sizeof(Value),
                                      (uint8_t *)&Value);
 }

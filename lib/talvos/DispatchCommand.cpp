@@ -47,11 +47,11 @@ DispatchCommand::~DispatchCommand()
 
 void DispatchCommand::run()
 {
-  for (int Z = 0; Z < GroupCountZ; Z++)
+  for (uint32_t Z = 0; Z < GroupCountZ; Z++)
   {
-    for (int Y = 0; Y < GroupCountY; Y++)
+    for (uint32_t Y = 0; Y < GroupCountY; Y++)
     {
-      for (int X = 0; X < GroupCountX; X++)
+      for (uint32_t X = 0; X < GroupCountX; X++)
       {
         Invocation I(Dev, Mod, Func, X, Y, Z, Variables);
 
