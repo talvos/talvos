@@ -36,6 +36,8 @@ size_t Type::getSize() const
   case ARRAY:
   case VECTOR:
     return ElementCount * ElementType->getSize();
+  case BOOL:
+    return 1;
   case INT:
     return BitWidth / 8;
   case POINTER:
