@@ -50,8 +50,8 @@ public:
 
   template <typename T> T get() const
   {
-    assert(sizeof(T) == Ty->getSize());
     assert(Data);
+    assert(sizeof(T) == Ty->getSize());
     return *((T *)Data);
   }
 
