@@ -239,6 +239,7 @@ void Invocation::step()
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpStore, Store);
 
+    NOP(SpvOpLoopMerge);
     NOP(SpvOpSelectionMerge);
 
 #undef DISPATCH
