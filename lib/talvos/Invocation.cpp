@@ -195,6 +195,9 @@ void Invocation::step()
   case Op:                                                                     \
     execute##Func(I);                                                          \
     break;
+#define NOP(Op)                                                                \
+  case Op:                                                                     \
+    break;
 
     DISPATCH(SpvOpAccessChain, AccessChain);
     DISPATCH(SpvOpBranch, Branch);
@@ -206,7 +209,10 @@ void Invocation::step()
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpStore, Store);
 
+    NOP(SpvOpSelectionMerge);
+
 #undef DISPATCH
+#undef NOP
 
   default:
     std::cout << "Unhandled opcode " << I->Opcode << std::endl;
