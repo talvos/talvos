@@ -112,6 +112,15 @@ void Invocation::executeIAdd(const Instruction *Inst)
   Objects[Id] = Object::create<uint32_t>(Inst->ResultType, Result);
 }
 
+void Invocation::executeIEqual(const Instruction *Inst)
+{
+  uint32_t Id = Inst->Operands[1];
+  // TODO: Use actual integer type
+  // TODO: Handle vectors
+  bool Result = OP(2, uint32_t) == OP(3, uint32_t);
+  Objects[Id] = Object::create<bool>(Inst->ResultType, Result);
+}
+
 void Invocation::executeLoad(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -168,6 +177,7 @@ void Invocation::step()
     DISPATCH(SpvOpAccessChain, AccessChain);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpIAdd, IAdd);
+    DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpStore, Store);
