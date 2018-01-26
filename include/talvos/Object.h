@@ -24,6 +24,7 @@ public:
 
   template <typename T> static Object create(const Type *Ty, T Value)
   {
+    assert(sizeof(T) == Ty->getSize());
     Object Obj;
     Obj.Ty = Ty;
     Obj.Data = new uint8_t[sizeof(T)];
