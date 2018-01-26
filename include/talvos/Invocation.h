@@ -40,12 +40,15 @@ public:
   void executeIAdd(const Instruction *Inst);
   void executeIEqual(const Instruction *Inst);
   void executeLoad(const Instruction *Inst);
+  void executePhi(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeStore(const Instruction *Inst);
 
 private:
   const Function *CurrentFunction;
   const Instruction *CurrentInstruction;
+  uint32_t CurrentBlock;
+  uint32_t PreviousBlock;
   std::vector<Object> Objects;
   Device *Dev;
 
@@ -53,6 +56,7 @@ private:
   Memory *PrivateMemory;
 
   Memory *getMemory(uint32_t StorageClass);
+  void moveToBlock(uint32_t Id);
 };
 
 } // namespace talvos

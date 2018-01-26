@@ -1,0 +1,19 @@
+# Run a serial accumulator loop to check that OpPhi is handled properly.
+
+MODULE simple-loop.spvasm
+ENTRY foo
+
+ALLOCATE n      BUFFER  4 FILL  INT32 16
+ALLOCATE input  BUFFER 64 RANGE INT32 1 1
+ALLOCATE output BUFFER  4 FILL  INT32 0
+
+DESCRIPTOR_SET 0 0 n
+DESCRIPTOR_SET 0 1 input
+DESCRIPTOR_SET 0 2 output
+
+DISPATCH 1 1 1
+
+DUMP INT32 output
+
+# CHECK Buffer 'output' (4 bytes):
+# CHECK   output[0] = 136

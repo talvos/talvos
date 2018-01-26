@@ -10,6 +10,7 @@ foreach(test
   spirv/composite-extract
   spirv/constant-composite
   spirv/simple-branch
+  spirv/simple-loop
   spirv/struct-offset
   talvos-cmd/dispatch-without-module
   talvos-cmd/duplicate-allocation-name

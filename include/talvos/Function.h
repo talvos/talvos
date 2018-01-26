@@ -28,6 +28,7 @@ public:
   void addBlock(Block *B);
   const Block *getBlock(uint32_t Id) const { return Blocks.at(Id); };
   const Block *getEntryBlock() const { return Blocks.at(EntryBlockId); };
+  uint32_t getEntryBlockId() const { return EntryBlockId; };
   uint32_t getId() { return Id; }
   void setEntryBlock(uint32_t Id) { EntryBlockId = Id; };
 

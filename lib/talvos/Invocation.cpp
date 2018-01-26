@@ -27,9 +27,10 @@ Invocation::Invocation(
 {
   Dev = D;
   PrivateMemory = new Memory;
-  CurrentFunction = F;
-  CurrentInstruction = F->getEntryBlock()->FirstInstruction;
   Objects = M->cloneObjects();
+
+  CurrentFunction = F;
+  moveToBlock(F->getEntryBlockId());
 
   // TODO: Handle local size larger than 1
   GlobalId[0] = GroupIdX;
@@ -103,15 +104,13 @@ void Invocation::executeAccessChain(const Instruction *Inst)
 
 void Invocation::executeBranch(const Instruction *Inst)
 {
-  const Block *B = CurrentFunction->getBlock(Inst->Operands[0]);
-  CurrentInstruction = B->FirstInstruction;
+  moveToBlock(Inst->Operands[0]);
 }
 
 void Invocation::executeBranchConditional(const Instruction *Inst)
 {
   bool Condition = OP(0, bool);
-  const Block *B = CurrentFunction->getBlock(Inst->Operands[Condition ? 1 : 2]);
-  CurrentInstruction = B->FirstInstruction;
+  moveToBlock(Inst->Operands[Condition ? 1 : 2]);
 }
 
 void Invocation::executeCompositeExtract(const Instruction *Inst)
@@ -149,6 +148,24 @@ void Invocation::executeLoad(const Instruction *Inst)
   Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<size_t>());
 }
 
+void Invocation::executePhi(const Instruction *Inst)
+{
+  uint32_t Id = Inst->Operands[1];
+
+  // TODO: Handle OpPhi as input to another OpPhi
+  assert(PreviousBlock);
+  for (int i = 2; i < Inst->NumOperands; i += 2)
+  {
+    assert(i + 1 < Inst->NumOperands);
+    if (Inst->Operands[i + 1] == PreviousBlock)
+    {
+      Objects[Id] = Objects[Inst->Operands[i]].clone();
+      return;
+    }
+  }
+  assert(false && "no matching predecessor block for OpPhi");
+}
+
 void Invocation::executeReturn(const Instruction *Inst)
 {
   // TODO: Jump back to callee function if necessary
@@ -182,6 +199,14 @@ Invocation::State Invocation::getState() const
   return CurrentInstruction ? READY : FINISHED;
 }
 
+void Invocation::moveToBlock(uint32_t Id)
+{
+  const Block *B = CurrentFunction->getBlock(Id);
+  CurrentInstruction = B->FirstInstruction;
+  PreviousBlock = CurrentBlock;
+  CurrentBlock = Id;
+}
+
 void Invocation::step()
 {
   assert(CurrentInstruction);
@@ -210,6 +235,7 @@ void Invocation::step()
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpLoad, Load);
+    DISPATCH(SpvOpPhi, Phi);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpStore, Store);
 
