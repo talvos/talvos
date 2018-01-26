@@ -13,8 +13,8 @@
 namespace talvos
 {
 
-struct Function;
 struct Instruction;
+class Function;
 class Device;
 class Memory;
 class Module;

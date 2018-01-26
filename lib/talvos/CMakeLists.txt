@@ -34,6 +34,8 @@ endif()
 set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
     ${CMAKE_SOURCE_DIR}/include/talvos/DispatchCommand.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Function.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Instruction.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
@@ -42,6 +44,7 @@ set(TALVOS_HEADERS
 set(TALVOS_SOURCES
     Device.cpp
     DispatchCommand.cpp
+    Function.cpp
     Invocation.cpp
     Memory.cpp
     Module.cpp

@@ -8,6 +8,8 @@
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Device.h"
+#include "talvos/Function.h"
+#include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
@@ -25,7 +27,7 @@ Invocation::Invocation(
 {
   Dev = D;
   PrivateMemory = new Memory;
-  CurrentInstruction = F->FirstInstruction;
+  CurrentInstruction = F->getEntryBlock()->FirstInstruction;
   Objects = M->cloneObjects();
 
   // TODO: Handle local size larger than 1

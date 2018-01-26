@@ -10,6 +10,8 @@
 
 #include <spirv/unified1/spirv.h>
 
+#include "talvos/Function.h"
+#include "talvos/Instruction.h"
 #include "talvos/Module.h"
 #include "talvos/Type.h"
 
@@ -24,6 +26,7 @@ public:
     assert(!Mod && "Module already initialized");
     Mod = std::unique_ptr<Module>(new Module(IdBound));
     CurrentFunction = nullptr;
+    CurrentBlock = nullptr;
     PreviousInstruction = nullptr;
   }
 
@@ -36,38 +39,58 @@ public:
       assert(CurrentFunction == nullptr);
       // TODO: Cleanup - when is this destroyed?
       // Should be owned by Module? Module::createFunction()?
-      CurrentFunction = new Function;
-      CurrentFunction->Id = Inst->result_id;
-      CurrentFunction->FirstInstruction = nullptr;
+      const Type *FuncType =
+          Mod->getType(Inst->words[Inst->operands[3].offset]);
+      CurrentFunction = new Function(Inst->result_id, FuncType);
     }
     else if (Inst->opcode == SpvOpFunctionEnd)
     {
       assert(CurrentFunction);
+      assert(CurrentBlock);
+      CurrentFunction->addBlock(CurrentBlock);
       Mod->addFunction(CurrentFunction);
       CurrentFunction = nullptr;
-      PreviousInstruction = nullptr;
+      CurrentBlock = nullptr;
     }
     else if (CurrentFunction)
     {
-      // TODO: Cleanup - when is this destroyed, by parent Function?
-      Instruction *I = new Instruction;
-      I->ResultType = Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
-      I->Opcode = Inst->opcode;
-      I->NumOperands = Inst->num_operands;
-      // TODO: Are all operands IDs?
-      I->Operands = new uint32_t[I->NumOperands];
-      for (int i = 0; i < Inst->num_operands; i++)
+      if (Inst->opcode == SpvOpLabel)
       {
-        // TODO: Handle larger operands
-        assert(Inst->operands[i].num_words == 1);
-        I->Operands[i] = Inst->words[Inst->operands[i].offset];
+        if (CurrentBlock)
+          // Add previous block to function.
+          CurrentFunction->addBlock(CurrentBlock);
+        else
+          // First block - set as entry block.
+          CurrentFunction->setEntryBlock(Inst->result_id);
+
+        // Create new block.
+        CurrentBlock = new Block;
+        CurrentBlock->Id = Inst->result_id;
+        CurrentBlock->FirstInstruction = nullptr;
+        PreviousInstruction = nullptr;
       }
-      I->Next = nullptr;
-      if (!CurrentFunction->FirstInstruction)
-        CurrentFunction->FirstInstruction = I;
-      else if (PreviousInstruction)
-        PreviousInstruction->Next = I;
-      PreviousInstruction = I;
+      else
+      {
+        // TODO: Cleanup - when is this destroyed, by parent Function?
+        Instruction *I = new Instruction;
+        I->ResultType = Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
+        I->Opcode = Inst->opcode;
+        I->NumOperands = Inst->num_operands;
+        // TODO: Are all operands IDs?
+        I->Operands = new uint32_t[I->NumOperands];
+        for (int i = 0; i < Inst->num_operands; i++)
+        {
+          // TODO: Handle larger operands
+          assert(Inst->operands[i].num_words == 1);
+          I->Operands[i] = Inst->words[Inst->operands[i].offset];
+        }
+        I->Next = nullptr;
+        if (!CurrentBlock->FirstInstruction)
+          CurrentBlock->FirstInstruction = I;
+        else if (PreviousInstruction)
+          PreviousInstruction->Next = I;
+        PreviousInstruction = I;
+      }
     }
     else
     {
@@ -296,6 +319,7 @@ public:
 private:
   std::unique_ptr<Module> Mod;
   Function *CurrentFunction;
+  Block *CurrentBlock;
   Instruction *PreviousInstruction;
   std::map<std::pair<uint32_t, uint32_t>, uint32_t> MemberOffsets;
 };
@@ -337,8 +361,8 @@ void Module::addEntryPoint(std::string Name, uint32_t Id)
 
 void Module::addFunction(Function *Func)
 {
-  assert(Functions.count(Func->Id) == 0);
-  Functions[Func->Id] = Func;
+  assert(Functions.count(Func->getId()) == 0);
+  Functions[Func->getId()] = Func;
 }
 
 void Module::addObject(uint32_t Id, const Object &Obj)

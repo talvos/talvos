@@ -12,8 +12,8 @@
 namespace talvos
 {
 
-struct Function;
 class Device;
+class Function;
 class Module;
 class Object;
 

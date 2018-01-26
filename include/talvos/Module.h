@@ -16,25 +16,9 @@
 namespace talvos
 {
 
+struct Instruction;
+class Function;
 class Type;
-
-struct Instruction
-{
-  const Type *ResultType;
-  uint16_t Opcode;
-  uint16_t NumOperands;
-  // TODO: Currently assumes all operands are 32-bit IDs
-  uint32_t *Operands;
-  Instruction *Next;
-};
-
-struct Function
-{
-  // TODO: Name, attributes, etc
-  // TODO: Blocks?
-  uint32_t Id;
-  Instruction *FirstInstruction;
-};
 
 struct BufferVariable
 {
