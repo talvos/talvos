@@ -97,6 +97,12 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Objects[Inst->Operands[1]] = Object::create<size_t>(Inst->ResultType, Result);
 }
 
+void Invocation::executeBranch(const Instruction *Inst)
+{
+  const Block *B = CurrentFunction->getBlock(Inst->Operands[0]);
+  CurrentInstruction = B->FirstInstruction;
+}
+
 void Invocation::executeBranchConditional(const Instruction *Inst)
 {
   bool Condition = OP(0, bool);
@@ -191,6 +197,7 @@ void Invocation::step()
     break;
 
     DISPATCH(SpvOpAccessChain, AccessChain);
+    DISPATCH(SpvOpBranch, Branch);
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpIAdd, IAdd);
