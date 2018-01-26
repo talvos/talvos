@@ -34,6 +34,7 @@ public:
 
   // Instruction handlers.
   void executeAccessChain(const Instruction *Inst);
+  void executeBranchConditional(const Instruction *Inst);
   void executeCompositeExtract(const Instruction *Inst);
   void executeIAdd(const Instruction *Inst);
   void executeIEqual(const Instruction *Inst);
@@ -42,6 +43,7 @@ public:
   void executeStore(const Instruction *Inst);
 
 private:
+  const Function *CurrentFunction;
   const Instruction *CurrentInstruction;
   std::vector<Object> Objects;
   Device *Dev;

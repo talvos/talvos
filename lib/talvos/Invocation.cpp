@@ -27,6 +27,7 @@ Invocation::Invocation(
 {
   Dev = D;
   PrivateMemory = new Memory;
+  CurrentFunction = F;
   CurrentInstruction = F->getEntryBlock()->FirstInstruction;
   Objects = M->cloneObjects();
 
@@ -94,6 +95,13 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   }
 
   Objects[Inst->Operands[1]] = Object::create<size_t>(Inst->ResultType, Result);
+}
+
+void Invocation::executeBranchConditional(const Instruction *Inst)
+{
+  bool Condition = OP(0, bool);
+  const Block *B = CurrentFunction->getBlock(Inst->Operands[Condition ? 1 : 2]);
+  CurrentInstruction = B->FirstInstruction;
 }
 
 void Invocation::executeCompositeExtract(const Instruction *Inst)
@@ -168,15 +176,22 @@ void Invocation::step()
 {
   assert(CurrentInstruction);
 
+  const Instruction *I = CurrentInstruction;
+
+  // Move program counter to next instruction.
+  // Execution of terminator instruction may change this.
+  CurrentInstruction = CurrentInstruction->Next;
+
   // Dispatch instruction to handler method.
-  switch (CurrentInstruction->Opcode)
+  switch (I->Opcode)
   {
 #define DISPATCH(Op, Func)                                                     \
   case Op:                                                                     \
-    execute##Func(CurrentInstruction);                                         \
+    execute##Func(I);                                                          \
     break;
 
     DISPATCH(SpvOpAccessChain, AccessChain);
+    DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
@@ -187,11 +202,8 @@ void Invocation::step()
 #undef DISPATCH
 
   default:
-    std::cout << "Unhandled opcode " << CurrentInstruction->Opcode << std::endl;
+    std::cout << "Unhandled opcode " << I->Opcode << std::endl;
   }
-
-  // TODO: Handle branch/call/ret
-  CurrentInstruction = CurrentInstruction->Next;
 }
 
 } // namespace talvos
