@@ -27,6 +27,7 @@ public:
   bool isComposite() const;
 
   static Type *getArray(const Type *ElemType, uint32_t ElementCount);
+  static Type *getBool();
   static Type *getInt(uint32_t Width);
   static Type *getFunction(const Type *ReturnType,
                            const std::vector<const Type *> &ArgTypes);

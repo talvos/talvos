@@ -68,6 +68,8 @@ Type *Type::getArray(const Type *ElemType, uint32_t ElementCount)
   return T;
 }
 
+Type *Type::getBool() { return new Type(BOOL); }
+
 Type *Type::getInt(uint32_t Width)
 {
   Type *T = new Type(INT);
