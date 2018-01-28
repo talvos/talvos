@@ -101,6 +101,7 @@ public:
         uint32_t Capbility = Inst->words[Inst->operands[0].offset];
         switch (Capbility)
         {
+        case SpvCapabilityInt16:
         case SpvCapabilityShader:
         case SpvCapabilityVariablePointers:
         case SpvCapabilityVariablePointersStorageBuffer:
