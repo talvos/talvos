@@ -22,6 +22,15 @@ class Object
 public:
   Object() { Data = nullptr; }
 
+  static Object create(const Type *Ty)
+  {
+    assert(Ty);
+    Object Result;
+    Result.Ty = Ty;
+    Result.Data = new uint8_t[Ty->getSize()];
+    return Result;
+  }
+
   template <typename T> static Object create(const Type *Ty, T Value)
   {
     assert(sizeof(T) == Ty->getSize());
