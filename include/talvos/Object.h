@@ -48,11 +48,13 @@ public:
 
   Object extract(const std::vector<uint32_t> &Indices) const;
 
-  template <typename T> T get() const
+  template <typename T> T get(uint32_t Element = 0) const
   {
     assert(Data);
-    assert(sizeof(T) == Ty->getSize());
-    return *((T *)Data);
+    assert(Ty->isScalar() || Ty->isVector());
+    assert(Ty->isScalar() ? (sizeof(T) == Ty->getSize() && Element == 0)
+                          : sizeof(T) == Ty->getElementType()->getSize());
+    return ((T *)Data)[Element];
   }
 
   const Type *getType() const { return Ty; };
