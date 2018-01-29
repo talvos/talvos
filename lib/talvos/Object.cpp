@@ -14,6 +14,7 @@ namespace talvos
 Object Object::createComposite(const Type *Ty,
                                const std::vector<Object> &Elements)
 {
+  assert(Ty->isComposite());
   Object Result;
   Result.Ty = Ty;
   Result.Data = new uint8_t[Ty->getSize()];
@@ -28,6 +29,8 @@ Object Object::createComposite(const Type *Ty,
 
 Object Object::extract(const std::vector<uint32_t> &Indices) const
 {
+  assert(Data);
+
   // Loop over indices to compute byte offset and result type.
   uint32_t Offset = 0;
   const Type *Ty = this->Ty;
@@ -48,15 +51,16 @@ Object Object::extract(const std::vector<uint32_t> &Indices) const
 
 Object Object::load(const Type *Ty, Memory *Mem, size_t Address)
 {
-  Object Obj;
-  Obj.Ty = Ty;
-  Obj.Data = new uint8_t[Ty->getSize()];
-  Mem->load(Obj.Data, Address, Ty->getSize());
-  return Obj;
+  Object Result;
+  Result.Ty = Ty;
+  Result.Data = new uint8_t[Ty->getSize()];
+  Mem->load(Result.Data, Address, Ty->getSize());
+  return Result;
 }
 
 void Object::store(Memory *Mem, size_t Address) const
 {
+  assert(Data);
   Mem->store(Address, Ty->getSize(), Data);
 }
 

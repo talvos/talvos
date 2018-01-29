@@ -33,12 +33,13 @@ public:
 
   template <typename T> static Object create(const Type *Ty, T Value)
   {
+    assert(Ty->isScalar());
     assert(sizeof(T) == Ty->getSize());
-    Object Obj;
-    Obj.Ty = Ty;
-    Obj.Data = new uint8_t[sizeof(T)];
-    *((T *)Obj.Data) = Value;
-    return Obj;
+    Object Result;
+    Result.Ty = Ty;
+    Result.Data = new uint8_t[sizeof(T)];
+    *((T *)Result.Data) = Value;
+    return Result;
   }
 
   static Object createComposite(const Type *Ty,
@@ -46,11 +47,12 @@ public:
 
   Object clone() const
   {
-    Object Obj;
-    Obj.Ty = this->Ty;
-    Obj.Data = new uint8_t[Ty->getSize()];
-    memcpy(Obj.Data, this->Data, Ty->getSize());
-    return Obj;
+    assert(Data);
+    Object Result;
+    Result.Ty = this->Ty;
+    Result.Data = new uint8_t[Ty->getSize()];
+    memcpy(Result.Data, this->Data, Ty->getSize());
+    return Result;
   }
 
   void destroy() { delete[] Data; }
