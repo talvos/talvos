@@ -63,6 +63,15 @@ public:
 
   static Object load(const Type *Ty, Memory *Mem, size_t Address);
 
+  template <typename T> void set(T Value, uint32_t Element = 0)
+  {
+    assert(Data);
+    assert(Ty->isScalar() || Ty->isVector());
+    assert(Ty->isScalar() ? (sizeof(T) == Ty->getSize() && Element == 0)
+                          : sizeof(T) == Ty->getElementType()->getSize());
+    ((T *)Data)[Element] = Value;
+  }
+
   void store(Memory *Mem, size_t Address) const;
 
 private:
