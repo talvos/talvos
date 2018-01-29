@@ -25,6 +25,11 @@ public:
   size_t getSize() const;
   uint32_t getStorageClass() const;
   bool isComposite() const;
+  bool isScalar() const
+  {
+    return (Id == BOOL) || (Id == INT) || (Id == FLOAT) || (Id == POINTER);
+  };
+  bool isVector() const { return Id == VECTOR; };
 
   static Type *getArray(const Type *ElemType, uint32_t ElementCount);
   static Type *getBool();
