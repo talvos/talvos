@@ -125,10 +125,15 @@ void Invocation::executeCompositeExtract(const Instruction *Inst)
 void Invocation::executeIAdd(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
-  // TODO: Use actual integer type
-  // TODO: Handle vectors
-  uint32_t Result = OP(2, uint32_t) + OP(3, uint32_t);
-  Objects[Id] = Object::create<uint32_t>(Inst->ResultType, Result);
+  const Object &A = Objects[Inst->Operands[2]];
+  const Object &B = Objects[Inst->Operands[3]];
+  Object Result = Object::create(Inst->ResultType);
+  for (int i = 0; i < Inst->ResultType->getElementCount(); i++)
+  {
+    // TODO: Use actual integer type
+    Result.set<uint32_t>(A.get<uint32_t>(i) + B.get<uint32_t>(i), i);
+  }
+  Objects[Id] = Result;
 }
 
 void Invocation::executeIEqual(const Instruction *Inst)
