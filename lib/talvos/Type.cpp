@@ -79,6 +79,11 @@ bool Type::isComposite() const
   return (Id == ARRAY || Id == STRUCT || Id == VECTOR);
 }
 
+bool Type::isScalar() const
+{
+  return (Id == BOOL) || (Id == INT) || (Id == FLOAT) || (Id == POINTER);
+}
+
 Type *Type::getArray(const Type *ElemType, uint32_t ElementCount)
 {
   Type *T = new Type(ARRAY);
