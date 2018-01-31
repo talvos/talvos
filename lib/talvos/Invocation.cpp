@@ -108,11 +108,18 @@ void Invocation::executeBinaryOp(const Instruction *Inst, const F &&Op)
   uint32_t Id = Inst->Operands[1];
   const Object &OpA = Objects[Inst->Operands[2]];
   const Object &OpB = Objects[Inst->Operands[3]];
+  const Type *OpType = OpA.getType()->getScalarType();
   Object Result = Object::create(Inst->ResultType);
   for (int i = 0; i < Inst->ResultType->getElementCount(); i++)
   {
-    // TODO: Use actual type
-    Result.set(Op(OpA.get<uint32_t>(i), OpB.get<uint32_t>(i)), i);
+    if (OpType->isInt() && OpType->getBitWidth() == 16)
+      Result.set(Op(OpA.get<uint16_t>(i), OpB.get<uint16_t>(i)), i);
+    else if (OpType->isInt() && OpType->getBitWidth() == 32)
+      Result.set(Op(OpA.get<uint32_t>(i), OpB.get<uint32_t>(i)), i);
+    else if (OpType->isInt() && OpType->getBitWidth() == 64)
+      Result.set(Op(OpA.get<uint64_t>(i), OpB.get<uint64_t>(i)), i);
+    else
+      assert(false && "Unhandled binary operation type");
   }
   Objects[Id] = Result;
 }
