@@ -26,11 +26,11 @@ class Function
 public:
   Function(uint32_t Id, const Type *FunctionType);
   void addBlock(Block *B);
-  const Block *getBlock(uint32_t Id) const { return Blocks.at(Id); };
-  const Block *getEntryBlock() const { return Blocks.at(EntryBlockId); };
-  uint32_t getEntryBlockId() const { return EntryBlockId; };
+  const Block *getBlock(uint32_t Id) const { return Blocks.at(Id); }
+  const Block *getEntryBlock() const { return Blocks.at(EntryBlockId); }
+  uint32_t getEntryBlockId() const { return EntryBlockId; }
   uint32_t getId() { return Id; }
-  void setEntryBlock(uint32_t Id) { EntryBlockId = Id; };
+  void setEntryBlock(uint32_t Id) { EntryBlockId = Id; }
 
 private:
   uint32_t Id;

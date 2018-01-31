@@ -68,9 +68,9 @@ public:
     return ((T *)Data)[Element];
   }
 
-  const Type *getType() const { return Ty; };
+  const Type *getType() const { return Ty; }
 
-  bool isSet() const { return Data ? true : false; };
+  bool isSet() const { return Data ? true : false; }
 
   static Object load(const Type *Ty, Memory *Mem, size_t Address);
 

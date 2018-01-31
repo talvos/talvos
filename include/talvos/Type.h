@@ -21,7 +21,7 @@ class Type
 {
 public:
   uint32_t getBitWidth() const;
-  uint32_t getElementCount() const { return ElementCount; };
+  uint32_t getElementCount() const { return ElementCount; }
   size_t getElementOffset(uint32_t Index) const;
   const Type *getElementType(uint32_t Index = 0) const;
   const Type *getScalarType() const;
@@ -32,8 +32,8 @@ public:
   bool isScalar() const
   {
     return (Id == BOOL) || (Id == INT) || (Id == FLOAT) || (Id == POINTER);
-  };
-  bool isVector() const { return Id == VECTOR; };
+  }
+  bool isVector() const { return Id == VECTOR; }
 
   static Type *getArray(const Type *ElemType, uint32_t ElementCount);
   static Type *getBool();
