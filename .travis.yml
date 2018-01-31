@@ -1,9 +1,30 @@
-dist: trusty
+language: generic
 
-language: cpp
-compiler:
-  - gcc
-  - clang
+matrix:
+  include:
+    # Clang
+    - os: linux
+      env: COMPILER_NAME=clang CC=clang CXX=clang++
+
+    # GCC 4.9
+    - os: linux
+      env: COMPILER_NAME=g++ CC=gcc-4.9 CXX=g++-4.9
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+
+    # GCC 7
+    - os: linux
+      env: COMPILER_NAME=g++ CC=gcc-7 CXX=g++-7
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
 
 script:
   - git clone https://github.com/KhronosGroup/SPIRV-Headers
