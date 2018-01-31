@@ -110,7 +110,7 @@ void Invocation::executeBinaryOp(const Instruction *Inst, const F &&Op)
   const Object &OpB = Objects[Inst->Operands[3]];
   const Type *OpType = OpA.getType()->getScalarType();
   Object Result = Object::create(Inst->ResultType);
-  for (int i = 0; i < Inst->ResultType->getElementCount(); i++)
+  for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
   {
     if (OpType->isInt() && OpType->getBitWidth() == 16)
       Result.set(Op(OpA.get<uint16_t>(i), OpB.get<uint16_t>(i)), i);
