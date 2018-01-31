@@ -124,6 +124,7 @@ Type *Type::getStruct(const StructElementTypeList &ElemTypes)
 
 Type *Type::getVector(const Type *ElemType, uint32_t ElemCount)
 {
+  assert(ElemType->isScalar());
   Type *T = new Type(VECTOR);
   T->ElementType = ElemType;
   T->ElementCount = ElemCount;
