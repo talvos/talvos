@@ -102,6 +102,7 @@ public:
         switch (Capbility)
         {
         case SpvCapabilityInt16:
+        case SpvCapabilityInt64:
         case SpvCapabilityShader:
         case SpvCapabilityVariablePointers:
         case SpvCapabilityVariablePointersStorageBuffer:
