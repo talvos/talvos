@@ -102,6 +102,21 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Objects[Inst->Operands[1]] = Object::create<size_t>(Inst->ResultType, Result);
 }
 
+template <typename F>
+void Invocation::executeBinaryOp(const Instruction *Inst, const F &&Op)
+{
+  uint32_t Id = Inst->Operands[1];
+  const Object &OpA = Objects[Inst->Operands[2]];
+  const Object &OpB = Objects[Inst->Operands[3]];
+  Object Result = Object::create(Inst->ResultType);
+  for (int i = 0; i < Inst->ResultType->getElementCount(); i++)
+  {
+    // TODO: Use actual type
+    Result.set(Op(OpA.get<uint32_t>(i), OpB.get<uint32_t>(i)), i);
+  }
+  Objects[Id] = Result;
+}
+
 void Invocation::executeBranch(const Instruction *Inst)
 {
   moveToBlock(Inst->Operands[0]);
@@ -124,25 +139,12 @@ void Invocation::executeCompositeExtract(const Instruction *Inst)
 
 void Invocation::executeIAdd(const Instruction *Inst)
 {
-  uint32_t Id = Inst->Operands[1];
-  const Object &A = Objects[Inst->Operands[2]];
-  const Object &B = Objects[Inst->Operands[3]];
-  Object Result = Object::create(Inst->ResultType);
-  for (int i = 0; i < Inst->ResultType->getElementCount(); i++)
-  {
-    // TODO: Use actual integer type
-    Result.set<uint32_t>(A.get<uint32_t>(i) + B.get<uint32_t>(i), i);
-  }
-  Objects[Id] = Result;
+  executeBinaryOp(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
 }
 
 void Invocation::executeIEqual(const Instruction *Inst)
 {
-  uint32_t Id = Inst->Operands[1];
-  // TODO: Use actual integer type
-  // TODO: Handle vectors
-  bool Result = OP(2, uint32_t) == OP(3, uint32_t);
-  Objects[Id] = Object::create<bool>(Inst->ResultType, Result);
+  executeBinaryOp(Inst, [](auto &&A, auto &&B) -> bool { return A == B; });
 }
 
 void Invocation::executeLoad(const Instruction *Inst)

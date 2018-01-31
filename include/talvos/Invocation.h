@@ -55,6 +55,8 @@ private:
   uint32_t GlobalId[3];
   Memory *PrivateMemory;
 
+  template <typename F>
+  void executeBinaryOp(const Instruction *Inst, const F &&Op);
   Memory *getMemory(uint32_t StorageClass);
   void moveToBlock(uint32_t Id);
 };
