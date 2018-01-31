@@ -29,6 +29,17 @@ const Type *Type::getElementType(uint32_t Index) const
     return ElementType;
 }
 
+const Type *Type::getScalarType() const
+{
+  if (Id == VECTOR)
+    return ElementType;
+  else
+  {
+    assert(isScalar());
+    return this;
+  }
+}
+
 size_t Type::getSize() const
 {
   switch (Id)

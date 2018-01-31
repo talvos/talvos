@@ -23,6 +23,7 @@ public:
   uint32_t getElementCount() const { return ElementCount; };
   size_t getElementOffset(uint32_t Index) const;
   const Type *getElementType(uint32_t Index = 0) const;
+  const Type *getScalarType() const;
   size_t getSize() const;
   uint32_t getStorageClass() const;
   bool isComposite() const;
