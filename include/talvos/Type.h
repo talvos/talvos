@@ -27,6 +27,7 @@ public:
   size_t getSize() const;
   uint32_t getStorageClass() const;
   bool isComposite() const;
+  bool isInt() const { return Id == INT; }
   bool isScalar() const
   {
     return (Id == BOOL) || (Id == INT) || (Id == FLOAT) || (Id == POINTER);
