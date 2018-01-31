@@ -20,6 +20,7 @@ typedef std::vector<std::pair<const Type *, uint32_t>> StructElementTypeList;
 class Type
 {
 public:
+  uint32_t getBitWidth() const;
   uint32_t getElementCount() const { return ElementCount; };
   size_t getElementOffset(uint32_t Index) const;
   const Type *getElementType(uint32_t Index = 0) const;

@@ -10,6 +10,12 @@
 namespace talvos
 {
 
+uint32_t Type::getBitWidth() const
+{
+  assert(isInt());
+  return BitWidth;
+}
+
 size_t Type::getElementOffset(uint32_t Index) const
 {
   if (Id == STRUCT)
