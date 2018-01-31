@@ -1,0 +1,278 @@
+# Test OpIAdd instruction for 16-, 32-, and 64-bit integers with scalars and
+# vectors of width 2, 3, and 4.
+# TODO: Padding for 3-element vectors
+#
+# kernel void test_OpIAdd(
+#   global short  *A_16x1, global short  *B_16x1, global short  *out_16x1,
+#   global short2 *A_16x2, global short2 *B_16x2, global short2 *out_16x2,
+#   global short3 *A_16x3, global short3 *B_16x3, global short3 *out_16x3,
+#   global short4 *A_16x4, global short4 *B_16x4, global short4 *out_16x4,
+#
+#   global int  *A_32x1, global int  *B_32x1, global int  *out_32x1,
+#   global int2 *A_32x2, global int2 *B_32x2, global int2 *out_32x2,
+#   global int3 *A_32x3, global int3 *B_32x3, global int3 *out_32x3,
+#   global int4 *A_32x4, global int4 *B_32x4, global int4 *out_32x4,
+#
+#   global long  *A_64x1, global long  *B_64x1, global long  *out_64x1,
+#   global long2 *A_64x2, global long2 *B_64x2, global long2 *out_64x2,
+#   global long3 *A_64x3, global long3 *B_64x3, global long3 *out_64x3,
+#   global long4 *A_64x4, global long4 *B_64x4, global long4 *out_64x4
+#   )
+# {
+#   int i = get_global_id(0);
+#
+#   out_16x1[i] = A_16x1[i] + B_16x1[i];
+#   out_16x2[i] = A_16x2[i] + B_16x2[i];
+#   out_16x3[i] = A_16x3[i] + B_16x3[i];
+#   out_16x4[i] = A_16x4[i] + B_16x4[i];
+#
+#   out_32x1[i] = A_32x1[i] + B_32x1[i];
+#   out_32x2[i] = A_32x2[i] + B_32x2[i];
+#   out_32x3[i] = A_32x3[i] + B_32x3[i];
+#   out_32x4[i] = A_32x4[i] + B_32x4[i];
+#
+#   out_64x1[i] = A_64x1[i] + B_64x1[i];
+#   out_64x2[i] = A_64x2[i] + B_64x2[i];
+#   out_64x3[i] = A_64x3[i] + B_64x3[i];
+#   out_64x4[i] = A_64x4[i] + B_64x4[i];
+# }
+
+MODULE test_OpIAdd.spvasm
+ENTRY test_OpIAdd
+
+ALLOCATE A_16x1   BUFFER 8  RANGE INT16 0 1
+ALLOCATE B_16x1   BUFFER 8  RANGE INT16 1 2
+ALLOCATE out_16x1 BUFFER 8  FILL  INT16 0
+ALLOCATE A_16x2   BUFFER 16 RANGE INT16 2 3
+ALLOCATE B_16x2   BUFFER 16 RANGE INT16 3 4
+ALLOCATE out_16x2 BUFFER 16 FILL  INT16 0
+ALLOCATE A_16x3   BUFFER 24 RANGE INT16 4 5
+ALLOCATE B_16x3   BUFFER 24 RANGE INT16 5 6
+ALLOCATE out_16x3 BUFFER 24 FILL  INT16 0
+ALLOCATE A_16x4   BUFFER 32 RANGE INT16 6 7
+ALLOCATE B_16x4   BUFFER 32 RANGE INT16 7 8
+ALLOCATE out_16x4 BUFFER 32 FILL  INT16 0
+
+ALLOCATE A_32x1   BUFFER 16 RANGE INT32 100 -1
+ALLOCATE B_32x1   BUFFER 16 RANGE INT32 7 2
+ALLOCATE out_32x1 BUFFER 16 FILL  INT32 0
+ALLOCATE A_32x2   BUFFER 32 RANGE INT32 150 -3
+ALLOCATE B_32x2   BUFFER 32 RANGE INT32 20 7
+ALLOCATE out_32x2 BUFFER 32 FILL  INT32 0
+ALLOCATE A_32x3   BUFFER 48 RANGE INT32 260 -11
+ALLOCATE B_32x3   BUFFER 48 RANGE INT32 -40 25
+ALLOCATE out_32x3 BUFFER 48 FILL  INT32 0
+ALLOCATE A_32x4   BUFFER 64 RANGE INT32 1024 -42
+ALLOCATE B_32x4   BUFFER 64 RANGE INT32 7 7
+ALLOCATE out_32x4 BUFFER 64 FILL  INT32 0
+
+ALLOCATE A_64x1   BUFFER 32  RANGE INT64 100001 1
+ALLOCATE B_64x1   BUFFER 32  RANGE INT64 10 10
+ALLOCATE out_64x1 BUFFER 32  FILL  INT64 0
+ALLOCATE A_64x2   BUFFER 64  RANGE INT64 9999 9
+ALLOCATE B_64x2   BUFFER 64  RANGE INT64 8888 8
+ALLOCATE out_64x2 BUFFER 64  FILL  INT64 0
+ALLOCATE A_64x3   BUFFER 96  RANGE INT64 -7777 -77
+ALLOCATE B_64x3   BUFFER 96  RANGE INT64 -4242 -42
+ALLOCATE out_64x3 BUFFER 96  FILL  INT64 0
+ALLOCATE A_64x4   BUFFER 128 RANGE INT64 14294967297 1000001
+ALLOCATE B_64x4   BUFFER 128 RANGE INT64 -4294967297 -100002
+ALLOCATE out_64x4 BUFFER 128 FILL  INT64 0
+
+DESCRIPTOR_SET 0 0 A_16x1
+DESCRIPTOR_SET 0 1 B_16x1
+DESCRIPTOR_SET 0 2 out_16x1
+DESCRIPTOR_SET 0 3 A_16x2
+DESCRIPTOR_SET 0 4 B_16x2
+DESCRIPTOR_SET 0 5 out_16x2
+DESCRIPTOR_SET 0 6 A_16x3
+DESCRIPTOR_SET 0 7 B_16x3
+DESCRIPTOR_SET 0 8 out_16x3
+DESCRIPTOR_SET 0 9  A_16x4
+DESCRIPTOR_SET 0 10 B_16x4
+DESCRIPTOR_SET 0 11 out_16x4
+
+DESCRIPTOR_SET 0 12 A_32x1
+DESCRIPTOR_SET 0 13 B_32x1
+DESCRIPTOR_SET 0 14 out_32x1
+DESCRIPTOR_SET 0 15 A_32x2
+DESCRIPTOR_SET 0 16 B_32x2
+DESCRIPTOR_SET 0 17 out_32x2
+DESCRIPTOR_SET 0 18 A_32x3
+DESCRIPTOR_SET 0 19 B_32x3
+DESCRIPTOR_SET 0 20 out_32x3
+DESCRIPTOR_SET 0 21  A_32x4
+DESCRIPTOR_SET 0 22 B_32x4
+DESCRIPTOR_SET 0 23 out_32x4
+
+DESCRIPTOR_SET 0 24 A_64x1
+DESCRIPTOR_SET 0 25 B_64x1
+DESCRIPTOR_SET 0 26 out_64x1
+DESCRIPTOR_SET 0 27 A_64x2
+DESCRIPTOR_SET 0 28 B_64x2
+DESCRIPTOR_SET 0 29 out_64x2
+DESCRIPTOR_SET 0 30 A_64x3
+DESCRIPTOR_SET 0 31 B_64x3
+DESCRIPTOR_SET 0 32 out_64x3
+DESCRIPTOR_SET 0 33  A_64x4
+DESCRIPTOR_SET 0 34 B_64x4
+DESCRIPTOR_SET 0 35 out_64x4
+
+DISPATCH 4 1 1
+
+DUMP INT16 out_16x1
+DUMP INT16 out_16x2
+DUMP INT16 out_16x3
+DUMP INT16 out_16x4
+DUMP INT32 out_32x1
+DUMP INT32 out_32x2
+DUMP INT32 out_32x3
+DUMP INT32 out_32x4
+DUMP INT64 out_64x1
+DUMP INT64 out_64x2
+DUMP INT64 out_64x3
+DUMP INT64 out_64x4
+
+# CHECK Buffer 'out_16x1' (8 bytes):
+# CHECK   out_16x1[0] = 1
+# CHECK   out_16x1[1] = 4
+# CHECK   out_16x1[2] = 7
+# CHECK   out_16x1[3] = 10
+
+# CHECK Buffer 'out_16x2' (16 bytes):
+# CHECK   out_16x2[0] = 5
+# CHECK   out_16x2[1] = 12
+# CHECK   out_16x2[2] = 19
+# CHECK   out_16x2[3] = 26
+# CHECK   out_16x2[4] = 33
+# CHECK   out_16x2[5] = 40
+# CHECK   out_16x2[6] = 47
+# CHECK   out_16x2[7] = 54
+
+# CHECK Buffer 'out_16x3' (24 bytes):
+# CHECK   out_16x3[0] = 9
+# CHECK   out_16x3[1] = 20
+# CHECK   out_16x3[2] = 31
+# CHECK   out_16x3[3] = 42
+# CHECK   out_16x3[4] = 53
+# CHECK   out_16x3[5] = 64
+# CHECK   out_16x3[6] = 75
+# CHECK   out_16x3[7] = 86
+# CHECK   out_16x3[8] = 97
+# CHECK   out_16x3[9] = 108
+# CHECK   out_16x3[10] = 119
+# CHECK   out_16x3[11] = 130
+
+# CHECK Buffer 'out_16x4' (32 bytes):
+# CHECK   out_16x4[0] = 13
+# CHECK   out_16x4[1] = 28
+# CHECK   out_16x4[2] = 43
+# CHECK   out_16x4[3] = 58
+# CHECK   out_16x4[4] = 73
+# CHECK   out_16x4[5] = 88
+# CHECK   out_16x4[6] = 103
+# CHECK   out_16x4[7] = 118
+# CHECK   out_16x4[8] = 133
+# CHECK   out_16x4[9] = 148
+# CHECK   out_16x4[10] = 163
+# CHECK   out_16x4[11] = 178
+# CHECK   out_16x4[12] = 193
+# CHECK   out_16x4[13] = 208
+# CHECK   out_16x4[14] = 223
+# CHECK   out_16x4[15] = 238
+
+# CHECK Buffer 'out_32x1' (16 bytes):
+# CHECK   out_32x1[0] = 107
+# CHECK   out_32x1[1] = 108
+# CHECK   out_32x1[2] = 109
+# CHECK   out_32x1[3] = 110
+
+# CHECK Buffer 'out_32x2' (32 bytes):
+# CHECK   out_32x2[0] = 170
+# CHECK   out_32x2[1] = 174
+# CHECK   out_32x2[2] = 178
+# CHECK   out_32x2[3] = 182
+# CHECK   out_32x2[4] = 186
+# CHECK   out_32x2[5] = 190
+# CHECK   out_32x2[6] = 194
+# CHECK   out_32x2[7] = 198
+
+# CHECK Buffer 'out_32x3' (48 bytes):
+# CHECK   out_32x3[0] = 220
+# CHECK   out_32x3[1] = 234
+# CHECK   out_32x3[2] = 248
+# CHECK   out_32x3[3] = 262
+# CHECK   out_32x3[4] = 276
+# CHECK   out_32x3[5] = 290
+# CHECK   out_32x3[6] = 304
+# CHECK   out_32x3[7] = 318
+# CHECK   out_32x3[8] = 332
+# CHECK   out_32x3[9] = 346
+# CHECK   out_32x3[10] = 360
+# CHECK   out_32x3[11] = 374
+
+# CHECK Buffer 'out_32x4' (64 bytes):
+# CHECK   out_32x4[0] = 1031
+# CHECK   out_32x4[1] = 996
+# CHECK   out_32x4[2] = 961
+# CHECK   out_32x4[3] = 926
+# CHECK   out_32x4[4] = 891
+# CHECK   out_32x4[5] = 856
+# CHECK   out_32x4[6] = 821
+# CHECK   out_32x4[7] = 786
+# CHECK   out_32x4[8] = 751
+# CHECK   out_32x4[9] = 716
+# CHECK   out_32x4[10] = 681
+# CHECK   out_32x4[11] = 646
+# CHECK   out_32x4[12] = 611
+# CHECK   out_32x4[13] = 576
+# CHECK   out_32x4[14] = 541
+# CHECK   out_32x4[15] = 506
+
+# CHECK Buffer 'out_64x1' (32 bytes):
+# CHECK   out_64x1[0] = 100011
+# CHECK   out_64x1[1] = 100022
+# CHECK   out_64x1[2] = 100033
+# CHECK   out_64x1[3] = 100044
+
+# CHECK Buffer 'out_64x2' (64 bytes):
+# CHECK   out_64x2[0] = 18887
+# CHECK   out_64x2[1] = 18904
+# CHECK   out_64x2[2] = 18921
+# CHECK   out_64x2[3] = 18938
+# CHECK   out_64x2[4] = 18955
+# CHECK   out_64x2[5] = 18972
+# CHECK   out_64x2[6] = 18989
+# CHECK   out_64x2[7] = 19006
+
+# CHECK Buffer 'out_64x3' (96 bytes):
+# CHECK   out_64x3[0] = -12019
+# CHECK   out_64x3[1] = -12138
+# CHECK   out_64x3[2] = -12257
+# CHECK   out_64x3[3] = -12376
+# CHECK   out_64x3[4] = -12495
+# CHECK   out_64x3[5] = -12614
+# CHECK   out_64x3[6] = -12733
+# CHECK   out_64x3[7] = -12852
+# CHECK   out_64x3[8] = -12971
+# CHECK   out_64x3[9] = -13090
+# CHECK   out_64x3[10] = -13209
+# CHECK   out_64x3[11] = -13328
+
+# CHECK Buffer 'out_64x4' (128 bytes):
+# CHECK   out_64x4[0] = 10000000000
+# CHECK   out_64x4[1] = 10000899999
+# CHECK   out_64x4[2] = 10001799998
+# CHECK   out_64x4[3] = 10002699997
+# CHECK   out_64x4[4] = 10003599996
+# CHECK   out_64x4[5] = 10004499995
+# CHECK   out_64x4[6] = 10005399994
+# CHECK   out_64x4[7] = 10006299993
+# CHECK   out_64x4[8] = 10007199992
+# CHECK   out_64x4[9] = 10008099991
+# CHECK   out_64x4[10] = 10008999990
+# CHECK   out_64x4[11] = 10009899989
+# CHECK   out_64x4[12] = 10010799988
+# CHECK   out_64x4[13] = 10011699987
+# CHECK   out_64x4[14] = 10012599986
+# CHECK   out_64x4[15] = 10013499985

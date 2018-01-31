@@ -12,6 +12,7 @@ foreach(test
   spirv/simple-branch
   spirv/simple-loop
   spirv/struct-offset
+  spirv/test_OpIAdd
   talvos-cmd/dispatch-without-module
   talvos-cmd/duplicate-allocation-name
   talvos-cmd/empty
