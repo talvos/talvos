@@ -5,6 +5,12 @@ matrix:
     # Clang
     - os: linux
       env: COMPILER_NAME=clang CC=clang CXX=clang++
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
 
     # GCC 4.9
     - os: linux
