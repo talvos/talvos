@@ -83,7 +83,7 @@ void Memory::dump(size_t Address) const
   std::cout << std::endl;
 }
 
-void Memory::load(uint8_t *Data, size_t Address, size_t NumBytes)
+void Memory::load(uint8_t *Data, size_t Address, size_t NumBytes) const
 {
   size_t Id = (Address >> OFFSET_BITS);
   size_t Offset = (Address & (((size_t)-1) >> BUFFER_BITS));

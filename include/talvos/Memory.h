@@ -20,7 +20,10 @@ public:
   size_t allocate(size_t NumBytes);
   void dump() const;
   void dump(size_t Address) const;
-  void load(uint8_t *Result, size_t Address, size_t NumBytes);
+
+  /// Load \p NumBytes of data from \p Address into \p Result.
+  void load(uint8_t *Result, size_t Address, size_t NumBytes) const;
+
   void release(size_t Address);
   void store(size_t Address, size_t NumBytes, const uint8_t *Data);
 
