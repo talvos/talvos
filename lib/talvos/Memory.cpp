@@ -23,6 +23,13 @@ Memory::Memory()
   Buffers.resize(1);
 }
 
+Memory::~Memory()
+{
+  // Release all allocations.
+  for (size_t Id = 1; Id < Buffers.size(); Id++)
+    delete[] Buffers[Id].Data;
+}
+
 size_t Memory::allocate(size_t NumBytes)
 {
   // Allocate buffer.
