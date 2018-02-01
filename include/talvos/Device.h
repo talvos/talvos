@@ -11,6 +11,7 @@ namespace talvos
 
 class Memory;
 
+/// A Device instance encapsulates properties and state for the virtual device.
 class Device
 {
 public:
