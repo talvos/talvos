@@ -16,10 +16,12 @@ class Device
 public:
   Device();
   ~Device();
-  Memory *getGlobalMemory() { return GlobalMemory; }
+
+  /// Get the global memory instance associated with this device.
+  Memory &getGlobalMemory() { return *GlobalMemory; }
 
 private:
-  Memory *GlobalMemory;
+  Memory *GlobalMemory; ///< The global memory of this device.
 };
 
 } // namespace talvos

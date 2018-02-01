@@ -57,7 +57,10 @@ private:
 
   template <typename F>
   void executeBinaryOp(const Instruction *Inst, const F &&Op);
-  Memory *getMemory(uint32_t StorageClass);
+
+  /// Returns the memory instance associated with \p StorageClass.
+  Memory &getMemory(uint32_t StorageClass);
+
   void moveToBlock(uint32_t Id);
 };
 

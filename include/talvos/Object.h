@@ -72,7 +72,8 @@ public:
 
   bool isSet() const { return Data ? true : false; }
 
-  static Object load(const Type *Ty, Memory *Mem, size_t Address);
+  /// Create an object of type \p Ty from the data at \p Address.
+  static Object load(const Type *Ty, const Memory &Mem, size_t Address);
 
   template <typename T> void set(T Value, uint32_t Element = 0)
   {
@@ -83,7 +84,8 @@ public:
     ((T *)Data)[Element] = Value;
   }
 
-  void store(Memory *Mem, size_t Address) const;
+  /// Store the value of this object to memory at \p Address.
+  void store(Memory &Mem, size_t Address) const;
 
 private:
   const Type *Ty;

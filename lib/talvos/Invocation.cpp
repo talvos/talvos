@@ -67,7 +67,7 @@ Invocation::Invocation(
     size_t NumBytes = V.second.Ty->getElementType()->getSize();
     size_t Address = PrivateMemory->allocate(NumBytes);
     assert(V.second.Initializer);
-    Objects[V.second.Initializer].store(PrivateMemory, Address);
+    Objects[V.second.Initializer].store(*PrivateMemory, Address);
     Objects[V.first] = Object::create<size_t>(V.second.Ty, Address);
   }
 }
@@ -158,7 +158,7 @@ void Invocation::executeLoad(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
   const Object &Src = Objects[Inst->Operands[2]];
-  Memory *Mem = getMemory(Src.getType()->getStorageClass());
+  Memory &Mem = getMemory(Src.getType()->getStorageClass());
   Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<size_t>());
 }
 
@@ -189,11 +189,11 @@ void Invocation::executeStore(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
   const Object &Dest = Objects[Inst->Operands[0]];
-  Memory *Mem = getMemory(Dest.getType()->getStorageClass());
+  Memory &Mem = getMemory(Dest.getType()->getStorageClass());
   Objects[Id].store(Mem, Dest.get<size_t>());
 }
 
-Memory *Invocation::getMemory(uint32_t StorageClass)
+Memory &Invocation::getMemory(uint32_t StorageClass)
 {
   switch (StorageClass)
   {
@@ -201,10 +201,9 @@ Memory *Invocation::getMemory(uint32_t StorageClass)
     return Dev->getGlobalMemory();
   case SpvStorageClassInput:
   case SpvStorageClassPrivate:
-    return PrivateMemory;
+    return *PrivateMemory;
   default:
     assert(false && "Unhandled storage class");
-    return nullptr;
   }
 }
 

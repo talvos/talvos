@@ -69,7 +69,7 @@ void CommandFile::parseAllocate()
     size_t NumBytes = get<size_t>("allocation size");
 
     // Allocate buffer.
-    size_t Address = Device->getGlobalMemory()->allocate(NumBytes);
+    size_t Address = Device->getGlobalMemory().allocate(NumBytes);
     Buffers[Name] = {Address, NumBytes};
 
     // Process initializer.
@@ -187,13 +187,13 @@ void CommandFile::parseDump()
   else if (DumpType == "DOUBLE")
     dump<double>();
   else if (DumpType == "ALL")
-    Device->getGlobalMemory()->dump();
+    Device->getGlobalMemory().dump();
   else if (DumpType == "RAW")
   {
     string Name = get<string>("allocation name");
     if (!Buffers.count(Name))
       throw "invalid resource identifier";
-    Device->getGlobalMemory()->dump(Buffers.at(Name).first);
+    Device->getGlobalMemory().dump(Buffers.at(Name).first);
   }
   else
     throw NotRecognizedException();
@@ -231,8 +231,8 @@ template <typename T> void CommandFile::dump()
   for (size_t i = 0; i < NumBytes / sizeof(T); i++)
   {
     T Value;
-    Device->getGlobalMemory()->load((uint8_t *)&Value, Address + i * sizeof(T),
-                                    sizeof(T));
+    Device->getGlobalMemory().load((uint8_t *)&Value, Address + i * sizeof(T),
+                                   sizeof(T));
     std::cout << "  " << Name << "[" << i << "] = " << Value << std::endl;
   }
 }
@@ -241,8 +241,8 @@ template <typename T> void CommandFile::fill(size_t Address, size_t NumBytes)
 {
   T FillValue = get<T>("fill value");
   for (size_t i = 0; i < NumBytes; i += sizeof(FillValue))
-    Device->getGlobalMemory()->store(Address + i, sizeof(FillValue),
-                                     (uint8_t *)&FillValue);
+    Device->getGlobalMemory().store(Address + i, sizeof(FillValue),
+                                    (uint8_t *)&FillValue);
 }
 
 template <typename T> void CommandFile::range(size_t Address, size_t NumBytes)
@@ -250,8 +250,8 @@ template <typename T> void CommandFile::range(size_t Address, size_t NumBytes)
   T Value = get<T>("range start");
   T RangeInc = get<T>("range inc");
   for (size_t i = 0; i < NumBytes; i += sizeof(Value), Value += RangeInc)
-    Device->getGlobalMemory()->store(Address + i, sizeof(Value),
-                                     (uint8_t *)&Value);
+    Device->getGlobalMemory().store(Address + i, sizeof(Value),
+                                    (uint8_t *)&Value);
 }
 
 bool CommandFile::run()
