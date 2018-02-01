@@ -16,6 +16,8 @@ class Device
 public:
   Device();
   ~Device();
+  Device(const Device &) = delete;
+  Device &operator=(const Device &) = delete;
 
   /// Get the global memory instance associated with this device.
   Memory &getGlobalMemory() { return *GlobalMemory; }
