@@ -51,7 +51,7 @@ public:
   void addEntryPoint(std::string Name, uint32_t Id);
   void addFunction(std::unique_ptr<Function> Func);
   void addObject(uint32_t Id, const Object &Obj);
-  void addType(uint32_t Id, Type *T);
+  void addType(uint32_t Id, std::unique_ptr<Type> Ty);
   void addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer);
   std::vector<Object> cloneObjects() const;
   const Function *getEntryPoint(const std::string &Name) const;
@@ -76,7 +76,7 @@ private:
   BufferVariableMap BufferVariables;
   InputVariableMap InputVariables;
   PrivateVariableMap PrivateVariables;
-  std::map<uint32_t, Type *> Types;
+  std::map<uint32_t, std::unique_ptr<Type>> Types;
   std::map<uint32_t, std::unique_ptr<Function>> Functions;
   std::map<std::string, uint32_t> EntryPoints;
 };

@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <vector>
 
 namespace talvos
@@ -32,16 +33,21 @@ public:
   bool isScalar() const;
   bool isVector() const { return Id == VECTOR; }
 
-  static Type *getArray(const Type *ElemType, uint32_t ElementCount);
-  static Type *getBool();
-  static Type *getInt(uint32_t Width);
-  static Type *getFunction(const Type *ReturnType,
-                           const std::vector<const Type *> &ArgTypes);
-  static Type *getPointer(uint32_t StorageClass, const Type *ElemType);
-  static Type *getRuntimeArray(const Type *ElemType);
-  static Type *getStruct(const StructElementTypeList &ElemTypes);
-  static Type *getVector(const Type *ElemType, uint32_t ElemCount);
-  static Type *getVoid();
+  static std::unique_ptr<Type> getArray(const Type *ElemType,
+                                        uint32_t ElementCount);
+  static std::unique_ptr<Type> getBool();
+  static std::unique_ptr<Type> getInt(uint32_t Width);
+  static std::unique_ptr<Type>
+  getFunction(const Type *ReturnType,
+              const std::vector<const Type *> &ArgTypes);
+  static std::unique_ptr<Type> getPointer(uint32_t StorageClass,
+                                          const Type *ElemType);
+  static std::unique_ptr<Type> getRuntimeArray(const Type *ElemType);
+  static std::unique_ptr<Type>
+  getStruct(const StructElementTypeList &ElemTypes);
+  static std::unique_ptr<Type> getVector(const Type *ElemType,
+                                         uint32_t ElemCount);
+  static std::unique_ptr<Type> getVoid();
 
 private:
   Type(uint32_t Id)

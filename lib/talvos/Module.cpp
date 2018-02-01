@@ -373,10 +373,10 @@ void Module::addObject(uint32_t Id, const Object &Obj)
   Objects[Id] = Obj;
 }
 
-void Module::addType(uint32_t Id, Type *T)
+void Module::addType(uint32_t Id, std::unique_ptr<Type> Ty)
 {
   assert(!Types.count(Id));
-  Types[Id] = T;
+  Types[Id] = std::move(Ty);
 }
 
 void Module::addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer)
@@ -470,7 +470,7 @@ const Object &Module::getObject(uint32_t Id) const { return Objects.at(Id); }
 const Type *Module::getType(uint32_t Id) const
 {
   assert(Types.count(Id));
-  return Types.at(Id);
+  return Types.at(Id).get();
 }
 
 std::unique_ptr<Module> Module::load(const uint32_t *Words, uint32_t NumWords)
