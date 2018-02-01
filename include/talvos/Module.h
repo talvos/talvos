@@ -49,13 +49,13 @@ public:
   Module(uint32_t IdBound);
   ~Module();
   void addEntryPoint(std::string Name, uint32_t Id);
-  void addFunction(Function *Func);
+  void addFunction(std::unique_ptr<Function> Func);
   void addObject(uint32_t Id, const Object &Obj);
   void addType(uint32_t Id, Type *T);
   void addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer);
   std::vector<Object> cloneObjects() const;
-  Function *getEntryPoint(const std::string &Name) const;
-  Function *getFunction(uint32_t Id) const;
+  const Function *getEntryPoint(const std::string &Name) const;
+  const Function *getFunction(uint32_t Id) const;
   uint32_t getIdBound() const { return IdBound; }
   const BufferVariableMap &getBufferVariables() const;
   const InputVariableMap &getInputVariables() const;
@@ -77,7 +77,7 @@ private:
   InputVariableMap InputVariables;
   PrivateVariableMap PrivateVariables;
   std::map<uint32_t, Type *> Types;
-  std::map<uint32_t, Function *> Functions;
+  std::map<uint32_t, std::unique_ptr<Function>> Functions;
   std::map<std::string, uint32_t> EntryPoints;
 };
 

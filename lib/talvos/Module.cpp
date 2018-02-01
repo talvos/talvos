@@ -41,14 +41,14 @@ public:
       // Should be owned by Module? Module::createFunction()?
       const Type *FuncType =
           Mod->getType(Inst->words[Inst->operands[3].offset]);
-      CurrentFunction = new Function(Inst->result_id, FuncType);
+      CurrentFunction = std::make_unique<Function>(Inst->result_id, FuncType);
     }
     else if (Inst->opcode == SpvOpFunctionEnd)
     {
       assert(CurrentFunction);
       assert(CurrentBlock);
       CurrentFunction->addBlock(CurrentBlock);
-      Mod->addFunction(CurrentFunction);
+      Mod->addFunction(std::move(CurrentFunction));
       CurrentFunction = nullptr;
       CurrentBlock = nullptr;
     }
@@ -320,7 +320,7 @@ public:
 
 private:
   std::unique_ptr<Module> Mod;
-  Function *CurrentFunction;
+  std::unique_ptr<Function> CurrentFunction;
   Block *CurrentBlock;
   Instruction *PreviousInstruction;
   std::map<std::pair<uint32_t, uint32_t>, uint32_t> MemberOffsets;
@@ -361,10 +361,10 @@ void Module::addEntryPoint(std::string Name, uint32_t Id)
   EntryPoints[Name] = Id;
 }
 
-void Module::addFunction(Function *Func)
+void Module::addFunction(std::unique_ptr<Function> Func)
 {
   assert(Functions.count(Func->getId()) == 0);
-  Functions[Func->getId()] = Func;
+  Functions[Func->getId()] = std::move(Func);
 }
 
 void Module::addObject(uint32_t Id, const Object &Obj)
@@ -436,18 +436,18 @@ std::vector<Object> Module::cloneObjects() const
   return ClonedObjects;
 }
 
-Function *Module::getEntryPoint(const std::string &Name) const
+const Function *Module::getEntryPoint(const std::string &Name) const
 {
   if (!EntryPoints.count(Name))
     return nullptr;
-  return Functions.at(EntryPoints.at(Name));
+  return Functions.at(EntryPoints.at(Name)).get();
 }
 
-Function *Module::getFunction(uint32_t Id) const
+const Function *Module::getFunction(uint32_t Id) const
 {
   if (!Functions.count(Id))
     return nullptr;
-  return Functions.at(Id);
+  return Functions.at(Id).get();
 }
 
 const BufferVariableMap &Module::getBufferVariables() const
