@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <memory>
 
 #include "CommandFile.h"
 
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
   if (!parseArguments(argc, argv))
     return 1;
 
-  CommandFile *CF;
+  std::unique_ptr<CommandFile> CF;
   std::ifstream File;
   if (FileName)
   {
@@ -32,11 +33,11 @@ int main(int argc, char *argv[])
       cerr << "Unable to open config file '" << FileName << "'" << endl;
       return 1;
     }
-    CF = new CommandFile(File);
+    CF = std::make_unique<CommandFile>(File);
   }
   else
   {
-    CF = new CommandFile(std::cin);
+    CF = std::make_unique<CommandFile>(std::cin);
   }
 
   // Run commands.
