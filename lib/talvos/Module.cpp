@@ -10,6 +10,7 @@
 
 #include <spirv/unified1/spirv.h>
 
+#include "talvos/Block.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Module.h"
@@ -47,7 +48,7 @@ public:
     {
       assert(CurrentFunction);
       assert(CurrentBlock);
-      CurrentFunction->addBlock(CurrentBlock);
+      CurrentFunction->addBlock(std::move(CurrentBlock));
       Mod->addFunction(std::move(CurrentFunction));
       CurrentFunction = nullptr;
       CurrentBlock = nullptr;
@@ -58,15 +59,13 @@ public:
       {
         if (CurrentBlock)
           // Add previous block to function.
-          CurrentFunction->addBlock(CurrentBlock);
+          CurrentFunction->addBlock(std::move(CurrentBlock));
         else
           // First block - set as entry block.
           CurrentFunction->setEntryBlock(Inst->result_id);
 
         // Create new block.
-        CurrentBlock = new Block;
-        CurrentBlock->Id = Inst->result_id;
-        CurrentBlock->FirstInstruction = nullptr;
+        CurrentBlock = std::make_unique<Block>(Inst->result_id);
         PreviousInstruction = nullptr;
       }
       else
@@ -321,7 +320,7 @@ public:
 private:
   std::unique_ptr<Module> Mod;
   std::unique_ptr<Function> CurrentFunction;
-  Block *CurrentBlock;
+  std::unique_ptr<Block> CurrentBlock;
   Instruction *PreviousInstruction;
   std::map<std::pair<uint32_t, uint32_t>, uint32_t> MemberOffsets;
 };

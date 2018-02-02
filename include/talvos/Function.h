@@ -7,27 +7,29 @@
 #define TALVOS_FUNCTION_H
 
 #include <map>
+#include <memory>
 
 namespace talvos
 {
 
-struct Instruction;
+class Block;
 class Type;
 
-// TODO: Make Block a class as well?
-struct Block
-{
-  uint32_t Id;
-  const Instruction *FirstInstruction;
-};
-
+/// This class represents a function in a SPIR-V Module.
 class Function
 {
 public:
   Function(uint32_t Id, const Type *FunctionType);
-  void addBlock(Block *B);
-  const Block *getBlock(uint32_t Id) const { return Blocks.at(Id); }
-  const Block *getEntryBlock() const { return Blocks.at(EntryBlockId); }
+
+  /// Add a block to this function.
+  void addBlock(std::unique_ptr<Block> B);
+
+  /// Returns the block with ID \p Id.
+  const Block *getBlock(uint32_t Id) const { return Blocks.at(Id).get(); }
+
+  /// Returns the first block in this function.
+  const Block *getEntryBlock() const { return Blocks.at(EntryBlockId).get(); }
+
   uint32_t getEntryBlockId() const { return EntryBlockId; }
   uint32_t getId() { return Id; }
   void setEntryBlock(uint32_t Id) { EntryBlockId = Id; }
@@ -35,7 +37,7 @@ public:
 private:
   uint32_t Id;
   const Type *FunctionType;
-  std::map<uint32_t, Block *> Blocks;
+  std::map<uint32_t, std::unique_ptr<Block>> Blocks;
   uint32_t EntryBlockId;
 };
 

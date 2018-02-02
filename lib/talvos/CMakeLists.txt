@@ -32,6 +32,7 @@ if (NOT SPIRV_TOOLS_LIB)
 endif()
 
 set(TALVOS_HEADERS
+    ${CMAKE_SOURCE_DIR}/include/talvos/Block.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
     ${CMAKE_SOURCE_DIR}/include/talvos/DispatchCommand.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Function.h
@@ -42,6 +43,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Type.h)
 set(TALVOS_SOURCES
+    Block.cpp
     Device.cpp
     DispatchCommand.cpp
     Function.cpp

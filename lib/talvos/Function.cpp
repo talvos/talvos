@@ -5,6 +5,7 @@
 
 #include <cassert>
 
+#include "talvos/Block.h"
 #include "talvos/Function.h"
 #include "talvos/Type.h"
 
@@ -17,10 +18,10 @@ Function::Function(uint32_t Id, const Type *FuncType)
   this->FunctionType = FuncType;
 }
 
-void Function::addBlock(Block *B)
+void Function::addBlock(std::unique_ptr<Block> B)
 {
-  assert(Blocks.count(B->Id) == 0);
-  Blocks[B->Id] = B;
+  assert(Blocks.count(B->getId()) == 0);
+  Blocks[B->getId()] = std::move(B);
 }
 
 } // namespace talvos

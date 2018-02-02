@@ -7,6 +7,7 @@
 #include <iostream>
 #include <spirv/unified1/spirv.h>
 
+#include "talvos/Block.h"
 #include "talvos/Device.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
