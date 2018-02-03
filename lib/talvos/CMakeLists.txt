@@ -47,6 +47,7 @@ set(TALVOS_SOURCES
     Device.cpp
     DispatchCommand.cpp
     Function.cpp
+    Instruction.cpp
     Invocation.cpp
     Memory.cpp
     Module.cpp

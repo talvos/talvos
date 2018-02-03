@@ -7,32 +7,38 @@
 #define TALVOS_BLOCK_H
 
 #include <cstdint>
+#include <memory>
 
 namespace talvos
 {
 
-struct Instruction;
+class Instruction;
 
 /// A block of instruction ending with a termination instruction.
 class Block
 {
 public:
   /// Create a new block with an ID.
-  Block(uint32_t Id) : Id(Id), FirstInstruction(nullptr) {}
+  Block(uint32_t Id);
 
   ~Block();
   Block(const Block &) = delete;
   Block &operator=(const Block &) = delete;
 
+  /// Returns the first instruction in this block.
+  const Instruction *getFirstInstruction() const;
+
   /// Returns the ID of this block.
   uint32_t getId() const { return Id; }
 
+  /// Insert \p I at the beginning of this block.
+  /// This transfers ownership of \p I to this block.
+  void insertAtStart(Instruction *I);
+
 private:
   uint32_t Id; ///< The unique ID of the block.
-
-public:
-  // TODO: Make this private once we have proper instruction insertion routines.
-  Instruction *FirstInstruction; ///< The first instruction in the block.
+  std::unique_ptr<Instruction>
+      FirstInstruction; ///< The first instruction in the block.
 };
 
 } // namespace talvos

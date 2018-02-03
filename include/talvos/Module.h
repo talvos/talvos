@@ -16,8 +16,8 @@
 namespace talvos
 {
 
-struct Instruction;
 class Function;
+class Instruction;
 class Type;
 
 struct BufferVariable

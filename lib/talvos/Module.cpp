@@ -83,11 +83,12 @@ public:
           assert(Inst->operands[i].num_words == 1);
           I->Operands[i] = Inst->words[Inst->operands[i].offset];
         }
-        I->Next = nullptr;
-        if (!CurrentBlock->FirstInstruction)
-          CurrentBlock->FirstInstruction = I;
-        else if (PreviousInstruction)
-          PreviousInstruction->Next = I;
+
+        // Insert this instruction into the current block.
+        if (PreviousInstruction)
+          I->insertAfter(PreviousInstruction);
+        else
+          CurrentBlock->insertAtStart(I);
         PreviousInstruction = I;
       }
     }

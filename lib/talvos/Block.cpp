@@ -9,9 +9,24 @@
 namespace talvos
 {
 
-Block::~Block()
+Block::Block(uint32_t Id)
 {
-  // TODO: Destroy instructions
+  this->Id = Id;
+  FirstInstruction = nullptr;
+}
+
+Block::~Block() {}
+
+const Instruction *Block::getFirstInstruction() const
+{
+  return FirstInstruction.get();
+}
+
+void Block::insertAtStart(Instruction *I)
+{
+  if (FirstInstruction)
+    FirstInstruction.release()->insertAfter(I);
+  FirstInstruction = std::unique_ptr<Instruction>(I);
 }
 
 } // namespace talvos

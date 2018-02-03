@@ -216,7 +216,7 @@ Invocation::State Invocation::getState() const
 void Invocation::moveToBlock(uint32_t Id)
 {
   const Block *B = CurrentFunction->getBlock(Id);
-  CurrentInstruction = B->FirstInstruction;
+  CurrentInstruction = B->getFirstInstruction();
   PreviousBlock = CurrentBlock;
   CurrentBlock = Id;
 }
@@ -229,7 +229,7 @@ void Invocation::step()
 
   // Move program counter to next instruction.
   // Execution of terminator instruction may change this.
-  CurrentInstruction = CurrentInstruction->Next;
+  CurrentInstruction = CurrentInstruction->next();
 
   // Dispatch instruction to handler method.
   switch (I->Opcode)

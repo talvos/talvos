@@ -13,9 +13,9 @@
 namespace talvos
 {
 
-struct Instruction;
-class Function;
 class Device;
+class Function;
+class Instruction;
 class Memory;
 class Module;
 
