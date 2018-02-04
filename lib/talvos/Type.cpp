@@ -21,7 +21,10 @@ size_t Type::getElementOffset(uint32_t Index) const
   if (Id == STRUCT)
     return ElementTypes[Index].second;
   else
+  {
+    assert(ElementType && "Not an aggregate type");
     return ElementType->getSize() * Index;
+  }
 }
 
 const Type *Type::getElementType(uint32_t Index) const
