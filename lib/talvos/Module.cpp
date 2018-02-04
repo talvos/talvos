@@ -62,7 +62,7 @@ public:
           CurrentFunction->addBlock(std::move(CurrentBlock));
         else
           // First block - set as entry block.
-          CurrentFunction->setEntryBlock(Inst->result_id);
+          CurrentFunction->setFirstBlock(Inst->result_id);
 
         // Create new block.
         CurrentBlock = std::make_unique<Block>(Inst->result_id);

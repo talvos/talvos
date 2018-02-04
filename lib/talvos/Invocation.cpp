@@ -31,7 +31,7 @@ Invocation::Invocation(
   Objects = M->cloneObjects();
 
   CurrentFunction = F;
-  moveToBlock(F->getEntryBlockId());
+  moveToBlock(F->getFirstBlockId());
 
   // TODO: Handle local size larger than 1
   GlobalId[0] = GroupIdX;

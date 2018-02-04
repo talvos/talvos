@@ -19,6 +19,7 @@ class Type;
 class Function
 {
 public:
+  /// Create a new function with an ID and a type.
   Function(uint32_t Id, const Type *FunctionType);
 
   /// Add a block to this function.
@@ -28,17 +29,25 @@ public:
   const Block *getBlock(uint32_t Id) const { return Blocks.at(Id).get(); }
 
   /// Returns the first block in this function.
-  const Block *getEntryBlock() const { return Blocks.at(EntryBlockId).get(); }
+  const Block *getFirstBlock() const { return Blocks.at(FirstBlockId).get(); }
 
-  uint32_t getEntryBlockId() const { return EntryBlockId; }
+  /// Returns the ID of the first block in this function.
+  uint32_t getFirstBlockId() const { return FirstBlockId; }
+
+  /// Returns the ID of this function.
   uint32_t getId() { return Id; }
-  void setEntryBlock(uint32_t Id) { EntryBlockId = Id; }
+
+  /// Sets the ID of the entry block in this function.
+  void setFirstBlock(uint32_t Id) { FirstBlockId = Id; }
 
 private:
-  uint32_t Id;
-  const Type *FunctionType;
-  std::map<uint32_t, std::unique_ptr<Block>> Blocks;
-  uint32_t EntryBlockId;
+  /// A mapping from IDs to Blocks.
+  typedef std::map<uint32_t, std::unique_ptr<Block>> BlockMap;
+
+  uint32_t Id;              ///< The ID of this function.
+  const Type *FunctionType; ///< The function type.
+  uint32_t FirstBlockId;    ///< The ID of the first block.
+  BlockMap Blocks;          ///< The blocks in the function.
 };
 
 } // namespace talvos
