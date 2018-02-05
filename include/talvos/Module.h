@@ -83,9 +83,6 @@ public:
   /// Set \p Initializer to 0 to leave the variable uninitialized.
   void addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer);
 
-  /// Returns a cloned list of all result objects in this module.
-  std::vector<Object> cloneObjects() const;
-
   /// Get the entry point with the specified name.
   /// Returns nullptr if no entry point called \p Name is found.
   const Function *getEntryPoint(const std::string &Name) const;
@@ -108,6 +105,9 @@ public:
   /// Returns the object with the specified ID.
   /// \p Id must be valid constant instruction result.
   const Object &getObject(uint32_t Id) const;
+
+  /// Returns a list of all result objects in this module.
+  const std::vector<Object> &getObjects() const;
 
   /// Returns the type with the specified ID.
   const Type *getType(uint32_t Id) const;

@@ -11,6 +11,51 @@
 namespace talvos
 {
 
+Object::Object(const Type *Ty)
+{
+  assert(Ty);
+  this->Ty = Ty;
+  this->Data = new uint8_t[Ty->getSize()];
+}
+
+template <typename T> Object::Object(const Type *Ty, T Value) : Object(Ty)
+{
+  assert(Ty->isScalar());
+  assert(sizeof(T) == Ty->getSize());
+  *((T *)Data) = Value;
+}
+
+Object::~Object() { delete[] Data; }
+
+Object::Object(const Object &Src)
+{
+  Data = nullptr;
+  if (Src)
+  {
+    Ty = Src.Ty;
+    Data = new uint8_t[Ty->getSize()];
+    memcpy(Data, Src.Data, Ty->getSize());
+  }
+}
+
+Object &Object::operator=(const Object &Src)
+{
+  if (this != &Src)
+  {
+    Object Tmp(Src);
+    std::swap(Data, Tmp.Data);
+    std::swap(Ty, Tmp.Ty);
+  }
+  return *this;
+}
+
+Object::Object(Object &&Src) noexcept
+{
+  Ty = Src.Ty;
+  Data = Src.Data;
+  Src.Data = nullptr;
+}
+
 Object Object::extract(const std::vector<uint32_t> &Indices) const
 {
   assert(Data);
@@ -31,6 +76,15 @@ Object Object::extract(const std::vector<uint32_t> &Indices) const
   Result.Data = new uint8_t[Ty->getSize()];
   memcpy(Result.Data, Data + Offset, Ty->getSize());
   return Result;
+}
+
+template <typename T> T Object::get(uint32_t Element) const
+{
+  assert(Data);
+  assert(Ty->isScalar() || Ty->isVector());
+  assert(Ty->isScalar() ? (sizeof(T) == Ty->getSize() && Element == 0)
+                        : sizeof(T) == Ty->getElementType()->getSize());
+  return ((T *)Data)[Element];
 }
 
 void Object::insert(const std::vector<uint32_t> &Indices, const Object &Element)
@@ -61,10 +115,32 @@ Object Object::load(const Type *Ty, const Memory &Mem, size_t Address)
   return Result;
 }
 
+template <typename T> void Object::set(T Value, uint32_t Element)
+{
+  assert(Data);
+  assert(Ty->isScalar() || Ty->isVector());
+  assert(Ty->isScalar() ? (sizeof(T) == Ty->getSize() && Element == 0)
+                        : sizeof(T) == Ty->getElementType()->getSize());
+  ((T *)Data)[Element] = Value;
+}
+
 void Object::store(Memory &Mem, size_t Address) const
 {
   assert(Data);
   Mem.store(Address, Ty->getSize(), Data);
 }
+
+// Explicit template instantiations for scalar types.
+#define INSTANTIATE(TYPE)                                                      \
+  template Object::Object(const talvos::Type *Ty, TYPE Value);                 \
+  template TYPE Object::get(uint32_t) const;                                   \
+  template void Object::set(TYPE, uint32_t)
+INSTANTIATE(bool);
+INSTANTIATE(uint16_t);
+INSTANTIATE(uint32_t);
+INSTANTIATE(uint64_t);
+INSTANTIATE(size_t);
+INSTANTIATE(float);
+INSTANTIATE(double);
 
 } // namespace talvos

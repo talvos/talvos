@@ -39,7 +39,7 @@ public:
   DispatchCommand(Device *D, const Module *M, const Function *F,
                   uint32_t GroupCountX, uint32_t GroupCountY,
                   uint32_t GroupCountZ, const DescriptorSet &DS);
-  ~DispatchCommand();
+
   DispatchCommand(const DispatchCommand &) = delete;
   DispatchCommand &operator=(const DispatchCommand &) = delete;
 

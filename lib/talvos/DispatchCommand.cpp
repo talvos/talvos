@@ -33,16 +33,10 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
                                          V.second.Binding};
     if (DS.count(Binding))
     {
-      Object Pointer = Object::create<size_t>(V.second.Ty, DS.at(Binding));
+      Object Pointer(V.second.Ty, DS.at(Binding));
       Variables.push_back({V.first, Pointer});
     }
   }
-}
-
-DispatchCommand::~DispatchCommand()
-{
-  for (auto V : Variables)
-    V.second.destroy();
 }
 
 void DispatchCommand::run()

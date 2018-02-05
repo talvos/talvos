@@ -119,7 +119,7 @@ public:
         const Type *Ty = Mod->getType(Inst->type_id);
         // TODO: Use actual type
         uint32_t Value = Inst->words[Inst->operands[2].offset];
-        Mod->addObject(Inst->result_id, Object::create<uint32_t>(Ty, Value));
+        Mod->addObject(Inst->result_id, Object(Ty, Value));
         break;
       }
       case SpvOpConstantComposite:
@@ -128,7 +128,7 @@ public:
         const Type *Ty = Mod->getType(Inst->type_id);
 
         // Create composite object.
-        Object Composite = Object::create(Ty);
+        Object Composite(Ty);
 
         // Set constituent values.
         for (uint32_t i = 2; i < Inst->num_operands; i++)
@@ -352,8 +352,6 @@ Module::Module(uint32_t IdBound)
 
 Module::~Module()
 {
-  for (Object &Obj : Objects)
-    Obj.destroy();
 }
 
 void Module::addEntryPoint(std::string Name, uint32_t Id)
@@ -425,18 +423,6 @@ void Module::addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer)
   }
 }
 
-std::vector<Object> Module::cloneObjects() const
-{
-  std::vector<Object> ClonedObjects;
-  ClonedObjects.resize(Objects.size());
-  for (size_t i = 0; i < Objects.size(); i++)
-  {
-    if (Objects[i])
-      ClonedObjects[i] = Objects[i].clone();
-  }
-  return ClonedObjects;
-}
-
 const Function *Module::getEntryPoint(const std::string &Name) const
 {
   if (!EntryPoints.count(Name))
@@ -467,6 +453,8 @@ const PrivateVariableMap &Module::getPrivateVariables() const
 }
 
 const Object &Module::getObject(uint32_t Id) const { return Objects.at(Id); }
+
+const std::vector<Object> &Module::getObjects() const { return Objects; }
 
 const Type *Module::getType(uint32_t Id) const
 {

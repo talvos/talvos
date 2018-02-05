@@ -28,7 +28,6 @@ Invocation::Invocation(
 {
   Dev = D;
   PrivateMemory = new Memory;
-  Objects = M->cloneObjects();
 
   CurrentFunction = F;
   moveToBlock(F->getFirstBlockId());
@@ -38,9 +37,12 @@ Invocation::Invocation(
   GlobalId[1] = GroupIdY;
   GlobalId[2] = GroupIdZ;
 
+  // Clone module level objects.
+  Objects = M->getObjects();
+
   // Copy variable pointer values.
   for (auto V : Variables)
-    Objects[V.first] = V.second.clone();
+    Objects[V.first] = V.second;
 
   // Set up input variables.
   for (InputVariableMap::value_type V : M->getInputVariables())
@@ -52,7 +54,7 @@ Invocation::Invocation(
       // Allocate and initialize global ID.
       size_t Address = PrivateMemory->allocate(sizeof(GlobalId));
       PrivateMemory->store(Address, sizeof(GlobalId), (uint8_t *)GlobalId);
-      Objects[V.first] = Object::create<size_t>(V.second.Ty, Address);
+      Objects[V.first] = Object(V.second.Ty, Address);
       break;
     }
     default:
@@ -69,14 +71,12 @@ Invocation::Invocation(
     size_t Address = PrivateMemory->allocate(NumBytes);
     assert(V.second.Initializer);
     Objects[V.second.Initializer].store(*PrivateMemory, Address);
-    Objects[V.first] = Object::create<size_t>(V.second.Ty, Address);
+    Objects[V.first] = Object(V.second.Ty, Address);
   }
 }
 
 Invocation::~Invocation()
 {
-  for (Object &Obj : Objects)
-    Obj.destroy();
   delete PrivateMemory;
 }
 
@@ -100,7 +100,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
     ElemType = ElemType->getElementType(Idx);
   }
 
-  Objects[Inst->Operands[1]] = Object::create<size_t>(Inst->ResultType, Result);
+  Objects[Inst->Operands[1]] = Object(Inst->ResultType, Result);
 }
 
 template <typename F>
@@ -110,7 +110,7 @@ void Invocation::executeBinaryOp(const Instruction *Inst, const F &&Op)
   const Object &OpA = Objects[Inst->Operands[2]];
   const Object &OpB = Objects[Inst->Operands[3]];
   const Type *OpType = OpA.getType()->getScalarType();
-  Object Result = Object::create(Inst->ResultType);
+  Object Result(Inst->ResultType);
   for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
   {
     if (OpType->isInt() && OpType->getBitWidth() == 16)
@@ -174,7 +174,7 @@ void Invocation::executePhi(const Instruction *Inst)
     assert(i + 1 < Inst->NumOperands);
     if (Inst->Operands[i + 1] == PreviousBlock)
     {
-      Objects[Id] = Objects[Inst->Operands[i]].clone();
+      Objects[Id] = Objects[Inst->Operands[i]];
       return;
     }
   }

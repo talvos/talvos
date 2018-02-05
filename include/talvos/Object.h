@@ -17,80 +17,66 @@ namespace talvos
 
 class Memory;
 
+/// This class represents an instruction result.
+///
+/// Instances of this class have a Type and a backing data store.
 class Object
 {
 public:
+  /// Create an empty, uninitialized object.
   Object() { Data = nullptr; }
 
-  static Object create(const Type *Ty)
-  {
-    assert(Ty);
-    Object Result;
-    Result.Ty = Ty;
-    Result.Data = new uint8_t[Ty->getSize()];
-    return Result;
-  }
+  /// Allocate an object with type \p Ty, leaving its data uninitialized.
+  Object(const Type *Ty);
 
-  template <typename T> static Object create(const Type *Ty, T Value)
-  {
-    assert(Ty->isScalar());
-    assert(sizeof(T) == Ty->getSize());
-    Object Result;
-    Result.Ty = Ty;
-    Result.Data = new uint8_t[sizeof(T)];
-    *((T *)Result.Data) = Value;
-    return Result;
-  }
+  /// Allocate an object with type \p Ty, initializing it with \p Value.
+  /// \p Ty must be a scalar type, and its size must match \p sizeof(T).
+  template <typename T> Object(const Type *Ty, T Value);
 
-  Object clone() const
-  {
-    assert(Data);
-    Object Result;
-    Result.Ty = this->Ty;
-    Result.Data = new uint8_t[Ty->getSize()];
-    memcpy(Result.Data, this->Data, Ty->getSize());
-    return Result;
-  }
+  /// Destroy this object.
+  ~Object();
 
-  void destroy() { delete[] Data; }
+  /// Copy-construct a new object, cloning the data from \p Src.
+  Object(const Object &Src);
 
+  /// Copy-assign to this object, cloning the data from \p Src.
+  Object &operator=(const Object &Src);
+
+  /// Move-construct an object, taking the data from \p Src.
+  Object(Object &&Src) noexcept;
+
+  /// Extract an element from a composite object.
+  /// \returns a new object with the type and data of the target element.
   Object extract(const std::vector<uint32_t> &Indices) const;
 
-  template <typename T> T get(uint32_t Element = 0) const
-  {
-    assert(Data);
-    assert(Ty->isScalar() || Ty->isVector());
-    assert(Ty->isScalar() ? (sizeof(T) == Ty->getSize() && Element == 0)
-                          : sizeof(T) == Ty->getElementType()->getSize());
-    return ((T *)Data)[Element];
-  }
+  /// Get the value of this object as a scalar of type \p T.
+  /// The type of this object must be either a scalar or a vector, and the size
+  /// of the scalar type must match \p sizeof(T).
+  template <typename T> T get(uint32_t Element = 0) const;
 
+  /// Returns the type of this object.
   const Type *getType() const { return Ty; }
 
   /// Insert the value of \p Element into a composite object.
   void insert(const std::vector<uint32_t> &Indices, const Object &Element);
 
-  /// Create an object of type \p Ty from the data at \p Address.
-  static Object load(const Type *Ty, const Memory &Mem, size_t Address);
-
   /// Returns true if this object has been allocated.
   operator bool() const { return Data ? true : false; }
 
-  template <typename T> void set(T Value, uint32_t Element = 0)
-  {
-    assert(Data);
-    assert(Ty->isScalar() || Ty->isVector());
-    assert(Ty->isScalar() ? (sizeof(T) == Ty->getSize() && Element == 0)
-                          : sizeof(T) == Ty->getElementType()->getSize());
-    ((T *)Data)[Element] = Value;
-  }
+  /// Set the value of this object to a scalar of type \p T.
+  /// The type of this object must be either a scalar or a vector, and the size
+  /// of the scalar type must match \p sizeof(T).
+  template <typename T> void set(T Value, uint32_t Element = 0);
 
   /// Store the value of this object to memory at \p Address.
   void store(Memory &Mem, size_t Address) const;
 
+  /// Create an object of type \p Ty from the data at \p Address.
+  static Object load(const Type *Ty, const Memory &Mem, size_t Address);
+
 private:
-  const Type *Ty;
-  uint8_t *Data;
+  const Type *Ty; ///< The type of this object.
+  uint8_t *Data;  ///< The raw data backing this object.
 };
 
 } // namespace talvos
