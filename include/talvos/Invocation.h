@@ -55,6 +55,7 @@ public:
   void executeCompositeExtract(const Instruction *Inst);
   void executeIAdd(const Instruction *Inst);
   void executeIEqual(const Instruction *Inst);
+  void executeIMul(const Instruction *Inst);
   void executeLoad(const Instruction *Inst);
   void executePhi(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);

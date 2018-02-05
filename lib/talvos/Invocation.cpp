@@ -155,6 +155,11 @@ void Invocation::executeIEqual(const Instruction *Inst)
   executeBinaryOp(Inst, [](auto &&A, auto &&B) -> bool { return A == B; });
 }
 
+void Invocation::executeIMul(const Instruction *Inst)
+{
+  executeBinaryOp(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
+}
+
 void Invocation::executeLoad(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -248,6 +253,7 @@ void Invocation::step()
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
+    DISPATCH(SpvOpIMul, IMul);
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpPhi, Phi);
     DISPATCH(SpvOpReturn, Return);
