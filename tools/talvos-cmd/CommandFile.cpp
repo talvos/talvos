@@ -66,10 +66,10 @@ void CommandFile::parseAllocate()
   string Type = get<string>("allocation type");
   if (Type == "BUFFER")
   {
-    size_t NumBytes = get<size_t>("allocation size");
+    uint64_t NumBytes = get<uint64_t>("allocation size");
 
     // Allocate buffer.
-    size_t Address = Device->getGlobalMemory().allocate(NumBytes);
+    uint64_t Address = Device->getGlobalMemory().allocate(NumBytes);
     Buffers[Name] = {Address, NumBytes};
 
     // Process initializer.
@@ -222,13 +222,13 @@ template <typename T> void CommandFile::dump()
   if (!Buffers.count(Name))
     throw "invalid resource identifier";
 
-  size_t Address = Buffers.at(Name).first;
-  size_t NumBytes = Buffers.at(Name).second;
+  uint64_t Address = Buffers.at(Name).first;
+  uint64_t NumBytes = Buffers.at(Name).second;
 
   std::cout << std::endl
             << "Buffer '" << Name << "' (" << NumBytes
             << " bytes):" << std::endl;
-  for (size_t i = 0; i < NumBytes / sizeof(T); i++)
+  for (uint64_t i = 0; i < NumBytes / sizeof(T); i++)
   {
     T Value;
     Device->getGlobalMemory().load((uint8_t *)&Value, Address + i * sizeof(T),
@@ -237,19 +237,21 @@ template <typename T> void CommandFile::dump()
   }
 }
 
-template <typename T> void CommandFile::fill(size_t Address, size_t NumBytes)
+template <typename T>
+void CommandFile::fill(uint64_t Address, uint64_t NumBytes)
 {
   T FillValue = get<T>("fill value");
-  for (size_t i = 0; i < NumBytes; i += sizeof(FillValue))
+  for (uint64_t i = 0; i < NumBytes; i += sizeof(FillValue))
     Device->getGlobalMemory().store(Address + i, sizeof(FillValue),
                                     (uint8_t *)&FillValue);
 }
 
-template <typename T> void CommandFile::range(size_t Address, size_t NumBytes)
+template <typename T>
+void CommandFile::range(uint64_t Address, uint64_t NumBytes)
 {
   T Value = get<T>("range start");
   T RangeInc = get<T>("range inc");
-  for (size_t i = 0; i < NumBytes; i += sizeof(Value), Value += RangeInc)
+  for (uint64_t i = 0; i < NumBytes; i += sizeof(Value), Value += RangeInc)
     Device->getGlobalMemory().store(Address + i, sizeof(Value),
                                     (uint8_t *)&Value);
 }

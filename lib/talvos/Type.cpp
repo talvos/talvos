@@ -61,7 +61,7 @@ size_t Type::getSize() const
   case INT:
     return BitWidth / 8;
   case POINTER:
-    return sizeof(size_t);
+    return sizeof(uint64_t);
   case STRUCT:
     return ElementTypes[ElementCount - 1].second +
            ElementTypes[ElementCount - 1].first->getSize();

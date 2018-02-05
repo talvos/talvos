@@ -106,7 +106,7 @@ void Object::insert(const std::vector<uint32_t> &Indices, const Object &Element)
   memcpy(Data + Offset, Element.Data, Ty->getSize());
 }
 
-Object Object::load(const Type *Ty, const Memory &Mem, size_t Address)
+Object Object::load(const Type *Ty, const Memory &Mem, uint64_t Address)
 {
   Object Result;
   Result.Ty = Ty;
@@ -124,7 +124,7 @@ template <typename T> void Object::set(T Value, uint32_t Element)
   ((T *)Data)[Element] = Value;
 }
 
-void Object::store(Memory &Mem, size_t Address) const
+void Object::store(Memory &Mem, uint64_t Address) const
 {
   assert(Data);
   Mem.store(Address, Ty->getSize(), Data);
@@ -139,7 +139,6 @@ INSTANTIATE(bool);
 INSTANTIATE(uint16_t);
 INSTANTIATE(uint32_t);
 INSTANTIATE(uint64_t);
-INSTANTIATE(size_t);
 INSTANTIATE(float);
 INSTANTIATE(double);
 

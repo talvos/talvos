@@ -69,10 +69,10 @@ public:
   template <typename T> void set(T Value, uint32_t Element = 0);
 
   /// Store the value of this object to memory at \p Address.
-  void store(Memory &Mem, size_t Address) const;
+  void store(Memory &Mem, uint64_t Address) const;
 
   /// Create an object of type \p Ty from the data at \p Address.
-  static Object load(const Type *Ty, const Memory &Mem, size_t Address);
+  static Object load(const Type *Ty, const Memory &Mem, uint64_t Address);
 
 private:
   const Type *Ty; ///< The type of this object.

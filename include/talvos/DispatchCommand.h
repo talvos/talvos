@@ -18,7 +18,7 @@ class Module;
 class Object;
 
 /// Map from Descriptor/Binding pair to an address in memory.
-typedef std::map<std::pair<size_t, size_t>, size_t> DescriptorSet;
+typedef std::map<std::pair<size_t, size_t>, uint64_t> DescriptorSet;
 
 /// This class is used to invoke compute kernels on a virtual device.
 class DispatchCommand

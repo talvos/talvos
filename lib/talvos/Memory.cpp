@@ -30,7 +30,7 @@ Memory::~Memory()
     delete[] Buffers[Id].Data;
 }
 
-size_t Memory::allocate(size_t NumBytes)
+uint64_t Memory::allocate(uint64_t NumBytes)
 {
   // Allocate buffer.
   Buffer B;
@@ -38,7 +38,7 @@ size_t Memory::allocate(size_t NumBytes)
   B.Data = new uint8_t[NumBytes];
 
   // Get the next available buffer identifier.
-  size_t Id;
+  uint64_t Id;
   if (FreeBuffers.size())
   {
     // Re-use previously released buffer identifier.
@@ -65,9 +65,9 @@ void Memory::dump() const
   }
 }
 
-void Memory::dump(size_t Address) const
+void Memory::dump(uint64_t Address) const
 {
-  size_t Id = (Address >> OFFSET_BITS);
+  uint64_t Id = (Address >> OFFSET_BITS);
 
   if (!Buffers[Id].Data)
   {
@@ -75,14 +75,14 @@ void Memory::dump(size_t Address) const
     return;
   }
 
-  for (size_t i = 0; i < Buffers[Id].NumBytes; i++)
+  for (uint64_t i = 0; i < Buffers[Id].NumBytes; i++)
   {
     if (i % 4 == 0)
     {
       std::cout << std::endl
                 << std::hex << std::uppercase << std::setw(16)
                 << std::setfill(' ') << std::right
-                << ((((size_t)Id) << OFFSET_BITS) | i) << ":";
+                << ((((uint64_t)Id) << OFFSET_BITS) | i) << ":";
     }
     std::cout << " " << std::hex << std::uppercase << std::setw(2)
               << std::setfill('0') << (int)Buffers[Id].Data[i];
@@ -90,10 +90,10 @@ void Memory::dump(size_t Address) const
   std::cout << std::endl;
 }
 
-void Memory::load(uint8_t *Data, size_t Address, size_t NumBytes) const
+void Memory::load(uint8_t *Data, uint64_t Address, uint64_t NumBytes) const
 {
-  size_t Id = (Address >> OFFSET_BITS);
-  size_t Offset = (Address & (((size_t)-1) >> BUFFER_BITS));
+  uint64_t Id = (Address >> OFFSET_BITS);
+  uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
 
   // TODO: Generate useful error message for invalid memory accesses
   assert(Id < Buffers.size());
@@ -103,9 +103,9 @@ void Memory::load(uint8_t *Data, size_t Address, size_t NumBytes) const
   memcpy(Data, Buffers[Id].Data + Offset, NumBytes);
 }
 
-void Memory::release(size_t Address)
+void Memory::release(uint64_t Address)
 {
-  size_t Id = (Address >> OFFSET_BITS);
+  uint64_t Id = (Address >> OFFSET_BITS);
   assert(Buffers[Id].Data != nullptr);
 
   // Release memory used by buffer.
@@ -115,10 +115,10 @@ void Memory::release(size_t Address)
   FreeBuffers.push_back(Id);
 }
 
-void Memory::store(size_t Address, size_t NumBytes, const uint8_t *Data)
+void Memory::store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data)
 {
-  size_t Id = (Address >> OFFSET_BITS);
-  size_t Offset = (Address & (((size_t)-1) >> BUFFER_BITS));
+  uint64_t Id = (Address >> OFFSET_BITS);
+  uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
 
   // TODO: Generate useful error message for invalid memory accesses
   assert(Id < Buffers.size());

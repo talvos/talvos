@@ -52,7 +52,7 @@ Invocation::Invocation(
     case SpvBuiltInGlobalInvocationId:
     {
       // Allocate and initialize global ID.
-      size_t Address = PrivateMemory->allocate(sizeof(GlobalId));
+      uint64_t Address = PrivateMemory->allocate(sizeof(GlobalId));
       PrivateMemory->store(Address, sizeof(GlobalId), (uint8_t *)GlobalId);
       Objects[V.first] = Object(V.second.Ty, Address);
       break;
@@ -67,8 +67,8 @@ Invocation::Invocation(
   for (PrivateVariableMap::value_type V : M->getPrivateVariables())
   {
     // Allocate and initialize variable in private memory.
-    size_t NumBytes = V.second.Ty->getElementType()->getSize();
-    size_t Address = PrivateMemory->allocate(NumBytes);
+    uint64_t NumBytes = V.second.Ty->getElementType()->getSize();
+    uint64_t Address = PrivateMemory->allocate(NumBytes);
     assert(V.second.Initializer);
     Objects[V.second.Initializer].store(*PrivateMemory, Address);
     Objects[V.first] = Object(V.second.Ty, Address);
@@ -88,7 +88,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   // TODO: Generate useful error message for this
   assert(Base && "Invalid base pointer - missing descriptor set?");
 
-  size_t Result = Base.get<size_t>();
+  uint64_t Result = Base.get<uint64_t>();
   const Type *ElemType = Base.getType()->getElementType(0);
 
   // Loop over indices.
@@ -160,7 +160,7 @@ void Invocation::executeLoad(const Instruction *Inst)
   uint32_t Id = Inst->Operands[1];
   const Object &Src = Objects[Inst->Operands[2]];
   Memory &Mem = getMemory(Src.getType()->getStorageClass());
-  Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<size_t>());
+  Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<uint64_t>());
 }
 
 void Invocation::executePhi(const Instruction *Inst)
@@ -191,7 +191,7 @@ void Invocation::executeStore(const Instruction *Inst)
   uint32_t Id = Inst->Operands[1];
   const Object &Dest = Objects[Inst->Operands[0]];
   Memory &Mem = getMemory(Dest.getType()->getStorageClass());
-  Objects[Id].store(Mem, Dest.get<size_t>());
+  Objects[Id].store(Mem, Dest.get<uint64_t>());
 }
 
 Memory &Invocation::getMemory(uint32_t StorageClass)
