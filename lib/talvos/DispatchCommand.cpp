@@ -3,8 +3,6 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-#include <iostream>
-
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/DispatchCommand.h"
