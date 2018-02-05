@@ -70,10 +70,11 @@ public:
   /// Insert the value of \p Element into a composite object.
   void insert(const std::vector<uint32_t> &Indices, const Object &Element);
 
-  bool isSet() const { return Data ? true : false; }
-
   /// Create an object of type \p Ty from the data at \p Address.
   static Object load(const Type *Ty, const Memory &Mem, size_t Address);
+
+  /// Returns true if this object has been allocated.
+  operator bool() const { return Data ? true : false; }
 
   template <typename T> void set(T Value, uint32_t Element = 0)
   {

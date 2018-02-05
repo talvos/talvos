@@ -431,7 +431,7 @@ std::vector<Object> Module::cloneObjects() const
   ClonedObjects.resize(Objects.size());
   for (size_t i = 0; i < Objects.size(); i++)
   {
-    if (Objects[i].isSet())
+    if (Objects[i])
       ClonedObjects[i] = Objects[i].clone();
   }
   return ClonedObjects;

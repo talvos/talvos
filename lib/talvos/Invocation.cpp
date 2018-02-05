@@ -86,7 +86,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Object &Base = Objects[Inst->Operands[2]];
 
   // TODO: Generate useful error message for this
-  assert(Base.isSet() && "Invalid base pointer - missing descriptor set?");
+  assert(Base && "Invalid base pointer - missing descriptor set?");
 
   size_t Result = Base.get<size_t>();
   const Type *ElemType = Base.getType()->getElementType(0);
