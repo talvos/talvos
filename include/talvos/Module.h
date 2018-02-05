@@ -63,6 +63,10 @@ public:
   // Destroy the module and all its types, functions, blocks, and instructions.
   ~Module();
 
+  // Do not allow Modules to be copied.
+  Module(const Module &) = delete;
+  Module &operator=(const Module &) = delete;
+
   /// Add an entry point with the specified name and function ID.
   void addEntryPoint(std::string Name, uint32_t Id);
 
