@@ -58,6 +58,8 @@ size_t Type::getSize() const
     return ElementCount * ElementType->getSize();
   case BOOL:
     return 1;
+  case FLOAT:
+    return BitWidth / 8;
   case INT:
     return BitWidth / 8;
   case POINTER:
@@ -99,6 +101,13 @@ std::unique_ptr<Type> Type::getArray(const Type *ElemType,
 std::unique_ptr<Type> Type::getBool()
 {
   return std::unique_ptr<Type>(new Type(BOOL));
+}
+
+std::unique_ptr<Type> Type::getFloat(uint32_t Width)
+{
+  std::unique_ptr<Type> T(new Type(FLOAT));
+  T->BitWidth = Width;
+  return T;
 }
 
 std::unique_ptr<Type> Type::getInt(uint32_t Width)

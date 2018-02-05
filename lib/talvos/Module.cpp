@@ -242,6 +242,12 @@ public:
         Mod->addType(Inst->result_id, Type::getBool());
         break;
       }
+      case SpvOpTypeFloat:
+      {
+        uint32_t Width = Inst->words[Inst->operands[1].offset];
+        Mod->addType(Inst->result_id, Type::getFloat(Width));
+        break;
+      }
       case SpvOpTypeInt:
       {
         uint32_t Width = Inst->words[Inst->operands[1].offset];

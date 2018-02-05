@@ -58,6 +58,9 @@ public:
   /// Returns \p true if this is an array, struct, or vector type.
   bool isComposite() const;
 
+  /// Returns \p true if this is a floating point type.
+  bool isFloat() const { return Id == FLOAT; }
+
   /// Returns \p true if this is an integer type.
   bool isInt() const { return Id == INT; }
 
@@ -73,6 +76,9 @@ public:
 
   /// Create a boolean type.
   static std::unique_ptr<Type> getBool();
+
+  /// Create a floating point type.
+  static std::unique_ptr<Type> getFloat(uint32_t Width);
 
   /// Create an integer type.
   static std::unique_ptr<Type> getInt(uint32_t Width);
