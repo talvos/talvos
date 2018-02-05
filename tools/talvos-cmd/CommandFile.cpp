@@ -139,8 +139,8 @@ void CommandFile::parseAllocate()
 
 void CommandFile::parseDescriptorSet()
 {
-  size_t Set = get<size_t>("descriptor set");
-  size_t Binding = get<size_t>("binding");
+  uint32_t Set = get<uint32_t>("descriptor set");
+  uint32_t Binding = get<uint32_t>("binding");
   string Name = get<string>("resource name");
   if (!Buffers.count(Name))
     throw "invalid resource identifier";

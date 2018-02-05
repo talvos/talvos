@@ -27,8 +27,8 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
   for (BufferVariableMap::value_type V : M->getBufferVariables())
   {
     // Look-up variable in descriptor set and set pointer value.
-    std::pair<size_t, size_t> Binding = {V.second.DescriptorSet,
-                                         V.second.Binding};
+    std::pair<uint32_t, uint32_t> Binding = {V.second.DescriptorSet,
+                                             V.second.Binding};
     if (DS.count(Binding))
     {
       Object Pointer(V.second.Ty, DS.at(Binding));
