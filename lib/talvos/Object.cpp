@@ -11,22 +11,6 @@
 namespace talvos
 {
 
-Object Object::createComposite(const Type *Ty,
-                               const std::vector<Object> &Elements)
-{
-  assert(Ty->isComposite());
-  Object Result;
-  Result.Ty = Ty;
-  Result.Data = new uint8_t[Ty->getSize()];
-  for (size_t i = 0; i < Elements.size(); i++)
-  {
-    assert(Ty->getElementType(i) == Elements[i].getType());
-    memcpy(Result.Data + Ty->getElementOffset(i), Elements[i].Data,
-           Elements[i].getType()->getSize());
-  }
-  return Result;
-}
-
 Object Object::extract(const std::vector<uint32_t> &Indices) const
 {
   assert(Data);
@@ -47,6 +31,25 @@ Object Object::extract(const std::vector<uint32_t> &Indices) const
   Result.Data = new uint8_t[Ty->getSize()];
   memcpy(Result.Data, Data + Offset, Ty->getSize());
   return Result;
+}
+
+void Object::insert(const std::vector<uint32_t> &Indices, const Object &Element)
+{
+  assert(Data);
+
+  // Loop over indices to compute byte offset.
+  uint32_t Offset = 0;
+  const Type *Ty = this->Ty;
+  for (size_t i = 0; i < Indices.size(); i++)
+  {
+    assert(Ty->isComposite());
+    Offset += Ty->getElementOffset(Indices[i]);
+    Ty = Ty->getElementType(Indices[i]);
+  }
+
+  // Copy element data.
+  assert(Ty == Element.Ty);
+  memcpy(Data + Offset, Element.Data, Ty->getSize());
 }
 
 Object Object::load(const Type *Ty, const Memory &Mem, size_t Address)

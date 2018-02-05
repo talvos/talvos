@@ -127,17 +127,18 @@ public:
       {
         const Type *Ty = Mod->getType(Inst->type_id);
 
-        // Build list of constituent values.
-        std::vector<Object> Constituents;
-        for (int i = 2; i < Inst->num_operands; i++)
+        // Create composite object.
+        Object Composite = Object::create(Ty);
+
+        // Set constituent values.
+        for (uint32_t i = 2; i < Inst->num_operands; i++)
         {
           uint32_t Id = Inst->words[Inst->operands[i].offset];
-          Constituents.push_back(Mod->getObject(Id));
+          Composite.insert({i - 2}, Mod->getObject(Id));
         }
 
-        // Create and add composite.
-        Mod->addObject(Inst->result_id,
-                       Object::createComposite(Ty, Constituents));
+        // Add object to module.
+        Mod->addObject(Inst->result_id, Composite);
         break;
       }
       case SpvOpDecorate:

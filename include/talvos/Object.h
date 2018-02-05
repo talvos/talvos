@@ -42,9 +42,6 @@ public:
     return Result;
   }
 
-  static Object createComposite(const Type *Ty,
-                                const std::vector<Object> &Elements);
-
   Object clone() const
   {
     assert(Data);
@@ -69,6 +66,9 @@ public:
   }
 
   const Type *getType() const { return Ty; }
+
+  /// Insert the value of \p Element into a composite object.
+  void insert(const std::vector<uint32_t> &Indices, const Object &Element);
 
   bool isSet() const { return Data ? true : false; }
 
