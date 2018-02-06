@@ -29,7 +29,9 @@ private:
   void parseDescriptorSet();
   void parseDispatch();
   void parseDump();
+  void parseEndLoop();
   void parseEntry();
+  void parseLoop();
   void parseModule();
 
   template <typename T> void dump();
@@ -43,6 +45,7 @@ private:
   const talvos::Function *Function;
   std::map<std::string, std::pair<uint64_t, uint64_t>> Buffers;
   talvos::DescriptorSet DescriptorSet;
+  std::vector<std::pair<size_t, std::streampos>> Loops;
 
   std::string CurrentParseAction;
 };

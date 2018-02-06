@@ -225,12 +225,31 @@ void CommandFile::parseDump()
     throw NotRecognizedException();
 }
 
+void CommandFile::parseEndLoop()
+{
+  if (Loops.empty())
+    throw "ENDLOOP without matching LOOP";
+
+  if (--Loops.back().first)
+    Stream.seekg(Loops.back().second);
+  else
+    Loops.pop_back();
+}
+
 void CommandFile::parseEntry()
 {
   string Name = get<string>("entry name");
   Function = Module->getEntryPoint(Name);
   if (!Function)
     throw "invalid entry point";
+}
+
+void CommandFile::parseLoop()
+{
+  size_t Count = get<size_t>("loop count");
+  if (Count == 0)
+    throw "loop count must be > 0";
+  Loops.push_back({Count, Stream.tellg()});
 }
 
 void CommandFile::parseModule()
@@ -309,8 +328,12 @@ bool CommandFile::run()
         parseDispatch();
       else if (Command == "DUMP")
         parseDump();
+      else if (Command == "ENDLOOP")
+        parseEndLoop();
       else if (Command == "ENTRY")
         parseEntry();
+      else if (Command == "LOOP")
+        parseLoop();
       else if (Command == "MODULE")
         parseModule();
       else
@@ -340,6 +363,11 @@ bool CommandFile::run()
       {
         std::cerr << "Unexpected EOF while parsing " << CurrentParseAction
                   << std::endl;
+        return false;
+      }
+      if (!Loops.empty())
+      {
+        std::cerr << "ERROR: Unterminated LOOP" << std::endl;
         return false;
       }
     }

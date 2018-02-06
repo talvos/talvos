@@ -17,9 +17,12 @@ foreach(test
   talvos-cmd/dispatch-without-module
   talvos-cmd/duplicate-allocation-name
   talvos-cmd/empty
+  talvos-cmd/endloop-without-loop
   talvos-cmd/invalid-allocation-type
   talvos-cmd/invalid-resource-name
+  talvos-cmd/loop-count-zero
   talvos-cmd/unexpected-eof
+  talvos-cmd/unterminated-loop
 )
   add_test(
     NAME ${test}
