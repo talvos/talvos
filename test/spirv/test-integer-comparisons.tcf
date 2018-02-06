@@ -6,38 +6,55 @@
 MODULE test-integer-comparisons.spvasm
 ENTRY test_integer_comparisons
 
-ALLOCATE A BUFFER 44 DATA INT32
+ALLOCATE A BUFFER 52 DATA INT32
 0 0 0 1 -1
- 42  7  42
--42 -7 -42
+ 42  42  7  42
+-42 -42 -7 -42
 
-ALLOCATE B BUFFER 44 DATA INT32
+ALLOCATE B BUFFER 52 DATA INT32
 0 1 -1 0 0
-7 42 -7
--7 -42 42
+ 42  7  42 -7
+-42 -7 -42 42
 
-ALLOCATE gt BUFFER 44 FILL  INT32 0
+ALLOCATE eq BUFFER 52 FILL INT32 0
+ALLOCATE gt BUFFER 52 FILL INT32 0
 
 DESCRIPTOR_SET 0 0 A
 DESCRIPTOR_SET 0 1 B
 
-DESCRIPTOR_SET 0 2 gt
+DESCRIPTOR_SET 0 2 eq
+DESCRIPTOR_SET 0 3 gt
 
-DISPATCH 11 1 1
+DISPATCH 13 1 1
 
-DUMP INT32 A
-DUMP INT32 B
+DUMP INT32 eq
+# CHECK Buffer 'eq' (52 bytes):
+# CHECK   eq[0] = 1
+# CHECK   eq[1] = 0
+# CHECK   eq[2] = 0
+# CHECK   eq[3] = 0
+# CHECK   eq[4] = 0
+# CHECK   eq[5] = 1
+# CHECK   eq[6] = 0
+# CHECK   eq[7] = 0
+# CHECK   eq[8] = 0
+# CHECK   eq[9] = 1
+# CHECK   eq[10] = 0
+# CHECK   eq[11] = 0
+# CHECK   eq[12] = 0
+
 DUMP INT32 gt
-
-# CHECK Buffer 'gt' (44 bytes):
+# CHECK Buffer 'gt' (52 bytes):
 # CHECK   gt[0] = 0
 # CHECK   gt[1] = 0
 # CHECK   gt[2] = 1
 # CHECK   gt[3] = 1
 # CHECK   gt[4] = 0
-# CHECK   gt[5] = 1
-# CHECK   gt[6] = 0
-# CHECK   gt[7] = 1
-# CHECK   gt[8] = 0
-# CHECK   gt[9] = 1
+# CHECK   gt[5] = 0
+# CHECK   gt[6] = 1
+# CHECK   gt[7] = 0
+# CHECK   gt[8] = 1
+# CHECK   gt[9] = 0
 # CHECK   gt[10] = 0
+# CHECK   gt[11] = 1
+# CHECK   gt[12] = 0
