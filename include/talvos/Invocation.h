@@ -83,6 +83,8 @@ private:
   template <typename OperandType, typename F>
   void executeBinaryOp(const Instruction *Inst, const F &Op);
   template <typename F>
+  void executeBinaryOpFP(const Instruction *Inst, const F &&Op);
+  template <typename F>
   void executeBinaryOpSInt(const Instruction *Inst, const F &&Op);
   template <typename F>
   void executeBinaryOpUInt(const Instruction *Inst, const F &&Op);

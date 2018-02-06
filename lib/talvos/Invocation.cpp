@@ -139,6 +139,24 @@ void Invocation::executeBinaryOpSInt(const Instruction *Inst, const F &&Op)
 }
 
 template <typename F>
+void Invocation::executeBinaryOpFP(const Instruction *Inst, const F &&Op)
+{
+  const Type *OpType = Objects[Inst->Operands[2]].getType()->getScalarType();
+  assert(OpType->isFloat());
+  switch (OpType->getBitWidth())
+  {
+  case 32:
+    executeBinaryOp<float>(Inst, Op);
+    break;
+  case 64:
+    executeBinaryOp<double>(Inst, Op);
+    break;
+  default:
+    assert(false && "Unhandled binary operation floating point size");
+  }
+}
+
+template <typename F>
 void Invocation::executeBinaryOpUInt(const Instruction *Inst, const F &&Op)
 {
   const Type *OpType = Objects[Inst->Operands[2]].getType()->getScalarType();
