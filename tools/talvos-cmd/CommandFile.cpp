@@ -74,7 +74,33 @@ void CommandFile::parseAllocate()
 
     // Process initializer.
     string Init = get<string>("allocation initializer");
-    if (Init == "FILL")
+    if (Init == "DATA")
+    {
+      string InitType = get<string>("data type");
+      if (InitType == "INT8")
+        data<int8_t>(Address, NumBytes);
+      else if (InitType == "UINT8")
+        data<uint8_t>(Address, NumBytes);
+      else if (InitType == "INT16")
+        data<int16_t>(Address, NumBytes);
+      else if (InitType == "UINT16")
+        data<uint16_t>(Address, NumBytes);
+      else if (InitType == "INT32")
+        data<int32_t>(Address, NumBytes);
+      else if (InitType == "UINT32")
+        data<uint32_t>(Address, NumBytes);
+      else if (InitType == "INT64")
+        data<int64_t>(Address, NumBytes);
+      else if (InitType == "UINT64")
+        data<uint64_t>(Address, NumBytes);
+      else if (InitType == "FLOAT")
+        data<float>(Address, NumBytes);
+      else if (InitType == "DOUBLE")
+        data<double>(Address, NumBytes);
+      else
+        throw NotRecognizedException();
+    }
+    else if (Init == "FILL")
     {
       string InitType = get<string>("fill type");
       if (InitType == "INT8")
@@ -234,6 +260,17 @@ template <typename T> void CommandFile::dump()
     Device->getGlobalMemory().load((uint8_t *)&Value, Address + i * sizeof(T),
                                    sizeof(T));
     std::cout << "  " << Name << "[" << i << "] = " << Value << std::endl;
+  }
+}
+
+template <typename T>
+void CommandFile::data(uint64_t Address, uint64_t NumBytes)
+{
+  for (uint64_t i = 0; i < NumBytes; i += sizeof(T))
+  {
+    T Value = get<T>("data value");
+    Device->getGlobalMemory().store(Address + i, sizeof(Value),
+                                    (uint8_t *)&Value);
   }
 }
 

@@ -33,6 +33,7 @@ private:
   void parseModule();
 
   template <typename T> void dump();
+  template <typename T> void data(uint64_t Address, uint64_t NumBytes);
   template <typename T> void fill(uint64_t Address, uint64_t NumBytes);
   template <typename T> void range(uint64_t Address, uint64_t NumBytes);
 
