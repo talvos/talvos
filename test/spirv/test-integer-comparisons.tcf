@@ -1,0 +1,43 @@
+# Test integer comparison instructions.
+# Fills buffers A and B with specific values and then executes this snippet:
+#   if (A[i] <OP> B[i])
+#     OUTPUT[i] = 1;
+
+MODULE test-integer-comparisons.spvasm
+ENTRY test_integer_comparisons
+
+ALLOCATE A BUFFER 44 DATA INT32
+0 0 0 1 -1
+ 42  7  42
+-42 -7 -42
+
+ALLOCATE B BUFFER 44 DATA INT32
+0 1 -1 0 0
+7 42 -7
+-7 -42 42
+
+ALLOCATE gt BUFFER 44 FILL  INT32 0
+
+DESCRIPTOR_SET 0 0 A
+DESCRIPTOR_SET 0 1 B
+
+DESCRIPTOR_SET 0 2 gt
+
+DISPATCH 11 1 1
+
+DUMP INT32 A
+DUMP INT32 B
+DUMP INT32 gt
+
+# CHECK Buffer 'gt' (44 bytes):
+# CHECK   gt[0] = 0
+# CHECK   gt[1] = 0
+# CHECK   gt[2] = 1
+# CHECK   gt[3] = 1
+# CHECK   gt[4] = 0
+# CHECK   gt[5] = 1
+# CHECK   gt[6] = 0
+# CHECK   gt[7] = 1
+# CHECK   gt[8] = 0
+# CHECK   gt[9] = 1
+# CHECK   gt[10] = 0
