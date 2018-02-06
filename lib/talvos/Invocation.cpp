@@ -103,26 +103,60 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Objects[Inst->Operands[1]] = Object(Inst->ResultType, Result);
 }
 
-template <typename F>
-void Invocation::executeBinaryOp(const Instruction *Inst, const F &&Op)
+template <typename OperandType, typename F>
+void Invocation::executeBinaryOp(const Instruction *Inst, const F &Op)
 {
   uint32_t Id = Inst->Operands[1];
   const Object &OpA = Objects[Inst->Operands[2]];
   const Object &OpB = Objects[Inst->Operands[3]];
-  const Type *OpType = OpA.getType()->getScalarType();
   Object Result(Inst->ResultType);
   for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
   {
-    if (OpType->isInt() && OpType->getBitWidth() == 16)
-      Result.set(Op(OpA.get<uint16_t>(i), OpB.get<uint16_t>(i)), i);
-    else if (OpType->isInt() && OpType->getBitWidth() == 32)
-      Result.set(Op(OpA.get<uint32_t>(i), OpB.get<uint32_t>(i)), i);
-    else if (OpType->isInt() && OpType->getBitWidth() == 64)
-      Result.set(Op(OpA.get<uint64_t>(i), OpB.get<uint64_t>(i)), i);
-    else
-      assert(false && "Unhandled binary operation type");
+    Result.set(Op(OpA.get<OperandType>(i), OpB.get<OperandType>(i)), i);
   }
   Objects[Id] = Result;
+}
+
+template <typename F>
+void Invocation::executeBinaryOpSInt(const Instruction *Inst, const F &&Op)
+{
+  const Type *OpType = Objects[Inst->Operands[2]].getType()->getScalarType();
+  assert(OpType->isInt());
+  switch (OpType->getBitWidth())
+  {
+  case 16:
+    executeBinaryOp<int16_t>(Inst, Op);
+    break;
+  case 32:
+    executeBinaryOp<int32_t>(Inst, Op);
+    break;
+  case 64:
+    executeBinaryOp<int64_t>(Inst, Op);
+    break;
+  default:
+    assert(false && "Unhandled binary operation integer width");
+  }
+}
+
+template <typename F>
+void Invocation::executeBinaryOpUInt(const Instruction *Inst, const F &&Op)
+{
+  const Type *OpType = Objects[Inst->Operands[2]].getType()->getScalarType();
+  assert(OpType->isInt());
+  switch (OpType->getBitWidth())
+  {
+  case 16:
+    executeBinaryOp<uint16_t>(Inst, Op);
+    break;
+  case 32:
+    executeBinaryOp<uint32_t>(Inst, Op);
+    break;
+  case 64:
+    executeBinaryOp<uint64_t>(Inst, Op);
+    break;
+  default:
+    assert(false && "Unhandled binary operation integer width");
+  }
 }
 
 void Invocation::executeBranch(const Instruction *Inst)
@@ -147,17 +181,19 @@ void Invocation::executeCompositeExtract(const Instruction *Inst)
 
 void Invocation::executeIAdd(const Instruction *Inst)
 {
-  executeBinaryOp(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
+  executeBinaryOpUInt(Inst,
+                      [](auto A, auto B) -> decltype(A) { return A + B; });
 }
 
 void Invocation::executeIEqual(const Instruction *Inst)
 {
-  executeBinaryOp(Inst, [](auto &&A, auto &&B) -> bool { return A == B; });
+  executeBinaryOpUInt(Inst, [](auto &&A, auto &&B) -> bool { return A == B; });
 }
 
 void Invocation::executeIMul(const Instruction *Inst)
 {
-  executeBinaryOp(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
+  executeBinaryOpUInt(Inst,
+                      [](auto A, auto B) -> decltype(A) { return A * B; });
 }
 
 void Invocation::executeLoad(const Instruction *Inst)

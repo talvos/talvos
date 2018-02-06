@@ -136,6 +136,9 @@ void Object::store(Memory &Mem, uint64_t Address) const
   template TYPE Object::get(uint32_t) const;                                   \
   template void Object::set(TYPE, uint32_t)
 INSTANTIATE(bool);
+INSTANTIATE(int16_t);
+INSTANTIATE(int32_t);
+INSTANTIATE(int64_t);
 INSTANTIATE(uint16_t);
 INSTANTIATE(uint32_t);
 INSTANTIATE(uint64_t);

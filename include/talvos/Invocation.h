@@ -74,10 +74,16 @@ private:
   uint32_t GlobalId[3];  ///< The GlobalInvocationID.
   Memory *PrivateMemory; ///< The private memory instance.
 
-  /// Helper function to execute binary instructions.
+  /// Helper functions to execute binary instructions.
   /// \p F is a lambda that takes two operand values and returns the result.
+  ///@{
+  template <typename OperandType, typename F>
+  void executeBinaryOp(const Instruction *Inst, const F &Op);
   template <typename F>
-  void executeBinaryOp(const Instruction *Inst, const F &&Op);
+  void executeBinaryOpSInt(const Instruction *Inst, const F &&Op);
+  template <typename F>
+  void executeBinaryOpUInt(const Instruction *Inst, const F &&Op);
+  ///@}
 
   /// Returns the memory instance associated with \p StorageClass.
   Memory &getMemory(uint32_t StorageClass);
