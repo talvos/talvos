@@ -197,6 +197,11 @@ void Invocation::executeCompositeExtract(const Instruction *Inst)
   Objects[Id] = Objects[Inst->Operands[2]].extract(Indices);
 }
 
+void Invocation::executeFAdd(const Instruction *Inst)
+{
+  executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
+}
+
 void Invocation::executeFSub(const Instruction *Inst)
 {
   executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A - B; });
@@ -338,6 +343,7 @@ void Invocation::step()
     DISPATCH(SpvOpBranch, Branch);
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
+    DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFSub, FSub);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
