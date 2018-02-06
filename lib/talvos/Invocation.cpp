@@ -204,6 +204,11 @@ void Invocation::executeLoad(const Instruction *Inst)
   Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<uint64_t>());
 }
 
+void Invocation::executeLogicalNot(const Instruction *Inst)
+{
+  executeUnaryOp<bool>(Inst, [](bool &&A) { return !A; });
+}
+
 void Invocation::executePhi(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -238,6 +243,19 @@ void Invocation::executeStore(const Instruction *Inst)
   const Object &Dest = Objects[Inst->Operands[0]];
   Memory &Mem = getMemory(Dest.getType()->getStorageClass());
   Objects[Id].store(Mem, Dest.get<uint64_t>());
+}
+
+template <typename OperandType, typename F>
+void Invocation::executeUnaryOp(const Instruction *Inst, const F &Op)
+{
+  uint32_t Id = Inst->Operands[1];
+  const Object &OpA = Objects[Inst->Operands[2]];
+  Object Result(Inst->ResultType);
+  for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
+  {
+    Result.set(Op(OpA.get<OperandType>(i)), i);
+  }
+  Objects[Id] = Result;
 }
 
 Memory &Invocation::getMemory(uint32_t StorageClass)
@@ -296,6 +314,7 @@ void Invocation::step()
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpIMul, IMul);
     DISPATCH(SpvOpLoad, Load);
+    DISPATCH(SpvOpLogicalNot, LogicalNot);
     DISPATCH(SpvOpPhi, Phi);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);

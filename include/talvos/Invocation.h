@@ -57,6 +57,7 @@ public:
   void executeIEqual(const Instruction *Inst);
   void executeIMul(const Instruction *Inst);
   void executeLoad(const Instruction *Inst);
+  void executeLogicalNot(const Instruction *Inst);
   void executePhi(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
@@ -84,6 +85,13 @@ private:
   void executeBinaryOpSInt(const Instruction *Inst, const F &&Op);
   template <typename F>
   void executeBinaryOpUInt(const Instruction *Inst, const F &&Op);
+  ///@}
+
+  /// Helper functions to execute unary instructions.
+  /// \p F is a lambda that takes an operand value and returns the result.
+  ///@{
+  template <typename OperandType, typename F>
+  void executeUnaryOp(const Instruction *Inst, const F &Op);
   ///@}
 
   /// Returns the memory instance associated with \p StorageClass.
