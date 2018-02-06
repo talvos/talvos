@@ -202,6 +202,11 @@ void Invocation::executeFAdd(const Instruction *Inst)
   executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
 }
 
+void Invocation::executeFMul(const Instruction *Inst)
+{
+  executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
+}
+
 void Invocation::executeFSub(const Instruction *Inst)
 {
   executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A - B; });
@@ -344,6 +349,7 @@ void Invocation::step()
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpFAdd, FAdd);
+    DISPATCH(SpvOpFMul, FMul);
     DISPATCH(SpvOpFSub, FSub);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);

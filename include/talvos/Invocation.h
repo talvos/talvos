@@ -54,6 +54,7 @@ public:
   void executeBranchConditional(const Instruction *Inst);
   void executeCompositeExtract(const Instruction *Inst);
   void executeFAdd(const Instruction *Inst);
+  void executeFMul(const Instruction *Inst);
   void executeFSub(const Instruction *Inst);
   void executeIAdd(const Instruction *Inst);
   void executeIEqual(const Instruction *Inst);
