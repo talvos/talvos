@@ -12,7 +12,7 @@ namespace talvos
 
 uint32_t Type::getBitWidth() const
 {
-  assert(isInt());
+  assert(isInt() || isFloat());
   return BitWidth;
 }
 
