@@ -18,12 +18,14 @@ ALLOCATE B BUFFER 52 DATA INT32
 
 ALLOCATE eq BUFFER 52 FILL INT32 0
 ALLOCATE gt BUFFER 52 FILL INT32 0
+ALLOCATE lt BUFFER 52 FILL INT32 0
 
 DESCRIPTOR_SET 0 0 A
 DESCRIPTOR_SET 0 1 B
 
 DESCRIPTOR_SET 0 2 eq
 DESCRIPTOR_SET 0 3 gt
+DESCRIPTOR_SET 0 4 lt
 
 DISPATCH 13 1 1
 
@@ -58,3 +60,19 @@ DUMP INT32 gt
 # CHECK   gt[10] = 0
 # CHECK   gt[11] = 1
 # CHECK   gt[12] = 0
+
+DUMP INT32 lt
+# CHECK Buffer 'lt' (52 bytes):
+# CHECK   lt[0] = 0
+# CHECK   lt[1] = 1
+# CHECK   lt[2] = 0
+# CHECK   lt[3] = 0
+# CHECK   lt[4] = 1
+# CHECK   lt[5] = 0
+# CHECK   lt[6] = 0
+# CHECK   lt[7] = 1
+# CHECK   lt[8] = 0
+# CHECK   lt[9] = 0
+# CHECK   lt[10] = 1
+# CHECK   lt[11] = 0
+# CHECK   lt[12] = 1

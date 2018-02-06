@@ -237,6 +237,11 @@ void Invocation::executeSGreaterThan(const Instruction *Inst)
   executeBinaryOpSInt(Inst, [](auto &&A, auto &&B) -> bool { return A > B; });
 }
 
+void Invocation::executeSLessThan(const Instruction *Inst)
+{
+  executeBinaryOpSInt(Inst, [](auto &&A, auto &&B) -> bool { return A < B; });
+}
+
 void Invocation::executeStore(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -318,6 +323,7 @@ void Invocation::step()
     DISPATCH(SpvOpPhi, Phi);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
+    DISPATCH(SpvOpSLessThan, SLessThan);
     DISPATCH(SpvOpStore, Store);
 
     NOP(SpvOpLoopMerge);

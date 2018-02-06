@@ -61,6 +61,7 @@ public:
   void executePhi(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
+  void executeSLessThan(const Instruction *Inst);
   void executeStore(const Instruction *Inst);
   ///@}
 
