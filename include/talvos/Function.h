@@ -22,6 +22,10 @@ public:
   /// Create a new function with an ID and a type.
   Function(uint32_t Id, const Type *FunctionType);
 
+  // Do not allow Functions to be copied.
+  Function(const Function &) = delete;
+  Function &operator=(const Function &) = delete;
+
   /// Add a block to this function.
   void addBlock(std::unique_ptr<Block> B);
 
