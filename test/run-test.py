@@ -49,7 +49,7 @@ for ln in range(len(lines)):
                 oln = o
                 break
         if not matched:
-            print 'CHECK on line %d not found' % ln
+            print 'CHECK on line %d not found' % (ln+1)
             exit(1)
     elif line.startswith('# EXIT '):
         expected_exit_code = int(line[7:])
