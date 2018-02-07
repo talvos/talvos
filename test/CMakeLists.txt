@@ -4,6 +4,7 @@
 # terms please see the LICENSE file distributed with this source code.
 
 foreach(test
+  misc/jacobi
   misc/multiple-entry-points
   misc/vecadd
   misc/vecadd_binary
