@@ -333,6 +333,7 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
     return *PrivateMemory;
   default:
     assert(false && "Unhandled storage class");
+    abort();
   }
 }
 
