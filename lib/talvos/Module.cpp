@@ -194,6 +194,17 @@ public:
         }
         break;
       }
+      case SpvOpExtInstImport:
+      {
+        // TODO: Store the mapping from result ID to set for later use
+        char *ExtInstSet = (char *)(Inst->words + Inst->operands[1].offset);
+        if (strcmp(ExtInstSet, "GLSL.std.450"))
+        {
+          std::cerr << "WARNING: Unrecognized extended instruction set "
+                    << ExtInstSet << std::endl;
+        }
+        break;
+      }
       case SpvOpMemberDecorate:
       {
         uint32_t Target = Inst->words[Inst->operands[0].offset];
