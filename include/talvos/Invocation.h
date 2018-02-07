@@ -41,6 +41,10 @@ public:
   /// Destroy this invocation.
   ~Invocation();
 
+  // Do not allow Invocations to be copied.
+  Invocation(const Invocation &) = delete;
+  Invocation &operator=(const Invocation &) = delete;
+
   /// Returns the state of this invocation.
   State getState() const;
 
