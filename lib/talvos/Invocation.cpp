@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <spirv/unified1/GLSL.std.450.h>
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Block.h"
@@ -197,6 +198,26 @@ void Invocation::executeCompositeExtract(const Instruction *Inst)
   Objects[Id] = Objects[Inst->Operands[2]].extract(Indices);
 }
 
+void Invocation::executeExtInst(const Instruction *Inst)
+{
+  // TODO: Currently assumes extended instruction set is GLSL.std.450
+  // TODO: Use dispatch mechanism similar to step()?
+  uint32_t Id = Inst->Operands[1];
+  uint32_t ExtInst = Inst->Operands[3];
+  switch (ExtInst)
+  {
+  case GLSLstd450Fma:
+    // TODO: Handle vectors and double precision (using a helper function?)
+    assert(Inst->ResultType->isFloat());
+    assert(Inst->ResultType->getBitWidth() == 32);
+    Objects[Id] =
+        Object(Inst->ResultType, OP(4, float) * OP(5, float) + OP(6, float));
+    break;
+  default:
+    assert(false && "Unhandled GLSL.std.450 extended instruction");
+  }
+}
+
 void Invocation::executeFAdd(const Instruction *Inst)
 {
   executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
@@ -353,6 +374,7 @@ void Invocation::step()
     DISPATCH(SpvOpBranch, Branch);
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
+    DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFDiv, FDiv);
     DISPATCH(SpvOpFMul, FMul);
