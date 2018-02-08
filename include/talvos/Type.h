@@ -49,7 +49,8 @@ public:
   const Type *getScalarType() const;
 
   /// Returns the size of this type in bytes.
-  size_t getSize() const;
+  /// Returns zero for void, function, and runtime array types.
+  size_t getSize() const { return ByteSize; };
 
   /// Returns the storage class of this type.
   /// Valid for pointer types.
@@ -109,9 +110,10 @@ public:
 private:
   /// Create a new type.
   /// Used by the factory functions, which will populate class members directly.
-  Type(uint32_t Id)
+  Type(uint32_t Id, size_t ByteSize)
   {
     this->Id = Id;
+    this->ByteSize = ByteSize;
     ElementCount = 1;
     ElementType = nullptr;
   };
@@ -132,6 +134,8 @@ private:
   };
 
   uint32_t Id; ///< The ID of this type.
+
+  size_t ByteSize; ///< The size of this type in bytes.
 
   uint32_t BitWidth; ///< Valid for integer and floating point types.
 

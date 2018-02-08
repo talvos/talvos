@@ -49,30 +49,6 @@ const Type *Type::getScalarType() const
   }
 }
 
-size_t Type::getSize() const
-{
-  switch (Id)
-  {
-  case ARRAY:
-  case VECTOR:
-    return ElementCount * ElementType->getSize();
-  case BOOL:
-    return 1;
-  case FLOAT:
-    return BitWidth / 8;
-  case INT:
-    return BitWidth / 8;
-  case POINTER:
-    return sizeof(uint64_t);
-  case STRUCT:
-    return ElementTypes[ElementCount - 1].second +
-           ElementTypes[ElementCount - 1].first->getSize();
-  default:
-    assert(false && "Type::getSize() not implemented for this Type");
-    return 0;
-  }
-}
-
 uint32_t Type::getStorageClass() const
 {
   assert(Id == POINTER);
@@ -92,7 +68,7 @@ bool Type::isScalar() const
 std::unique_ptr<Type> Type::getArray(const Type *ElemType,
                                      uint32_t ElementCount)
 {
-  std::unique_ptr<Type> T(new Type(ARRAY));
+  std::unique_ptr<Type> T(new Type(ARRAY, ElementCount * ElemType->getSize()));
   T->ElementType = ElemType;
   T->ElementCount = ElementCount;
   return T;
@@ -100,19 +76,19 @@ std::unique_ptr<Type> Type::getArray(const Type *ElemType,
 
 std::unique_ptr<Type> Type::getBool()
 {
-  return std::unique_ptr<Type>(new Type(BOOL));
+  return std::unique_ptr<Type>(new Type(BOOL, 1));
 }
 
 std::unique_ptr<Type> Type::getFloat(uint32_t Width)
 {
-  std::unique_ptr<Type> T(new Type(FLOAT));
+  std::unique_ptr<Type> T(new Type(FLOAT, Width / 8));
   T->BitWidth = Width;
   return T;
 }
 
 std::unique_ptr<Type> Type::getInt(uint32_t Width)
 {
-  std::unique_ptr<Type> T(new Type(INT));
+  std::unique_ptr<Type> T(new Type(INT, Width / 8));
   T->BitWidth = Width;
   return T;
 }
@@ -121,7 +97,7 @@ std::unique_ptr<Type>
 Type::getFunction(const Type *ReturnType,
                   const std::vector<const Type *> &ArgTypes)
 {
-  std::unique_ptr<Type> T(new Type(FUNCTION));
+  std::unique_ptr<Type> T(new Type(FUNCTION, 0));
   T->ReturnType = ReturnType;
   T->ArgumentTypes = ArgTypes;
   return T;
@@ -130,7 +106,7 @@ Type::getFunction(const Type *ReturnType,
 std::unique_ptr<Type> Type::getPointer(uint32_t StorageClass,
                                        const Type *ElemType)
 {
-  std::unique_ptr<Type> T(new Type(POINTER));
+  std::unique_ptr<Type> T(new Type(POINTER, sizeof(uint64_t)));
   T->StorageClass = StorageClass;
   T->ElementType = ElemType;
   return T;
@@ -138,14 +114,16 @@ std::unique_ptr<Type> Type::getPointer(uint32_t StorageClass,
 
 std::unique_ptr<Type> Type::getRuntimeArray(const Type *ElemType)
 {
-  std::unique_ptr<Type> T(new Type(RUNTIME_ARRAY));
+  std::unique_ptr<Type> T(new Type(RUNTIME_ARRAY, 0));
   T->ElementType = ElemType;
   return T;
 }
 
 std::unique_ptr<Type> Type::getStruct(const StructElementTypeList &ElemTypes)
 {
-  std::unique_ptr<Type> T(new Type(STRUCT));
+  size_t ByteSize = ElemTypes[ElemTypes.size() - 1].second +
+                    ElemTypes[ElemTypes.size() - 1].first->getSize();
+  std::unique_ptr<Type> T(new Type(STRUCT, ByteSize));
   T->ElementTypes = ElemTypes;
   T->ElementCount = ElemTypes.size();
   return T;
@@ -154,7 +132,7 @@ std::unique_ptr<Type> Type::getStruct(const StructElementTypeList &ElemTypes)
 std::unique_ptr<Type> Type::getVector(const Type *ElemType, uint32_t ElemCount)
 {
   assert(ElemType->isScalar());
-  std::unique_ptr<Type> T(new Type(VECTOR));
+  std::unique_ptr<Type> T(new Type(VECTOR, ElemCount * ElemType->getSize()));
   T->ElementType = ElemType;
   T->ElementCount = ElemCount;
   return T;
@@ -162,7 +140,7 @@ std::unique_ptr<Type> Type::getVector(const Type *ElemType, uint32_t ElemCount)
 
 std::unique_ptr<Type> Type::getVoid()
 {
-  return std::unique_ptr<Type>(new Type(VOID));
+  return std::unique_ptr<Type>(new Type(VOID, 0));
 }
 
 } // namespace talvos
