@@ -1,3 +1,25 @@
+# Performs several iterations of the Jacobi method (corresponding OpenCL
+# kernel code below) on a trivial 2x2 matrix.
+#
+# kernel void jacobi(
+#   const int norder,
+#   global         float * xold,
+#   global         float * xnew,
+#   global         float * A,
+#   global         float * b)
+# {
+#   const int row  = get_global_id(0);
+#
+#   float tmp = 0.f;
+#   for (int col = 0; col < norder; col++)
+#   {
+#     if (row != col)
+#       tmp += A[row*norder + col] * xold[col];
+#   }
+#
+#   xnew[row] = (b[row] - tmp) / A[row*norder + row];
+# }
+
 MODULE jacobi.spvasm
 ENTRY jacobi
 
