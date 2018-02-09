@@ -10,6 +10,7 @@ foreach(test
   misc/vecadd_binary
   spirv/composite-extract
   spirv/constant-composite
+  spirv/function-call
   spirv/simple-branch
   spirv/simple-loop
   spirv/struct-offset

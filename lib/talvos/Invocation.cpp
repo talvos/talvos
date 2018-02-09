@@ -30,6 +30,7 @@ Invocation::Invocation(
   Dev = D;
   PrivateMemory = new Memory;
 
+  CurrentModule = M;
   CurrentFunction = F;
   moveToBlock(F->getFirstBlockId());
 
@@ -238,6 +239,27 @@ void Invocation::executeFSub(const Instruction *Inst)
   executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A - B; });
 }
 
+void Invocation::executeFunctionCall(const Instruction *Inst)
+{
+  const Function *Func = CurrentModule->getFunction(Inst->Operands[2]);
+
+  // Copy function parameters.
+  assert(Func->getNumParams() == Inst->NumOperands - 3);
+  for (int i = 3; i < Inst->NumOperands; i++)
+    Objects[Func->getParamId(i - 3)] = Objects[Inst->Operands[i]];
+
+  // Create call stack entry.
+  StackEntry SE;
+  SE.RetInst = CurrentInstruction;
+  SE.RetFunc = CurrentFunction;
+  SE.RetBlock = CurrentBlock;
+  CallStack.push_back(SE);
+
+  // Move to first block of callee function.
+  CurrentFunction = Func;
+  moveToBlock(CurrentFunction->getFirstBlockId());
+}
+
 void Invocation::executeIAdd(const Instruction *Inst)
 {
   executeBinaryOpUInt(Inst,
@@ -288,7 +310,41 @@ void Invocation::executePhi(const Instruction *Inst)
 
 void Invocation::executeReturn(const Instruction *Inst)
 {
-  // TODO: Jump back to callee function if necessary
+  // If this is the entry function, do nothing.
+  if (CallStack.empty())
+    return;
+
+  StackEntry SE = CallStack.back();
+  CallStack.pop_back();
+
+  // Release function scope allocations.
+  for (uint64_t Address : SE.Allocations)
+    PrivateMemory->release(Address);
+
+  // Return to callee function.
+  CurrentFunction = SE.RetFunc;
+  CurrentBlock = SE.RetBlock;
+  CurrentInstruction = SE.RetInst;
+}
+
+void Invocation::executeReturnValue(const Instruction *Inst)
+{
+  assert(!CallStack.empty());
+
+  StackEntry SE = CallStack.back();
+  CallStack.pop_back();
+
+  // Set return value.
+  Objects[SE.RetInst->Operands[1]] = Objects[Inst->Operands[0]];
+
+  // Release function scope allocations.
+  for (uint64_t Address : SE.Allocations)
+    PrivateMemory->release(Address);
+
+  // Return to callee function.
+  CurrentFunction = SE.RetFunc;
+  CurrentBlock = SE.RetBlock;
+  CurrentInstruction = SE.RetInst;
 }
 
 void Invocation::executeSGreaterThan(const Instruction *Inst)
@@ -322,6 +378,20 @@ void Invocation::executeUnaryOp(const Instruction *Inst, const F &Op)
   Objects[Id] = Result;
 }
 
+void Invocation::executeVariable(const Instruction *Inst)
+{
+  assert(Inst->Operands[2] == SpvStorageClassFunction);
+
+  uint32_t Id = Inst->Operands[1];
+  size_t AllocSize = Inst->ResultType->getElementType()->getSize();
+  uint64_t Address = PrivateMemory->allocate(AllocSize);
+  Objects[Id] = Object(Inst->ResultType, Address);
+
+  // Track function scope allocations.
+  if (!CallStack.empty())
+    CallStack.back().Allocations.push_back(Address);
+}
+
 Memory &Invocation::getMemory(uint32_t StorageClass)
 {
   switch (StorageClass)
@@ -329,6 +399,7 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
   case SpvStorageClassStorageBuffer:
     return Dev->getGlobalMemory();
   case SpvStorageClassInput:
+  case SpvStorageClassFunction:
   case SpvStorageClassPrivate:
     return *PrivateMemory;
   default:
@@ -380,6 +451,7 @@ void Invocation::step()
     DISPATCH(SpvOpFDiv, FDiv);
     DISPATCH(SpvOpFMul, FMul);
     DISPATCH(SpvOpFSub, FSub);
+    DISPATCH(SpvOpFunctionCall, FunctionCall);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpIMul, IMul);
@@ -387,9 +459,11 @@ void Invocation::step()
     DISPATCH(SpvOpLogicalNot, LogicalNot);
     DISPATCH(SpvOpPhi, Phi);
     DISPATCH(SpvOpReturn, Return);
+    DISPATCH(SpvOpReturnValue, ReturnValue);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
     DISPATCH(SpvOpSLessThan, SLessThan);
     DISPATCH(SpvOpStore, Store);
+    DISPATCH(SpvOpVariable, Variable);
 
     NOP(SpvOpLoopMerge);
     NOP(SpvOpSelectionMerge);

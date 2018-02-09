@@ -62,6 +62,7 @@ public:
   void executeFDiv(const Instruction *Inst);
   void executeFMul(const Instruction *Inst);
   void executeFSub(const Instruction *Inst);
+  void executeFunctionCall(const Instruction *Inst);
   void executeIAdd(const Instruction *Inst);
   void executeIEqual(const Instruction *Inst);
   void executeIMul(const Instruction *Inst);
@@ -69,16 +70,33 @@ public:
   void executeLogicalNot(const Instruction *Inst);
   void executePhi(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
+  void executeReturnValue(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
   void executeSLessThan(const Instruction *Inst);
   void executeStore(const Instruction *Inst);
+  void executeVariable(const Instruction *Inst);
   ///@}
 
 private:
+  const Module *CurrentModule;           ///< The current module.
   const Function *CurrentFunction;       ///< The current function.
   const Instruction *CurrentInstruction; ///< The current instruction.
   uint32_t CurrentBlock;                 ///< The current block.
   uint32_t PreviousBlock;                ///< The previous block (for OpPhi).
+
+  /// A data structure holding information for a function call.
+  struct StackEntry
+  {
+    // The instruction, block, and function to return to.
+    const Instruction *RetInst;
+    const Function *RetFunc;
+    uint32_t RetBlock;
+
+    /// Function scope allocations within this stack frame.
+    std::vector<uint64_t> Allocations;
+  };
+
+  std::vector<StackEntry> CallStack; ///< The function call stack.
 
   std::vector<Object> Objects; ///< Set of result objects.
 

@@ -8,6 +8,7 @@
 
 #include <map>
 #include <memory>
+#include <vector>
 
 namespace talvos
 {
@@ -29,6 +30,9 @@ public:
   /// Add a block to this function.
   void addBlock(std::unique_ptr<Block> B);
 
+  /// Add a parameter to this function.
+  void addParam(uint32_t Id) { Parameters.push_back(Id); }
+
   /// Returns the block with ID \p Id.
   const Block *getBlock(uint32_t Id) const { return Blocks.at(Id).get(); }
 
@@ -41,6 +45,12 @@ public:
   /// Returns the ID of this function.
   uint32_t getId() { return Id; }
 
+  /// Returns the ID of the parameter at index \p I.
+  uint32_t getParamId(uint32_t I) const { return Parameters[I]; }
+
+  /// Returns the number of parameters in this function.
+  uint32_t getNumParams() const { return Parameters.size(); }
+
   /// Sets the ID of the entry block in this function.
   void setFirstBlock(uint32_t Id) { FirstBlockId = Id; }
 
@@ -52,6 +62,8 @@ private:
   const Type *FunctionType; ///< The function type.
   uint32_t FirstBlockId;    ///< The ID of the first block.
   BlockMap Blocks;          ///< The blocks in the function.
+
+  std::vector<uint32_t> Parameters; ///< The function parameter IDs.
 };
 
 } // namespace talvos

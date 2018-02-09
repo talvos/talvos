@@ -1,0 +1,51 @@
+# Test function calls with parameters and return values, and function scope
+# allocations.
+#
+# void global_ptr_arg(global int *out)
+# {
+#   *out = 7;
+# }
+#
+# void private_ptr_arg(private int *out)
+# {
+#   *out = 11;
+# }
+#
+# int ret_val(int in)
+# {
+#   return 42 + in;
+# }
+#
+# void nested(global int *out)
+# {
+#   *out = ret_val(*out);
+# }
+#
+# kernel void entry(global int *output)
+# {
+#   output[0] = ret_val(output[0]);
+#
+#   global_ptr_arg(output + 1);
+#
+#   int x;
+#   private_ptr_arg(&x);
+#   output[2] = x;
+#
+#   nested(output + 3);
+# }
+
+MODULE function-call.spvasm
+ENTRY entry
+
+ALLOCATE output BUFFER 16 DATA UINT32 123 0 0 11
+DESCRIPTOR_SET 0 0 output
+
+DISPATCH 1 1 1
+
+DUMP UINT32 output
+
+# CHECK Buffer 'output' (16 bytes):
+# CHECK   output[0] = 165
+# CHECK   output[1] = 7
+# CHECK   output[2] = 11
+# CHECK   output[3] = 53

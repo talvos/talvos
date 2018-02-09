@@ -53,6 +53,10 @@ public:
       CurrentFunction = nullptr;
       CurrentBlock = nullptr;
     }
+    else if (Inst->opcode == SpvOpFunctionParameter)
+    {
+      CurrentFunction->addParam(Inst->result_id);
+    }
     else if (CurrentFunction)
     {
       if (Inst->opcode == SpvOpLabel)
