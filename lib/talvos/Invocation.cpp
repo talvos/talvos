@@ -10,6 +10,7 @@
 
 #include "talvos/Block.h"
 #include "talvos/Device.h"
+#include "talvos/DispatchCommand.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
@@ -23,16 +24,16 @@ namespace talvos
 {
 
 Invocation::Invocation(
-    Device *D, const Module *M, const Function *F, uint32_t GroupIdX,
-    uint32_t GroupIdY, uint32_t GroupIdZ,
+    const DispatchCommand *Dispatch, uint32_t GroupIdX, uint32_t GroupIdY,
+    uint32_t GroupIdZ, uint32_t LocalIdX, uint32_t LocalIdY, uint32_t LocalIdZ,
     const std::vector<std::pair<uint32_t, Object>> &Variables)
 {
-  Dev = D;
+  Dev = Dispatch->getDevice();
   PrivateMemory = new Memory;
 
-  CurrentModule = M;
-  CurrentFunction = F;
-  moveToBlock(F->getFirstBlockId());
+  CurrentModule = Dispatch->getModule();
+  CurrentFunction = Dispatch->getFunction();
+  moveToBlock(CurrentFunction->getFirstBlockId());
 
   // TODO: Handle local size larger than 1
   GlobalId[0] = GroupIdX;
@@ -40,14 +41,14 @@ Invocation::Invocation(
   GlobalId[2] = GroupIdZ;
 
   // Clone module level objects.
-  Objects = M->getObjects();
+  Objects = CurrentModule->getObjects();
 
   // Copy variable pointer values.
   for (auto V : Variables)
     Objects[V.first] = V.second;
 
   // Set up input variables.
-  for (InputVariableMap::value_type V : M->getInputVariables())
+  for (InputVariableMap::value_type V : CurrentModule->getInputVariables())
   {
     switch (V.second.Builtin)
     {
@@ -66,7 +67,7 @@ Invocation::Invocation(
   }
 
   // Set up private variables.
-  for (PrivateVariableMap::value_type V : M->getPrivateVariables())
+  for (PrivateVariableMap::value_type V : CurrentModule->getPrivateVariables())
   {
     // Allocate and initialize variable in private memory.
     uint64_t NumBytes = V.second.Ty->getElementType()->getSize();

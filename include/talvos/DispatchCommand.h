@@ -43,6 +43,15 @@ public:
   DispatchCommand(const DispatchCommand &) = delete;
   DispatchCommand &operator=(const DispatchCommand &) = delete;
 
+  /// Return the device this command is targeting.
+  Device *getDevice() const { return Dev; }
+
+  /// Return the function this command is invoking.
+  const Function *getFunction() const { return Func; }
+
+  /// Return the module this command is using.
+  const Module *getModule() const { return Mod; }
+
   /// Run the dispatch command to completion.
   void run();
 
@@ -53,6 +62,9 @@ private:
   uint32_t GroupCountX; ///< The number of groups in the X dimension.
   uint32_t GroupCountY; ///< The number of groups in the Y dimension.
   uint32_t GroupCountZ; ///< The number of groups in the Z dimension.
+  uint32_t GroupSizeX;  ///< The size of each group in the X dimension.
+  uint32_t GroupSizeY;  ///< The size of each group in the Y dimension.
+  uint32_t GroupSizeZ;  ///< The size of each group in the Z dimension.
   std::vector<std::pair<uint32_t, Object>>
       Variables;        ///< Resolved variable values.
 };

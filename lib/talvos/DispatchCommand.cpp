@@ -23,6 +23,11 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
   this->GroupCountY = GroupCountY;
   this->GroupCountZ = GroupCountZ;
 
+  // TODO: Use actual group size
+  this->GroupSizeX = 1;
+  this->GroupSizeY = 1;
+  this->GroupSizeZ = 1;
+
   // Resolve buffer variables.
   for (BufferVariableMap::value_type V : M->getBufferVariables())
   {
@@ -39,18 +44,27 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
 
 void DispatchCommand::run()
 {
-  for (uint32_t Z = 0; Z < GroupCountZ; Z++)
+  for (uint32_t GZ = 0; GZ < GroupCountZ; GZ++)
   {
-    for (uint32_t Y = 0; Y < GroupCountY; Y++)
+    for (uint32_t GY = 0; GY < GroupCountY; GY++)
     {
-      for (uint32_t X = 0; X < GroupCountX; X++)
+      for (uint32_t GX = 0; GX < GroupCountX; GX++)
       {
-        Invocation I(Dev, Mod, Func, X, Y, Z, Variables);
-
-        // TODO: Handle barriers
-        while (I.getState() == Invocation::READY)
+        for (uint32_t LZ = 0; LZ < GroupSizeZ; LZ++)
         {
-          I.step();
+          for (uint32_t LY = 0; LY < GroupSizeY; LY++)
+          {
+            for (uint32_t LX = 0; LX < GroupSizeX; LX++)
+            {
+              Invocation I(this, GX, GY, GZ, LX, LY, LZ, Variables);
+
+              // TODO: Handle barriers
+              while (I.getState() == Invocation::READY)
+              {
+                I.step();
+              }
+            }
+          }
         }
       }
     }

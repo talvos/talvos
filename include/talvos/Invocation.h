@@ -14,6 +14,7 @@ namespace talvos
 {
 
 class Device;
+class DispatchCommand;
 class Function;
 class Instruction;
 class Memory;
@@ -31,11 +32,12 @@ public:
   enum State { READY, FINISHED };
 
 public:
-  /// Create an invocation of the entry point \p F on a particular device.
+  /// Create an invocation for \p Dispatch, with specific group and local IDs.
   /// Global variables with their resolved pointer values are listed in
   /// \p Variables.
-  Invocation(Device *D, const Module *M, const Function *F, uint32_t GroupIdX,
-             uint32_t GroupIdY, uint32_t GroupIdZ,
+  Invocation(const DispatchCommand *Dispatch, uint32_t GroupIdX,
+             uint32_t GroupIdY, uint32_t GroupIdZ, uint32_t LocalIdX,
+             uint32_t LocalIdY, uint32_t LocalIdZ,
              const std::vector<std::pair<uint32_t, Object>> &Variables);
 
   /// Destroy this invocation.
