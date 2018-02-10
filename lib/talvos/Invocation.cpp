@@ -327,6 +327,32 @@ void Invocation::executePhi(const Instruction *Inst)
   assert(false && "no matching predecessor block for OpPhi");
 }
 
+void Invocation::executePtrAccessChain(const Instruction *Inst)
+{
+  // Base pointer.
+  Object &Base = Objects[Inst->Operands[2]];
+
+  // TODO: Generate useful error message for this
+  assert(Base && "Invalid base pointer - missing descriptor set?");
+
+  uint64_t Result = Base.get<uint64_t>();
+  const Type *ElemType = Base.getType()->getElementType();
+
+  // Perform initial deference for element index.
+  Result += Base.getType()->getElementOffset(OP(3, uint32_t));
+
+  // Loop over indices.
+  for (int i = 4; i < Inst->NumOperands; i++)
+  {
+    // TODO: Handle indices of different sizes.
+    uint32_t Idx = OP(i, uint32_t);
+    Result += ElemType->getElementOffset(Idx);
+    ElemType = ElemType->getElementType(Idx);
+  }
+
+  Objects[Inst->Operands[1]] = Object(Inst->ResultType, Result);
+}
+
 void Invocation::executeReturn(const Instruction *Inst)
 {
   // If this is the entry function, do nothing.
@@ -484,6 +510,7 @@ void Invocation::step()
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpLogicalNot, LogicalNot);
     DISPATCH(SpvOpPhi, Phi);
+    DISPATCH(SpvOpPtrAccessChain, PtrAccessChain);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpReturnValue, ReturnValue);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);

@@ -73,6 +73,7 @@ public:
   void executeLoad(const Instruction *Inst);
   void executeLogicalNot(const Instruction *Inst);
   void executePhi(const Instruction *Inst);
+  void executePtrAccessChain(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeReturnValue(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
