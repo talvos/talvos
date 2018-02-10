@@ -22,6 +22,7 @@ foreach(test
   talvos-cmd/endloop-without-loop
   talvos-cmd/invalid-allocation-type
   talvos-cmd/invalid-resource-name
+  talvos-cmd/invalid-vector-suffix
   talvos-cmd/loop-count-zero
   talvos-cmd/unexpected-eof
   talvos-cmd/unterminated-loop

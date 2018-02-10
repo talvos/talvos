@@ -192,26 +192,38 @@ void CommandFile::parseDispatch()
 void CommandFile::parseDump()
 {
   string DumpType = get<string>("dump type");
+
+  unsigned VecWidth = 1;
+  size_t VPos = DumpType.find('v');
+  if (VPos != string::npos)
+  {
+    char *End;
+    VecWidth = strtoul(DumpType.c_str() + VPos + 1, &End, 10);
+    if (VecWidth == 0 || strlen(End))
+      throw "invalid vector suffix";
+    DumpType = DumpType.substr(0, VPos);
+  }
+
   if (DumpType == "INT8")
-    dump<int8_t>();
+    dump<int8_t>(VecWidth);
   else if (DumpType == "UINT8")
-    dump<uint8_t>();
+    dump<uint8_t>(VecWidth);
   else if (DumpType == "INT16")
-    dump<int16_t>();
+    dump<int16_t>(VecWidth);
   else if (DumpType == "UINT16")
-    dump<uint16_t>();
+    dump<uint16_t>(VecWidth);
   else if (DumpType == "INT32")
-    dump<int32_t>();
+    dump<int32_t>(VecWidth);
   else if (DumpType == "UINT32")
-    dump<uint32_t>();
+    dump<uint32_t>(VecWidth);
   else if (DumpType == "INT64")
-    dump<int64_t>();
+    dump<int64_t>(VecWidth);
   else if (DumpType == "UINT64")
-    dump<uint64_t>();
+    dump<uint64_t>(VecWidth);
   else if (DumpType == "FLOAT")
-    dump<float>();
+    dump<float>(VecWidth);
   else if (DumpType == "DOUBLE")
-    dump<double>();
+    dump<double>(VecWidth);
   else if (DumpType == "ALL")
     Device->getGlobalMemory().dump();
   else if (DumpType == "RAW")
@@ -261,7 +273,7 @@ void CommandFile::parseModule()
     throw "failed to load SPIR-V module";
 }
 
-template <typename T> void CommandFile::dump()
+template <typename T> void CommandFile::dump(unsigned VecWidth)
 {
   string Name = get<string>("allocation name");
   if (!Buffers.count(Name))
@@ -270,15 +282,36 @@ template <typename T> void CommandFile::dump()
   uint64_t Address = Buffers.at(Name).first;
   uint64_t NumBytes = Buffers.at(Name).second;
 
+  // 3-element vectors are padded to 4-elements in buffers.
+  if (VecWidth == 3)
+    VecWidth = 4;
+
   std::cout << std::endl
             << "Buffer '" << Name << "' (" << NumBytes
             << " bytes):" << std::endl;
-  for (uint64_t i = 0; i < NumBytes / sizeof(T); i++)
+  for (uint64_t i = 0; i < NumBytes / sizeof(T); i += VecWidth)
   {
-    T Value;
-    Device->getGlobalMemory().load((uint8_t *)&Value, Address + i * sizeof(T),
-                                   sizeof(T));
-    std::cout << "  " << Name << "[" << i << "] = " << Value << std::endl;
+    std::cout << "  " << Name << "[" << (i / VecWidth) << "] = ";
+
+    if (VecWidth > 1)
+      std::cout << "(";
+    for (unsigned v = 0; v < VecWidth; v++)
+    {
+      if (v > 0)
+        std::cout << ", ";
+
+      if (i + v >= NumBytes / sizeof(T))
+        break;
+
+      T Value;
+      Device->getGlobalMemory().load((uint8_t *)&Value,
+                                     Address + (i + v) * sizeof(T), sizeof(T));
+      std::cout << Value;
+    }
+    if (VecWidth > 1)
+      std::cout << ")";
+
+    std::cout << std::endl;
   }
 }
 
