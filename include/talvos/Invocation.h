@@ -60,6 +60,7 @@ public:
   void executeBranch(const Instruction *Inst);
   void executeBranchConditional(const Instruction *Inst);
   void executeCompositeExtract(const Instruction *Inst);
+  void executeCompositeInsert(const Instruction *Inst);
   void executeExtInst(const Instruction *Inst);
   void executeFAdd(const Instruction *Inst);
   void executeFDiv(const Instruction *Inst);

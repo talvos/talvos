@@ -206,6 +206,18 @@ void Invocation::executeCompositeExtract(const Instruction *Inst)
   Objects[Id] = Objects[Inst->Operands[2]].extract(Indices);
 }
 
+void Invocation::executeCompositeInsert(const Instruction *Inst)
+{
+  uint32_t Id = Inst->Operands[1];
+  Object &Element = Objects[Inst->Operands[2]];
+  // TODO: Handle indices of different sizes.
+  std::vector<uint32_t> Indices(Inst->Operands + 4,
+                                Inst->Operands + Inst->NumOperands);
+  assert(Objects[Inst->Operands[3]].getType()->isComposite());
+  Objects[Id] = Objects[Inst->Operands[3]];
+  Objects[Id].insert(Indices, Element);
+}
+
 void Invocation::executeExtInst(const Instruction *Inst)
 {
   // TODO: Currently assumes extended instruction set is GLSL.std.450
@@ -459,6 +471,7 @@ void Invocation::step()
     DISPATCH(SpvOpBranch, Branch);
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
+    DISPATCH(SpvOpCompositeInsert, CompositeInsert);
     DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFDiv, FDiv);
