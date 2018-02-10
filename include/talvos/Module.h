@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "talvos/Dim3.h"
 #include "talvos/Object.h"
 
 namespace talvos
@@ -73,6 +74,9 @@ public:
   /// Add a function to this module.
   void addFunction(std::unique_ptr<Function> Func);
 
+  /// Add a local size execution mode to an entry point.
+  void addLocalSize(uint32_t Entry, Dim3 LocalSize);
+
   /// Add an object to this module.
   void addObject(uint32_t Id, const Object &Obj);
 
@@ -101,6 +105,10 @@ public:
 
   /// Returns the private variable map.
   const PrivateVariableMap &getPrivateVariables() const;
+
+  /// Returns the LocalSize execution mode for an entry point.
+  /// This will return (1,1,1) if it has not been explicitly set for \p Entry.
+  Dim3 getLocalSize(uint32_t Entry) const;
 
   /// Returns the object with the specified ID.
   /// \p Id must be valid constant instruction result.
@@ -142,6 +150,7 @@ private:
   TypeMap Types;                       ///< Type mapping.
   FunctionMap Functions;               ///< Function mapping.
   EntryPointMap EntryPoints;           ///< Entry point mapping.
+  std::map<uint32_t, Dim3> LocalSizes; ///< LocalSize execution modes.
 };
 
 } // namespace talvos

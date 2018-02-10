@@ -181,11 +181,12 @@ void CommandFile::parseDispatch()
   if (!Function)
     throw "DISPATCH reached with no prior ENTRY command";
 
-  uint32_t GroupsCountX = get<uint32_t>("group count X");
-  uint32_t GroupsCountY = get<uint32_t>("group count Y");
-  uint32_t GroupsCountZ = get<uint32_t>("group count Z");
-  talvos::DispatchCommand Command(Device, Module.get(), Function, GroupsCountX,
-                                  GroupsCountY, GroupsCountZ, DescriptorSet);
+  talvos::Dim3 GroupCount;
+  GroupCount.X = get<uint32_t>("group count X");
+  GroupCount.Y = get<uint32_t>("group count Y");
+  GroupCount.Z = get<uint32_t>("group count Z");
+  talvos::DispatchCommand Command(Device, Module.get(), Function, GroupCount,
+                                  DescriptorSet);
   Command.run();
 }
 

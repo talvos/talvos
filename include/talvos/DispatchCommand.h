@@ -9,6 +9,8 @@
 #include <map>
 #include <vector>
 
+#include "talvos/Dim3.h"
+
 namespace talvos
 {
 
@@ -32,13 +34,10 @@ public:
   /// \param D The target device.
   /// \param M The module containing the entry point to invoke.
   /// \param F The entry point to invoke.
-  /// \param GroupCountX The number of groups in the X dimension.
-  /// \param GroupCountY The number of groups in the Y dimension.
-  /// \param GroupCountZ The number of groups in the Z dimension.
+  /// \param NumGroups The number of groups to launch.
   /// \param DS The descriptor set mapping to use.
-  DispatchCommand(Device *D, const Module *M, const Function *F,
-                  uint32_t GroupCountX, uint32_t GroupCountY,
-                  uint32_t GroupCountZ, const DescriptorSet &DS);
+  DispatchCommand(Device *D, const Module *M, const Function *F, Dim3 NumGroups,
+                  const DescriptorSet &DS);
 
   DispatchCommand(const DispatchCommand &) = delete;
   DispatchCommand &operator=(const DispatchCommand &) = delete;
@@ -48,6 +47,12 @@ public:
 
   /// Return the function this command is invoking.
   const Function *getFunction() const { return Func; }
+
+  /// Return the workgroup size.
+  Dim3 getGroupSize() const { return GroupSize; }
+
+  /// Return the number of workgroups.
+  Dim3 getNumGroups() const { return NumGroups; }
 
   /// Return the module this command is using.
   const Module *getModule() const { return Mod; }
@@ -59,14 +64,11 @@ private:
   Device *Dev;          ///< The target device.
   const Module *Mod;    ///< The module containing the entry point to invoke.
   const Function *Func; ///< The entry point to invoke.
-  uint32_t GroupCountX; ///< The number of groups in the X dimension.
-  uint32_t GroupCountY; ///< The number of groups in the Y dimension.
-  uint32_t GroupCountZ; ///< The number of groups in the Z dimension.
-  uint32_t GroupSizeX;  ///< The size of each group in the X dimension.
-  uint32_t GroupSizeY;  ///< The size of each group in the Y dimension.
-  uint32_t GroupSizeZ;  ///< The size of each group in the Z dimension.
-  std::vector<std::pair<uint32_t, Object>>
-      Variables;        ///< Resolved variable values.
+  Dim3 GroupSize;       ///< The size of each workgroup.
+  Dim3 NumGroups;       ///< The number of workgroups.
+
+  /// Resolved variable values.
+  std::vector<std::pair<uint32_t, Object>> Variables;
 };
 
 } // namespace talvos

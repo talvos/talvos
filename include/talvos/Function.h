@@ -43,7 +43,7 @@ public:
   uint32_t getFirstBlockId() const { return FirstBlockId; }
 
   /// Returns the ID of this function.
-  uint32_t getId() { return Id; }
+  uint32_t getId() const { return Id; }
 
   /// Returns the ID of the parameter at index \p I.
   uint32_t getParamId(uint32_t I) const { return Parameters[I]; }

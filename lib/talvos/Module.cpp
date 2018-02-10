@@ -187,6 +187,22 @@ public:
         Mod->addEntryPoint(Name, Id);
         break;
       }
+      case SpvOpExecutionMode:
+      {
+        uint32_t Entry = Inst->words[Inst->operands[0].offset];
+        uint32_t Mode = Inst->words[Inst->operands[1].offset];
+        switch (Mode)
+        {
+        case SpvExecutionModeLocalSize:
+          Mod->addLocalSize(Entry,
+                            Dim3(Inst->words + Inst->operands[2].offset));
+          break;
+        default:
+          std::cerr << "Unimplemented execution mode: " << Mode << std::endl;
+          abort();
+        }
+        break;
+      }
       case SpvOpExtension:
       {
         char *Extension = (char *)(Inst->words + Inst->operands[0].offset);
@@ -403,6 +419,12 @@ void Module::addFunction(std::unique_ptr<Function> Func)
   Functions[Func->getId()] = std::move(Func);
 }
 
+void Module::addLocalSize(uint32_t Entry, Dim3 LocalSize)
+{
+  assert(LocalSizes.count(Entry) == 0);
+  LocalSizes[Entry] = LocalSize;
+}
+
 void Module::addObject(uint32_t Id, const Object &Obj)
 {
   assert(Id < Objects.size());
@@ -436,9 +458,9 @@ void Module::addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer)
   {
     InputVariable V;
 
-    // Variable may already have been created by decorations
-    if (InputVariables.count(Id))
-      V = InputVariables[Id];
+    // Variable must have already been created by a builtin decoration.
+    assert(InputVariables.count(Id));
+    V = InputVariables[Id];
 
     V.Ty = Ty;
 
@@ -487,6 +509,14 @@ const InputVariableMap &Module::getInputVariables() const
 const PrivateVariableMap &Module::getPrivateVariables() const
 {
   return PrivateVariables;
+}
+
+Dim3 Module::getLocalSize(uint32_t Entry) const
+{
+  if (LocalSizes.count(Entry))
+    return LocalSizes.at(Entry);
+  else
+    return Dim3(1, 1, 1);
 }
 
 const Object &Module::getObject(uint32_t Id) const { return Objects.at(Id); }
@@ -576,6 +606,9 @@ void Module::setBuiltin(uint32_t Id, uint32_t Builtin)
   switch (Builtin)
   {
   case SpvBuiltInGlobalInvocationId:
+  case SpvBuiltInLocalInvocationId:
+  case SpvBuiltInNumWorkgroups:
+  case SpvBuiltInWorkgroupId:
     assert(!InputVariables.count(Id));
     InputVariables[Id].Builtin = Builtin;
     break;

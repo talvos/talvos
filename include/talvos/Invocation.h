@@ -8,6 +8,7 @@
 
 #include <vector>
 
+#include "talvos/Dim3.h"
 #include "talvos/Object.h"
 
 namespace talvos
@@ -35,9 +36,7 @@ public:
   /// Create an invocation for \p Dispatch, with specific group and local IDs.
   /// Global variables with their resolved pointer values are listed in
   /// \p Variables.
-  Invocation(const DispatchCommand *Dispatch, uint32_t GroupIdX,
-             uint32_t GroupIdY, uint32_t GroupIdZ, uint32_t LocalIdX,
-             uint32_t LocalIdY, uint32_t LocalIdZ,
+  Invocation(const DispatchCommand *Dispatch, Dim3 GroupId, Dim3 LocalId,
              const std::vector<std::pair<uint32_t, Object>> &Variables);
 
   /// Destroy this invocation.
@@ -107,7 +106,9 @@ private:
   std::vector<Object> Objects; ///< Set of result objects.
 
   Device *Dev;           ///< The device this invocation is executing on.
-  uint32_t GlobalId[3];  ///< The GlobalInvocationID.
+  Dim3 GroupId;          ///< The WorkgroupId.
+  Dim3 LocalId;          ///< The LocalInvocationID.
+  Dim3 GlobalId;         ///< The GlobalInvocationID.
   Memory *PrivateMemory; ///< The private memory instance.
 
   /// Helper functions to execute binary instructions.

@@ -24,8 +24,7 @@ namespace talvos
 {
 
 Invocation::Invocation(
-    const DispatchCommand *Dispatch, uint32_t GroupIdX, uint32_t GroupIdY,
-    uint32_t GroupIdZ, uint32_t LocalIdX, uint32_t LocalIdY, uint32_t LocalIdZ,
+    const DispatchCommand *Dispatch, Dim3 GroupId, Dim3 LocalId,
     const std::vector<std::pair<uint32_t, Object>> &Variables)
 {
   Dev = Dispatch->getDevice();
@@ -35,10 +34,12 @@ Invocation::Invocation(
   CurrentFunction = Dispatch->getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
 
-  // TODO: Handle local size larger than 1
-  GlobalId[0] = GroupIdX;
-  GlobalId[1] = GroupIdY;
-  GlobalId[2] = GroupIdZ;
+  // Set up the local and global ID.
+  Dim3 GroupSize = Dispatch->getGroupSize();
+  Dim3 NumGroups = Dispatch->getNumGroups();
+  GroupId = GroupId;
+  LocalId = LocalId;
+  GlobalId = LocalId + GroupId * GroupSize;
 
   // Clone module level objects.
   Objects = CurrentModule->getObjects();
@@ -50,20 +51,37 @@ Invocation::Invocation(
   // Set up input variables.
   for (InputVariableMap::value_type V : CurrentModule->getInputVariables())
   {
+    // Get initialization data.
+    size_t Sz;
+    uint8_t *Data;
     switch (V.second.Builtin)
     {
     case SpvBuiltInGlobalInvocationId:
-    {
-      // Allocate and initialize global ID.
-      uint64_t Address = PrivateMemory->allocate(sizeof(GlobalId));
-      PrivateMemory->store(Address, sizeof(GlobalId), (uint8_t *)GlobalId);
-      Objects[V.first] = Object(V.second.Ty, Address);
+      Sz = sizeof(GlobalId);
+      Data = (uint8_t *)GlobalId.Data;
       break;
-    }
+    case SpvBuiltInLocalInvocationId:
+      Sz = sizeof(LocalId);
+      Data = (uint8_t *)LocalId.Data;
+      break;
+    case SpvBuiltInNumWorkgroups:
+      Sz = sizeof(NumGroups);
+      Data = (uint8_t *)NumGroups.Data;
+      break;
+    case SpvBuiltInWorkgroupId:
+      Sz = sizeof(GroupId);
+      Data = (uint8_t *)GroupId.Data;
+      break;
     default:
-      std::cout << "Unhandled input variable builtin: " << V.second.Builtin
+      std::cerr << "Unimplemented input variable builtin: " << V.second.Builtin
                 << std::endl;
+      abort();
     }
+
+    // Perform allocation and initialize it.
+    uint64_t Address = PrivateMemory->allocate(Sz);
+    PrivateMemory->store(Address, Sz, Data);
+    Objects[V.first] = Object(V.second.Ty, Address);
   }
 
   // Set up private variables.
