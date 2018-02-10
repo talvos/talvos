@@ -322,6 +322,9 @@ public:
         Mod->addType(Inst->result_id, Type::getVoid());
         break;
       }
+      case SpvOpUndef:
+        Mod->addObject(Inst->result_id, Object(Mod->getType(Inst->type_id)));
+        break;
       case SpvOpVariable:
         Mod->addVariable(Inst->result_id, Mod->getType(Inst->type_id),
                          ((Inst->num_operands > 3)

@@ -379,6 +379,11 @@ void Invocation::executeUnaryOp(const Instruction *Inst, const F &Op)
   Objects[Id] = Result;
 }
 
+void Invocation::executeUndef(const Instruction *Inst)
+{
+  Objects[Inst->Operands[1]] = Object(Inst->ResultType);
+}
+
 void Invocation::executeVariable(const Instruction *Inst)
 {
   assert(Inst->Operands[2] == SpvStorageClassFunction);
@@ -464,6 +469,7 @@ void Invocation::step()
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
     DISPATCH(SpvOpSLessThan, SLessThan);
     DISPATCH(SpvOpStore, Store);
+    DISPATCH(SpvOpUndef, Undef);
     DISPATCH(SpvOpVariable, Variable);
 
     NOP(SpvOpLoopMerge);

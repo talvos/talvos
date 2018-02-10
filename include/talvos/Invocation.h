@@ -76,6 +76,7 @@ public:
   void executeSGreaterThan(const Instruction *Inst);
   void executeSLessThan(const Instruction *Inst);
   void executeStore(const Instruction *Inst);
+  void executeUndef(const Instruction *Inst);
   void executeVariable(const Instruction *Inst);
   ///@}
 
