@@ -428,6 +428,11 @@ void Invocation::executeStore(const Instruction *Inst)
   Objects[Id].store(Mem, Dest.get<uint64_t>());
 }
 
+void Invocation::executeULessThan(const Instruction *Inst)
+{
+  executeBinaryOpUInt(Inst, [](auto &&A, auto &&B) -> bool { return A < B; });
+}
+
 template <typename OperandType, typename F>
 void Invocation::executeUnaryOp(const Instruction *Inst, const F &Op)
 {
@@ -534,6 +539,7 @@ void Invocation::step()
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
     DISPATCH(SpvOpSLessThan, SLessThan);
     DISPATCH(SpvOpStore, Store);
+    DISPATCH(SpvOpULessThan, ULessThan);
     DISPATCH(SpvOpUndef, Undef);
     DISPATCH(SpvOpVariable, Variable);
 
