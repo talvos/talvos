@@ -8,7 +8,9 @@
 #include "talvos/DispatchCommand.h"
 #include "talvos/Function.h"
 #include "talvos/Invocation.h"
+#include "talvos/Memory.h"
 #include "talvos/Module.h"
+#include "talvos/Workgroup.h"
 
 namespace talvos
 {
@@ -46,13 +48,23 @@ void DispatchCommand::run()
     {
       for (uint32_t GX = 0; GX < NumGroups.X; GX++)
       {
+        Workgroup Group({GX, GY, GZ});
+
+        // Allocate workgroup variables.
+        for (auto V : Mod->getWorkgroupVariables())
+        {
+          size_t NumBytes = V.second->getElementType()->getSize();
+          uint64_t Address = Group.getLocalMemory().allocate(NumBytes);
+          Variables.push_back({V.first, Object(V.second, Address)});
+        }
+
         for (uint32_t LZ = 0; LZ < GroupSize.Z; LZ++)
         {
           for (uint32_t LY = 0; LY < GroupSize.Y; LY++)
           {
             for (uint32_t LX = 0; LX < GroupSize.X; LX++)
             {
-              Invocation I(this, {GX, GY, GZ}, {LX, LY, LZ}, Variables);
+              Invocation I(this, Group, {LX, LY, LZ}, Variables);
 
               // TODO: Handle barriers
               while (I.getState() == Invocation::READY)

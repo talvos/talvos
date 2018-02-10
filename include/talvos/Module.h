@@ -48,6 +48,7 @@ struct PrivateVariable
 typedef std::map<uint32_t, BufferVariable> BufferVariableMap;
 typedef std::map<uint32_t, InputVariable> InputVariableMap;
 typedef std::map<uint32_t, PrivateVariable> PrivateVariableMap;
+typedef std::map<uint32_t, const Type *> WorkgroupVariableMap;
 ///@}
 
 /// This class represents a SPIR-V module.
@@ -87,6 +88,9 @@ public:
   /// Set \p Initializer to 0 to leave the variable uninitialized.
   void addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer);
 
+  /// Returns the buffer variable map.
+  const BufferVariableMap &getBufferVariables() const;
+
   /// Get the entry point with the specified name.
   /// Returns nullptr if no entry point called \p Name is found.
   const Function *getEntryPoint(const std::string &Name) const;
@@ -97,14 +101,8 @@ public:
   /// Returns the ID bound of the results in this module.
   uint32_t getIdBound() const { return IdBound; }
 
-  /// Returns the buffer variable map.
-  const BufferVariableMap &getBufferVariables() const;
-
   /// Returns the input variable map.
   const InputVariableMap &getInputVariables() const;
-
-  /// Returns the private variable map.
-  const PrivateVariableMap &getPrivateVariables() const;
 
   /// Returns the LocalSize execution mode for an entry point.
   /// This will return (1,1,1) if it has not been explicitly set for \p Entry.
@@ -117,8 +115,14 @@ public:
   /// Returns a list of all result objects in this module.
   const std::vector<Object> &getObjects() const;
 
+  /// Returns the private variable map.
+  const PrivateVariableMap &getPrivateVariables() const;
+
   /// Returns the type with the specified ID.
   const Type *getType(uint32_t Id) const;
+
+  /// Returns the workgroup variable map.
+  const WorkgroupVariableMap &getWorkgroupVariables() const;
 
   /// Set the binding decoration of the specified variable ID.
   void setBinding(uint32_t Variable, uint32_t Binding);
@@ -144,13 +148,15 @@ private:
 
   uint32_t IdBound;                    ///< The ID bound of the module.
   std::vector<Object> Objects;         ///< Constant instruction results.
-  BufferVariableMap BufferVariables;   ///< Buffer variables.
-  InputVariableMap InputVariables;     ///< Input variables.
-  PrivateVariableMap PrivateVariables; ///< Private variables.
   TypeMap Types;                       ///< Type mapping.
   FunctionMap Functions;               ///< Function mapping.
   EntryPointMap EntryPoints;           ///< Entry point mapping.
   std::map<uint32_t, Dim3> LocalSizes; ///< LocalSize execution modes.
+
+  BufferVariableMap BufferVariables;       ///< Buffer variables.
+  InputVariableMap InputVariables;         ///< Input variables.
+  PrivateVariableMap PrivateVariables;     ///< Private variables.
+  WorkgroupVariableMap WorkgroupVariables; ///< Workgroup variables.
 };
 
 } // namespace talvos

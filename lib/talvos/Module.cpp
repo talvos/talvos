@@ -477,6 +477,12 @@ void Module::addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer)
     PrivateVariables[Id] = V;
     break;
   }
+  case SpvStorageClassWorkgroup:
+  {
+    assert(!WorkgroupVariables.count(Id));
+    WorkgroupVariables[Id] = Ty;
+    break;
+  }
   default:
     std::cout << "Unhandled storage class " << Ty->getStorageClass()
               << std::endl;
@@ -528,6 +534,11 @@ const Type *Module::getType(uint32_t Id) const
 {
   assert(Types.count(Id));
   return Types.at(Id).get();
+}
+
+const WorkgroupVariableMap &Module::getWorkgroupVariables() const
+{
+  return WorkgroupVariables;
 }
 
 std::unique_ptr<Module> Module::load(const uint32_t *Words, uint32_t NumWords)

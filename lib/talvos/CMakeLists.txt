@@ -42,7 +42,8 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Type.h)
+    ${CMAKE_SOURCE_DIR}/include/talvos/Type.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
 set(TALVOS_SOURCES
     Block.cpp
     Device.cpp
@@ -53,7 +54,8 @@ set(TALVOS_SOURCES
     Memory.cpp
     Module.cpp
     Object.cpp
-    Type.cpp)
+    Type.cpp
+    Workgroup.cpp)
 add_library(talvos SHARED ${TALVOS_SOURCES} ${TALVOS_HEADERS})
 target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")

@@ -20,6 +20,7 @@ class Function;
 class Instruction;
 class Memory;
 class Module;
+class Workgroup;
 
 /// This class represents a single execution of a SPIR-V entry point.
 ///
@@ -36,7 +37,7 @@ public:
   /// Create an invocation for \p Dispatch, with specific group and local IDs.
   /// Global variables with their resolved pointer values are listed in
   /// \p Variables.
-  Invocation(const DispatchCommand *Dispatch, Dim3 GroupId, Dim3 LocalId,
+  Invocation(const DispatchCommand *Dispatch, Workgroup &Group, Dim3 LocalId,
              const std::vector<std::pair<uint32_t, Object>> &Variables);
 
   /// Destroy this invocation.
@@ -107,6 +108,7 @@ private:
   std::vector<Object> Objects; ///< Set of result objects.
 
   Device *Dev;           ///< The device this invocation is executing on.
+  Workgroup &Group;      ///< The workgroup this invocation belongs to.
   Dim3 GroupId;          ///< The WorkgroupId.
   Dim3 LocalId;          ///< The LocalInvocationID.
   Dim3 GlobalId;         ///< The GlobalInvocationID.

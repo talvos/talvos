@@ -17,6 +17,7 @@
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
 #include "talvos/Type.h"
+#include "talvos/Workgroup.h"
 
 #define OP(Index, Type) Objects[Inst->Operands[Index]].get<Type>()
 
@@ -24,8 +25,9 @@ namespace talvos
 {
 
 Invocation::Invocation(
-    const DispatchCommand *Dispatch, Dim3 GroupId, Dim3 LocalId,
+    const DispatchCommand *Dispatch, Workgroup &Group, Dim3 LocalId,
     const std::vector<std::pair<uint32_t, Object>> &Variables)
+    : Group(Group)
 {
   Dev = Dispatch->getDevice();
   PrivateMemory = new Memory;
@@ -37,7 +39,7 @@ Invocation::Invocation(
   // Set up the local and global ID.
   Dim3 GroupSize = Dispatch->getGroupSize();
   Dim3 NumGroups = Dispatch->getNumGroups();
-  GroupId = GroupId;
+  GroupId = Group.getGroupId();
   LocalId = LocalId;
   GlobalId = LocalId + GroupId * GroupSize;
 
@@ -471,6 +473,8 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
   {
   case SpvStorageClassStorageBuffer:
     return Dev->getGlobalMemory();
+  case SpvStorageClassWorkgroup:
+    return Group.getLocalMemory();
   case SpvStorageClassInput:
   case SpvStorageClassFunction:
   case SpvStorageClassPrivate:
