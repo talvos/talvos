@@ -180,6 +180,12 @@ void Invocation::executeBinaryOpUInt(const Instruction *Inst, const F &&Op)
   }
 }
 
+void Invocation::executeBitwiseAnd(const Instruction *Inst)
+{
+  executeBinaryOpUInt(Inst,
+                      [](auto A, auto B) -> decltype(A) { return A & B; });
+}
+
 void Invocation::executeBranch(const Instruction *Inst)
 {
   moveToBlock(Inst->Operands[0]);
@@ -449,6 +455,7 @@ void Invocation::step()
     break;
 
     DISPATCH(SpvOpAccessChain, AccessChain);
+    DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);
     DISPATCH(SpvOpBranch, Branch);
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
