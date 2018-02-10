@@ -499,7 +499,8 @@ void Invocation::step()
 #undef NOP
 
   default:
-    std::cout << "Unhandled opcode " << I->Opcode << std::endl;
+    std::cerr << "Unimplemented opcode " << I->Opcode << std::endl;
+    abort();
   }
 }
 
