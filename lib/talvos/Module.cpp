@@ -152,7 +152,7 @@ public:
         switch (Decoration)
         {
         case SpvDecorationArrayStride:
-          // TODO: Probably need to handle this?
+          ArrayStrides[Target] = Inst->words[Inst->operands[2].offset];
           break;
         case SpvDecorationBinding:
           Mod->setBinding(Target, Inst->words[Inst->operands[2].offset]);
@@ -249,7 +249,11 @@ public:
         const Type *ElemType =
             Mod->getType(Inst->words[Inst->operands[1].offset]);
         uint32_t Length = Inst->words[Inst->operands[2].offset];
-        Mod->addType(Inst->result_id, Type::getArray(ElemType, Length));
+        uint32_t ArrayStride = ElemType->getSize();
+        if (ArrayStrides.count(Inst->result_id))
+          ArrayStride = ArrayStrides[Inst->result_id];
+        Mod->addType(Inst->result_id,
+                     Type::getArray(ElemType, Length, ArrayStride));
         break;
       }
       case SpvOpTypeBool:
@@ -287,14 +291,22 @@ public:
         uint32_t StorageClass = Inst->words[Inst->operands[1].offset];
         const Type *ElemType =
             Mod->getType(Inst->words[Inst->operands[2].offset]);
-        Mod->addType(Inst->result_id, Type::getPointer(StorageClass, ElemType));
+        uint32_t ArrayStride = ElemType->getSize();
+        if (ArrayStrides.count(Inst->result_id))
+          ArrayStride = ArrayStrides[Inst->result_id];
+        Mod->addType(Inst->result_id,
+                     Type::getPointer(StorageClass, ElemType, ArrayStride));
         break;
       }
       case SpvOpTypeRuntimeArray:
       {
         const Type *ElemType =
             Mod->getType(Inst->words[Inst->operands[1].offset]);
-        Mod->addType(Inst->result_id, Type::getRuntimeArray(ElemType));
+        uint32_t ArrayStride = ElemType->getSize();
+        if (ArrayStrides.count(Inst->result_id))
+          ArrayStride = ArrayStrides[Inst->result_id];
+        Mod->addType(Inst->result_id,
+                     Type::getRuntimeArray(ElemType, ArrayStride));
         break;
       }
       case SpvOpTypeStruct:
@@ -348,6 +360,7 @@ private:
   std::unique_ptr<Function> CurrentFunction;
   std::unique_ptr<Block> CurrentBlock;
   Instruction *PreviousInstruction;
+  std::map<uint32_t, uint32_t> ArrayStrides;
   std::map<std::pair<uint32_t, uint32_t>, uint32_t> MemberOffsets;
 };
 

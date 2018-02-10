@@ -72,8 +72,8 @@ public:
   bool isVector() const { return Id == VECTOR; }
 
   /// Create an array type.
-  static std::unique_ptr<Type> getArray(const Type *ElemType,
-                                        uint32_t ElementCount);
+  static std::unique_ptr<Type>
+  getArray(const Type *ElemType, uint32_t ElementCount, uint32_t ArrayStride);
 
   /// Create a boolean type.
   static std::unique_ptr<Type> getBool();
@@ -90,11 +90,12 @@ public:
               const std::vector<const Type *> &ArgTypes);
 
   /// Create a pointer type.
-  static std::unique_ptr<Type> getPointer(uint32_t StorageClass,
-                                          const Type *ElemType);
+  static std::unique_ptr<Type>
+  getPointer(uint32_t StorageClass, const Type *ElemType, uint32_t ArrayStride);
 
   /// Create a runtime array type.
-  static std::unique_ptr<Type> getRuntimeArray(const Type *ElemType);
+  static std::unique_ptr<Type> getRuntimeArray(const Type *ElemType,
+                                               uint32_t ArrayStride);
 
   /// Create a structure type.
   static std::unique_ptr<Type>
@@ -143,6 +144,7 @@ private:
 
   const Type *ElementType; ///< Valid for for pointer, array, and vector types.
   uint32_t ElementCount;   ///< Valid for array, struct, and vector types.
+  uint32_t ArrayStride;    ///< Valid for array and pointer types.
   StructElementTypeList ElementTypes; ///< Valid for struct types.
 
   const Type *ReturnType;                  ///< Valid for function types.

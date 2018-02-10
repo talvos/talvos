@@ -20,11 +20,12 @@ size_t Type::getElementOffset(uint32_t Index) const
 {
   if (Id == STRUCT)
     return ElementTypes[Index].second;
-  else
-  {
-    assert(ElementType && "Not an aggregate type");
+  else if (Id == VECTOR)
     return ElementType->getSize() * Index;
-  }
+  else if (Id == ARRAY || Id == POINTER || Id == RUNTIME_ARRAY)
+    return ArrayStride * Index;
+  assert(false && "Not an aggregate type");
+  abort();
 }
 
 const Type *Type::getElementType(uint32_t Index) const
@@ -66,11 +67,13 @@ bool Type::isScalar() const
 }
 
 std::unique_ptr<Type> Type::getArray(const Type *ElemType,
-                                     uint32_t ElementCount)
+                                     uint32_t ElementCount,
+                                     uint32_t ArrayStride)
 {
   std::unique_ptr<Type> T(new Type(ARRAY, ElementCount * ElemType->getSize()));
   T->ElementType = ElemType;
   T->ElementCount = ElementCount;
+  T->ArrayStride = ArrayStride;
   return T;
 }
 
@@ -104,18 +107,22 @@ Type::getFunction(const Type *ReturnType,
 }
 
 std::unique_ptr<Type> Type::getPointer(uint32_t StorageClass,
-                                       const Type *ElemType)
+                                       const Type *ElemType,
+                                       uint32_t ArrayStride)
 {
   std::unique_ptr<Type> T(new Type(POINTER, sizeof(uint64_t)));
   T->StorageClass = StorageClass;
   T->ElementType = ElemType;
+  T->ArrayStride = ArrayStride;
   return T;
 }
 
-std::unique_ptr<Type> Type::getRuntimeArray(const Type *ElemType)
+std::unique_ptr<Type> Type::getRuntimeArray(const Type *ElemType,
+                                            uint32_t ArrayStride)
 {
   std::unique_ptr<Type> T(new Type(RUNTIME_ARRAY, 0));
   T->ElementType = ElemType;
+  T->ArrayStride = ArrayStride;
   return T;
 }
 
