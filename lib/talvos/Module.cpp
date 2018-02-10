@@ -264,7 +264,8 @@ public:
       {
         const Type *ElemType =
             Mod->getType(Inst->words[Inst->operands[1].offset]);
-        uint32_t Length = Inst->words[Inst->operands[2].offset];
+        uint32_t LengthId = Inst->words[Inst->operands[2].offset];
+        uint32_t Length = Mod->getObject(LengthId).get<uint32_t>();
         uint32_t ArrayStride = ElemType->getSize();
         if (ArrayStrides.count(Inst->result_id))
           ArrayStride = ArrayStrides[Inst->result_id];

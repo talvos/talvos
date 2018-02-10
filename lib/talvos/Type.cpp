@@ -70,7 +70,8 @@ std::unique_ptr<Type> Type::getArray(const Type *ElemType,
                                      uint32_t ElementCount,
                                      uint32_t ArrayStride)
 {
-  std::unique_ptr<Type> T(new Type(ARRAY, ElementCount * ElemType->getSize()));
+  assert(ArrayStride >= ElemType->getSize());
+  std::unique_ptr<Type> T(new Type(ARRAY, ElementCount * ArrayStride));
   T->ElementType = ElemType;
   T->ElementCount = ElementCount;
   T->ArrayStride = ArrayStride;
@@ -110,6 +111,7 @@ std::unique_ptr<Type> Type::getPointer(uint32_t StorageClass,
                                        const Type *ElemType,
                                        uint32_t ArrayStride)
 {
+  assert(ArrayStride >= ElemType->getSize());
   std::unique_ptr<Type> T(new Type(POINTER, sizeof(uint64_t)));
   T->StorageClass = StorageClass;
   T->ElementType = ElemType;
@@ -120,6 +122,7 @@ std::unique_ptr<Type> Type::getPointer(uint32_t StorageClass,
 std::unique_ptr<Type> Type::getRuntimeArray(const Type *ElemType,
                                             uint32_t ArrayStride)
 {
+  assert(ArrayStride >= ElemType->getSize());
   std::unique_ptr<Type> T(new Type(RUNTIME_ARRAY, 0));
   T->ElementType = ElemType;
   T->ArrayStride = ArrayStride;
