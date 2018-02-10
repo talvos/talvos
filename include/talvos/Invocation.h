@@ -77,6 +77,7 @@ public:
   void executeReturn(const Instruction *Inst);
   void executeReturnValue(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
+  void executeShiftRightLogical(const Instruction *Inst);
   void executeSLessThan(const Instruction *Inst);
   void executeStore(const Instruction *Inst);
   void executeULessThan(const Instruction *Inst);

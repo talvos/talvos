@@ -417,6 +417,12 @@ void Invocation::executeSGreaterThan(const Instruction *Inst)
   executeBinaryOpSInt(Inst, [](auto &&A, auto &&B) -> bool { return A > B; });
 }
 
+void Invocation::executeShiftRightLogical(const Instruction *Inst)
+{
+  executeBinaryOpUInt(Inst,
+                      [](auto A, auto B) -> decltype(A) { return A >> B; });
+}
+
 void Invocation::executeSLessThan(const Instruction *Inst)
 {
   executeBinaryOpSInt(Inst, [](auto &&A, auto &&B) -> bool { return A < B; });
@@ -541,6 +547,7 @@ void Invocation::step()
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpReturnValue, ReturnValue);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
+    DISPATCH(SpvOpShiftRightLogical, ShiftRightLogical);
     DISPATCH(SpvOpSLessThan, SLessThan);
     DISPATCH(SpvOpStore, Store);
     DISPATCH(SpvOpULessThan, ULessThan);
