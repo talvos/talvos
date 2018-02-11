@@ -30,15 +30,20 @@ class Workgroup;
 class Invocation
 {
 public:
-  /// Used to indicate whether an invocation is ready to execute, or complete.
-  enum State { READY, FINISHED };
+  /// Used to indicate whether an invocation is ready to execute, waiting at a
+  /// barrier, or complete.
+  enum State
+  {
+    READY,
+    BARRIER,
+    FINISHED
+  };
 
 public:
   /// Create an invocation for \p Dispatch, with specific group and local IDs.
   /// Global variables with their resolved pointer values are listed in
   /// \p Variables.
-  Invocation(const DispatchCommand *Dispatch, Workgroup &Group, Dim3 LocalId,
-             const std::vector<std::pair<uint32_t, Object>> &Variables);
+  Invocation(const DispatchCommand *Dispatch, Workgroup *Group, Dim3 LocalId);
 
   /// Destroy this invocation.
   ~Invocation();
@@ -46,6 +51,9 @@ public:
   // Do not allow Invocations to be copied.
   Invocation(const Invocation &) = delete;
   Invocation &operator=(const Invocation &) = delete;
+
+  /// Clear the barrier state, allowing the invocation to continue.
+  void clearBarrier() { AtBarrier = false; }
 
   /// Returns the state of this invocation.
   State getState() const;
@@ -61,6 +69,7 @@ public:
   void executeBranchConditional(const Instruction *Inst);
   void executeCompositeExtract(const Instruction *Inst);
   void executeCompositeInsert(const Instruction *Inst);
+  void executeControlBarrier(const Instruction *Inst);
   void executeExtInst(const Instruction *Inst);
   void executeFAdd(const Instruction *Inst);
   void executeFDiv(const Instruction *Inst);
@@ -91,6 +100,7 @@ private:
   const Instruction *CurrentInstruction; ///< The current instruction.
   uint32_t CurrentBlock;                 ///< The current block.
   uint32_t PreviousBlock;                ///< The previous block (for OpPhi).
+  bool AtBarrier;                        ///< True when at a barrier.
 
   /// A data structure holding information for a function call.
   struct StackEntry
@@ -109,7 +119,7 @@ private:
   std::vector<Object> Objects; ///< Set of result objects.
 
   Device *Dev;           ///< The device this invocation is executing on.
-  Workgroup &Group;      ///< The workgroup this invocation belongs to.
+  Workgroup *Group;      ///< The workgroup this invocation belongs to.
   Dim3 GroupId;          ///< The WorkgroupId.
   Dim3 LocalId;          ///< The LocalInvocationID.
   Dim3 GlobalId;         ///< The GlobalInvocationID.

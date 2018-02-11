@@ -26,6 +26,8 @@ typedef std::map<std::pair<uint32_t, uint32_t>, uint64_t> DescriptorSet;
 class DispatchCommand
 {
 public:
+  typedef std::vector<std::pair<uint32_t, Object>> VariableList;
+
   /// Create a new DispatchCommand.
   ///
   /// The function \p F must belong to module \p M. Any buffers used by \p F
@@ -57,6 +59,9 @@ public:
   /// Return the module this command is using.
   const Module *getModule() const { return Mod; }
 
+  /// Return the resolved buffer variable pointer values for this command.
+  const VariableList &getVariables() const { return Variables; }
+
   /// Run the dispatch command to completion.
   void run();
 
@@ -67,8 +72,7 @@ private:
   Dim3 GroupSize;       ///< The size of each workgroup.
   Dim3 NumGroups;       ///< The number of workgroups.
 
-  /// Resolved variable values.
-  std::vector<std::pair<uint32_t, Object>> Variables;
+  VariableList Variables; ///< Resolved buffer variable values.
 };
 
 } // namespace talvos

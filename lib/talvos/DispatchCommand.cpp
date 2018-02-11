@@ -3,6 +3,7 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <iostream>
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/DispatchCommand.h"
@@ -29,7 +30,7 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
   // Resolve buffer variables.
   for (BufferVariableMap::value_type V : M->getBufferVariables())
   {
-    // Look-up variable in descriptor set and set pointer value.
+    // Look up variable in descriptor set and set pointer value.
     std::pair<uint32_t, uint32_t> Binding = {V.second.DescriptorSet,
                                              V.second.Binding};
     if (DS.count(Binding))
@@ -48,30 +49,49 @@ void DispatchCommand::run()
     {
       for (uint32_t GX = 0; GX < NumGroups.X; GX++)
       {
-        Workgroup Group({GX, GY, GZ});
+        Workgroup Group(this, {GX, GY, GZ});
 
-        // Allocate workgroup variables.
-        for (auto V : Mod->getWorkgroupVariables())
+        // Loop until all work items have completed.
+        const Workgroup::WorkItemList &WorkItems = Group.getWorkItems();
+        size_t NumWorkItems = WorkItems.size();
+        while (true)
         {
-          size_t NumBytes = V.second->getElementType()->getSize();
-          uint64_t Address = Group.getLocalMemory().allocate(NumBytes);
-          Variables.push_back({V.first, Object(V.second, Address)});
-        }
+          uint32_t BarrierCount = 0;
 
-        for (uint32_t LZ = 0; LZ < GroupSize.Z; LZ++)
-        {
-          for (uint32_t LY = 0; LY < GroupSize.Y; LY++)
+          // Step each invocation until it hits a barrier or completes.
+          for (uint32_t I = 0; I < NumWorkItems; I++)
           {
-            for (uint32_t LX = 0; LX < GroupSize.X; LX++)
-            {
-              Invocation I(this, Group, {LX, LY, LZ}, Variables);
+            auto &WI = WorkItems[I];
+            while (WI->getState() == Invocation::READY)
+              WI->step();
 
-              // TODO: Handle barriers
-              while (I.getState() == Invocation::READY)
-              {
-                I.step();
-              }
+            // Increment barrier count if necessary.
+            if (WI->getState() == Invocation::BARRIER)
+              BarrierCount++;
+          }
+
+          // Check for barriers.
+          if (BarrierCount > 0)
+          {
+            // All invocations in the group must hit the barrier.
+            // TODO: Ensure they hit the *same* barrier?
+            // TODO: Allow for other execution scopes.
+            if (BarrierCount != NumWorkItems)
+            {
+              // TODO: Better error message.
+              std::cerr << "Barrier not reached by every invocation."
+                        << std::endl;
+              abort();
             }
+
+            // Clear the barrier.
+            for (auto &WI : WorkItems)
+              WI->clearBarrier();
+          }
+          else
+          {
+            // All invocations must have completed - this group is done.
+            break;
           }
         }
       }

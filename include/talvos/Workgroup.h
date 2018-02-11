@@ -6,19 +6,28 @@
 #ifndef TALVOS_WORKGROUP_H
 #define TALVOS_WORKGROUP_H
 
+#include <memory>
+#include <vector>
+
 #include "talvos/Dim3.h"
 
 namespace talvos
 {
 
+class DispatchCommand;
+class Invocation;
 class Memory;
+class Object;
 
 /// This class represents a workgroup executing a compute command.
 class Workgroup
 {
 public:
+  typedef std::vector<std::unique_ptr<Invocation>> WorkItemList;
+  typedef std::vector<std::pair<uint32_t, Object>> VariableList;
+
   /// Create a workgroup.
-  Workgroup(Dim3 GroupId);
+  Workgroup(const DispatchCommand *Dispatch, Dim3 GroupId);
 
   /// Destroy this workgroup.
   ~Workgroup();
@@ -33,10 +42,20 @@ public:
   /// Returns the local memory instance associated with this workgroup.
   Memory &getLocalMemory() { return *LocalMemory; }
 
+  /// Return the list of work items in this workgroup.
+  const WorkItemList &getWorkItems() const { return WorkItems; }
+
+  /// Return the workgroup scope variable pointer values.
+  const VariableList &getVariables() const { return Variables; }
+
 private:
   Dim3 GroupId; ///< The group ID.
 
   Memory *LocalMemory; ///< The local memory of this workgroup.
+
+  WorkItemList WorkItems; ///< List of work items in this workgroup.
+
+  VariableList Variables; ///< Workgroup scope OpVariable allocations.
 };
 
 } // namespace talvos

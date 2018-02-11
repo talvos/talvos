@@ -24,14 +24,14 @@
 namespace talvos
 {
 
-Invocation::Invocation(
-    const DispatchCommand *Dispatch, Workgroup &Group, Dim3 LocalId,
-    const std::vector<std::pair<uint32_t, Object>> &Variables)
-    : Group(Group)
+Invocation::Invocation(const DispatchCommand *Dispatch, Workgroup *Group,
+                       Dim3 LocalId)
 {
   Dev = Dispatch->getDevice();
   PrivateMemory = new Memory;
+  this->Group = Group;
 
+  AtBarrier = false;
   CurrentModule = Dispatch->getModule();
   CurrentFunction = Dispatch->getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
@@ -39,15 +39,19 @@ Invocation::Invocation(
   // Set up the local and global ID.
   Dim3 GroupSize = Dispatch->getGroupSize();
   Dim3 NumGroups = Dispatch->getNumGroups();
-  GroupId = Group.getGroupId();
+  GroupId = Group->getGroupId();
   LocalId = LocalId;
   GlobalId = LocalId + GroupId * GroupSize;
 
   // Clone module level objects.
   Objects = CurrentModule->getObjects();
 
-  // Copy variable pointer values.
-  for (auto V : Variables)
+  // Copy buffer variable pointer values.
+  for (auto V : Dispatch->getVariables())
+    Objects[V.first] = V.second;
+
+  // Copy workgroup variable pointer values.
+  for (auto V : Group->getVariables())
     Objects[V.first] = V.second;
 
   // Set up input variables.
@@ -236,6 +240,13 @@ void Invocation::executeCompositeInsert(const Instruction *Inst)
   assert(Objects[Inst->Operands[3]].getType()->isComposite());
   Objects[Id] = Objects[Inst->Operands[3]];
   Objects[Id].insert(Indices, Element);
+}
+
+void Invocation::executeControlBarrier(const Instruction *Inst)
+{
+  // TODO: Handle other execution scopes
+  assert(Objects[Inst->Operands[0]].get<uint32_t>() == SpvScopeWorkgroup);
+  AtBarrier = true;
 }
 
 void Invocation::executeExtInst(const Instruction *Inst)
@@ -480,7 +491,8 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
   case SpvStorageClassStorageBuffer:
     return Dev->getGlobalMemory();
   case SpvStorageClassWorkgroup:
-    return Group.getLocalMemory();
+    assert(Group && "Not executing within a workgroup.");
+    return Group->getLocalMemory();
   case SpvStorageClassInput:
   case SpvStorageClassFunction:
   case SpvStorageClassPrivate:
@@ -493,6 +505,8 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
 
 Invocation::State Invocation::getState() const
 {
+  if (AtBarrier)
+    return BARRIER;
   return CurrentInstruction ? READY : FINISHED;
 }
 
@@ -506,6 +520,7 @@ void Invocation::moveToBlock(uint32_t Id)
 
 void Invocation::step()
 {
+  assert(getState() == READY);
   assert(CurrentInstruction);
 
   const Instruction *I = CurrentInstruction;
@@ -531,6 +546,7 @@ void Invocation::step()
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpCompositeInsert, CompositeInsert);
+    DISPATCH(SpvOpControlBarrier, ControlBarrier);
     DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFDiv, FDiv);
