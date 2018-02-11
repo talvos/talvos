@@ -6,6 +6,7 @@
 foreach(test
   misc/jacobi
   misc/multiple-entry-points
+  misc/reduce
   misc/vecadd
   misc/vecadd_binary
   spirv/composite-extract

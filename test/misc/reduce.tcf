@@ -1,0 +1,49 @@
+# Perform a workgroup reduction using local memory.
+#
+# #define WGSIZE 8
+# __attribute__((reqd_work_group_size(WGSIZE,1,1)))
+# kernel void reduce(uint n, global uint *data, global uint *result)
+# {
+#   local uint localData[WGSIZE];
+#
+#   uint gid = get_global_id(0);
+#   uint lid = get_local_id(0);
+#   uint lsz = get_local_size(0);
+#   uint grp = get_group_id(0);
+#
+#   localData[lid] = data[gid];
+#   for (uint offset = lsz/2; offset > 0; offset/=2)
+#   {
+#     barrier(CLK_LOCAL_MEM_FENCE);
+#     if (lid < offset)
+#       localData[lid] += localData[lid + offset];
+#   }
+#
+#   if (lid == 0)
+#     result[grp] = localData[lid];
+# }
+
+MODULE reduce.spvasm
+ENTRY reduce
+
+ALLOCATE n      BUFFER 4   DATA UINT32 64
+ALLOCATE data   BUFFER 256 RANGE UINT32 0 1
+ALLOCATE result BUFFER 32  FILL UINT32 0
+
+DESCRIPTOR_SET 0 0 n
+DESCRIPTOR_SET 0 1 data
+DESCRIPTOR_SET 0 2 result
+
+DISPATCH 8 1 1
+
+DUMP UINT32 result
+
+# CHECK Buffer 'result' (32 bytes):
+# CHECK   result[0] = 28
+# CHECK   result[1] = 92
+# CHECK   result[2] = 156
+# CHECK   result[3] = 220
+# CHECK   result[4] = 284
+# CHECK   result[5] = 348
+# CHECK   result[6] = 412
+# CHECK   result[7] = 476
