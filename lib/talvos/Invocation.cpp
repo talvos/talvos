@@ -294,7 +294,7 @@ void Invocation::executeFunctionCall(const Instruction *Inst)
   const Function *Func = CurrentModule->getFunction(Inst->Operands[2]);
 
   // Copy function parameters.
-  assert(Func->getNumParams() == Inst->NumOperands - 3);
+  assert(Inst->NumOperands == Func->getNumParams() + 3);
   for (int i = 3; i < Inst->NumOperands; i++)
     Objects[Func->getParamId(i - 3)] = Objects[Inst->Operands[i]];
 
