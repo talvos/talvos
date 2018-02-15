@@ -400,6 +400,27 @@ void Invocation::executeVariable(const Instruction *Inst)
     CallStack.back().Allocations.push_back(Address);
 }
 
+void Invocation::executeVectorShuffle(const Instruction *Inst)
+{
+  uint32_t Id = Inst->Operands[1];
+  Object Result(Inst->ResultType);
+
+  const Object &Vec1 = Objects[Inst->Operands[2]];
+  const Object &Vec2 = Objects[Inst->Operands[3]];
+  uint32_t Vec1Length = Vec1.getType()->getElementCount();
+
+  for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
+  {
+    uint32_t Idx = Inst->Operands[4 + i];
+    if (Idx < Vec1Length)
+      Result.insert({i}, Vec1.extract({Idx}));
+    else
+      Result.insert({i}, Vec2.extract({Idx - Vec1Length}));
+  }
+
+  Objects[Id] = Result;
+}
+
 Memory &Invocation::getMemory(uint32_t StorageClass)
 {
   switch (StorageClass)
@@ -486,6 +507,7 @@ void Invocation::step()
     DISPATCH(SpvOpULessThan, ULessThan);
     DISPATCH(SpvOpUndef, Undef);
     DISPATCH(SpvOpVariable, Variable);
+    DISPATCH(SpvOpVectorShuffle, VectorShuffle);
 
     NOP(SpvOpLoopMerge);
     NOP(SpvOpSelectionMerge);

@@ -93,6 +93,7 @@ public:
   void executeULessThan(const Instruction *Inst);
   void executeUndef(const Instruction *Inst);
   void executeVariable(const Instruction *Inst);
+  void executeVectorShuffle(const Instruction *Inst);
   ///@}
 
 private:
