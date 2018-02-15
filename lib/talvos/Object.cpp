@@ -3,6 +3,8 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <cassert>
+#include <cstring>
 #include <vector>
 
 #include "talvos/Object.h"
@@ -129,6 +131,8 @@ void Object::store(Memory &Mem, uint64_t Address) const
   assert(Data);
   Mem.store(Address, Ty->getSize(), Data);
 }
+
+void Object::zero() { memset(Data, 0, Ty->getSize()); }
 
 // Explicit template instantiations for scalar types.
 #define INSTANTIATE(TYPE)                                                      \

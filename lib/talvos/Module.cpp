@@ -145,6 +145,15 @@ public:
         Mod->addObject(Inst->result_id, Composite);
         break;
       }
+      case SpvOpConstantNull:
+      {
+        // Create and add object.
+        const Type *Ty = Mod->getType(Inst->type_id);
+        Object Value(Ty);
+        Value.zero();
+        Mod->addObject(Inst->result_id, Value);
+        break;
+      }
       case SpvOpDecorate:
       {
         uint32_t Target = Inst->words[Inst->operands[0].offset];

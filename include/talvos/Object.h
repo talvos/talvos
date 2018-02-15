@@ -6,9 +6,7 @@
 #ifndef TALVOS_OBJECT_H
 #define TALVOS_OBJECT_H
 
-#include <cassert>
 #include <cstdint>
-#include <cstring>
 
 #include "talvos/Type.h"
 
@@ -70,6 +68,9 @@ public:
 
   /// Store the value of this object to memory at \p Address.
   void store(Memory &Mem, uint64_t Address) const;
+
+  /// Set all of the value bits in this object to zero.
+  void zero();
 
   /// Create an object of type \p Ty from the data at \p Address.
   static Object load(const Type *Ty, const Memory &Mem, uint64_t Address);
