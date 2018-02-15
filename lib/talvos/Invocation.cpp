@@ -4,6 +4,7 @@
 // terms please see the LICENSE file distributed with this source code.
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <spirv/unified1/GLSL.std.450.h>
 #include <spirv/unified1/spirv.h>
@@ -263,6 +264,12 @@ void Invocation::executeExtInst(const Instruction *Inst)
     assert(Inst->ResultType->getBitWidth() == 32);
     Objects[Id] =
         Object(Inst->ResultType, OP(4, float) * OP(5, float) + OP(6, float));
+    break;
+  case GLSLstd450InverseSqrt:
+    // TODO: Handle vectors and double precision (using a helper function?)
+    assert(Inst->ResultType->isFloat());
+    assert(Inst->ResultType->getBitWidth() == 32);
+    Objects[Id] = Object(Inst->ResultType, 1.f / sqrtf(OP(4, float)));
     break;
   default:
     assert(false && "Unhandled GLSL.std.450 extended instruction");
