@@ -3,6 +3,7 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -131,84 +132,9 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Objects[Inst->Operands[1]] = Object(Inst->ResultType, Result);
 }
 
-template <typename OperandType, typename F>
-void Invocation::executeBinaryOp(const Instruction *Inst, const F &Op)
-{
-  uint32_t Id = Inst->Operands[1];
-  const Object &OpA = Objects[Inst->Operands[2]];
-  const Object &OpB = Objects[Inst->Operands[3]];
-  Object Result(Inst->ResultType);
-  for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
-  {
-    Result.set(Op(OpA.get<OperandType>(i), OpB.get<OperandType>(i)), i);
-  }
-  Objects[Id] = Result;
-}
-
-template <typename F>
-void Invocation::executeBinaryOpSInt(const Instruction *Inst, const F &&Op)
-{
-  const Type *OpType = Objects[Inst->Operands[2]].getType()->getScalarType();
-  assert(OpType->isInt());
-  switch (OpType->getBitWidth())
-  {
-  case 16:
-    executeBinaryOp<int16_t>(Inst, Op);
-    break;
-  case 32:
-    executeBinaryOp<int32_t>(Inst, Op);
-    break;
-  case 64:
-    executeBinaryOp<int64_t>(Inst, Op);
-    break;
-  default:
-    assert(false && "Unhandled binary operation integer width");
-  }
-}
-
-template <typename F>
-void Invocation::executeBinaryOpFP(const Instruction *Inst, const F &&Op)
-{
-  const Type *OpType = Objects[Inst->Operands[2]].getType()->getScalarType();
-  assert(OpType->isFloat());
-  switch (OpType->getBitWidth())
-  {
-  case 32:
-    executeBinaryOp<float>(Inst, Op);
-    break;
-  case 64:
-    executeBinaryOp<double>(Inst, Op);
-    break;
-  default:
-    assert(false && "Unhandled binary operation floating point size");
-  }
-}
-
-template <typename F>
-void Invocation::executeBinaryOpUInt(const Instruction *Inst, const F &&Op)
-{
-  const Type *OpType = Objects[Inst->Operands[2]].getType()->getScalarType();
-  assert(OpType->isInt());
-  switch (OpType->getBitWidth())
-  {
-  case 16:
-    executeBinaryOp<uint16_t>(Inst, Op);
-    break;
-  case 32:
-    executeBinaryOp<uint32_t>(Inst, Op);
-    break;
-  case 64:
-    executeBinaryOp<uint64_t>(Inst, Op);
-    break;
-  default:
-    assert(false && "Unhandled binary operation integer width");
-  }
-}
-
 void Invocation::executeBitwiseAnd(const Instruction *Inst)
 {
-  executeBinaryOpUInt(Inst,
-                      [](auto A, auto B) -> decltype(A) { return A & B; });
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A & B; });
 }
 
 void Invocation::executeBranch(const Instruction *Inst)
@@ -254,22 +180,16 @@ void Invocation::executeExtInst(const Instruction *Inst)
 {
   // TODO: Currently assumes extended instruction set is GLSL.std.450
   // TODO: Use dispatch mechanism similar to step()?
-  uint32_t Id = Inst->Operands[1];
   uint32_t ExtInst = Inst->Operands[3];
   switch (ExtInst)
   {
   case GLSLstd450Fma:
-    // TODO: Handle vectors and double precision (using a helper function?)
-    assert(Inst->ResultType->isFloat());
-    assert(Inst->ResultType->getBitWidth() == 32);
-    Objects[Id] =
-        Object(Inst->ResultType, OP(4, float) * OP(5, float) + OP(6, float));
+  {
+    executeOpFP<3, 4>(Inst, [](auto A, auto B, auto C) { return A * B + C; });
     break;
+  }
   case GLSLstd450InverseSqrt:
-    // TODO: Handle vectors and double precision (using a helper function?)
-    assert(Inst->ResultType->isFloat());
-    assert(Inst->ResultType->getBitWidth() == 32);
-    Objects[Id] = Object(Inst->ResultType, 1.f / sqrtf(OP(4, float)));
+    executeOpFP<1, 4>(Inst, [](auto X) { return 1.f / sqrt(X); });
     break;
   default:
     assert(false && "Unhandled GLSL.std.450 extended instruction");
@@ -278,22 +198,22 @@ void Invocation::executeExtInst(const Instruction *Inst)
 
 void Invocation::executeFAdd(const Instruction *Inst)
 {
-  executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
 }
 
 void Invocation::executeFDiv(const Instruction *Inst)
 {
-  executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
 }
 
 void Invocation::executeFMul(const Instruction *Inst)
 {
-  executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
 }
 
 void Invocation::executeFSub(const Instruction *Inst)
 {
-  executeBinaryOpFP(Inst, [](auto A, auto B) -> decltype(A) { return A - B; });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A - B; });
 }
 
 void Invocation::executeFunctionCall(const Instruction *Inst)
@@ -319,19 +239,17 @@ void Invocation::executeFunctionCall(const Instruction *Inst)
 
 void Invocation::executeIAdd(const Instruction *Inst)
 {
-  executeBinaryOpUInt(Inst,
-                      [](auto A, auto B) -> decltype(A) { return A + B; });
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
 }
 
 void Invocation::executeIEqual(const Instruction *Inst)
 {
-  executeBinaryOpUInt(Inst, [](auto &&A, auto &&B) -> bool { return A == B; });
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A == B; });
 }
 
 void Invocation::executeIMul(const Instruction *Inst)
 {
-  executeBinaryOpUInt(Inst,
-                      [](auto A, auto B) -> decltype(A) { return A * B; });
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
 }
 
 void Invocation::executeLoad(const Instruction *Inst)
@@ -344,7 +262,7 @@ void Invocation::executeLoad(const Instruction *Inst)
 
 void Invocation::executeLogicalNot(const Instruction *Inst)
 {
-  executeUnaryOp<bool>(Inst, [](bool &&A) { return !A; });
+  executeOp<bool, 1>(Inst, [](bool A) { return !A; });
 }
 
 void Invocation::executePhi(const Instruction *Inst)
@@ -432,18 +350,17 @@ void Invocation::executeReturnValue(const Instruction *Inst)
 
 void Invocation::executeSGreaterThan(const Instruction *Inst)
 {
-  executeBinaryOpSInt(Inst, [](auto &&A, auto &&B) -> bool { return A > B; });
+  executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A > B; });
 }
 
 void Invocation::executeShiftRightLogical(const Instruction *Inst)
 {
-  executeBinaryOpUInt(Inst,
-                      [](auto A, auto B) -> decltype(A) { return A >> B; });
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A >> B; });
 }
 
 void Invocation::executeSLessThan(const Instruction *Inst)
 {
-  executeBinaryOpSInt(Inst, [](auto &&A, auto &&B) -> bool { return A < B; });
+  executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A < B; });
 }
 
 void Invocation::executeStore(const Instruction *Inst)
@@ -456,20 +373,7 @@ void Invocation::executeStore(const Instruction *Inst)
 
 void Invocation::executeULessThan(const Instruction *Inst)
 {
-  executeBinaryOpUInt(Inst, [](auto &&A, auto &&B) -> bool { return A < B; });
-}
-
-template <typename OperandType, typename F>
-void Invocation::executeUnaryOp(const Instruction *Inst, const F &Op)
-{
-  uint32_t Id = Inst->Operands[1];
-  const Object &OpA = Objects[Inst->Operands[2]];
-  Object Result(Inst->ResultType);
-  for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
-  {
-    Result.set(Op(OpA.get<OperandType>(i)), i);
-  }
-  Objects[Id] = Result;
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A < B; });
 }
 
 void Invocation::executeUndef(const Instruction *Inst)
@@ -586,6 +490,110 @@ void Invocation::step()
   default:
     std::cerr << "Unimplemented opcode " << I->Opcode << std::endl;
     abort();
+  }
+}
+
+// Private helper functions for executing simple instructions.
+
+template <typename OpTy, typename F>
+static auto apply(const std::array<OpTy, 1> Operands, const F &Op)
+{
+  return Op(Operands[0]);
+}
+
+template <typename OpTy, typename F>
+static auto apply(const std::array<OpTy, 2> Operands, const F &Op)
+{
+  return Op(Operands[0], Operands[1]);
+}
+
+template <typename OpTy, typename F>
+static auto apply(const std::array<OpTy, 3> Operands, const F &Op)
+{
+  return Op(Operands[0], Operands[1], Operands[2]);
+}
+
+template <typename OpTy, unsigned N, unsigned Offset, typename F>
+void Invocation::executeOp(const Instruction *Inst, const F &Op)
+{
+  uint32_t Id = Inst->Operands[1];
+  Object Result(Inst->ResultType);
+  std::array<OpTy, N> Operands;
+
+  // Loop over each vector component.
+  for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
+  {
+    // Gather operands.
+    for (unsigned j = 0; j < N; j++)
+      Operands[j] = Objects[Inst->Operands[Offset + j]].get<OpTy>(i);
+
+    // Apply lambda and set result.
+    Result.set(apply(Operands, Op), i);
+  }
+
+  Objects[Id] = Result;
+}
+
+template <unsigned N, unsigned Offset, typename F>
+void Invocation::executeOpSInt(const Instruction *Inst, const F &&Op)
+{
+  const Type *OpType = Objects[Inst->Operands[Offset]].getType();
+  OpType = OpType->getScalarType();
+  assert(OpType->isInt());
+  switch (OpType->getBitWidth())
+  {
+  case 16:
+    executeOp<int16_t, N, Offset>(Inst, Op);
+    break;
+  case 32:
+    executeOp<int32_t, N, Offset>(Inst, Op);
+    break;
+  case 64:
+    executeOp<int64_t, N, Offset>(Inst, Op);
+    break;
+  default:
+    assert(false && "Unhandled binary operation integer width");
+  }
+}
+
+template <unsigned N, unsigned Offset, typename F>
+void Invocation::executeOpFP(const Instruction *Inst, const F &&Op)
+{
+  const Type *OpType = Objects[Inst->Operands[Offset]].getType();
+  OpType = OpType->getScalarType();
+  assert(OpType->isFloat());
+  switch (OpType->getBitWidth())
+  {
+  case 32:
+    executeOp<float, N, Offset>(Inst, Op);
+    break;
+  case 64:
+    executeOp<double, N, Offset>(Inst, Op);
+    break;
+  default:
+    assert(false && "Unhandled binary operation floating point size");
+  }
+}
+
+template <unsigned N, unsigned Offset, typename F>
+void Invocation::executeOpUInt(const Instruction *Inst, const F &&Op)
+{
+  const Type *OpType = Objects[Inst->Operands[Offset]].getType();
+  OpType = OpType->getScalarType();
+  assert(OpType->isInt());
+  switch (OpType->getBitWidth())
+  {
+  case 16:
+    executeOp<uint16_t, N>(Inst, Op);
+    break;
+  case 32:
+    executeOp<uint32_t, N>(Inst, Op);
+    break;
+  case 64:
+    executeOp<uint64_t, N>(Inst, Op);
+    break;
+  default:
+    assert(false && "Unhandled binary operation integer width");
   }
 }
 

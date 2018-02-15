@@ -125,24 +125,21 @@ private:
   Dim3 GlobalId;         ///< The GlobalInvocationID.
   Memory *PrivateMemory; ///< The private memory instance.
 
-  /// Helper functions to execute binary instructions.
-  /// \p F is a lambda that takes two operand values and returns the result.
+  /// Helper functions to execute simple instructions that can either operate
+  /// on scalars or component-wise for vectors.
+  /// \p OpTy is the C++ scalar type of each operand.
+  /// \p N is the number of operands.
+  /// \p Offset is the operand offset of the first value.
+  /// \p Op is a lambda that takes \p N operand values and returns a result.
   ///@{
-  template <typename OperandType, typename F>
-  void executeBinaryOp(const Instruction *Inst, const F &Op);
-  template <typename F>
-  void executeBinaryOpFP(const Instruction *Inst, const F &&Op);
-  template <typename F>
-  void executeBinaryOpSInt(const Instruction *Inst, const F &&Op);
-  template <typename F>
-  void executeBinaryOpUInt(const Instruction *Inst, const F &&Op);
-  ///@}
-
-  /// Helper functions to execute unary instructions.
-  /// \p F is a lambda that takes an operand value and returns the result.
-  ///@{
-  template <typename OperandType, typename F>
-  void executeUnaryOp(const Instruction *Inst, const F &Op);
+  template <typename OpTy, unsigned N, unsigned Offset = 2, typename F>
+  void executeOp(const Instruction *Inst, const F &Op);
+  template <unsigned N, unsigned Offset = 2, typename F>
+  void executeOpFP(const Instruction *Inst, const F &&Op);
+  template <unsigned N, unsigned Offset = 2, typename F>
+  void executeOpSInt(const Instruction *Inst, const F &&Op);
+  template <unsigned N, unsigned Offset = 2, typename F>
+  void executeOpUInt(const Instruction *Inst, const F &&Op);
   ///@}
 
   /// Returns the memory instance associated with \p StorageClass.
