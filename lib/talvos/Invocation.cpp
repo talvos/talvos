@@ -307,7 +307,7 @@ void Invocation::executeFunctionCall(const Instruction *Inst)
 
   // Create call stack entry.
   StackEntry SE;
-  SE.RetInst = CurrentInstruction;
+  SE.RetInst = Inst;
   SE.RetFunc = CurrentFunction;
   SE.RetBlock = CurrentBlock;
   CallStack.push_back(SE);
@@ -407,7 +407,7 @@ void Invocation::executeReturn(const Instruction *Inst)
   // Return to callee function.
   CurrentFunction = SE.RetFunc;
   CurrentBlock = SE.RetBlock;
-  CurrentInstruction = SE.RetInst;
+  CurrentInstruction = SE.RetInst->next();
 }
 
 void Invocation::executeReturnValue(const Instruction *Inst)
@@ -427,7 +427,7 @@ void Invocation::executeReturnValue(const Instruction *Inst)
   // Return to callee function.
   CurrentFunction = SE.RetFunc;
   CurrentBlock = SE.RetBlock;
-  CurrentInstruction = SE.RetInst;
+  CurrentInstruction = SE.RetInst->next();
 }
 
 void Invocation::executeSGreaterThan(const Instruction *Inst)
