@@ -65,6 +65,7 @@ public:
   ///@{
   void executeAccessChain(const Instruction *Inst);
   void executeBitwiseAnd(const Instruction *Inst);
+  void executeBitwiseOr(const Instruction *Inst);
   void executeBranch(const Instruction *Inst);
   void executeBranchConditional(const Instruction *Inst);
   void executeCompositeExtract(const Instruction *Inst);

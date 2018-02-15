@@ -137,6 +137,11 @@ void Invocation::executeBitwiseAnd(const Instruction *Inst)
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A & B; });
 }
 
+void Invocation::executeBitwiseOr(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A | B; });
+}
+
 void Invocation::executeBranch(const Instruction *Inst)
 {
   moveToBlock(Inst->Operands[0]);
@@ -453,6 +458,7 @@ void Invocation::step()
 
     DISPATCH(SpvOpAccessChain, AccessChain);
     DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);
+    DISPATCH(SpvOpBitwiseOr, BitwiseOr);
     DISPATCH(SpvOpBranch, Branch);
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
