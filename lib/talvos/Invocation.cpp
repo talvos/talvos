@@ -184,17 +184,18 @@ void Invocation::executeControlBarrier(const Instruction *Inst)
 void Invocation::executeExtInst(const Instruction *Inst)
 {
   // TODO: Currently assumes extended instruction set is GLSL.std.450
-  // TODO: Use dispatch mechanism similar to step()?
   uint32_t ExtInst = Inst->Operands[3];
   switch (ExtInst)
   {
   case GLSLstd450Fma:
   {
-    executeOpFP<3, 4>(Inst, [](auto A, auto B, auto C) { return A * B + C; });
+    executeOpFP<3, 4>(
+        Inst, [](auto A, auto B, auto C) -> decltype(A) { return A * B + C; });
     break;
   }
   case GLSLstd450InverseSqrt:
-    executeOpFP<1, 4>(Inst, [](auto X) { return 1.f / sqrt(X); });
+    executeOpFP<1, 4>(Inst,
+                      [](auto X) -> decltype(X) { return 1.f / sqrt(X); });
     break;
   default:
     assert(false && "Unhandled GLSL.std.450 extended instruction");
