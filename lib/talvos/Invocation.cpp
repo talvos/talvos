@@ -187,6 +187,34 @@ void Invocation::executeExtInst(const Instruction *Inst)
   uint32_t ExtInst = Inst->Operands[3];
   switch (ExtInst)
   {
+  case GLSLstd450Acos:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return acos(X); });
+    break;
+  case GLSLstd450Acosh:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return acosh(X); });
+    break;
+  case GLSLstd450Asin:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return asin(X); });
+    break;
+  case GLSLstd450Asinh:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return asinh(X); });
+    break;
+  case GLSLstd450Atan:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return atan(X); });
+    break;
+  case GLSLstd450Atanh:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return atanh(X); });
+    break;
+  case GLSLstd450Atan2:
+    executeOpFP<2, 4>(
+        Inst, [](auto Y, auto X) -> decltype(X) { return atan2(Y, X); });
+    break;
+  case GLSLstd450Cos:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return cos(X); });
+    break;
+  case GLSLstd450Cosh:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return cosh(X); });
+    break;
   case GLSLstd450Fma:
   {
     executeOpFP<3, 4>(
@@ -196,6 +224,18 @@ void Invocation::executeExtInst(const Instruction *Inst)
   case GLSLstd450InverseSqrt:
     executeOpFP<1, 4>(Inst,
                       [](auto X) -> decltype(X) { return 1.f / sqrt(X); });
+    break;
+  case GLSLstd450Sin:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return sin(X); });
+    break;
+  case GLSLstd450Sinh:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return sinh(X); });
+    break;
+  case GLSLstd450Tan:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return tan(X); });
+    break;
+  case GLSLstd450Tanh:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return tanh(X); });
     break;
   default:
     assert(false && "Unhandled GLSL.std.450 extended instruction");
