@@ -40,4 +40,4 @@ script:
             -DSPIRV_TOOLS_INCLUDE_DIR=$PWD/SPIRV-Tools/include
             -DSPIRV_TOOLS_LIBRARY_DIR=$PWD/SPIRV-Tools/lib
   - make -j 2
-  - make test
+  - ctest . --output-on-failure
