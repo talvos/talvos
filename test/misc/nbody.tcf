@@ -1,0 +1,90 @@
+# Simple N-Body simulation.
+#
+# float4 computeForce(float4 ipos, float4 jpos, float softening)
+# {
+#   float4 d       = jpos - ipos;
+#          d.w     = 0;
+#   float  distSq  = d.x*d.x + d.y*d.y + d.z*d.z + softening*softening;
+#   float  invdist = native_rsqrt(distSq);
+#   float  coeff   = jpos.w * (invdist*invdist*invdist);
+#   return coeff * d;
+# }
+#
+# __attribute__((reqd_work_group_size(4, 1, 1)))
+# kernel void nbody(global const float4 * restrict positionsIn,
+#                   global       float4 * restrict positionsOut,
+#                   global       float4 * restrict velocities,
+#                   const        uint              numBodies,
+#                   const        float             softening,
+#                   const        float             delta)
+# {
+#   uint i       = get_global_id(0);
+#   uint lid     = get_local_id(0);
+#   float4 ipos  = positionsIn[i];
+#
+#   // Compute force
+#   float4 force = 0.f;
+#   for (uint j = 0; j < numBodies; j+=WGSIZE)
+#   {
+#     for (uint k = 0; k < WGSIZE; k++)
+#     {
+#       force += computeForce(ipos, positionsIn[j + k], softening);
+#     }
+#   }
+#
+#   // Update velocity
+#   float4 velocity = velocities[i];
+#   velocity       += force * delta;
+#   velocities[i]   = velocity;
+#
+#   // Update position
+#   positionsOut[i] = ipos + velocity * delta;
+# }
+
+MODULE nbody.spvasm
+ENTRY nbody
+
+ALLOCATE positionsIn   BUFFER 128   DATA FLOAT
+  86.52     0.00   -94.33  1
+   4.49  -127.48   -10.59  1
+-103.63   -21.64   -71.95  1
+ 114.35    34.82    45.79  1
+ -27.18   -57.11   111.28  1
+ -95.14    85.48     4.97  1
+  22.78   -40.85  -119.15  1
+ 120.63    42.12     7.60  1
+
+ALLOCATE positionsOut  BUFFER 128   FILL FLOAT 0
+ALLOCATE velocities    BUFFER 128   FILL FLOAT 0
+ALLOCATE numBodies     BUFFER 4     DATA UINT32 8
+ALLOCATE softening     BUFFER 4     DATA FLOAT 100
+ALLOCATE delta         BUFFER 4     DATA FLOAT 50
+
+DESCRIPTOR_SET 0 0 positionsIn
+DESCRIPTOR_SET 0 1 positionsOut
+DESCRIPTOR_SET 0 2 velocities
+DESCRIPTOR_SET 0 3 numBodies
+DESCRIPTOR_SET 0 4 softening
+DESCRIPTOR_SET 0 5 delta
+
+LOOP 4
+  DESCRIPTOR_SET 0 0 positionsIn
+  DESCRIPTOR_SET 0 1 positionsOut
+  DISPATCH 2 1 1
+
+  DESCRIPTOR_SET 0 0 positionsOut
+  DESCRIPTOR_SET 0 1 positionsIn
+  DISPATCH 2 1 1
+ENDLOOP
+
+DUMP FLOATv4 positionsIn
+
+# CHECK Buffer 'positionsIn' (128 bytes):
+# CHECK   positionsIn[0] = (80.7532, -1.53149, -87.715, 1)
+# CHECK   positionsIn[1] = (5.01991, -118.199, -11.5671, 1)
+# CHECK   positionsIn[2] = (-95.29, -20.7632, -68.3113, 1)
+# CHECK   positionsIn[3] = (108.945, 32.027, 38.9385, 1)
+# CHECK   positionsIn[4] = (-24.4484, -54.6156, 103.015, 1)
+# CHECK   positionsIn[5] = (-89.4127, 78.8418, 3.11838, 1)
+# CHECK   positionsIn[6] = (23.4577, -38.0185, -110.509, 1)
+# CHECK   positionsIn[7] = (113.796, 37.5987, 6.651, 1)

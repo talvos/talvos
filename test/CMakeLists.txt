@@ -6,6 +6,7 @@
 foreach(test
   misc/jacobi
   misc/multiple-entry-points
+  misc/nbody
   misc/reduce
   misc/vecadd
   misc/vecadd_binary

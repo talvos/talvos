@@ -1,0 +1,158 @@
+; SPIR-V
+; Version: 1.0
+; Generator: Codeplay; 0
+; Bound: 112
+; Schema: 0
+               OpCapability Shader
+               OpCapability VariablePointers
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpExtension "SPV_KHR_variable_pointers"
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %60 "nbody" %30 %31
+               OpExecutionMode %60 LocalSize 4 1 1
+               OpSource OpenCL_C 120
+               OpDecorate %5 ArrayStride 16
+               OpMemberDecorate %6 0 Offset 0
+               OpDecorate %6 Block
+               OpMemberDecorate %9 0 Offset 0
+               OpDecorate %9 Block
+               OpMemberDecorate %12 0 Offset 0
+               OpDecorate %12 Block
+               OpDecorate %30 BuiltIn GlobalInvocationId
+               OpDecorate %31 BuiltIn LocalInvocationId
+               OpDecorate %32 DescriptorSet 0
+               OpDecorate %32 Binding 0
+               OpDecorate %33 DescriptorSet 0
+               OpDecorate %33 Binding 1
+               OpDecorate %34 DescriptorSet 0
+               OpDecorate %34 Binding 2
+               OpDecorate %35 DescriptorSet 0
+               OpDecorate %35 Binding 3
+               OpDecorate %36 DescriptorSet 0
+               OpDecorate %36 Binding 4
+               OpDecorate %37 DescriptorSet 0
+               OpDecorate %37 Binding 5
+          %2 = OpTypeFloat 32
+          %3 = OpTypeVector %2 4
+          %4 = OpTypePointer StorageBuffer %3
+          %5 = OpTypeRuntimeArray %3
+          %6 = OpTypeStruct %5
+          %7 = OpTypePointer StorageBuffer %6
+          %8 = OpTypeInt 32 0
+          %9 = OpTypeStruct %8
+         %10 = OpTypePointer StorageBuffer %9
+         %11 = OpTypePointer StorageBuffer %8
+         %12 = OpTypeStruct %2
+         %13 = OpTypePointer StorageBuffer %12
+         %14 = OpTypePointer StorageBuffer %2
+         %15 = OpTypeVoid
+         %16 = OpTypeFunction %15
+         %17 = OpTypeVector %8 3
+         %18 = OpTypePointer Input %17
+         %19 = OpTypePointer Input %8
+         %20 = OpTypeBool
+         %21 = OpTypeFunction %3 %3 %3 %2
+         %22 = OpConstant %8 0
+         %23 = OpConstantNull %3
+         %24 = OpConstant %8 1
+         %25 = OpConstant %8 2
+         %26 = OpConstant %8 3
+         %27 = OpConstant %8 4
+         %28 = OpUndef %3
+         %29 = OpConstant %2 0
+         %30 = OpVariable %18 Input
+         %31 = OpVariable %18 Input
+         %32 = OpVariable %7 StorageBuffer
+         %33 = OpVariable %7 StorageBuffer
+         %34 = OpVariable %7 StorageBuffer
+         %35 = OpVariable %10 StorageBuffer
+         %36 = OpVariable %13 StorageBuffer
+         %37 = OpVariable %13 StorageBuffer
+         %38 = OpFunction %3 Const %21
+         %39 = OpFunctionParameter %3
+         %40 = OpFunctionParameter %3
+         %41 = OpFunctionParameter %2
+         %42 = OpLabel
+         %43 = OpFSub %3 %40 %39
+         %44 = OpCompositeInsert %3 %29 %43 3
+         %45 = OpCompositeExtract %2 %43 0
+         %46 = OpCompositeExtract %2 %43 1
+         %47 = OpFMul %2 %46 %46
+         %48 = OpExtInst %2 %1 Fma %45 %45 %47
+         %49 = OpCompositeExtract %2 %43 2
+         %50 = OpExtInst %2 %1 Fma %49 %49 %48
+         %51 = OpExtInst %2 %1 Fma %41 %41 %50
+         %52 = OpExtInst %2 %1 InverseSqrt %51
+         %53 = OpCompositeExtract %2 %40 3
+         %54 = OpFMul %2 %52 %52
+         %55 = OpFMul %2 %52 %54
+         %56 = OpFMul %2 %53 %55
+         %57 = OpCompositeInsert %3 %56 %28 0
+         %58 = OpVectorShuffle %3 %57 %28 0 0 0 0
+         %59 = OpFMul %3 %44 %58
+               OpReturnValue %59
+               OpFunctionEnd
+         %60 = OpFunction %15 None %16
+         %61 = OpLabel
+         %62 = OpAccessChain %11 %35 %22
+         %63 = OpLoad %8 %62
+         %64 = OpAccessChain %14 %36 %22
+         %65 = OpLoad %2 %64
+         %66 = OpAccessChain %14 %37 %22
+         %67 = OpLoad %2 %66
+         %68 = OpAccessChain %19 %30 %22
+         %69 = OpLoad %8 %68
+         %70 = OpAccessChain %4 %32 %22 %69
+         %71 = OpLoad %3 %70
+         %72 = OpIEqual %20 %63 %22
+         %73 = OpLogicalNot %20 %72
+               OpSelectionMerge %101 None
+               OpBranchConditional %73 %74 %101
+         %74 = OpLabel
+               OpBranch %75
+         %75 = OpLabel
+         %77 = OpPhi %3 %96 %75 %23 %74
+         %76 = OpPhi %8 %97 %75 %22 %74
+         %78 = OpAccessChain %4 %32 %22 %76
+         %79 = OpLoad %3 %78
+         %80 = OpFunctionCall %3 %38 %71 %79 %65
+         %81 = OpFAdd %3 %77 %80
+         %82 = OpBitwiseOr %8 %76 %24
+         %83 = OpAccessChain %4 %32 %22 %82
+         %84 = OpLoad %3 %83
+         %85 = OpFunctionCall %3 %38 %71 %84 %65
+         %86 = OpFAdd %3 %81 %85
+         %87 = OpBitwiseOr %8 %76 %25
+         %88 = OpAccessChain %4 %32 %22 %87
+         %89 = OpLoad %3 %88
+         %90 = OpFunctionCall %3 %38 %71 %89 %65
+         %91 = OpFAdd %3 %86 %90
+         %92 = OpBitwiseOr %8 %76 %26
+         %93 = OpAccessChain %4 %32 %22 %92
+         %94 = OpLoad %3 %93
+         %95 = OpFunctionCall %3 %38 %71 %94 %65
+         %96 = OpFAdd %3 %91 %95
+         %97 = OpIAdd %8 %76 %27
+         %98 = OpULessThan %20 %97 %63
+         %99 = OpLogicalNot %20 %98
+               OpLoopMerge %100 %75 None
+               OpBranchConditional %99 %100 %75
+        %100 = OpLabel
+               OpBranch %101
+        %101 = OpLabel
+        %102 = OpPhi %3 %96 %100 %23 %61
+               OpBranch %103
+        %103 = OpLabel
+        %104 = OpPhi %3 %102 %101
+        %105 = OpAccessChain %4 %34 %22 %69
+        %106 = OpLoad %3 %105
+        %107 = OpCompositeInsert %3 %67 %28 0
+        %108 = OpVectorShuffle %3 %107 %28 0 0 0 0
+        %109 = OpExtInst %3 %1 Fma %104 %108 %106
+               OpStore %105 %109
+        %110 = OpExtInst %3 %1 Fma %109 %108 %71
+        %111 = OpAccessChain %4 %33 %22 %69
+               OpStore %111 %110
+               OpReturn
+               OpFunctionEnd
