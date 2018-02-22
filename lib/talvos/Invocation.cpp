@@ -298,6 +298,11 @@ void Invocation::executeIMul(const Instruction *Inst)
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
 }
 
+void Invocation::executeINotEqual(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A != B; });
+}
+
 void Invocation::executeLoad(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -535,6 +540,7 @@ void Invocation::step()
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpIMul, IMul);
+    DISPATCH(SpvOpINotEqual, INotEqual);
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpLogicalNot, LogicalNot);
     DISPATCH(SpvOpPhi, Phi);
