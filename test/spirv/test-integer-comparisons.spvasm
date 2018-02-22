@@ -61,6 +61,7 @@
          %31 = OpLoad %1 %30
          %32 = OpAccessChain %2 %22 %13 %29
          %33 = OpLoad %1 %32
+
          %34 = OpIEqual %11 %31 %33
                OpSelectionMerge %39 None
                OpBranchConditional %34 %35 %39
@@ -70,6 +71,7 @@
          %37 = OpLoad %1 %30
          %38 = OpLoad %1 %32
                OpBranch %39
+
          %39 = OpLabel
          %41 = OpPhi %1 %31 %27 %37 %35
          %40 = OpPhi %1 %33 %27 %38 %35

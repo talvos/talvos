@@ -40,11 +40,11 @@ expected_exit_code = 0
 for ln in range(len(lines)):
     line = lines[ln]
 
-    if line.startswith('# CHECK '):
-        pattern = line[8:]
+    if line.startswith('# CHECK: '):
+        pattern = line[9:]
         matched = False
         for o in range(oln, len(outlines)):
-            if outlines[o] == pattern:
+            if pattern in outlines[o]:
                 matched = True
                 oln = o
                 break

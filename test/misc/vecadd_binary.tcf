@@ -13,20 +13,20 @@ DISPATCH 16 1 1
 
 DUMP INT32 c
 
-# CHECK Buffer 'c' (64 bytes):
-# CHECK   c[0] = 7
-# CHECK   c[1] = 8
-# CHECK   c[2] = 9
-# CHECK   c[3] = 10
-# CHECK   c[4] = 11
-# CHECK   c[5] = 12
-# CHECK   c[6] = 13
-# CHECK   c[7] = 14
-# CHECK   c[8] = 15
-# CHECK   c[9] = 16
-# CHECK   c[10] = 17
-# CHECK   c[11] = 18
-# CHECK   c[12] = 19
-# CHECK   c[13] = 20
-# CHECK   c[14] = 21
-# CHECK   c[15] = 22
+# CHECK: Buffer 'c' (64 bytes):
+# CHECK:   c[0] = 7
+# CHECK:   c[1] = 8
+# CHECK:   c[2] = 9
+# CHECK:   c[3] = 10
+# CHECK:   c[4] = 11
+# CHECK:   c[5] = 12
+# CHECK:   c[6] = 13
+# CHECK:   c[7] = 14
+# CHECK:   c[8] = 15
+# CHECK:   c[9] = 16
+# CHECK:   c[10] = 17
+# CHECK:   c[11] = 18
+# CHECK:   c[12] = 19
+# CHECK:   c[13] = 20
+# CHECK:   c[14] = 21
+# CHECK:   c[15] = 22

@@ -79,12 +79,12 @@ ENDLOOP
 
 DUMP FLOATv4 positionsIn
 
-# CHECK Buffer 'positionsIn' (128 bytes):
-# CHECK   positionsIn[0] = (80.7532, -1.53149, -87.715, 1)
-# CHECK   positionsIn[1] = (5.01991, -118.199, -11.5671, 1)
-# CHECK   positionsIn[2] = (-95.29, -20.7632, -68.3113, 1)
-# CHECK   positionsIn[3] = (108.945, 32.027, 38.9385, 1)
-# CHECK   positionsIn[4] = (-24.4484, -54.6156, 103.015, 1)
-# CHECK   positionsIn[5] = (-89.4127, 78.8418, 3.11838, 1)
-# CHECK   positionsIn[6] = (23.4577, -38.0185, -110.509, 1)
-# CHECK   positionsIn[7] = (113.796, 37.5987, 6.651, 1)
+# CHECK: Buffer 'positionsIn' (128 bytes):
+# CHECK:   positionsIn[0] = (80.7532, -1.53149, -87.715, 1)
+# CHECK:   positionsIn[1] = (5.01991, -118.199, -11.5671, 1)
+# CHECK:   positionsIn[2] = (-95.29, -20.7632, -68.3113, 1)
+# CHECK:   positionsIn[3] = (108.945, 32.027, 38.9385, 1)
+# CHECK:   positionsIn[4] = (-24.4484, -54.6156, 103.015, 1)
+# CHECK:   positionsIn[5] = (-89.4127, 78.8418, 3.11838, 1)
+# CHECK:   positionsIn[6] = (23.4577, -38.0185, -110.509, 1)
+# CHECK:   positionsIn[7] = (113.796, 37.5987, 6.651, 1)

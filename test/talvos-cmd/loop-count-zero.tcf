@@ -1,4 +1,4 @@
-# CHECK ERROR: loop count must be > 0
+# CHECK: ERROR: loop count must be > 0
 # EXIT 1
 LOOP 0
 ENDLOOP

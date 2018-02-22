@@ -1,4 +1,4 @@
-# CHECK ERROR: Unterminated LOOP
+# CHECK: ERROR: Unterminated LOOP
 # EXIT 1
 
 LOOP 1

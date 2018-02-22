@@ -19,8 +19,8 @@ DISPATCH 4 1 1
 
 DUMP INT32 output
 
-# CHECK Buffer 'output' (16 bytes):
-# CHECK   output[0] = 42
-# CHECK   output[1] = 43
-# CHECK   output[2] = 44
-# CHECK   output[3] = 45
+# CHECK: Buffer 'output' (16 bytes):
+# CHECK:   output[0] = 42
+# CHECK:   output[1] = 43
+# CHECK:   output[2] = 44
+# CHECK:   output[3] = 45

@@ -30,49 +30,49 @@ DESCRIPTOR_SET 0 4 lt
 DISPATCH 13 1 1
 
 DUMP INT32 eq
-# CHECK Buffer 'eq' (52 bytes):
-# CHECK   eq[0] = 1
-# CHECK   eq[1] = 0
-# CHECK   eq[2] = 0
-# CHECK   eq[3] = 0
-# CHECK   eq[4] = 0
-# CHECK   eq[5] = 1
-# CHECK   eq[6] = 0
-# CHECK   eq[7] = 0
-# CHECK   eq[8] = 0
-# CHECK   eq[9] = 1
-# CHECK   eq[10] = 0
-# CHECK   eq[11] = 0
-# CHECK   eq[12] = 0
+# CHECK: Buffer 'eq' (52 bytes):
+# CHECK:   eq[0] = 1
+# CHECK:   eq[1] = 0
+# CHECK:   eq[2] = 0
+# CHECK:   eq[3] = 0
+# CHECK:   eq[4] = 0
+# CHECK:   eq[5] = 1
+# CHECK:   eq[6] = 0
+# CHECK:   eq[7] = 0
+# CHECK:   eq[8] = 0
+# CHECK:   eq[9] = 1
+# CHECK:   eq[10] = 0
+# CHECK:   eq[11] = 0
+# CHECK:   eq[12] = 0
 
 DUMP INT32 gt
-# CHECK Buffer 'gt' (52 bytes):
-# CHECK   gt[0] = 0
-# CHECK   gt[1] = 0
-# CHECK   gt[2] = 1
-# CHECK   gt[3] = 1
-# CHECK   gt[4] = 0
-# CHECK   gt[5] = 0
-# CHECK   gt[6] = 1
-# CHECK   gt[7] = 0
-# CHECK   gt[8] = 1
-# CHECK   gt[9] = 0
-# CHECK   gt[10] = 0
-# CHECK   gt[11] = 1
-# CHECK   gt[12] = 0
+# CHECK: Buffer 'gt' (52 bytes):
+# CHECK:   gt[0] = 0
+# CHECK:   gt[1] = 0
+# CHECK:   gt[2] = 1
+# CHECK:   gt[3] = 1
+# CHECK:   gt[4] = 0
+# CHECK:   gt[5] = 0
+# CHECK:   gt[6] = 1
+# CHECK:   gt[7] = 0
+# CHECK:   gt[8] = 1
+# CHECK:   gt[9] = 0
+# CHECK:   gt[10] = 0
+# CHECK:   gt[11] = 1
+# CHECK:   gt[12] = 0
 
 DUMP INT32 lt
-# CHECK Buffer 'lt' (52 bytes):
-# CHECK   lt[0] = 0
-# CHECK   lt[1] = 1
-# CHECK   lt[2] = 0
-# CHECK   lt[3] = 0
-# CHECK   lt[4] = 1
-# CHECK   lt[5] = 0
-# CHECK   lt[6] = 0
-# CHECK   lt[7] = 1
-# CHECK   lt[8] = 0
-# CHECK   lt[9] = 0
-# CHECK   lt[10] = 1
-# CHECK   lt[11] = 0
-# CHECK   lt[12] = 1
+# CHECK: Buffer 'lt' (52 bytes):
+# CHECK:   lt[0] = 0
+# CHECK:   lt[1] = 1
+# CHECK:   lt[2] = 0
+# CHECK:   lt[3] = 0
+# CHECK:   lt[4] = 1
+# CHECK:   lt[5] = 0
+# CHECK:   lt[6] = 0
+# CHECK:   lt[7] = 1
+# CHECK:   lt[8] = 0
+# CHECK:   lt[9] = 0
+# CHECK:   lt[10] = 1
+# CHECK:   lt[11] = 0
+# CHECK:   lt[12] = 1

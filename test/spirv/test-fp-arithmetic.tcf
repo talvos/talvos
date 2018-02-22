@@ -41,57 +41,57 @@ DUMP FLOAT sub32
 DUMP FLOAT mul32
 DUMP FLOAT div32
 
-# CHECK Buffer 'add32' (44 bytes):
-# CHECK   add32[0] = 0
-# CHECK   add32[1] = 1
-# CHECK   add32[2] = 1
-# CHECK   add32[3] = 2
-# CHECK   add32[4] = 0
-# CHECK   add32[5] = 0
-# CHECK   add32[6] = -2
-# CHECK   add32[7] = 54.44
-# CHECK   add32[8] = -60.06
-# CHECK   add32[9] = -115.61
-# CHECK   add32[10] = -1.11
+# CHECK: Buffer 'add32' (44 bytes):
+# CHECK:   add32[0] = 0
+# CHECK:   add32[1] = 1
+# CHECK:   add32[2] = 1
+# CHECK:   add32[3] = 2
+# CHECK:   add32[4] = 0
+# CHECK:   add32[5] = 0
+# CHECK:   add32[6] = -2
+# CHECK:   add32[7] = 54.44
+# CHECK:   add32[8] = -60.06
+# CHECK:   add32[9] = -115.61
+# CHECK:   add32[10] = -1.11
 
-# CHECK Buffer 'sub32' (44 bytes):
-# CHECK   sub32[0] = 0
-# CHECK   sub32[1] = -1
-# CHECK   sub32[2] = 1
-# CHECK   sub32[3] = 0
-# CHECK   sub32[4] = 2
-# CHECK   sub32[5] = -2
-# CHECK   sub32[6] = 0
-# CHECK   sub32[7] = 29.76
-# CHECK   sub32[8] = -84.74
-# CHECK   sub32[9] = -29.19
-# CHECK   sub32[10] = 85.31
+# CHECK: Buffer 'sub32' (44 bytes):
+# CHECK:   sub32[0] = 0
+# CHECK:   sub32[1] = -1
+# CHECK:   sub32[2] = 1
+# CHECK:   sub32[3] = 0
+# CHECK:   sub32[4] = 2
+# CHECK:   sub32[5] = -2
+# CHECK:   sub32[6] = 0
+# CHECK:   sub32[7] = 29.76
+# CHECK:   sub32[8] = -84.74
+# CHECK:   sub32[9] = -29.19
+# CHECK:   sub32[10] = 85.31
 
-# CHECK Buffer 'mul32' (44 bytes):
-# CHECK   mul32[0] = 0
-# CHECK   mul32[1] = 0
-# CHECK   mul32[2] = 0
-# CHECK   mul32[3] = 1
-# CHECK   mul32[4] = -1
-# CHECK   mul32[5] = -1
-# CHECK   mul32[6] = 1
-# CHECK   mul32[7] = 519.514
-# CHECK   mul32[8] = -893.416
-# CHECK   mul32[9] = 3128.4
-# CHECK   mul32[10] = -1819.14
+# CHECK: Buffer 'mul32' (44 bytes):
+# CHECK:   mul32[0] = 0
+# CHECK:   mul32[1] = 0
+# CHECK:   mul32[2] = 0
+# CHECK:   mul32[3] = 1
+# CHECK:   mul32[4] = -1
+# CHECK:   mul32[5] = -1
+# CHECK:   mul32[6] = 1
+# CHECK:   mul32[7] = 519.514
+# CHECK:   mul32[8] = -893.416
+# CHECK:   mul32[9] = 3128.4
+# CHECK:   mul32[10] = -1819.14
 
-# CHECK Buffer 'div32' (44 bytes):
-# CHECK   div32[0] = nan
-# CHECK   div32[1] = 0
-# CHECK   div32[2] = inf
-# CHECK   div32[3] = 1
-# CHECK   div32[4] = -1
-# CHECK   div32[5] = -1
-# CHECK   div32[6] = 1
-# CHECK   div32[7] = 3.41167
-# CHECK   div32[8] = -5.8671
-# CHECK   div32[9] = 1.67554
-# CHECK   div32[10] = -0.974311
+# CHECK: Buffer 'div32' (44 bytes):
+# CHECK:   div32[0] = nan
+# CHECK:   div32[1] = 0
+# CHECK:   div32[2] = inf
+# CHECK:   div32[3] = 1
+# CHECK:   div32[4] = -1
+# CHECK:   div32[5] = -1
+# CHECK:   div32[6] = 1
+# CHECK:   div32[7] = 3.41167
+# CHECK:   div32[8] = -5.8671
+# CHECK:   div32[9] = 1.67554
+# CHECK:   div32[10] = -0.974311
 
 
 
@@ -132,54 +132,54 @@ DUMP DOUBLE sub64
 DUMP DOUBLE mul64
 DUMP DOUBLE div64
 
-# CHECK Buffer 'add64' (88 bytes):
-# CHECK   add64[0] = 0
-# CHECK   add64[1] = 1
-# CHECK   add64[2] = 1
-# CHECK   add64[3] = 2
-# CHECK   add64[4] = 0
-# CHECK   add64[5] = 0
-# CHECK   add64[6] = -2
-# CHECK   add64[7] = 165.64
-# CHECK   add64[8] = -596.95
-# CHECK   add64[9] = -1263.61
-# CHECK   add64[10] = -501.02
+# CHECK: Buffer 'add64' (88 bytes):
+# CHECK:   add64[0] = 0
+# CHECK:   add64[1] = 1
+# CHECK:   add64[2] = 1
+# CHECK:   add64[3] = 2
+# CHECK:   add64[4] = 0
+# CHECK:   add64[5] = 0
+# CHECK:   add64[6] = -2
+# CHECK:   add64[7] = 165.64
+# CHECK:   add64[8] = -596.95
+# CHECK:   add64[9] = -1263.61
+# CHECK:   add64[10] = -501.02
 
-# CHECK Buffer 'sub64' (88 bytes):
-# CHECK   sub64[0] = 0
-# CHECK   sub64[1] = -1
-# CHECK   sub64[2] = 1
-# CHECK   sub64[3] = 0
-# CHECK   sub64[4] = 2
-# CHECK   sub64[5] = -2
-# CHECK   sub64[6] = 0
-# CHECK   sub64[7] = -81.26
-# CHECK   sub64[8] = -843.85
-# CHECK   sub64[9] = -177.19
-# CHECK   sub64[10] = 585.4
+# CHECK: Buffer 'sub64' (88 bytes):
+# CHECK:   sub64[0] = 0
+# CHECK:   sub64[1] = -1
+# CHECK:   sub64[2] = 1
+# CHECK:   sub64[3] = 0
+# CHECK:   sub64[4] = 2
+# CHECK:   sub64[5] = -2
+# CHECK:   sub64[6] = 0
+# CHECK:   sub64[7] = -81.26
+# CHECK:   sub64[8] = -843.85
+# CHECK:   sub64[9] = -177.19
+# CHECK:   sub64[10] = 585.4
 
-# CHECK Buffer 'mul64' (88 bytes):
-# CHECK   mul64[0] = 0
-# CHECK   mul64[1] = 0
-# CHECK   mul64[2] = 0
-# CHECK   mul64[3] = 1
-# CHECK   mul64[4] = -1
-# CHECK   mul64[5] = -1
-# CHECK   mul64[6] = 1
-# CHECK   mul64[7] = 5208.36
-# CHECK   mul64[8] = -88933.4
-# CHECK   mul64[9] = 391328
-# CHECK   mul64[10] = -22918
+# CHECK: Buffer 'mul64' (88 bytes):
+# CHECK:   mul64[0] = 0
+# CHECK:   mul64[1] = 0
+# CHECK:   mul64[2] = 0
+# CHECK:   mul64[3] = 1
+# CHECK:   mul64[4] = -1
+# CHECK:   mul64[5] = -1
+# CHECK:   mul64[6] = 1
+# CHECK:   mul64[7] = 5208.36
+# CHECK:   mul64[8] = -88933.4
+# CHECK:   mul64[9] = 391328
+# CHECK:   mul64[10] = -22918
 
-# CHECK Buffer 'div64' (88 bytes):
-# CHECK   div64[0] = nan
-# CHECK   div64[1] = 0
-# CHECK   div64[2] = inf
-# CHECK   div64[3] = 1
-# CHECK   div64[4] = -1
-# CHECK   div64[5] = -1
-# CHECK   div64[6] = 1
-# CHECK   div64[7] = 0.341758
-# CHECK   div64[8] = -5.83556
-# CHECK   div64[9] = 1.32619
-# CHECK   div64[10] = -0.0776679
+# CHECK: Buffer 'div64' (88 bytes):
+# CHECK:   div64[0] = nan
+# CHECK:   div64[1] = 0
+# CHECK:   div64[2] = inf
+# CHECK:   div64[3] = 1
+# CHECK:   div64[4] = -1
+# CHECK:   div64[5] = -1
+# CHECK:   div64[6] = 1
+# CHECK:   div64[7] = 0.341758
+# CHECK:   div64[8] = -5.83556
+# CHECK:   div64[9] = 1.32619
+# CHECK:   div64[10] = -0.0776679

@@ -23,23 +23,23 @@ DUMP INT32 y
 DUMP INT32 z
 DUMP INT32 w
 
-# CHECK Buffer 'x' (16 bytes):
-# CHECK   x[0] = 1
-# CHECK   x[1] = 5
-# CHECK   x[2] = 9
-# CHECK   x[3] = 13
-# CHECK Buffer 'y' (16 bytes):
-# CHECK   y[0] = 2
-# CHECK   y[1] = 6
-# CHECK   y[2] = 10
-# CHECK   y[3] = 14
-# CHECK Buffer 'z' (16 bytes):
-# CHECK   z[0] = 3
-# CHECK   z[1] = 7
-# CHECK   z[2] = 11
-# CHECK   z[3] = 15
-# CHECK Buffer 'w' (16 bytes):
-# CHECK   w[0] = 4
-# CHECK   w[1] = 8
-# CHECK   w[2] = 12
-# CHECK   w[3] = 16
+# CHECK: Buffer 'x' (16 bytes):
+# CHECK:   x[0] = 1
+# CHECK:   x[1] = 5
+# CHECK:   x[2] = 9
+# CHECK:   x[3] = 13
+# CHECK: Buffer 'y' (16 bytes):
+# CHECK:   y[0] = 2
+# CHECK:   y[1] = 6
+# CHECK:   y[2] = 10
+# CHECK:   y[3] = 14
+# CHECK: Buffer 'z' (16 bytes):
+# CHECK:   z[0] = 3
+# CHECK:   z[1] = 7
+# CHECK:   z[2] = 11
+# CHECK:   z[3] = 15
+# CHECK: Buffer 'w' (16 bytes):
+# CHECK:   w[0] = 4
+# CHECK:   w[1] = 8
+# CHECK:   w[2] = 12
+# CHECK:   w[3] = 16

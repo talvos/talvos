@@ -133,158 +133,158 @@ DUMP INT64 out_64x2
 DUMP INT64 out_64x3
 DUMP INT64 out_64x4
 
-# CHECK Buffer 'out_16x1' (8 bytes):
-# CHECK   out_16x1[0] = 1
-# CHECK   out_16x1[1] = 4
-# CHECK   out_16x1[2] = 7
-# CHECK   out_16x1[3] = 10
+# CHECK: Buffer 'out_16x1' (8 bytes):
+# CHECK:   out_16x1[0] = 1
+# CHECK:   out_16x1[1] = 4
+# CHECK:   out_16x1[2] = 7
+# CHECK:   out_16x1[3] = 10
 
-# CHECK Buffer 'out_16x2' (16 bytes):
-# CHECK   out_16x2[0] = 5
-# CHECK   out_16x2[1] = 12
-# CHECK   out_16x2[2] = 19
-# CHECK   out_16x2[3] = 26
-# CHECK   out_16x2[4] = 33
-# CHECK   out_16x2[5] = 40
-# CHECK   out_16x2[6] = 47
-# CHECK   out_16x2[7] = 54
+# CHECK: Buffer 'out_16x2' (16 bytes):
+# CHECK:   out_16x2[0] = 5
+# CHECK:   out_16x2[1] = 12
+# CHECK:   out_16x2[2] = 19
+# CHECK:   out_16x2[3] = 26
+# CHECK:   out_16x2[4] = 33
+# CHECK:   out_16x2[5] = 40
+# CHECK:   out_16x2[6] = 47
+# CHECK:   out_16x2[7] = 54
 
-# CHECK Buffer 'out_16x3' (32 bytes):
-# CHECK   out_16x3[0] = 9
-# CHECK   out_16x3[1] = 20
-# CHECK   out_16x3[2] = 31
-# CHECK   out_16x3[3] = 0
-# CHECK   out_16x3[4] = 53
-# CHECK   out_16x3[5] = 64
-# CHECK   out_16x3[6] = 75
-# CHECK   out_16x3[7] = 0
-# CHECK   out_16x3[8] = 97
-# CHECK   out_16x3[9] = 108
-# CHECK   out_16x3[10] = 119
-# CHECK   out_16x3[11] = 0
-# CHECK   out_16x3[12] = 141
-# CHECK   out_16x3[13] = 152
-# CHECK   out_16x3[14] = 163
-# CHECK   out_16x3[15] = 0
+# CHECK: Buffer 'out_16x3' (32 bytes):
+# CHECK:   out_16x3[0] = 9
+# CHECK:   out_16x3[1] = 20
+# CHECK:   out_16x3[2] = 31
+# CHECK:   out_16x3[3] = 0
+# CHECK:   out_16x3[4] = 53
+# CHECK:   out_16x3[5] = 64
+# CHECK:   out_16x3[6] = 75
+# CHECK:   out_16x3[7] = 0
+# CHECK:   out_16x3[8] = 97
+# CHECK:   out_16x3[9] = 108
+# CHECK:   out_16x3[10] = 119
+# CHECK:   out_16x3[11] = 0
+# CHECK:   out_16x3[12] = 141
+# CHECK:   out_16x3[13] = 152
+# CHECK:   out_16x3[14] = 163
+# CHECK:   out_16x3[15] = 0
 
-# CHECK Buffer 'out_16x4' (32 bytes):
-# CHECK   out_16x4[0] = 13
-# CHECK   out_16x4[1] = 28
-# CHECK   out_16x4[2] = 43
-# CHECK   out_16x4[3] = 58
-# CHECK   out_16x4[4] = 73
-# CHECK   out_16x4[5] = 88
-# CHECK   out_16x4[6] = 103
-# CHECK   out_16x4[7] = 118
-# CHECK   out_16x4[8] = 133
-# CHECK   out_16x4[9] = 148
-# CHECK   out_16x4[10] = 163
-# CHECK   out_16x4[11] = 178
-# CHECK   out_16x4[12] = 193
-# CHECK   out_16x4[13] = 208
-# CHECK   out_16x4[14] = 223
-# CHECK   out_16x4[15] = 238
+# CHECK: Buffer 'out_16x4' (32 bytes):
+# CHECK:   out_16x4[0] = 13
+# CHECK:   out_16x4[1] = 28
+# CHECK:   out_16x4[2] = 43
+# CHECK:   out_16x4[3] = 58
+# CHECK:   out_16x4[4] = 73
+# CHECK:   out_16x4[5] = 88
+# CHECK:   out_16x4[6] = 103
+# CHECK:   out_16x4[7] = 118
+# CHECK:   out_16x4[8] = 133
+# CHECK:   out_16x4[9] = 148
+# CHECK:   out_16x4[10] = 163
+# CHECK:   out_16x4[11] = 178
+# CHECK:   out_16x4[12] = 193
+# CHECK:   out_16x4[13] = 208
+# CHECK:   out_16x4[14] = 223
+# CHECK:   out_16x4[15] = 238
 
-# CHECK Buffer 'out_32x1' (16 bytes):
-# CHECK   out_32x1[0] = 107
-# CHECK   out_32x1[1] = 108
-# CHECK   out_32x1[2] = 109
-# CHECK   out_32x1[3] = 110
+# CHECK: Buffer 'out_32x1' (16 bytes):
+# CHECK:   out_32x1[0] = 107
+# CHECK:   out_32x1[1] = 108
+# CHECK:   out_32x1[2] = 109
+# CHECK:   out_32x1[3] = 110
 
-# CHECK Buffer 'out_32x2' (32 bytes):
-# CHECK   out_32x2[0] = 170
-# CHECK   out_32x2[1] = 174
-# CHECK   out_32x2[2] = 178
-# CHECK   out_32x2[3] = 182
-# CHECK   out_32x2[4] = 186
-# CHECK   out_32x2[5] = 190
-# CHECK   out_32x2[6] = 194
-# CHECK   out_32x2[7] = 198
+# CHECK: Buffer 'out_32x2' (32 bytes):
+# CHECK:   out_32x2[0] = 170
+# CHECK:   out_32x2[1] = 174
+# CHECK:   out_32x2[2] = 178
+# CHECK:   out_32x2[3] = 182
+# CHECK:   out_32x2[4] = 186
+# CHECK:   out_32x2[5] = 190
+# CHECK:   out_32x2[6] = 194
+# CHECK:   out_32x2[7] = 198
 
-# CHECK Buffer 'out_32x3' (64 bytes):
-# CHECK   out_32x3[0] = 220
-# CHECK   out_32x3[1] = 234
-# CHECK   out_32x3[2] = 248
-# CHECK   out_32x3[3] = 0
-# CHECK   out_32x3[4] = 276
-# CHECK   out_32x3[5] = 290
-# CHECK   out_32x3[6] = 304
-# CHECK   out_32x3[7] = 0
-# CHECK   out_32x3[8] = 332
-# CHECK   out_32x3[9] = 346
-# CHECK   out_32x3[10] = 360
-# CHECK   out_32x3[11] = 0
-# CHECK   out_32x3[12] = 388
-# CHECK   out_32x3[13] = 402
-# CHECK   out_32x3[14] = 416
-# CHECK   out_32x3[15] = 0
+# CHECK: Buffer 'out_32x3' (64 bytes):
+# CHECK:   out_32x3[0] = 220
+# CHECK:   out_32x3[1] = 234
+# CHECK:   out_32x3[2] = 248
+# CHECK:   out_32x3[3] = 0
+# CHECK:   out_32x3[4] = 276
+# CHECK:   out_32x3[5] = 290
+# CHECK:   out_32x3[6] = 304
+# CHECK:   out_32x3[7] = 0
+# CHECK:   out_32x3[8] = 332
+# CHECK:   out_32x3[9] = 346
+# CHECK:   out_32x3[10] = 360
+# CHECK:   out_32x3[11] = 0
+# CHECK:   out_32x3[12] = 388
+# CHECK:   out_32x3[13] = 402
+# CHECK:   out_32x3[14] = 416
+# CHECK:   out_32x3[15] = 0
 
-# CHECK Buffer 'out_32x4' (64 bytes):
-# CHECK   out_32x4[0] = 1031
-# CHECK   out_32x4[1] = 996
-# CHECK   out_32x4[2] = 961
-# CHECK   out_32x4[3] = 926
-# CHECK   out_32x4[4] = 891
-# CHECK   out_32x4[5] = 856
-# CHECK   out_32x4[6] = 821
-# CHECK   out_32x4[7] = 786
-# CHECK   out_32x4[8] = 751
-# CHECK   out_32x4[9] = 716
-# CHECK   out_32x4[10] = 681
-# CHECK   out_32x4[11] = 646
-# CHECK   out_32x4[12] = 611
-# CHECK   out_32x4[13] = 576
-# CHECK   out_32x4[14] = 541
-# CHECK   out_32x4[15] = 506
+# CHECK: Buffer 'out_32x4' (64 bytes):
+# CHECK:   out_32x4[0] = 1031
+# CHECK:   out_32x4[1] = 996
+# CHECK:   out_32x4[2] = 961
+# CHECK:   out_32x4[3] = 926
+# CHECK:   out_32x4[4] = 891
+# CHECK:   out_32x4[5] = 856
+# CHECK:   out_32x4[6] = 821
+# CHECK:   out_32x4[7] = 786
+# CHECK:   out_32x4[8] = 751
+# CHECK:   out_32x4[9] = 716
+# CHECK:   out_32x4[10] = 681
+# CHECK:   out_32x4[11] = 646
+# CHECK:   out_32x4[12] = 611
+# CHECK:   out_32x4[13] = 576
+# CHECK:   out_32x4[14] = 541
+# CHECK:   out_32x4[15] = 506
 
-# CHECK Buffer 'out_64x1' (32 bytes):
-# CHECK   out_64x1[0] = 100011
-# CHECK   out_64x1[1] = 100022
-# CHECK   out_64x1[2] = 100033
-# CHECK   out_64x1[3] = 100044
+# CHECK: Buffer 'out_64x1' (32 bytes):
+# CHECK:   out_64x1[0] = 100011
+# CHECK:   out_64x1[1] = 100022
+# CHECK:   out_64x1[2] = 100033
+# CHECK:   out_64x1[3] = 100044
 
-# CHECK Buffer 'out_64x2' (64 bytes):
-# CHECK   out_64x2[0] = 18887
-# CHECK   out_64x2[1] = 18904
-# CHECK   out_64x2[2] = 18921
-# CHECK   out_64x2[3] = 18938
-# CHECK   out_64x2[4] = 18955
-# CHECK   out_64x2[5] = 18972
-# CHECK   out_64x2[6] = 18989
-# CHECK   out_64x2[7] = 19006
+# CHECK: Buffer 'out_64x2' (64 bytes):
+# CHECK:   out_64x2[0] = 18887
+# CHECK:   out_64x2[1] = 18904
+# CHECK:   out_64x2[2] = 18921
+# CHECK:   out_64x2[3] = 18938
+# CHECK:   out_64x2[4] = 18955
+# CHECK:   out_64x2[5] = 18972
+# CHECK:   out_64x2[6] = 18989
+# CHECK:   out_64x2[7] = 19006
 
-# CHECK Buffer 'out_64x3' (128 bytes):
-# CHECK   out_64x3[0] = -12019
-# CHECK   out_64x3[1] = -12138
-# CHECK   out_64x3[2] = -12257
-# CHECK   out_64x3[3] = 0
-# CHECK   out_64x3[4] = -12495
-# CHECK   out_64x3[5] = -12614
-# CHECK   out_64x3[6] = -12733
-# CHECK   out_64x3[7] = 0
-# CHECK   out_64x3[8] = -12971
-# CHECK   out_64x3[9] = -13090
-# CHECK   out_64x3[10] = -13209
-# CHECK   out_64x3[11] = 0
-# CHECK   out_64x3[12] = -13447
-# CHECK   out_64x3[13] = -13566
-# CHECK   out_64x3[14] = -13685
-# CHECK   out_64x3[15] = 0
+# CHECK: Buffer 'out_64x3' (128 bytes):
+# CHECK:   out_64x3[0] = -12019
+# CHECK:   out_64x3[1] = -12138
+# CHECK:   out_64x3[2] = -12257
+# CHECK:   out_64x3[3] = 0
+# CHECK:   out_64x3[4] = -12495
+# CHECK:   out_64x3[5] = -12614
+# CHECK:   out_64x3[6] = -12733
+# CHECK:   out_64x3[7] = 0
+# CHECK:   out_64x3[8] = -12971
+# CHECK:   out_64x3[9] = -13090
+# CHECK:   out_64x3[10] = -13209
+# CHECK:   out_64x3[11] = 0
+# CHECK:   out_64x3[12] = -13447
+# CHECK:   out_64x3[13] = -13566
+# CHECK:   out_64x3[14] = -13685
+# CHECK:   out_64x3[15] = 0
 
-# CHECK Buffer 'out_64x4' (128 bytes):
-# CHECK   out_64x4[0] = 10000000000
-# CHECK   out_64x4[1] = 10000899999
-# CHECK   out_64x4[2] = 10001799998
-# CHECK   out_64x4[3] = 10002699997
-# CHECK   out_64x4[4] = 10003599996
-# CHECK   out_64x4[5] = 10004499995
-# CHECK   out_64x4[6] = 10005399994
-# CHECK   out_64x4[7] = 10006299993
-# CHECK   out_64x4[8] = 10007199992
-# CHECK   out_64x4[9] = 10008099991
-# CHECK   out_64x4[10] = 10008999990
-# CHECK   out_64x4[11] = 10009899989
-# CHECK   out_64x4[12] = 10010799988
-# CHECK   out_64x4[13] = 10011699987
-# CHECK   out_64x4[14] = 10012599986
-# CHECK   out_64x4[15] = 10013499985
+# CHECK: Buffer 'out_64x4' (128 bytes):
+# CHECK:   out_64x4[0] = 10000000000
+# CHECK:   out_64x4[1] = 10000899999
+# CHECK:   out_64x4[2] = 10001799998
+# CHECK:   out_64x4[3] = 10002699997
+# CHECK:   out_64x4[4] = 10003599996
+# CHECK:   out_64x4[5] = 10004499995
+# CHECK:   out_64x4[6] = 10005399994
+# CHECK:   out_64x4[7] = 10006299993
+# CHECK:   out_64x4[8] = 10007199992
+# CHECK:   out_64x4[9] = 10008099991
+# CHECK:   out_64x4[10] = 10008999990
+# CHECK:   out_64x4[11] = 10009899989
+# CHECK:   out_64x4[12] = 10010799988
+# CHECK:   out_64x4[13] = 10011699987
+# CHECK:   out_64x4[14] = 10012599986
+# CHECK:   out_64x4[15] = 10013499985
