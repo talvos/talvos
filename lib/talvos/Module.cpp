@@ -107,6 +107,7 @@ public:
         {
         case SpvCapabilityInt16:
         case SpvCapabilityInt64:
+        case SpvCapabilityFloat64:
         case SpvCapabilityShader:
         case SpvCapabilityVariablePointers:
         case SpvCapabilityVariablePointersStorageBuffer:
