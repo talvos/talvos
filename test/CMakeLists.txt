@@ -18,6 +18,7 @@ foreach(test
   spirv/simple-loop
   spirv/struct-offset
   spirv/test-fp-arithmetic
+  spirv/test-fp-comparisons
   spirv/test-integer-comparisons
   spirv/test_OpIAdd
   talvos-cmd/dispatch-without-module

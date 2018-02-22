@@ -1,0 +1,240 @@
+# Test floating point comparison instructions.
+# Fills buffers A and B with specific values and then executes this snippet:
+#   if (A[i] <OP> B[i])
+#     OUTPUT[i] = 1;
+
+MODULE test-fp-comparisons.spvasm
+ENTRY test_fp_comparisons
+
+ALLOCATE A BUFFER 52 DATA FLOAT
+0 0 0 1 -1 1 -1 1 1 -1
+nan nan 1
+
+ALLOCATE B BUFFER 52 DATA FLOAT
+0 1 -1 0 0 -1 1 -1 1 -1
+nan 1 nan
+
+ALLOCATE oeq  BUFFER 52 FILL INT32 0
+ALLOCATE ueq  BUFFER 52 FILL INT32 0
+ALLOCATE oneq BUFFER 52 FILL INT32 0
+ALLOCATE uneq BUFFER 52 FILL INT32 0
+ALLOCATE olt  BUFFER 52 FILL INT32 0
+ALLOCATE ult  BUFFER 52 FILL INT32 0
+ALLOCATE ogt  BUFFER 52 FILL INT32 0
+ALLOCATE ugt  BUFFER 52 FILL INT32 0
+ALLOCATE olte BUFFER 52 FILL INT32 0
+ALLOCATE ulte BUFFER 52 FILL INT32 0
+ALLOCATE ogte BUFFER 52 FILL INT32 0
+ALLOCATE ugte BUFFER 52 FILL INT32 0
+
+
+DESCRIPTOR_SET 0 0 A
+DESCRIPTOR_SET 0 1 B
+
+DESCRIPTOR_SET 0 2 oeq
+DESCRIPTOR_SET 0 3 ueq
+DESCRIPTOR_SET 0 4 oneq
+DESCRIPTOR_SET 0 5 uneq
+DESCRIPTOR_SET 0 6 olt
+DESCRIPTOR_SET 0 7 ult
+DESCRIPTOR_SET 0 8 ogt
+DESCRIPTOR_SET 0 9 ugt
+DESCRIPTOR_SET 0 10 olte
+DESCRIPTOR_SET 0 11 ulte
+DESCRIPTOR_SET 0 12 ogte
+DESCRIPTOR_SET 0 13 ugte
+
+DISPATCH 13 1 1
+
+DUMP INT32 oeq
+DUMP INT32 ueq
+DUMP INT32 oneq
+DUMP INT32 uneq
+DUMP INT32 olt
+DUMP INT32 ult
+DUMP INT32 ogt
+DUMP INT32 ugt
+DUMP INT32 olte
+DUMP INT32 ulte
+DUMP INT32 ogte
+DUMP INT32 ugte
+
+# CHECK: Buffer 'oeq' (52 bytes):
+# CHECK:   oeq[0] = 1
+# CHECK:   oeq[1] = 0
+# CHECK:   oeq[2] = 0
+# CHECK:   oeq[3] = 0
+# CHECK:   oeq[4] = 0
+# CHECK:   oeq[5] = 0
+# CHECK:   oeq[6] = 0
+# CHECK:   oeq[7] = 0
+# CHECK:   oeq[8] = 1
+# CHECK:   oeq[9] = 1
+# CHECK:   oeq[10] = 0
+# CHECK:   oeq[11] = 0
+# CHECK:   oeq[12] = 0
+
+# CHECK: Buffer 'ueq' (52 bytes):
+# CHECK:   ueq[0] = 1
+# CHECK:   ueq[1] = 0
+# CHECK:   ueq[2] = 0
+# CHECK:   ueq[3] = 0
+# CHECK:   ueq[4] = 0
+# CHECK:   ueq[5] = 0
+# CHECK:   ueq[6] = 0
+# CHECK:   ueq[7] = 0
+# CHECK:   ueq[8] = 1
+# CHECK:   ueq[9] = 1
+# CHECK:   ueq[10] = 1
+# CHECK:   ueq[11] = 1
+# CHECK:   ueq[12] = 1
+
+# CHECK: Buffer 'oneq' (52 bytes):
+# CHECK:   oneq[0] = 0
+# CHECK:   oneq[1] = 1
+# CHECK:   oneq[2] = 1
+# CHECK:   oneq[3] = 1
+# CHECK:   oneq[4] = 1
+# CHECK:   oneq[5] = 1
+# CHECK:   oneq[6] = 1
+# CHECK:   oneq[7] = 1
+# CHECK:   oneq[8] = 0
+# CHECK:   oneq[9] = 0
+# CHECK:   oneq[10] = 0
+# CHECK:   oneq[11] = 0
+# CHECK:   oneq[12] = 0
+
+# CHECK: Buffer 'uneq' (52 bytes):
+# CHECK:   uneq[0] = 0
+# CHECK:   uneq[1] = 1
+# CHECK:   uneq[2] = 1
+# CHECK:   uneq[3] = 1
+# CHECK:   uneq[4] = 1
+# CHECK:   uneq[5] = 1
+# CHECK:   uneq[6] = 1
+# CHECK:   uneq[7] = 1
+# CHECK:   uneq[8] = 0
+# CHECK:   uneq[9] = 0
+# CHECK:   uneq[10] = 1
+# CHECK:   uneq[11] = 1
+# CHECK:   uneq[12] = 1
+
+# CHECK: Buffer 'olt' (52 bytes):
+# CHECK:   olt[0] = 0
+# CHECK:   olt[1] = 1
+# CHECK:   olt[2] = 0
+# CHECK:   olt[3] = 0
+# CHECK:   olt[4] = 1
+# CHECK:   olt[5] = 0
+# CHECK:   olt[6] = 1
+# CHECK:   olt[7] = 0
+# CHECK:   olt[8] = 0
+# CHECK:   olt[9] = 0
+# CHECK:   olt[10] = 0
+# CHECK:   olt[11] = 0
+# CHECK:   olt[12] = 0
+
+# CHECK: Buffer 'ult' (52 bytes):
+# CHECK:   ult[0] = 0
+# CHECK:   ult[1] = 1
+# CHECK:   ult[2] = 0
+# CHECK:   ult[3] = 0
+# CHECK:   ult[4] = 1
+# CHECK:   ult[5] = 0
+# CHECK:   ult[6] = 1
+# CHECK:   ult[7] = 0
+# CHECK:   ult[8] = 0
+# CHECK:   ult[9] = 0
+# CHECK:   ult[10] = 1
+# CHECK:   ult[11] = 1
+# CHECK:   ult[12] = 1
+
+# CHECK: Buffer 'ogt' (52 bytes):
+# CHECK:   ogt[0] = 0
+# CHECK:   ogt[1] = 0
+# CHECK:   ogt[2] = 1
+# CHECK:   ogt[3] = 1
+# CHECK:   ogt[4] = 0
+# CHECK:   ogt[5] = 1
+# CHECK:   ogt[6] = 0
+# CHECK:   ogt[7] = 1
+# CHECK:   ogt[8] = 0
+# CHECK:   ogt[9] = 0
+# CHECK:   ogt[10] = 0
+# CHECK:   ogt[11] = 0
+# CHECK:   ogt[12] = 0
+
+# CHECK: Buffer 'ugt' (52 bytes):
+# CHECK:   ugt[0] = 0
+# CHECK:   ugt[1] = 0
+# CHECK:   ugt[2] = 1
+# CHECK:   ugt[3] = 1
+# CHECK:   ugt[4] = 0
+# CHECK:   ugt[5] = 1
+# CHECK:   ugt[6] = 0
+# CHECK:   ugt[7] = 1
+# CHECK:   ugt[8] = 0
+# CHECK:   ugt[9] = 0
+# CHECK:   ugt[10] = 1
+# CHECK:   ugt[11] = 1
+# CHECK:   ugt[12] = 1
+
+# CHECK: Buffer 'olte' (52 bytes):
+# CHECK:   olte[0] = 1
+# CHECK:   olte[1] = 1
+# CHECK:   olte[2] = 0
+# CHECK:   olte[3] = 0
+# CHECK:   olte[4] = 1
+# CHECK:   olte[5] = 0
+# CHECK:   olte[6] = 1
+# CHECK:   olte[7] = 0
+# CHECK:   olte[8] = 1
+# CHECK:   olte[9] = 1
+# CHECK:   olte[10] = 0
+# CHECK:   olte[11] = 0
+# CHECK:   olte[12] = 0
+
+# CHECK: Buffer 'ulte' (52 bytes):
+# CHECK:   ulte[0] = 1
+# CHECK:   ulte[1] = 1
+# CHECK:   ulte[2] = 0
+# CHECK:   ulte[3] = 0
+# CHECK:   ulte[4] = 1
+# CHECK:   ulte[5] = 0
+# CHECK:   ulte[6] = 1
+# CHECK:   ulte[7] = 0
+# CHECK:   ulte[8] = 1
+# CHECK:   ulte[9] = 1
+# CHECK:   ulte[10] = 1
+# CHECK:   ulte[11] = 1
+# CHECK:   ulte[12] = 1
+
+# CHECK: Buffer 'ogte' (52 bytes):
+# CHECK:   ogte[0] = 1
+# CHECK:   ogte[1] = 0
+# CHECK:   ogte[2] = 1
+# CHECK:   ogte[3] = 1
+# CHECK:   ogte[4] = 0
+# CHECK:   ogte[5] = 1
+# CHECK:   ogte[6] = 0
+# CHECK:   ogte[7] = 1
+# CHECK:   ogte[8] = 1
+# CHECK:   ogte[9] = 1
+# CHECK:   ogte[10] = 0
+# CHECK:   ogte[11] = 0
+# CHECK:   ogte[12] = 0
+
+# CHECK: Buffer 'ugte' (52 bytes):
+# CHECK:   ugte[0] = 1
+# CHECK:   ugte[1] = 0
+# CHECK:   ugte[2] = 1
+# CHECK:   ugte[3] = 1
+# CHECK:   ugte[4] = 0
+# CHECK:   ugte[5] = 1
+# CHECK:   ugte[6] = 0
+# CHECK:   ugte[7] = 1
+# CHECK:   ugte[8] = 1
+# CHECK:   ugte[9] = 1
+# CHECK:   ugte[10] = 1
+# CHECK:   ugte[11] = 1
+# CHECK:   ugte[12] = 1

@@ -257,6 +257,46 @@ void Invocation::executeFMul(const Instruction *Inst)
   executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
 }
 
+void Invocation::executeFOrdEqual(const Instruction *Inst)
+{
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A == B && !isunordered(A, B);
+  });
+}
+
+void Invocation::executeFOrdGreaterThan(const Instruction *Inst)
+{
+  executeOpFP<2>(
+      Inst, [](auto A, auto B) -> bool { return A > B && !isunordered(A, B); });
+}
+
+void Invocation::executeFOrdGreaterThanEqual(const Instruction *Inst)
+{
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A >= B && !isunordered(A, B);
+  });
+}
+
+void Invocation::executeFOrdLessThan(const Instruction *Inst)
+{
+  executeOpFP<2>(
+      Inst, [](auto A, auto B) -> bool { return A < B && !isunordered(A, B); });
+}
+
+void Invocation::executeFOrdLessThanEqual(const Instruction *Inst)
+{
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A <= B && !isunordered(A, B);
+  });
+}
+
+void Invocation::executeFOrdNotEqual(const Instruction *Inst)
+{
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A != B && !isunordered(A, B);
+  });
+}
+
 void Invocation::executeFSub(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A - B; });
@@ -281,6 +321,42 @@ void Invocation::executeFunctionCall(const Instruction *Inst)
   // Move to first block of callee function.
   CurrentFunction = Func;
   moveToBlock(CurrentFunction->getFirstBlockId());
+}
+
+void Invocation::executeFUnordEqual(const Instruction *Inst)
+{
+  executeOpFP<2>(
+      Inst, [](auto A, auto B) -> bool { return A == B || isunordered(A, B); });
+}
+
+void Invocation::executeFUnordGreaterThan(const Instruction *Inst)
+{
+  executeOpFP<2>(
+      Inst, [](auto A, auto B) -> bool { return A > B || isunordered(A, B); });
+}
+
+void Invocation::executeFUnordGreaterThanEqual(const Instruction *Inst)
+{
+  executeOpFP<2>(
+      Inst, [](auto A, auto B) -> bool { return A >= B || isunordered(A, B); });
+}
+
+void Invocation::executeFUnordLessThan(const Instruction *Inst)
+{
+  executeOpFP<2>(
+      Inst, [](auto A, auto B) -> bool { return A < B || isunordered(A, B); });
+}
+
+void Invocation::executeFUnordLessThanEqual(const Instruction *Inst)
+{
+  executeOpFP<2>(
+      Inst, [](auto A, auto B) -> bool { return A <= B || isunordered(A, B); });
+}
+
+void Invocation::executeFUnordNotEqual(const Instruction *Inst)
+{
+  executeOpFP<2>(
+      Inst, [](auto A, auto B) -> bool { return A != B || isunordered(A, B); });
 }
 
 void Invocation::executeIAdd(const Instruction *Inst)
@@ -560,8 +636,20 @@ void Invocation::step()
     DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFDiv, FDiv);
     DISPATCH(SpvOpFMul, FMul);
+    DISPATCH(SpvOpFOrdEqual, FOrdEqual);
+    DISPATCH(SpvOpFOrdGreaterThan, FOrdGreaterThan);
+    DISPATCH(SpvOpFOrdGreaterThanEqual, FOrdGreaterThanEqual);
+    DISPATCH(SpvOpFOrdLessThan, FOrdLessThan);
+    DISPATCH(SpvOpFOrdLessThanEqual, FOrdLessThanEqual);
+    DISPATCH(SpvOpFOrdNotEqual, FOrdNotEqual);
     DISPATCH(SpvOpFSub, FSub);
     DISPATCH(SpvOpFunctionCall, FunctionCall);
+    DISPATCH(SpvOpFUnordEqual, FUnordEqual);
+    DISPATCH(SpvOpFUnordGreaterThan, FUnordGreaterThan);
+    DISPATCH(SpvOpFUnordGreaterThanEqual, FUnordGreaterThanEqual);
+    DISPATCH(SpvOpFUnordLessThan, FUnordLessThan);
+    DISPATCH(SpvOpFUnordLessThanEqual, FUnordLessThanEqual);
+    DISPATCH(SpvOpFUnordNotEqual, FUnordNotEqual);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpIMul, IMul);
