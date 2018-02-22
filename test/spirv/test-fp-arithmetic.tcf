@@ -81,7 +81,7 @@ DUMP FLOAT div32
 # CHECK:   mul32[10] = -1819.14
 
 # CHECK: Buffer 'div32' (44 bytes):
-# CHECK:   div32[0] = nan
+# CHECK:   div32[0] =
 # CHECK:   div32[1] = 0
 # CHECK:   div32[2] = inf
 # CHECK:   div32[3] = 1
@@ -172,7 +172,7 @@ DUMP DOUBLE div64
 # CHECK:   mul64[10] = -22918
 
 # CHECK: Buffer 'div64' (88 bytes):
-# CHECK:   div64[0] = nan
+# CHECK:   div64[0] =
 # CHECK:   div64[1] = 0
 # CHECK:   div64[2] = inf
 # CHECK:   div64[3] = 1
