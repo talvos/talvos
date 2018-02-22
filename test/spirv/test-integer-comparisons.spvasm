@@ -1,14 +1,14 @@
 ; SPIR-V
 ; Version: 1.0
 ; Generator: Codeplay; 0
-; Bound: 54
+; Bound: 81
 ; Schema: 0
                OpCapability Shader
                OpCapability VariablePointers
                OpExtension "SPV_KHR_storage_buffer_storage_class"
                OpExtension "SPV_KHR_variable_pointers"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %26 "test_integer_comparisons" %15
+               OpEntryPoint GLCompute %33 "test_integer_comparisons" %15
                OpSource OpenCL_C 120
                OpDecorate %16 SpecId 0
                OpDecorate %17 SpecId 1
@@ -28,6 +28,20 @@
                OpDecorate %24 Binding 3
                OpDecorate %25 DescriptorSet 0
                OpDecorate %25 Binding 4
+               OpDecorate %26 DescriptorSet 0
+               OpDecorate %26 Binding 5
+               OpDecorate %27 DescriptorSet 0
+               OpDecorate %27 Binding 6
+               OpDecorate %28 DescriptorSet 0
+               OpDecorate %28 Binding 7
+               OpDecorate %29 DescriptorSet 0
+               OpDecorate %29 Binding 8
+               OpDecorate %30 DescriptorSet 0
+               OpDecorate %30 Binding 9
+               OpDecorate %31 DescriptorSet 0
+               OpDecorate %31 Binding 10
+               OpDecorate %32 DescriptorSet 0
+               OpDecorate %32 Binding 11
           %1 = OpTypeInt 32 0
           %2 = OpTypePointer StorageBuffer %1
           %3 = OpTypeRuntimeArray %1
@@ -53,47 +67,112 @@
          %23 = OpVariable %5 StorageBuffer
          %24 = OpVariable %5 StorageBuffer
          %25 = OpVariable %5 StorageBuffer
-         %26 = OpFunction %6 None %7
-         %27 = OpLabel
-         %28 = OpAccessChain %10 %15 %13
-         %29 = OpLoad %1 %28
-         %30 = OpAccessChain %2 %21 %13 %29
-         %31 = OpLoad %1 %30
-         %32 = OpAccessChain %2 %22 %13 %29
-         %33 = OpLoad %1 %32
+         %26 = OpVariable %5 StorageBuffer
+         %27 = OpVariable %5 StorageBuffer
+         %28 = OpVariable %5 StorageBuffer
+         %29 = OpVariable %5 StorageBuffer
+         %30 = OpVariable %5 StorageBuffer
+         %31 = OpVariable %5 StorageBuffer
+         %32 = OpVariable %5 StorageBuffer
 
-         %34 = OpIEqual %11 %31 %33
-               OpSelectionMerge %39 None
-               OpBranchConditional %34 %35 %39
-         %35 = OpLabel
-         %36 = OpAccessChain %2 %23 %13 %29
-               OpStore %36 %14
-         %37 = OpLoad %1 %30
-         %38 = OpLoad %1 %32
-               OpBranch %39
+         %33 = OpFunction %6 None %7
+         %34 = OpLabel
+         %35 = OpAccessChain %10 %15 %13
+         %36 = OpLoad %1 %35
+         %37 = OpAccessChain %2 %21 %13 %36
+         %38 = OpLoad %1 %37
+         %39 = OpAccessChain %2 %22 %13 %36
+         %40 = OpLoad %1 %39
 
-         %39 = OpLabel
-         %41 = OpPhi %1 %31 %27 %37 %35
-         %40 = OpPhi %1 %33 %27 %38 %35
-         %42 = OpSGreaterThan %11 %41 %40
-               OpSelectionMerge %47 None
-               OpBranchConditional %42 %43 %47
-         %43 = OpLabel
-         %44 = OpAccessChain %2 %24 %13 %29
-               OpStore %44 %14
-         %45 = OpLoad %1 %30
-         %46 = OpLoad %1 %32
-               OpBranch %47
-         %47 = OpLabel
-         %49 = OpPhi %1 %41 %39 %45 %43
-         %48 = OpPhi %1 %40 %39 %46 %43
-         %50 = OpSLessThan %11 %49 %48
-               OpSelectionMerge %53 None
-               OpBranchConditional %50 %51 %53
-         %51 = OpLabel
-         %52 = OpAccessChain %2 %25 %13 %29
-               OpStore %52 %14
-               OpBranch %53
-         %53 = OpLabel
+         %41 = OpIEqual %11 %38 %40
+               OpSelectionMerge %44 None
+               OpBranchConditional %41 %42 %44
+         %42 = OpLabel
+         %43 = OpAccessChain %2 %23 %13 %36
+               OpStore %43 %14
+               OpBranch %44
+         %44 = OpLabel
+
+         %45 = OpINotEqual %11 %38 %40
+               OpSelectionMerge %48 None
+               OpBranchConditional %45 %46 %48
+         %46 = OpLabel
+         %47 = OpAccessChain %2 %24 %13 %36
+               OpStore %47 %14
+               OpBranch %48
+         %48 = OpLabel
+
+         %49 = OpUGreaterThan %11 %38 %40
+               OpSelectionMerge %52 None
+               OpBranchConditional %49 %50 %52
+         %50 = OpLabel
+         %51 = OpAccessChain %2 %25 %13 %36
+               OpStore %51 %14
+               OpBranch %52
+         %52 = OpLabel
+
+         %53 = OpSGreaterThan %11 %38 %40
+               OpSelectionMerge %56 None
+               OpBranchConditional %53 %54 %56
+         %54 = OpLabel
+         %55 = OpAccessChain %2 %26 %13 %36
+               OpStore %55 %14
+               OpBranch %56
+         %56 = OpLabel
+
+         %57 = OpUGreaterThanEqual %11 %38 %40
+               OpSelectionMerge %60 None
+               OpBranchConditional %57 %58 %60
+         %58 = OpLabel
+         %59 = OpAccessChain %2 %27 %13 %36
+               OpStore %59 %14
+               OpBranch %60
+         %60 = OpLabel
+
+         %61 = OpSGreaterThanEqual %11 %38 %40
+               OpSelectionMerge %64 None
+               OpBranchConditional %61 %62 %64
+         %62 = OpLabel
+         %63 = OpAccessChain %2 %28 %13 %36
+               OpStore %63 %14
+               OpBranch %64
+         %64 = OpLabel
+
+         %65 = OpULessThan %11 %38 %40
+               OpSelectionMerge %68 None
+               OpBranchConditional %65 %66 %68
+         %66 = OpLabel
+         %67 = OpAccessChain %2 %29 %13 %36
+               OpStore %67 %14
+               OpBranch %68
+         %68 = OpLabel
+
+         %69 = OpSLessThan %11 %38 %40
+               OpSelectionMerge %72 None
+               OpBranchConditional %69 %70 %72
+         %70 = OpLabel
+         %71 = OpAccessChain %2 %30 %13 %36
+               OpStore %71 %14
+               OpBranch %72
+         %72 = OpLabel
+
+         %73 = OpULessThanEqual %11 %38 %40
+               OpSelectionMerge %76 None
+               OpBranchConditional %73 %74 %76
+         %74 = OpLabel
+         %75 = OpAccessChain %2 %31 %13 %36
+               OpStore %75 %14
+               OpBranch %76
+         %76 = OpLabel
+
+         %77 = OpSLessThanEqual %11 %38 %40
+               OpSelectionMerge %80 None
+               OpBranchConditional %77 %78 %80
+         %78 = OpLabel
+         %79 = OpAccessChain %2 %32 %13 %36
+               OpStore %79 %14
+               OpBranch %80
+         %80 = OpLabel
+
                OpReturn
                OpFunctionEnd

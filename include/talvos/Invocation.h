@@ -88,10 +88,15 @@ public:
   void executeReturn(const Instruction *Inst);
   void executeReturnValue(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
+  void executeSGreaterThanEqual(const Instruction *Inst);
   void executeShiftRightLogical(const Instruction *Inst);
   void executeSLessThan(const Instruction *Inst);
+  void executeSLessThanEqual(const Instruction *Inst);
   void executeStore(const Instruction *Inst);
+  void executeUGreaterThan(const Instruction *Inst);
+  void executeUGreaterThanEqual(const Instruction *Inst);
   void executeULessThan(const Instruction *Inst);
+  void executeULessThanEqual(const Instruction *Inst);
   void executeUndef(const Instruction *Inst);
   void executeVariable(const Instruction *Inst);
   void executeVectorShuffle(const Instruction *Inst);

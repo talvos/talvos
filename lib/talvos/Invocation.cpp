@@ -404,6 +404,11 @@ void Invocation::executeSGreaterThan(const Instruction *Inst)
   executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A > B; });
 }
 
+void Invocation::executeSGreaterThanEqual(const Instruction *Inst)
+{
+  executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A >= B; });
+}
+
 void Invocation::executeShiftRightLogical(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A >> B; });
@@ -414,6 +419,11 @@ void Invocation::executeSLessThan(const Instruction *Inst)
   executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A < B; });
 }
 
+void Invocation::executeSLessThanEqual(const Instruction *Inst)
+{
+  executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A <= B; });
+}
+
 void Invocation::executeStore(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -422,9 +432,24 @@ void Invocation::executeStore(const Instruction *Inst)
   Objects[Id].store(Mem, Dest.get<uint64_t>());
 }
 
+void Invocation::executeUGreaterThan(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A > B; });
+}
+
+void Invocation::executeUGreaterThanEqual(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A >= B; });
+}
+
 void Invocation::executeULessThan(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A < B; });
+}
+
+void Invocation::executeULessThanEqual(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A <= B; });
 }
 
 void Invocation::executeUndef(const Instruction *Inst)
@@ -548,10 +573,15 @@ void Invocation::step()
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpReturnValue, ReturnValue);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
+    DISPATCH(SpvOpSGreaterThanEqual, SGreaterThanEqual);
     DISPATCH(SpvOpShiftRightLogical, ShiftRightLogical);
     DISPATCH(SpvOpSLessThan, SLessThan);
+    DISPATCH(SpvOpSLessThanEqual, SLessThanEqual);
     DISPATCH(SpvOpStore, Store);
+    DISPATCH(SpvOpUGreaterThan, UGreaterThan);
+    DISPATCH(SpvOpUGreaterThanEqual, UGreaterThanEqual);
     DISPATCH(SpvOpULessThan, ULessThan);
+    DISPATCH(SpvOpULessThanEqual, ULessThanEqual);
     DISPATCH(SpvOpUndef, Undef);
     DISPATCH(SpvOpVariable, Variable);
     DISPATCH(SpvOpVectorShuffle, VectorShuffle);
