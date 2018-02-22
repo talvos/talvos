@@ -260,40 +260,42 @@ void Invocation::executeFMul(const Instruction *Inst)
 void Invocation::executeFOrdEqual(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
-    return A == B && !isunordered(A, B);
+    return A == B && !std::isunordered(A, B);
   });
 }
 
 void Invocation::executeFOrdGreaterThan(const Instruction *Inst)
 {
-  executeOpFP<2>(
-      Inst, [](auto A, auto B) -> bool { return A > B && !isunordered(A, B); });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A > B && !std::isunordered(A, B);
+  });
 }
 
 void Invocation::executeFOrdGreaterThanEqual(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
-    return A >= B && !isunordered(A, B);
+    return A >= B && !std::isunordered(A, B);
   });
 }
 
 void Invocation::executeFOrdLessThan(const Instruction *Inst)
 {
-  executeOpFP<2>(
-      Inst, [](auto A, auto B) -> bool { return A < B && !isunordered(A, B); });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A < B && !std::isunordered(A, B);
+  });
 }
 
 void Invocation::executeFOrdLessThanEqual(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
-    return A <= B && !isunordered(A, B);
+    return A <= B && !std::isunordered(A, B);
   });
 }
 
 void Invocation::executeFOrdNotEqual(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
-    return A != B && !isunordered(A, B);
+    return A != B && !std::isunordered(A, B);
   });
 }
 
@@ -325,38 +327,44 @@ void Invocation::executeFunctionCall(const Instruction *Inst)
 
 void Invocation::executeFUnordEqual(const Instruction *Inst)
 {
-  executeOpFP<2>(
-      Inst, [](auto A, auto B) -> bool { return A == B || isunordered(A, B); });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A == B || std::isunordered(A, B);
+  });
 }
 
 void Invocation::executeFUnordGreaterThan(const Instruction *Inst)
 {
-  executeOpFP<2>(
-      Inst, [](auto A, auto B) -> bool { return A > B || isunordered(A, B); });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A > B || std::isunordered(A, B);
+  });
 }
 
 void Invocation::executeFUnordGreaterThanEqual(const Instruction *Inst)
 {
-  executeOpFP<2>(
-      Inst, [](auto A, auto B) -> bool { return A >= B || isunordered(A, B); });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A >= B || std::isunordered(A, B);
+  });
 }
 
 void Invocation::executeFUnordLessThan(const Instruction *Inst)
 {
-  executeOpFP<2>(
-      Inst, [](auto A, auto B) -> bool { return A < B || isunordered(A, B); });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A < B || std::isunordered(A, B);
+  });
 }
 
 void Invocation::executeFUnordLessThanEqual(const Instruction *Inst)
 {
-  executeOpFP<2>(
-      Inst, [](auto A, auto B) -> bool { return A <= B || isunordered(A, B); });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A <= B || std::isunordered(A, B);
+  });
 }
 
 void Invocation::executeFUnordNotEqual(const Instruction *Inst)
 {
-  executeOpFP<2>(
-      Inst, [](auto A, auto B) -> bool { return A != B || isunordered(A, B); });
+  executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
+    return A != B || std::isunordered(A, B);
+  });
 }
 
 void Invocation::executeIAdd(const Instruction *Inst)
