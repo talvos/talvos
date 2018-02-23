@@ -1,0 +1,71 @@
+# Test logical instructions.
+
+MODULE test-logical-instructions.spvasm
+ENTRY test_logical_instructions
+
+ALLOCATE A BUFFER 16 DATA INT32
+0 0 1 1
+
+ALLOCATE B BUFFER 16 DATA INT32
+0 1 0 1
+
+ALLOCATE leq  BUFFER 16 FILL INT32 0
+ALLOCATE lneq BUFFER 16 FILL INT32 0
+ALLOCATE lor  BUFFER 16 FILL INT32 0
+ALLOCATE land BUFFER 16 FILL INT32 0
+ALLOCATE lnot BUFFER 16 FILL INT32 0
+ALLOCATE sel  BUFFER 16 FILL INT32 0
+
+DESCRIPTOR_SET 0 0 A
+DESCRIPTOR_SET 0 1 B
+DESCRIPTOR_SET 0 2 leq
+DESCRIPTOR_SET 0 3 lneq
+DESCRIPTOR_SET 0 4 lor
+DESCRIPTOR_SET 0 5 land
+DESCRIPTOR_SET 0 6 lnot
+DESCRIPTOR_SET 0 7 sel
+
+DISPATCH 4 1 1
+
+DUMP INT32 leq
+DUMP INT32 lneq
+DUMP INT32 lor
+DUMP INT32 land
+DUMP INT32 lnot
+DUMP INT32 sel
+
+# CHECK: Buffer 'leq' (16 bytes):
+# CHECK:   leq[0] = 1
+# CHECK:   leq[1] = 0
+# CHECK:   leq[2] = 0
+# CHECK:   leq[3] = 1
+
+# CHECK: Buffer 'lneq' (16 bytes):
+# CHECK:   lneq[0] = 0
+# CHECK:   lneq[1] = 1
+# CHECK:   lneq[2] = 1
+# CHECK:   lneq[3] = 0
+
+# CHECK: Buffer 'lor' (16 bytes):
+# CHECK:   lor[0] = 0
+# CHECK:   lor[1] = 1
+# CHECK:   lor[2] = 1
+# CHECK:   lor[3] = 1
+
+# CHECK: Buffer 'land' (16 bytes):
+# CHECK:   land[0] = 0
+# CHECK:   land[1] = 0
+# CHECK:   land[2] = 0
+# CHECK:   land[3] = 1
+
+# CHECK: Buffer 'lnot' (16 bytes):
+# CHECK:   lnot[0] = 1
+# CHECK:   lnot[1] = 1
+# CHECK:   lnot[2] = 0
+# CHECK:   lnot[3] = 0
+
+# CHECK: Buffer 'sel' (16 bytes):
+# CHECK:   sel[0] = 7
+# CHECK:   sel[1] = 7
+# CHECK:   sel[2] = 42
+# CHECK:   sel[3] = 42

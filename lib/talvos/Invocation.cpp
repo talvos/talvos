@@ -395,9 +395,29 @@ void Invocation::executeLoad(const Instruction *Inst)
   Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<uint64_t>());
 }
 
+void Invocation::executeLogicalAnd(const Instruction *Inst)
+{
+  executeOp<bool, 2>(Inst, [](bool A, bool B) { return A && B; });
+}
+
+void Invocation::executeLogicalEqual(const Instruction *Inst)
+{
+  executeOp<bool, 2>(Inst, [](bool A, bool B) { return A == B; });
+}
+
 void Invocation::executeLogicalNot(const Instruction *Inst)
 {
   executeOp<bool, 1>(Inst, [](bool A) { return !A; });
+}
+
+void Invocation::executeLogicalNotEqual(const Instruction *Inst)
+{
+  executeOp<bool, 2>(Inst, [](bool A, bool B) { return A != B; });
+}
+
+void Invocation::executeLogicalOr(const Instruction *Inst)
+{
+  executeOp<bool, 2>(Inst, [](bool A, bool B) { return A || B; });
 }
 
 void Invocation::executePhi(const Instruction *Inst)
@@ -481,6 +501,13 @@ void Invocation::executeReturnValue(const Instruction *Inst)
   CurrentFunction = SE.RetFunc;
   CurrentBlock = SE.RetBlock;
   CurrentInstruction = SE.RetInst->next();
+}
+
+void Invocation::executeSelect(const Instruction *Inst)
+{
+  bool Condition = OP(2, bool);
+  Objects[Inst->Operands[1]] =
+      Objects[Condition ? Inst->Operands[3] : Inst->Operands[4]];
 }
 
 void Invocation::executeSGreaterThan(const Instruction *Inst)
@@ -663,11 +690,16 @@ void Invocation::step()
     DISPATCH(SpvOpIMul, IMul);
     DISPATCH(SpvOpINotEqual, INotEqual);
     DISPATCH(SpvOpLoad, Load);
+    DISPATCH(SpvOpLogicalEqual, LogicalEqual);
+    DISPATCH(SpvOpLogicalNotEqual, LogicalNotEqual);
+    DISPATCH(SpvOpLogicalOr, LogicalOr);
+    DISPATCH(SpvOpLogicalAnd, LogicalAnd);
     DISPATCH(SpvOpLogicalNot, LogicalNot);
     DISPATCH(SpvOpPhi, Phi);
     DISPATCH(SpvOpPtrAccessChain, PtrAccessChain);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpReturnValue, ReturnValue);
+    DISPATCH(SpvOpSelect, Select);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
     DISPATCH(SpvOpSGreaterThanEqual, SGreaterThanEqual);
     DISPATCH(SpvOpShiftRightLogical, ShiftRightLogical);

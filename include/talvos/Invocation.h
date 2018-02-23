@@ -94,11 +94,16 @@ public:
   void executeIMul(const Instruction *Inst);
   void executeINotEqual(const Instruction *Inst);
   void executeLoad(const Instruction *Inst);
+  void executeLogicalAnd(const Instruction *Inst);
+  void executeLogicalEqual(const Instruction *Inst);
   void executeLogicalNot(const Instruction *Inst);
+  void executeLogicalNotEqual(const Instruction *Inst);
+  void executeLogicalOr(const Instruction *Inst);
   void executePhi(const Instruction *Inst);
   void executePtrAccessChain(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeReturnValue(const Instruction *Inst);
+  void executeSelect(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
   void executeSGreaterThanEqual(const Instruction *Inst);
   void executeShiftRightLogical(const Instruction *Inst);

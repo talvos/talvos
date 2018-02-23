@@ -1,0 +1,133 @@
+; SPIR-V
+; Version: 1.0
+; Schema: 0
+               OpCapability Shader
+               OpCapability VariablePointers
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpExtension "SPV_KHR_variable_pointers"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %31 "test_logical_instructions" %17
+               OpSource OpenCL_C 120
+               OpDecorate %18 SpecId 0
+               OpDecorate %19 SpecId 1
+               OpDecorate %20 SpecId 2
+               OpDecorate %3 ArrayStride 4
+               OpMemberDecorate %4 0 Offset 0
+               OpDecorate %4 Block
+               OpDecorate %17 BuiltIn GlobalInvocationId
+               OpDecorate %21 BuiltIn WorkgroupSize
+               OpDecorate %a_base DescriptorSet 0
+               OpDecorate %a_base Binding 0
+               OpDecorate %b_base DescriptorSet 0
+               OpDecorate %b_base Binding 1
+               OpDecorate %leq_base DescriptorSet 0
+               OpDecorate %leq_base Binding 2
+               OpDecorate %lneq_base DescriptorSet 0
+               OpDecorate %lneq_base Binding 3
+               OpDecorate %lor_base DescriptorSet 0
+               OpDecorate %lor_base Binding 4
+               OpDecorate %land_base DescriptorSet 0
+               OpDecorate %land_base Binding 5
+               OpDecorate %lnot_base DescriptorSet 0
+               OpDecorate %lnot_base Binding 6
+               OpDecorate %sel_base DescriptorSet 0
+               OpDecorate %sel_base Binding 7
+          %1 = OpTypeInt 32 0
+          %2 = OpTypePointer StorageBuffer %1
+          %3 = OpTypeRuntimeArray %1
+          %4 = OpTypeStruct %3
+          %5 = OpTypePointer StorageBuffer %4
+          %6 = OpTypeVoid
+          %7 = OpTypeFunction %6
+          %8 = OpTypeVector %1 3
+          %9 = OpTypePointer Input %8
+         %10 = OpTypePointer Input %1
+         %11 = OpTypeBool
+         %12 = OpTypePointer Private %8
+         %13 = OpConstant %1 0
+         %14 = OpConstant %1 1
+         %15 = OpConstant %1 42
+         %16 = OpConstant %1 7
+         %17 = OpVariable %9 Input
+         %18 = OpSpecConstant %1 1
+         %19 = OpSpecConstant %1 1
+         %20 = OpSpecConstant %1 1
+         %21 = OpSpecConstantComposite %8 %18 %19 %20
+         %22 = OpVariable %12 Private %21
+     %a_base = OpVariable %5 StorageBuffer
+     %b_base = OpVariable %5 StorageBuffer
+   %leq_base = OpVariable %5 StorageBuffer
+  %lneq_base = OpVariable %5 StorageBuffer
+   %lor_base = OpVariable %5 StorageBuffer
+  %land_base = OpVariable %5 StorageBuffer
+  %lnot_base = OpVariable %5 StorageBuffer
+   %sel_base = OpVariable %5 StorageBuffer
+         %31 = OpFunction %6 None %7
+         %32 = OpLabel
+         %33 = OpAccessChain %10 %17 %13
+         %34 = OpLoad %1 %33
+         %35 = OpAccessChain %2 %a_base %13 %34
+         %36 = OpLoad %1 %35
+          %a = OpIEqual %11 %36 %14
+         %38 = OpAccessChain %2 %b_base %13 %34
+         %39 = OpLoad %1 %38
+          %b = OpIEqual %11 %39 %14
+
+
+        %sel = OpSelect %1 %a %15 %16
+   %sel_addr = OpAccessChain %2 %sel_base %13 %34
+               OpStore %sel_addr %sel
+
+
+        %leq = OpLogicalEqual %11 %a %b
+               OpSelectionMerge %leq_end None
+               OpBranchConditional %leq %leq_true %leq_end
+   %leq_true = OpLabel
+   %leq_addr = OpAccessChain %2 %leq_base %13 %34
+               OpStore %leq_addr %14
+               OpBranch %leq_end
+    %leq_end = OpLabel
+
+
+       %lneq = OpLogicalNotEqual %11 %a %b
+               OpSelectionMerge %lneq_end None
+               OpBranchConditional %lneq %lneq_true %lneq_end
+  %lneq_true = OpLabel
+  %lneq_addr = OpAccessChain %2 %lneq_base %13 %34
+               OpStore %lneq_addr %14
+               OpBranch %lneq_end
+   %lneq_end = OpLabel
+
+
+        %lor = OpLogicalOr %11 %a %b
+               OpSelectionMerge %lor_end None
+               OpBranchConditional %lor %lor_true %lor_end
+   %lor_true = OpLabel
+   %lor_addr = OpAccessChain %2 %lor_base %13 %34
+               OpStore %lor_addr %14
+               OpBranch %lor_end
+    %lor_end = OpLabel
+
+
+       %land = OpLogicalAnd %11 %a %b
+               OpSelectionMerge %land_end None
+               OpBranchConditional %land %land_true %land_end
+  %land_true = OpLabel
+  %land_addr = OpAccessChain %2 %land_base %13 %34
+               OpStore %land_addr %14
+               OpBranch %land_end
+   %land_end = OpLabel
+
+
+       %lnot = OpLogicalNot %11 %a
+               OpSelectionMerge %lnot_end None
+               OpBranchConditional %lnot %lnot_true %lnot_end
+  %lnot_true = OpLabel
+  %lnot_addr = OpAccessChain %2 %lnot_base %13 %34
+               OpStore %lnot_addr %14
+               OpBranch %lnot_end
+   %lnot_end = OpLabel
+
+
+               OpReturn
+               OpFunctionEnd
