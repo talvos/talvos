@@ -215,6 +215,9 @@ void Invocation::executeExtInst(const Instruction *Inst)
   case GLSLstd450Cosh:
     executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return cosh(X); });
     break;
+  case GLSLstd450FAbs:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return fabs(X); });
+    break;
   case GLSLstd450Fma:
   {
     executeOpFP<3, 4>(
