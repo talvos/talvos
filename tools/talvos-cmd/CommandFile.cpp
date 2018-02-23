@@ -152,6 +152,23 @@ void CommandFile::parseAllocate()
       else
         throw NotRecognizedException();
     }
+    else if (Init == "DATFILE")
+    {
+      // Open data file.
+      string Filename = get<string>("data filename");
+      std::ifstream DatFile(Filename, std::ios::binary);
+      if (!DatFile)
+        throw "unable to open file";
+
+      // Load data from file.
+      std::vector<char> Data(NumBytes);
+      if (!DatFile.read(Data.data(), NumBytes))
+        throw "failed to read binary data";
+
+      // Copy data to buffer.
+      Device->getGlobalMemory().store(Address, NumBytes,
+                                      (uint8_t *)Data.data());
+    }
     else
     {
       throw NotRecognizedException();
