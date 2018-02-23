@@ -9,6 +9,7 @@
                OpExtension "SPV_KHR_variable_pointers"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %40 "test_fp_comparisons" %20
+               OpEntryPoint GLCompute %96 "generate_nans" %20
                OpSource OpenCL_C 120
                OpDecorate %21 SpecId 0
                OpDecorate %22 SpecId 1
@@ -68,6 +69,9 @@
          %17 = OpTypePointer Private %13
          %18 = OpConstant %6 0
          %19 = OpConstant %6 1
+         %103 = OpConstant %6 10
+         %104 = OpConstant %6 11
+         %105 = OpConstant %6 12
          %20 = OpVariable %14 Input
          %21 = OpSpecConstant %6 1
          %22 = OpSpecConstant %6 1
@@ -88,6 +92,7 @@
          %37 = OpVariable %10 StorageBuffer
          %38 = OpVariable %10 StorageBuffer
          %39 = OpVariable %10 StorageBuffer
+
          %40 = OpFunction %11 None %12
          %41 = OpLabel
          %42 = OpAccessChain %15 %20 %18
@@ -207,3 +212,23 @@
 
                OpReturn
                OpFunctionEnd
+
+
+         %96 = OpFunction %11 None %12
+         %97 = OpLabel
+         %98 = OpAccessChain %2 %26 %18 %18
+         %99 = OpLoad %1 %98
+         %100 = OpAccessChain %2 %27 %18 %18
+         %101 = OpLoad %1 %100
+         %102 = OpFDiv %1 %99 %101
+         %106 = OpAccessChain %2 %26 %18 %103
+                OpStore %106 %102
+         %107 = OpAccessChain %2 %26 %18 %104
+                OpStore %107 %102
+         %108 = OpAccessChain %2 %27 %18 %103
+                OpStore %108 %102
+         %109 = OpAccessChain %2 %27 %18 %105
+                OpStore %109 %102
+
+                OpReturn
+                OpFunctionEnd

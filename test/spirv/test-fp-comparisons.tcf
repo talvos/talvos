@@ -4,15 +4,18 @@
 #     OUTPUT[i] = 1;
 
 MODULE test-fp-comparisons.spvasm
-ENTRY test_fp_comparisons
 
 ALLOCATE A BUFFER 52 DATA FLOAT
 0 0 0 1 -1 1 -1 1 1 -1
-nan nan 1
+0 # will be NaN
+0 # will be NaN
+1
 
 ALLOCATE B BUFFER 52 DATA FLOAT
 0 1 -1 0 0 -1 1 -1 1 -1
-nan 1 nan
+0 # will be NaN
+1
+0 # will be NaN
 
 ALLOCATE oeq  BUFFER 52 FILL INT32 0
 ALLOCATE ueq  BUFFER 52 FILL INT32 0
@@ -30,6 +33,13 @@ ALLOCATE ugte BUFFER 52 FILL INT32 0
 
 DESCRIPTOR_SET 0 0 A
 DESCRIPTOR_SET 0 1 B
+
+# Generate NaN operands
+ENTRY generate_nans
+DISPATCH 1 1 1
+
+
+ENTRY test_fp_comparisons
 
 DESCRIPTOR_SET 0 2 oeq
 DESCRIPTOR_SET 0 3 ueq
