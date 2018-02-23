@@ -31,6 +31,11 @@ if (NOT SPIRV_TOOLS_LIB)
           "SPIRV-Tools library required, try setting SPIRV_TOOLS_LIBRARY_DIR.")
 endif()
 
+# Disable exceptions for libtalvos
+if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
+endif()
+
 set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Block.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
