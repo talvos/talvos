@@ -1,0 +1,108 @@
+; SPIR-V
+; Version: 1.0
+; Schema: 0
+                 OpCapability Shader
+                 OpCapability VariablePointers
+                 OpExtension "SPV_KHR_storage_buffer_storage_class"
+                 OpExtension "SPV_KHR_variable_pointers"
+                 OpMemoryModel Logical GLSL450
+                 OpEntryPoint GLCompute %18 "test_bitwise_instructions" %12
+                 OpSource OpenCL_C 120
+                 OpDecorate %13 SpecId 0
+                 OpDecorate %14 SpecId 1
+                 OpDecorate %15 SpecId 2
+                 OpDecorate %3 ArrayStride 4
+                 OpMemberDecorate %4 0 Offset 0
+                 OpDecorate %4 Block
+                 OpDecorate %3 ArrayStride 4
+                 OpMemberDecorate %4 0 Offset 0
+                 OpDecorate %4 Block
+                 OpDecorate %12 BuiltIn GlobalInvocationId
+                 OpDecorate %16 BuiltIn WorkgroupSize
+
+                 OpDecorate %a_base DescriptorSet 0
+                 OpDecorate %a_base Binding 0
+                 OpDecorate %b_base DescriptorSet 0
+                 OpDecorate %b_base Binding 1
+                 OpDecorate %lshr_base DescriptorSet 0
+                 OpDecorate %lshr_base Binding 2
+                 OpDecorate %ashr_base DescriptorSet 0
+                 OpDecorate %ashr_base Binding 3
+                 OpDecorate %lshl_base DescriptorSet 0
+                 OpDecorate %lshl_base Binding 4
+                 OpDecorate %bwor_base DescriptorSet 0
+                 OpDecorate %bwor_base Binding 5
+                 OpDecorate %bwxor_base DescriptorSet 0
+                 OpDecorate %bwxor_base Binding 6
+                 OpDecorate %bwand_base DescriptorSet 0
+                 OpDecorate %bwand_base Binding 7
+                 OpDecorate %bwnot_base DescriptorSet 0
+                 OpDecorate %bwnot_base Binding 8
+
+            %1 = OpTypeInt 32 0
+            %2 = OpTypePointer StorageBuffer %1
+            %3 = OpTypeRuntimeArray %1
+            %4 = OpTypeStruct %3
+            %5 = OpTypePointer StorageBuffer %4
+            %6 = OpTypeVoid
+            %7 = OpTypeFunction %6
+            %8 = OpTypeVector %1 3
+            %9 = OpTypePointer Input %8
+           %10 = OpTypePointer Input %1
+           %11 = OpTypePointer Private %8
+           %i0 = OpConstant %1 0
+           %12 = OpVariable %9 Input
+           %13 = OpSpecConstant %1 1
+           %14 = OpSpecConstant %1 1
+           %15 = OpSpecConstant %1 1
+           %16 = OpSpecConstantComposite %8 %13 %14 %15
+           %17 = OpVariable %11 Private %16
+       %a_base = OpVariable %5 StorageBuffer
+       %b_base = OpVariable %5 StorageBuffer
+    %lshr_base = OpVariable %5 StorageBuffer
+    %ashr_base = OpVariable %5 StorageBuffer
+    %lshl_base = OpVariable %5 StorageBuffer
+    %bwor_base = OpVariable %5 StorageBuffer
+   %bwxor_base = OpVariable %5 StorageBuffer
+   %bwand_base = OpVariable %5 StorageBuffer
+   %bwnot_base = OpVariable %5 StorageBuffer
+
+           %18 = OpFunction %6 None %7
+           %19 = OpLabel
+        %i_ptr = OpAccessChain %10 %12 %i0
+            %i = OpLoad %1 %i_ptr
+        %a_ptr = OpAccessChain %2 %a_base %i0 %i
+            %a = OpLoad %1 %a_ptr
+        %b_ptr = OpAccessChain %2 %b_base %i0 %i
+            %b = OpLoad %1 %b_ptr
+
+         %lshr = OpShiftRightLogical %1 %a %b
+     %lshr_ptr = OpAccessChain %2 %lshr_base %i0 %i
+                 OpStore %lshr_ptr %lshr
+
+         %ashr = OpShiftRightArithmetic %1 %a %b
+     %ashr_ptr = OpAccessChain %2 %ashr_base %i0 %i
+                 OpStore %ashr_ptr %ashr
+
+         %lshl = OpShiftLeftLogical %1 %a %b
+     %lshl_ptr = OpAccessChain %2 %lshl_base %i0 %i
+                 OpStore %lshl_ptr %lshl
+
+         %bwor = OpBitwiseOr %1 %a %b
+     %bwor_ptr = OpAccessChain %2 %bwor_base %i0 %i
+                 OpStore %bwor_ptr %bwor
+
+        %bwxor = OpBitwiseXor %1 %a %b
+    %bwxor_ptr = OpAccessChain %2 %bwxor_base %i0 %i
+                 OpStore %bwxor_ptr %bwxor
+
+        %bwand = OpBitwiseAnd %1 %a %b
+    %bwand_ptr = OpAccessChain %2 %bwand_base %i0 %i
+                 OpStore %bwand_ptr %bwand
+
+        %bwnot = OpNot %1 %a
+    %bwnot_ptr = OpAccessChain %2 %bwnot_base %i0 %i
+                 OpStore %bwnot_ptr %bwnot
+
+                 OpReturn
+                 OpFunctionEnd

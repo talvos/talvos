@@ -1,0 +1,103 @@
+# Test bitwise instructions.
+# Fills buffers A and B with specific values and then executes this snippet:
+#   OUTPUT[i] = A[i] <OP> B[i];
+
+MODULE test-bitwise-instructions.spvasm
+ENTRY test_bitwise_instructions
+
+BUFFER A 28 DATA INT32
+0 -1 -1 254 64 16 -64
+
+BUFFER B 28 DATA INT32
+0 0 -1 97 1 5 1
+
+BUFFER lshr  28 FILL FLOAT 0
+BUFFER ashr  28 FILL FLOAT 0
+BUFFER lshl  28 FILL FLOAT 0
+BUFFER bwor  28 FILL FLOAT 0
+BUFFER bwxor 28 FILL FLOAT 0
+BUFFER bwand 28 FILL FLOAT 0
+BUFFER bwnot 28 FILL FLOAT 0
+
+DESCRIPTOR_SET 0 0 A
+DESCRIPTOR_SET 0 1 B
+DESCRIPTOR_SET 0 2 lshr
+DESCRIPTOR_SET 0 3 ashr
+DESCRIPTOR_SET 0 4 lshl
+DESCRIPTOR_SET 0 5 bwor
+DESCRIPTOR_SET 0 6 bwxor
+DESCRIPTOR_SET 0 7 bwand
+DESCRIPTOR_SET 0 8 bwnot
+
+DISPATCH 7 1 1
+
+DUMP INT32 lshr
+DUMP INT32 ashr
+DUMP INT32 lshl
+DUMP INT32 bwor
+DUMP INT32 bwxor
+DUMP INT32 bwand
+DUMP INT32 bwnot
+
+# CHECK: Buffer 'lshr' (28 bytes):
+# CHECK:   lshr[0] = 0
+# CHECK:   lshr[1] = -1
+# CHECK:   lshr[2] = 1
+# CHECK:   lshr[3] = 127
+# CHECK:   lshr[4] = 32
+# CHECK:   lshr[5] = 0
+# CHECK:   lshr[6] = 2147483616
+
+# CHECK: Buffer 'ashr' (28 bytes):
+# CHECK:   ashr[0] = 0
+# CHECK:   ashr[1] = -1
+# CHECK:   ashr[2] = -1
+# CHECK:   ashr[3] = 127
+# CHECK:   ashr[4] = 32
+# CHECK:   ashr[5] = 0
+# CHECK:   ashr[6] = -32
+
+# CHECK: Buffer 'lshl' (28 bytes):
+# CHECK:   lshl[0] = 0
+# CHECK:   lshl[1] = -1
+# CHECK:   lshl[2] = -2147483648
+# CHECK:   lshl[3] = 508
+# CHECK:   lshl[4] = 128
+# CHECK:   lshl[5] = 512
+# CHECK:   lshl[6] = -128
+
+# CHECK: Buffer 'bwor' (28 bytes):
+# CHECK:   bwor[0] = 0
+# CHECK:   bwor[1] = -1
+# CHECK:   bwor[2] = -1
+# CHECK:   bwor[3] = 255
+# CHECK:   bwor[4] = 65
+# CHECK:   bwor[5] = 21
+# CHECK:   bwor[6] = -63
+
+# CHECK: Buffer 'bwxor' (28 bytes):
+# CHECK:   bwxor[0] = 0
+# CHECK:   bwxor[1] = -1
+# CHECK:   bwxor[2] = 0
+# CHECK:   bwxor[3] = 159
+# CHECK:   bwxor[4] = 65
+# CHECK:   bwxor[5] = 21
+# CHECK:   bwxor[6] = -63
+
+# CHECK: Buffer 'bwand' (28 bytes):
+# CHECK:   bwand[0] = 0
+# CHECK:   bwand[1] = 0
+# CHECK:   bwand[2] = -1
+# CHECK:   bwand[3] = 96
+# CHECK:   bwand[4] = 0
+# CHECK:   bwand[5] = 0
+# CHECK:   bwand[6] = 0
+
+# CHECK: Buffer 'bwnot' (28 bytes):
+# CHECK:   bwnot[0] = -1
+# CHECK:   bwnot[1] = 0
+# CHECK:   bwnot[2] = 0
+# CHECK:   bwnot[3] = -255
+# CHECK:   bwnot[4] = -65
+# CHECK:   bwnot[5] = -17
+# CHECK:   bwnot[6] = 63

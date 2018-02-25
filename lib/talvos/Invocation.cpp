@@ -142,6 +142,11 @@ void Invocation::executeBitwiseOr(const Instruction *Inst)
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A | B; });
 }
 
+void Invocation::executeBitwiseXor(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A ^ B; });
+}
+
 void Invocation::executeBranch(const Instruction *Inst)
 {
   moveToBlock(Inst->Operands[0]);
@@ -436,6 +441,11 @@ void Invocation::executeLogicalOr(const Instruction *Inst)
   executeOp<bool, 2>(Inst, [](bool A, bool B) { return A || B; });
 }
 
+void Invocation::executeNot(const Instruction *Inst)
+{
+  executeOpUInt<1>(Inst, [](auto A) -> decltype(A) { return ~A; });
+}
+
 void Invocation::executePhi(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -534,6 +544,16 @@ void Invocation::executeSGreaterThan(const Instruction *Inst)
 void Invocation::executeSGreaterThanEqual(const Instruction *Inst)
 {
   executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A >= B; });
+}
+
+void Invocation::executeShiftLeftLogical(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A << B; });
+}
+
+void Invocation::executeShiftRightArithmetic(const Instruction *Inst)
+{
+  executeOpSInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A >> B; });
 }
 
 void Invocation::executeShiftRightLogical(const Instruction *Inst)
@@ -678,6 +698,7 @@ void Invocation::step()
     DISPATCH(SpvOpAccessChain, AccessChain);
     DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);
     DISPATCH(SpvOpBitwiseOr, BitwiseOr);
+    DISPATCH(SpvOpBitwiseXor, BitwiseXor);
     DISPATCH(SpvOpBranch, Branch);
     DISPATCH(SpvOpBranchConditional, BranchConditional);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
@@ -713,6 +734,7 @@ void Invocation::step()
     DISPATCH(SpvOpLogicalOr, LogicalOr);
     DISPATCH(SpvOpLogicalAnd, LogicalAnd);
     DISPATCH(SpvOpLogicalNot, LogicalNot);
+    DISPATCH(SpvOpNot, Not);
     DISPATCH(SpvOpPhi, Phi);
     DISPATCH(SpvOpPtrAccessChain, PtrAccessChain);
     DISPATCH(SpvOpReturn, Return);
@@ -720,6 +742,8 @@ void Invocation::step()
     DISPATCH(SpvOpSelect, Select);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
     DISPATCH(SpvOpSGreaterThanEqual, SGreaterThanEqual);
+    DISPATCH(SpvOpShiftLeftLogical, ShiftLeftLogical);
+    DISPATCH(SpvOpShiftRightArithmetic, ShiftRightArithmetic);
     DISPATCH(SpvOpShiftRightLogical, ShiftRightLogical);
     DISPATCH(SpvOpSLessThan, SLessThan);
     DISPATCH(SpvOpSLessThanEqual, SLessThanEqual);

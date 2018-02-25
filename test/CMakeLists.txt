@@ -17,6 +17,7 @@ foreach(test
   spirv/simple-branch
   spirv/simple-loop
   spirv/struct-offset
+  spirv/test-bitwise-instructions
   spirv/test-fp-arithmetic
   spirv/test-fp-comparisons
   spirv/test-integer-comparisons

@@ -66,6 +66,7 @@ public:
   void executeAccessChain(const Instruction *Inst);
   void executeBitwiseAnd(const Instruction *Inst);
   void executeBitwiseOr(const Instruction *Inst);
+  void executeBitwiseXor(const Instruction *Inst);
   void executeBranch(const Instruction *Inst);
   void executeBranchConditional(const Instruction *Inst);
   void executeCompositeExtract(const Instruction *Inst);
@@ -101,6 +102,7 @@ public:
   void executeLogicalNot(const Instruction *Inst);
   void executeLogicalNotEqual(const Instruction *Inst);
   void executeLogicalOr(const Instruction *Inst);
+  void executeNot(const Instruction *Inst);
   void executePhi(const Instruction *Inst);
   void executePtrAccessChain(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
@@ -108,6 +110,8 @@ public:
   void executeSelect(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
   void executeSGreaterThanEqual(const Instruction *Inst);
+  void executeShiftLeftLogical(const Instruction *Inst);
+  void executeShiftRightArithmetic(const Instruction *Inst);
   void executeShiftRightLogical(const Instruction *Inst);
   void executeSLessThan(const Instruction *Inst);
   void executeSLessThanEqual(const Instruction *Inst);
