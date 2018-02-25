@@ -1,11 +1,8 @@
 MODULE multiple-entry-points.spvasm
 
-ALLOCATE temp BUFFER 16 FILL INT32 0
-ALLOCATE output BUFFER 16 FILL INT32 0
-
-# TODO: Update once we can allocate scalars
-# ALLOCATE x INT32 42
-ALLOCATE x BUFFER 4 FILL INT32 42
+BUFFER temp   16 FILL INT32 0
+BUFFER output 16 FILL INT32 0
+BUFFER x       4 DATA INT32 42
 
 DESCRIPTOR_SET 0 0 temp
 DESCRIPTOR_SET 0 1 output

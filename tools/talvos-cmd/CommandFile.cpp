@@ -71,122 +71,113 @@ template <typename T> T CommandFile::get(const char *ParseAction)
   }
 }
 
-void CommandFile::parseAllocate()
+void CommandFile::parseBuffer()
 {
-  string Name = get<string>("allocation name");
+  string Name = get<string>("buffer name");
   if (Buffers.count(Name))
-    throw "duplicate allocation name";
+    throw "duplicate buffer name";
 
-  string Type = get<string>("allocation type");
-  if (Type == "BUFFER")
+  uint64_t NumBytes = get<uint64_t>("buffer size");
+
+  // Allocate buffer.
+  uint64_t Address = Device->getGlobalMemory().allocate(NumBytes);
+  Buffers[Name] = {Address, NumBytes};
+
+  // Process initializer.
+  string Init = get<string>("buffer initializer");
+  if (Init == "DATA")
   {
-    uint64_t NumBytes = get<uint64_t>("allocation size");
-
-    // Allocate buffer.
-    uint64_t Address = Device->getGlobalMemory().allocate(NumBytes);
-    Buffers[Name] = {Address, NumBytes};
-
-    // Process initializer.
-    string Init = get<string>("allocation initializer");
-    if (Init == "DATA")
-    {
-      string InitType = get<string>("data type");
-      if (InitType == "INT8")
-        data<int8_t>(Address, NumBytes);
-      else if (InitType == "UINT8")
-        data<uint8_t>(Address, NumBytes);
-      else if (InitType == "INT16")
-        data<int16_t>(Address, NumBytes);
-      else if (InitType == "UINT16")
-        data<uint16_t>(Address, NumBytes);
-      else if (InitType == "INT32")
-        data<int32_t>(Address, NumBytes);
-      else if (InitType == "UINT32")
-        data<uint32_t>(Address, NumBytes);
-      else if (InitType == "INT64")
-        data<int64_t>(Address, NumBytes);
-      else if (InitType == "UINT64")
-        data<uint64_t>(Address, NumBytes);
-      else if (InitType == "FLOAT")
-        data<float>(Address, NumBytes);
-      else if (InitType == "DOUBLE")
-        data<double>(Address, NumBytes);
-      else
-        throw NotRecognizedException();
-    }
-    else if (Init == "FILL")
-    {
-      string InitType = get<string>("fill type");
-      if (InitType == "INT8")
-        fill<int8_t>(Address, NumBytes);
-      else if (InitType == "UINT8")
-        fill<uint8_t>(Address, NumBytes);
-      else if (InitType == "INT16")
-        fill<int16_t>(Address, NumBytes);
-      else if (InitType == "UINT16")
-        fill<uint16_t>(Address, NumBytes);
-      else if (InitType == "INT32")
-        fill<int32_t>(Address, NumBytes);
-      else if (InitType == "UINT32")
-        fill<uint32_t>(Address, NumBytes);
-      else if (InitType == "INT64")
-        fill<int64_t>(Address, NumBytes);
-      else if (InitType == "UINT64")
-        fill<uint64_t>(Address, NumBytes);
-      else if (InitType == "FLOAT")
-        fill<float>(Address, NumBytes);
-      else if (InitType == "DOUBLE")
-        fill<double>(Address, NumBytes);
-      else
-        throw NotRecognizedException();
-    }
-    else if (Init == "RANGE")
-    {
-      string InitType = get<string>("range type");
-      if (InitType == "INT8")
-        range<int8_t>(Address, NumBytes);
-      else if (InitType == "UINT8")
-        range<uint8_t>(Address, NumBytes);
-      else if (InitType == "INT16")
-        range<int16_t>(Address, NumBytes);
-      else if (InitType == "UINT16")
-        range<uint16_t>(Address, NumBytes);
-      else if (InitType == "INT32")
-        range<int32_t>(Address, NumBytes);
-      else if (InitType == "UINT32")
-        range<uint32_t>(Address, NumBytes);
-      else if (InitType == "INT64")
-        range<int64_t>(Address, NumBytes);
-      else if (InitType == "UINT64")
-        range<uint64_t>(Address, NumBytes);
-      else if (InitType == "FLOAT")
-        range<float>(Address, NumBytes);
-      else if (InitType == "DOUBLE")
-        range<double>(Address, NumBytes);
-      else
-        throw NotRecognizedException();
-    }
-    else if (Init == "DATFILE")
-    {
-      // Open data file.
-      string Filename = get<string>("data filename");
-      std::ifstream DatFile(Filename, std::ios::binary);
-      if (!DatFile)
-        throw "unable to open file";
-
-      // Load data from file.
-      std::vector<char> Data(NumBytes);
-      if (!DatFile.read(Data.data(), NumBytes))
-        throw "failed to read binary data";
-
-      // Copy data to buffer.
-      Device->getGlobalMemory().store(Address, NumBytes,
-                                      (uint8_t *)Data.data());
-    }
+    string InitType = get<string>("data type");
+    if (InitType == "INT8")
+      data<int8_t>(Address, NumBytes);
+    else if (InitType == "UINT8")
+      data<uint8_t>(Address, NumBytes);
+    else if (InitType == "INT16")
+      data<int16_t>(Address, NumBytes);
+    else if (InitType == "UINT16")
+      data<uint16_t>(Address, NumBytes);
+    else if (InitType == "INT32")
+      data<int32_t>(Address, NumBytes);
+    else if (InitType == "UINT32")
+      data<uint32_t>(Address, NumBytes);
+    else if (InitType == "INT64")
+      data<int64_t>(Address, NumBytes);
+    else if (InitType == "UINT64")
+      data<uint64_t>(Address, NumBytes);
+    else if (InitType == "FLOAT")
+      data<float>(Address, NumBytes);
+    else if (InitType == "DOUBLE")
+      data<double>(Address, NumBytes);
     else
-    {
       throw NotRecognizedException();
-    }
+  }
+  else if (Init == "FILL")
+  {
+    string InitType = get<string>("fill type");
+    if (InitType == "INT8")
+      fill<int8_t>(Address, NumBytes);
+    else if (InitType == "UINT8")
+      fill<uint8_t>(Address, NumBytes);
+    else if (InitType == "INT16")
+      fill<int16_t>(Address, NumBytes);
+    else if (InitType == "UINT16")
+      fill<uint16_t>(Address, NumBytes);
+    else if (InitType == "INT32")
+      fill<int32_t>(Address, NumBytes);
+    else if (InitType == "UINT32")
+      fill<uint32_t>(Address, NumBytes);
+    else if (InitType == "INT64")
+      fill<int64_t>(Address, NumBytes);
+    else if (InitType == "UINT64")
+      fill<uint64_t>(Address, NumBytes);
+    else if (InitType == "FLOAT")
+      fill<float>(Address, NumBytes);
+    else if (InitType == "DOUBLE")
+      fill<double>(Address, NumBytes);
+    else
+      throw NotRecognizedException();
+  }
+  else if (Init == "RANGE")
+  {
+    string InitType = get<string>("range type");
+    if (InitType == "INT8")
+      range<int8_t>(Address, NumBytes);
+    else if (InitType == "UINT8")
+      range<uint8_t>(Address, NumBytes);
+    else if (InitType == "INT16")
+      range<int16_t>(Address, NumBytes);
+    else if (InitType == "UINT16")
+      range<uint16_t>(Address, NumBytes);
+    else if (InitType == "INT32")
+      range<int32_t>(Address, NumBytes);
+    else if (InitType == "UINT32")
+      range<uint32_t>(Address, NumBytes);
+    else if (InitType == "INT64")
+      range<int64_t>(Address, NumBytes);
+    else if (InitType == "UINT64")
+      range<uint64_t>(Address, NumBytes);
+    else if (InitType == "FLOAT")
+      range<float>(Address, NumBytes);
+    else if (InitType == "DOUBLE")
+      range<double>(Address, NumBytes);
+    else
+      throw NotRecognizedException();
+  }
+  else if (Init == "DATFILE")
+  {
+    // Open data file.
+    string Filename = get<string>("data filename");
+    std::ifstream DatFile(Filename, std::ios::binary);
+    if (!DatFile)
+      throw "unable to open file";
+
+    // Load data from file.
+    std::vector<char> Data(NumBytes);
+    if (!DatFile.read(Data.data(), NumBytes))
+      throw "failed to read binary data";
+
+    // Copy data to buffer.
+    Device->getGlobalMemory().store(Address, NumBytes, (uint8_t *)Data.data());
   }
   else
   {
@@ -385,8 +376,8 @@ bool CommandFile::run()
     {
       // Parse command.
       string Command = get<string>("command");
-      if (Command == "ALLOCATE")
-        parseAllocate();
+      if (Command == "BUFFER")
+        parseBuffer();
       else if (Command == "DESCRIPTOR_SET")
         parseDescriptorSet();
       else if (Command == "DISPATCH")

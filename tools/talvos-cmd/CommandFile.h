@@ -25,7 +25,7 @@ public:
 private:
   template <typename T> T get(const char *ParseAction);
 
-  void parseAllocate();
+  void parseBuffer();
   void parseDescriptorSet();
   void parseDispatch();
   void parseDump();

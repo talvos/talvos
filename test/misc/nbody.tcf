@@ -44,7 +44,7 @@
 MODULE nbody.spvasm
 ENTRY nbody
 
-ALLOCATE positionsIn   BUFFER 128   DATA FLOAT
+BUFFER positionsIn   128   DATA FLOAT
   86.52     0.00   -94.33  1
    4.49  -127.48   -10.59  1
 -103.63   -21.64   -71.95  1
@@ -54,11 +54,11 @@ ALLOCATE positionsIn   BUFFER 128   DATA FLOAT
   22.78   -40.85  -119.15  1
  120.63    42.12     7.60  1
 
-ALLOCATE positionsOut  BUFFER 128   FILL FLOAT 0
-ALLOCATE velocities    BUFFER 128   FILL FLOAT 0
-ALLOCATE numBodies     BUFFER 4     DATA UINT32 8
-ALLOCATE softening     BUFFER 4     DATA FLOAT 100
-ALLOCATE delta         BUFFER 4     DATA FLOAT 50
+BUFFER positionsOut  128   FILL FLOAT 0
+BUFFER velocities    128   FILL FLOAT 0
+BUFFER numBodies     4     DATA UINT32 8
+BUFFER softening     4     DATA FLOAT 100
+BUFFER delta         4     DATA FLOAT 50
 
 DESCRIPTOR_SET 0 0 positionsIn
 DESCRIPTOR_SET 0 1 positionsOut

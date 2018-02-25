@@ -26,7 +26,6 @@ foreach(test
   talvos-cmd/duplicate-allocation-name
   talvos-cmd/empty
   talvos-cmd/endloop-without-loop
-  talvos-cmd/invalid-allocation-type
   talvos-cmd/invalid-resource-name
   talvos-cmd/invalid-vector-suffix
   talvos-cmd/loop-count-zero

@@ -1,3 +1,0 @@
-# CHECK: line 3: ERROR: unrecognized allocation type
-# EXIT 1
-ALLOCATE foo BAR 4

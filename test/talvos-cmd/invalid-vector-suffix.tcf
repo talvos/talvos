@@ -1,4 +1,4 @@
 # CHECK: line 4: ERROR: invalid vector suffix
 # EXIT 1
-ALLOCATE foo BUFFER 4 FILL INT32 0
+BUFFER foo 4 FILL INT32 0
 DUMP INT32vX foo
