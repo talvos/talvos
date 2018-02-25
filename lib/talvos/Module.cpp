@@ -102,8 +102,8 @@ public:
       {
       case SpvOpCapability:
       {
-        uint32_t Capbility = Inst->words[Inst->operands[0].offset];
-        switch (Capbility)
+        uint32_t Capability = Inst->words[Inst->operands[0].offset];
+        switch (Capability)
         {
         case SpvCapabilityInt16:
         case SpvCapabilityInt64:
@@ -113,7 +113,7 @@ public:
         case SpvCapabilityVariablePointersStorageBuffer:
           break;
         default:
-          std::cerr << "WARNING: Unrecognized capability " << Capbility
+          std::cerr << "WARNING: Unrecognized capability " << Capability
                     << std::endl;
         }
         break;
