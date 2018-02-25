@@ -1,4 +1,4 @@
-# CHECK: ERROR: duplicate allocation name
+# CHECK: line 4: ERROR: duplicate allocation name
 # EXIT 1
 ALLOCATE foo BUFFER 4 FILL INT32 0
 ALLOCATE foo BUFFER 4 FILL INT32 0

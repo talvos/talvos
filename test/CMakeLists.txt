@@ -30,6 +30,7 @@ foreach(test
   talvos-cmd/invalid-resource-name
   talvos-cmd/invalid-vector-suffix
   talvos-cmd/loop-count-zero
+  talvos-cmd/parse-failure
   talvos-cmd/unexpected-eof
   talvos-cmd/unterminated-loop
 )

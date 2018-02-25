@@ -47,5 +47,6 @@ private:
   talvos::DescriptorSet DescriptorSet;
   std::vector<std::pair<size_t, std::streampos>> Loops;
 
+  size_t CurrentLine;
   std::string CurrentParseAction;
 };

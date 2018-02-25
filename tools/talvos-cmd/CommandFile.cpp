@@ -20,6 +20,7 @@ class NotRecognizedException : exception
 CommandFile::CommandFile(std::istream &Stream) : Stream(Stream)
 {
   Device = new talvos::Device;
+  CurrentLine = 1;
 }
 
 CommandFile::~CommandFile() { delete Device; }
@@ -32,7 +33,19 @@ template <typename T> T CommandFile::get(const char *ParseAction)
     // Note the current stream position.
     streampos Pos = Stream.tellg();
 
-    // Try and read a token.
+    // Skip leading whitespace and check for newlines.
+    while (true)
+    {
+      int c = Stream.peek();
+      if (!isspace(c))
+        break;
+
+      if (c == '\n')
+        ++CurrentLine;
+      Stream.get();
+    }
+
+    // Try to read a token.
     string Token;
     Stream >> Token;
     if (Stream.fail())
@@ -43,6 +56,7 @@ template <typename T> T CommandFile::get(const char *ParseAction)
     {
       // Consume rest of line.
       getline(Stream, Token);
+      ++CurrentLine;
       continue;
     }
 
@@ -389,6 +403,7 @@ bool CommandFile::run()
         parseModule();
       else
       {
+        std::cerr << "line " << CurrentLine << ": ";
         std::cerr << "Unrecognized command '" << Command << "'" << std::endl;
         return false;
       }
@@ -397,11 +412,13 @@ bool CommandFile::run()
   // TODO: Add line numbers to error messages
   catch (NotRecognizedException e)
   {
+    std::cerr << "line " << CurrentLine << ": ";
     std::cerr << "ERROR: unrecognized " << CurrentParseAction << std::endl;
     return false;
   }
   catch (const char *err)
   {
+    std::cerr << "line " << CurrentLine << ": ";
     std::cerr << "ERROR: " << err << std::endl;
     return false;
   }
@@ -412,18 +429,21 @@ bool CommandFile::run()
       // EOF is only OK if we're parsing the next command.
       if (CurrentParseAction != "command")
       {
+        std::cerr << "line " << CurrentLine << ": ";
         std::cerr << "Unexpected EOF while parsing " << CurrentParseAction
                   << std::endl;
         return false;
       }
       if (!Loops.empty())
       {
+        std::cerr << "line " << CurrentLine << ": ";
         std::cerr << "ERROR: Unterminated LOOP" << std::endl;
         return false;
       }
     }
     else
     {
+      std::cerr << "line " << CurrentLine << ": ";
       std::cerr << "Failed to parse " << CurrentParseAction << std::endl;
       return false;
     }
