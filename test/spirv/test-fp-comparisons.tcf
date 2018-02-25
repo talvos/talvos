@@ -5,37 +5,50 @@
 
 MODULE test-fp-comparisons.spvasm
 
-ALLOCATE A BUFFER 52 DATA FLOAT
+ALLOCATE A BUFFER 72 DATA FLOAT
 0 0 0 1 -1 1 -1 1 1 -1
 0 # will be NaN
 0 # will be NaN
 1
+0 # will be inf
+0 # will be inf
+0 # will be -inf
+0 # will be inf
+0 # will be -inf
 
-ALLOCATE B BUFFER 52 DATA FLOAT
+ALLOCATE B BUFFER 72 DATA FLOAT
 0 1 -1 0 0 -1 1 -1 1 -1
 0 # will be NaN
 1
 0 # will be NaN
+0 # will be inf
+0 # will be -inf
+0 # will be -inf
+1
+1
 
-ALLOCATE oeq  BUFFER 52 FILL INT32 0
-ALLOCATE ueq  BUFFER 52 FILL INT32 0
-ALLOCATE oneq BUFFER 52 FILL INT32 0
-ALLOCATE uneq BUFFER 52 FILL INT32 0
-ALLOCATE olt  BUFFER 52 FILL INT32 0
-ALLOCATE ult  BUFFER 52 FILL INT32 0
-ALLOCATE ogt  BUFFER 52 FILL INT32 0
-ALLOCATE ugt  BUFFER 52 FILL INT32 0
-ALLOCATE olte BUFFER 52 FILL INT32 0
-ALLOCATE ulte BUFFER 52 FILL INT32 0
-ALLOCATE ogte BUFFER 52 FILL INT32 0
-ALLOCATE ugte BUFFER 52 FILL INT32 0
+ALLOCATE oeq  BUFFER 72 FILL INT32 0
+ALLOCATE ueq  BUFFER 72 FILL INT32 0
+ALLOCATE oneq BUFFER 72 FILL INT32 0
+ALLOCATE uneq BUFFER 72 FILL INT32 0
+ALLOCATE olt  BUFFER 72 FILL INT32 0
+ALLOCATE ult  BUFFER 72 FILL INT32 0
+ALLOCATE ogt  BUFFER 72 FILL INT32 0
+ALLOCATE ugt  BUFFER 72 FILL INT32 0
+ALLOCATE olte BUFFER 72 FILL INT32 0
+ALLOCATE ulte BUFFER 72 FILL INT32 0
+ALLOCATE ogte BUFFER 72 FILL INT32 0
+ALLOCATE ugte BUFFER 72 FILL INT32 0
+
+ALLOCATE isnan   BUFFER 72 FILL INT32 0
+ALLOCATE isinf   BUFFER 72 FILL INT32 0
 
 
 DESCRIPTOR_SET 0 0 A
 DESCRIPTOR_SET 0 1 B
 
-# Generate NaN operands
-ENTRY generate_nans
+# Generate NaN/Inf operands
+ENTRY generate_special
 DISPATCH 1 1 1
 
 
@@ -53,8 +66,10 @@ DESCRIPTOR_SET 0 10 olte
 DESCRIPTOR_SET 0 11 ulte
 DESCRIPTOR_SET 0 12 ogte
 DESCRIPTOR_SET 0 13 ugte
+DESCRIPTOR_SET 0 14 isnan
+DESCRIPTOR_SET 0 15 isinf
 
-DISPATCH 13 1 1
+DISPATCH 18 1 1
 
 DUMP INT32 oeq
 DUMP INT32 ueq
@@ -68,8 +83,10 @@ DUMP INT32 olte
 DUMP INT32 ulte
 DUMP INT32 ogte
 DUMP INT32 ugte
+DUMP INT32 isnan
+DUMP INT32 isinf
 
-# CHECK: Buffer 'oeq' (52 bytes):
+# CHECK: Buffer 'oeq' (72 bytes):
 # CHECK:   oeq[0] = 1
 # CHECK:   oeq[1] = 0
 # CHECK:   oeq[2] = 0
@@ -83,8 +100,13 @@ DUMP INT32 ugte
 # CHECK:   oeq[10] = 0
 # CHECK:   oeq[11] = 0
 # CHECK:   oeq[12] = 0
+# CHECK:   oeq[13] = 1
+# CHECK:   oeq[14] = 0
+# CHECK:   oeq[15] = 1
+# CHECK:   oeq[16] = 0
+# CHECK:   oeq[17] = 0
 
-# CHECK: Buffer 'ueq' (52 bytes):
+# CHECK: Buffer 'ueq' (72 bytes):
 # CHECK:   ueq[0] = 1
 # CHECK:   ueq[1] = 0
 # CHECK:   ueq[2] = 0
@@ -98,8 +120,13 @@ DUMP INT32 ugte
 # CHECK:   ueq[10] = 1
 # CHECK:   ueq[11] = 1
 # CHECK:   ueq[12] = 1
+# CHECK:   ueq[13] = 1
+# CHECK:   ueq[14] = 0
+# CHECK:   ueq[15] = 1
+# CHECK:   ueq[16] = 0
+# CHECK:   ueq[17] = 0
 
-# CHECK: Buffer 'oneq' (52 bytes):
+# CHECK: Buffer 'oneq' (72 bytes):
 # CHECK:   oneq[0] = 0
 # CHECK:   oneq[1] = 1
 # CHECK:   oneq[2] = 1
@@ -113,8 +140,13 @@ DUMP INT32 ugte
 # CHECK:   oneq[10] = 0
 # CHECK:   oneq[11] = 0
 # CHECK:   oneq[12] = 0
+# CHECK:   oneq[13] = 0
+# CHECK:   oneq[14] = 1
+# CHECK:   oneq[15] = 0
+# CHECK:   oneq[16] = 1
+# CHECK:   oneq[17] = 1
 
-# CHECK: Buffer 'uneq' (52 bytes):
+# CHECK: Buffer 'uneq' (72 bytes):
 # CHECK:   uneq[0] = 0
 # CHECK:   uneq[1] = 1
 # CHECK:   uneq[2] = 1
@@ -128,8 +160,13 @@ DUMP INT32 ugte
 # CHECK:   uneq[10] = 1
 # CHECK:   uneq[11] = 1
 # CHECK:   uneq[12] = 1
+# CHECK:   uneq[13] = 0
+# CHECK:   uneq[14] = 1
+# CHECK:   uneq[15] = 0
+# CHECK:   uneq[16] = 1
+# CHECK:   uneq[17] = 1
 
-# CHECK: Buffer 'olt' (52 bytes):
+# CHECK: Buffer 'olt' (72 bytes):
 # CHECK:   olt[0] = 0
 # CHECK:   olt[1] = 1
 # CHECK:   olt[2] = 0
@@ -143,8 +180,13 @@ DUMP INT32 ugte
 # CHECK:   olt[10] = 0
 # CHECK:   olt[11] = 0
 # CHECK:   olt[12] = 0
+# CHECK:   olt[13] = 0
+# CHECK:   olt[14] = 0
+# CHECK:   olt[15] = 0
+# CHECK:   olt[16] = 0
+# CHECK:   olt[17] = 1
 
-# CHECK: Buffer 'ult' (52 bytes):
+# CHECK: Buffer 'ult' (72 bytes):
 # CHECK:   ult[0] = 0
 # CHECK:   ult[1] = 1
 # CHECK:   ult[2] = 0
@@ -158,8 +200,13 @@ DUMP INT32 ugte
 # CHECK:   ult[10] = 1
 # CHECK:   ult[11] = 1
 # CHECK:   ult[12] = 1
+# CHECK:   ult[13] = 0
+# CHECK:   ult[14] = 0
+# CHECK:   ult[15] = 0
+# CHECK:   ult[16] = 0
+# CHECK:   ult[17] = 1
 
-# CHECK: Buffer 'ogt' (52 bytes):
+# CHECK: Buffer 'ogt' (72 bytes):
 # CHECK:   ogt[0] = 0
 # CHECK:   ogt[1] = 0
 # CHECK:   ogt[2] = 1
@@ -173,8 +220,13 @@ DUMP INT32 ugte
 # CHECK:   ogt[10] = 0
 # CHECK:   ogt[11] = 0
 # CHECK:   ogt[12] = 0
+# CHECK:   ogt[13] = 0
+# CHECK:   ogt[14] = 1
+# CHECK:   ogt[15] = 0
+# CHECK:   ogt[16] = 1
+# CHECK:   ogt[17] = 0
 
-# CHECK: Buffer 'ugt' (52 bytes):
+# CHECK: Buffer 'ugt' (72 bytes):
 # CHECK:   ugt[0] = 0
 # CHECK:   ugt[1] = 0
 # CHECK:   ugt[2] = 1
@@ -188,8 +240,13 @@ DUMP INT32 ugte
 # CHECK:   ugt[10] = 1
 # CHECK:   ugt[11] = 1
 # CHECK:   ugt[12] = 1
+# CHECK:   ugt[13] = 0
+# CHECK:   ugt[14] = 1
+# CHECK:   ugt[15] = 0
+# CHECK:   ugt[16] = 1
+# CHECK:   ugt[17] = 0
 
-# CHECK: Buffer 'olte' (52 bytes):
+# CHECK: Buffer 'olte' (72 bytes):
 # CHECK:   olte[0] = 1
 # CHECK:   olte[1] = 1
 # CHECK:   olte[2] = 0
@@ -203,8 +260,13 @@ DUMP INT32 ugte
 # CHECK:   olte[10] = 0
 # CHECK:   olte[11] = 0
 # CHECK:   olte[12] = 0
+# CHECK:   olte[13] = 1
+# CHECK:   olte[14] = 0
+# CHECK:   olte[15] = 1
+# CHECK:   olte[16] = 0
+# CHECK:   olte[17] = 1
 
-# CHECK: Buffer 'ulte' (52 bytes):
+# CHECK: Buffer 'ulte' (72 bytes):
 # CHECK:   ulte[0] = 1
 # CHECK:   ulte[1] = 1
 # CHECK:   ulte[2] = 0
@@ -218,8 +280,13 @@ DUMP INT32 ugte
 # CHECK:   ulte[10] = 1
 # CHECK:   ulte[11] = 1
 # CHECK:   ulte[12] = 1
+# CHECK:   ulte[13] = 1
+# CHECK:   ulte[14] = 0
+# CHECK:   ulte[15] = 1
+# CHECK:   ulte[16] = 0
+# CHECK:   ulte[17] = 1
 
-# CHECK: Buffer 'ogte' (52 bytes):
+# CHECK: Buffer 'ogte' (72 bytes):
 # CHECK:   ogte[0] = 1
 # CHECK:   ogte[1] = 0
 # CHECK:   ogte[2] = 1
@@ -233,8 +300,13 @@ DUMP INT32 ugte
 # CHECK:   ogte[10] = 0
 # CHECK:   ogte[11] = 0
 # CHECK:   ogte[12] = 0
+# CHECK:   ogte[13] = 1
+# CHECK:   ogte[14] = 1
+# CHECK:   ogte[15] = 1
+# CHECK:   ogte[16] = 1
+# CHECK:   ogte[17] = 0
 
-# CHECK: Buffer 'ugte' (52 bytes):
+# CHECK: Buffer 'ugte' (72 bytes):
 # CHECK:   ugte[0] = 1
 # CHECK:   ugte[1] = 0
 # CHECK:   ugte[2] = 1
@@ -248,3 +320,48 @@ DUMP INT32 ugte
 # CHECK:   ugte[10] = 1
 # CHECK:   ugte[11] = 1
 # CHECK:   ugte[12] = 1
+# CHECK:   ugte[13] = 1
+# CHECK:   ugte[14] = 1
+# CHECK:   ugte[15] = 1
+# CHECK:   ugte[16] = 1
+# CHECK:   ugte[17] = 0
+
+# CHECK: Buffer 'isnan' (72 bytes):
+# CHECK:   isnan[0] = 0
+# CHECK:   isnan[1] = 0
+# CHECK:   isnan[2] = 0
+# CHECK:   isnan[3] = 0
+# CHECK:   isnan[4] = 0
+# CHECK:   isnan[5] = 0
+# CHECK:   isnan[6] = 0
+# CHECK:   isnan[7] = 0
+# CHECK:   isnan[8] = 0
+# CHECK:   isnan[9] = 0
+# CHECK:   isnan[10] = 1
+# CHECK:   isnan[11] = 1
+# CHECK:   isnan[12] = 0
+# CHECK:   isnan[13] = 0
+# CHECK:   isnan[14] = 0
+# CHECK:   isnan[15] = 0
+# CHECK:   isnan[16] = 0
+# CHECK:   isnan[17] = 0
+
+# CHECK: Buffer 'isinf' (72 bytes):
+# CHECK:   isinf[0] = 0
+# CHECK:   isinf[1] = 0
+# CHECK:   isinf[2] = 0
+# CHECK:   isinf[3] = 0
+# CHECK:   isinf[4] = 0
+# CHECK:   isinf[5] = 0
+# CHECK:   isinf[6] = 0
+# CHECK:   isinf[7] = 0
+# CHECK:   isinf[8] = 0
+# CHECK:   isinf[9] = 0
+# CHECK:   isinf[10] = 0
+# CHECK:   isinf[11] = 0
+# CHECK:   isinf[12] = 0
+# CHECK:   isinf[13] = 1
+# CHECK:   isinf[14] = 1
+# CHECK:   isinf[15] = 1
+# CHECK:   isinf[16] = 1
+# CHECK:   isinf[17] = 1

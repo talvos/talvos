@@ -8,7 +8,7 @@
                OpExtension "SPV_KHR_variable_pointers"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %26 "test_fp_comparisons" %20
-               OpEntryPoint GLCompute %28 "generate_nans" %20
+               OpEntryPoint GLCompute %28 "generate_special"
                OpSource OpenCL_C 120
                OpDecorate %21 SpecId 0
                OpDecorate %22 SpecId 1
@@ -49,6 +49,10 @@
                OpDecorate %ogte_base Binding 12
                OpDecorate %ugte_base DescriptorSet 0
                OpDecorate %ugte_base Binding 13
+               OpDecorate %isnan_base DescriptorSet 0
+               OpDecorate %isnan_base Binding 14
+               OpDecorate %isinf_base DescriptorSet 0
+               OpDecorate %isinf_base Binding 15
           %1 = OpTypeFloat 32
           %2 = OpTypePointer StorageBuffer %1
           %3 = OpTypeRuntimeArray %1
@@ -68,9 +72,17 @@
          %17 = OpTypePointer Private %13
          %18 = OpConstant %6 0
          %19 = OpConstant %6 1
-        %103 = OpConstant %6 10
-        %104 = OpConstant %6 11
-        %105 = OpConstant %6 12
+         %f0 = OpConstant %1 0
+         %f1 = OpConstant %1 1
+      %fneg1 = OpConstant %1 -1
+        %i10 = OpConstant %6 10
+        %i11 = OpConstant %6 11
+        %i12 = OpConstant %6 12
+        %i13 = OpConstant %6 13
+        %i14 = OpConstant %6 14
+        %i15 = OpConstant %6 15
+        %i16 = OpConstant %6 16
+        %i17 = OpConstant %6 17
          %20 = OpVariable %14 Input
          %21 = OpSpecConstant %6 1
          %22 = OpSpecConstant %6 1
@@ -91,6 +103,8 @@
   %ulte_base = OpVariable %10 StorageBuffer
   %ogte_base = OpVariable %10 StorageBuffer
   %ugte_base = OpVariable %10 StorageBuffer
+ %isnan_base = OpVariable %10 StorageBuffer
+ %isinf_base = OpVariable %10 StorageBuffer
 
 
          %26 = OpFunction %11 None %12
@@ -223,25 +237,61 @@
    %ugte_end = OpLabel
 
 
+      %isnan = OpIsNan %16 %a
+               OpSelectionMerge %isnan_end None
+               OpBranchConditional %isnan %isnan_true %isnan_end
+ %isnan_true = OpLabel
+  %isnan_ptr = OpAccessChain %7 %isnan_base %18 %i
+               OpStore %isnan_ptr %19
+               OpBranch %isnan_end
+  %isnan_end = OpLabel
+
+
+      %isinf = OpIsInf %16 %a
+               OpSelectionMerge %isinf_end None
+               OpBranchConditional %isinf %isinf_true %isinf_end
+ %isinf_true = OpLabel
+  %isinf_ptr = OpAccessChain %7 %isinf_base %18 %i
+               OpStore %isinf_ptr %19
+               OpBranch %isinf_end
+  %isinf_end = OpLabel
+
+
                OpReturn
                OpFunctionEnd
 
 
          %28 = OpFunction %11 None %12
          %29 = OpLabel
-         %30 = OpAccessChain %2 %a_base %18 %18
-         %31 = OpLoad %1 %30
-         %32 = OpAccessChain %2 %b_base %18 %18
-         %33 = OpLoad %1 %32
-         %34 = OpFDiv %1 %31 %33
-         %35 = OpAccessChain %2 %a_base %18 %103
-               OpStore %35 %34
-         %36 = OpAccessChain %2 %a_base %18 %104
-               OpStore %36 %34
-         %37 = OpAccessChain %2 %b_base %18 %103
-               OpStore %37 %34
-         %38 = OpAccessChain %2 %b_base %18 %105
-               OpStore %38 %34
+
+        %nan = OpFDiv %1 %f0 %f0
+         %35 = OpAccessChain %2 %a_base %18 %i10
+               OpStore %35 %nan
+         %36 = OpAccessChain %2 %a_base %18 %i11
+               OpStore %36 %nan
+         %37 = OpAccessChain %2 %b_base %18 %i10
+               OpStore %37 %nan
+         %38 = OpAccessChain %2 %b_base %18 %i12
+               OpStore %38 %nan
+
+        %inf = OpFDiv %1 %f1 %f0
+     %neginf = OpFDiv %1 %fneg1 %f0
+         %39 = OpAccessChain %2 %a_base %18 %i13
+               OpStore %39 %inf
+         %40 = OpAccessChain %2 %a_base %18 %i14
+               OpStore %40 %inf
+         %41 = OpAccessChain %2 %a_base %18 %i15
+               OpStore %41 %neginf
+         %42 = OpAccessChain %2 %a_base %18 %i16
+               OpStore %42 %inf
+         %43 = OpAccessChain %2 %a_base %18 %i17
+               OpStore %43 %neginf
+         %44 = OpAccessChain %2 %b_base %18 %i13
+               OpStore %44 %inf
+         %45 = OpAccessChain %2 %b_base %18 %i14
+               OpStore %45 %neginf
+         %46 = OpAccessChain %2 %b_base %18 %i15
+               OpStore %46 %neginf
 
                 OpReturn
                 OpFunctionEnd

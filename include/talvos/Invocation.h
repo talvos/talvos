@@ -93,6 +93,8 @@ public:
   void executeIEqual(const Instruction *Inst);
   void executeIMul(const Instruction *Inst);
   void executeINotEqual(const Instruction *Inst);
+  void executeIsInf(const Instruction *Inst);
+  void executeIsNan(const Instruction *Inst);
   void executeLoad(const Instruction *Inst);
   void executeLogicalAnd(const Instruction *Inst);
   void executeLogicalEqual(const Instruction *Inst);

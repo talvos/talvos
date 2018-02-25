@@ -393,6 +393,16 @@ void Invocation::executeINotEqual(const Instruction *Inst)
   executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A != B; });
 }
 
+void Invocation::executeIsInf(const Instruction *Inst)
+{
+  executeOpFP<1>(Inst, [](auto A) -> bool { return isinf(A); });
+}
+
+void Invocation::executeIsNan(const Instruction *Inst)
+{
+  executeOpFP<1>(Inst, [](auto A) -> bool { return isnan(A); });
+}
+
 void Invocation::executeLoad(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -695,6 +705,8 @@ void Invocation::step()
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpIMul, IMul);
     DISPATCH(SpvOpINotEqual, INotEqual);
+    DISPATCH(SpvOpIsInf, IsInf);
+    DISPATCH(SpvOpIsNan, IsNan);
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpLogicalEqual, LogicalEqual);
     DISPATCH(SpvOpLogicalNotEqual, LogicalNotEqual);
