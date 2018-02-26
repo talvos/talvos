@@ -96,6 +96,7 @@ public:
   void executeINotEqual(const Instruction *Inst);
   void executeIsInf(const Instruction *Inst);
   void executeIsNan(const Instruction *Inst);
+  void executeISub(const Instruction *Inst);
   void executeLoad(const Instruction *Inst);
   void executeLogicalAnd(const Instruction *Inst);
   void executeLogicalEqual(const Instruction *Inst);
@@ -107,6 +108,7 @@ public:
   void executePtrAccessChain(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeReturnValue(const Instruction *Inst);
+  void executeSDiv(const Instruction *Inst);
   void executeSelect(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);
   void executeSGreaterThanEqual(const Instruction *Inst);
@@ -115,12 +117,16 @@ public:
   void executeShiftRightLogical(const Instruction *Inst);
   void executeSLessThan(const Instruction *Inst);
   void executeSLessThanEqual(const Instruction *Inst);
+  void executeSNegate(const Instruction *Inst);
+  void executeSRem(const Instruction *Inst);
   void executeStore(const Instruction *Inst);
+  void executeUDiv(const Instruction *Inst);
   void executeUGreaterThan(const Instruction *Inst);
   void executeUGreaterThanEqual(const Instruction *Inst);
   void executeULessThan(const Instruction *Inst);
   void executeULessThanEqual(const Instruction *Inst);
   void executeUndef(const Instruction *Inst);
+  void executeUMod(const Instruction *Inst);
   void executeVariable(const Instruction *Inst);
   void executeVectorShuffle(const Instruction *Inst);
   ///@}

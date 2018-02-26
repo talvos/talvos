@@ -20,6 +20,7 @@ foreach(test
   spirv/test-bitwise-instructions
   spirv/test-fp-arithmetic
   spirv/test-fp-comparisons
+  spirv/test-integer-arithmetic
   spirv/test-integer-comparisons
   spirv/test-logical-instructions
   spirv/test_OpIAdd

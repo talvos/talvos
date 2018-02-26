@@ -1,0 +1,107 @@
+# Test integer arithmetic instructions.
+# Fills buffers A and B with specific values and then executes this snippet:
+#   OUTPUT[i] = A[i] <OP> B[i];
+
+MODULE test-integer-arithmetic.spvasm
+ENTRY test_integer_arithmetic
+
+BUFFER A 24 DATA INT32
+0 42 7 -123 -13 57
+
+BUFFER B 24 DATA INT32
+7 7 42 124 -11 -5
+
+BUFFER sneg 24 FILL FLOAT 0
+BUFFER add  24 FILL FLOAT 0
+BUFFER sub  24 FILL FLOAT 0
+BUFFER mul  24 FILL FLOAT 0
+BUFFER udiv 24 FILL FLOAT 0
+BUFFER sdiv 24 FILL FLOAT 0
+BUFFER umod 24 FILL FLOAT 0
+BUFFER srem 24 FILL FLOAT 0
+
+DESCRIPTOR_SET 0 0 A
+DESCRIPTOR_SET 0 1 B
+DESCRIPTOR_SET 0 2 sneg
+DESCRIPTOR_SET 0 3 add
+DESCRIPTOR_SET 0 4 sub
+DESCRIPTOR_SET 0 5 mul
+DESCRIPTOR_SET 0 6 udiv
+DESCRIPTOR_SET 0 7 sdiv
+DESCRIPTOR_SET 0 8 umod
+DESCRIPTOR_SET 0 9 srem
+
+DISPATCH 6 1 1
+
+DUMP INT32 sneg
+DUMP INT32 add
+DUMP INT32 sub
+DUMP INT32 mul
+DUMP INT32 udiv
+DUMP INT32 sdiv
+DUMP INT32 umod
+DUMP INT32 srem
+
+# CHECK: Buffer 'sneg' (24 bytes):
+# CHECK:   sneg[0] = 0
+# CHECK:   sneg[1] = -42
+# CHECK:   sneg[2] = -7
+# CHECK:   sneg[3] = 123
+# CHECK:   sneg[4] = 13
+# CHECK:   sneg[5] = -57
+
+# CHECK: Buffer 'add' (24 bytes):
+# CHECK:   add[0] = 7
+# CHECK:   add[1] = 49
+# CHECK:   add[2] = 49
+# CHECK:   add[3] = 1
+# CHECK:   add[4] = -24
+# CHECK:   add[5] = 52
+
+# CHECK: Buffer 'sub' (24 bytes):
+# CHECK:   sub[0] = -7
+# CHECK:   sub[1] = 35
+# CHECK:   sub[2] = -35
+# CHECK:   sub[3] = -247
+# CHECK:   sub[4] = -2
+# CHECK:   sub[5] = 62
+
+# CHECK: Buffer 'mul' (24 bytes):
+# CHECK:   mul[0] = 0
+# CHECK:   mul[1] = 294
+# CHECK:   mul[2] = 294
+# CHECK:   mul[3] = -15252
+# CHECK:   mul[4] = 143
+# CHECK:   mul[5] = -285
+
+# CHECK: Buffer 'udiv' (24 bytes):
+# CHECK:   udiv[0] = 0
+# CHECK:   udiv[1] = 6
+# CHECK:   udiv[2] = 0
+# CHECK:   udiv[3] = 34636832
+# CHECK:   udiv[4] = 0
+# CHECK:   udiv[5] = 0
+
+# CHECK: Buffer 'sdiv' (24 bytes):
+# CHECK:   sdiv[0] = 0
+# CHECK:   sdiv[1] = 6
+# CHECK:   sdiv[2] = 0
+# CHECK:   sdiv[3] = 0
+# CHECK:   sdiv[4] = 1
+# CHECK:   sdiv[5] = -11
+
+# CHECK: Buffer 'umod' (24 bytes):
+# CHECK:   umod[0] = 0
+# CHECK:   umod[1] = 0
+# CHECK:   umod[2] = 7
+# CHECK:   umod[3] = 5
+# CHECK:   umod[4] = -13
+# CHECK:   umod[5] = 57
+
+# CHECK: Buffer 'srem' (24 bytes):
+# CHECK:   srem[0] = 0
+# CHECK:   srem[1] = 0
+# CHECK:   srem[2] = 7
+# CHECK:   srem[3] = -123
+# CHECK:   srem[4] = -2
+# CHECK:   srem[5] = 2

@@ -408,6 +408,11 @@ void Invocation::executeIsNan(const Instruction *Inst)
   executeOpFP<1>(Inst, [](auto A) -> bool { return isnan(A); });
 }
 
+void Invocation::executeISub(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A - B; });
+}
+
 void Invocation::executeLoad(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
@@ -529,6 +534,11 @@ void Invocation::executeReturnValue(const Instruction *Inst)
   CurrentInstruction = SE.RetInst->next();
 }
 
+void Invocation::executeSDiv(const Instruction *Inst)
+{
+  executeOpSInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
+}
+
 void Invocation::executeSelect(const Instruction *Inst)
 {
   bool Condition = OP(2, bool);
@@ -571,12 +581,27 @@ void Invocation::executeSLessThanEqual(const Instruction *Inst)
   executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A <= B; });
 }
 
+void Invocation::executeSNegate(const Instruction *Inst)
+{
+  executeOpSInt<1>(Inst, [](auto A) -> decltype(A) { return -A; });
+}
+
+void Invocation::executeSRem(const Instruction *Inst)
+{
+  executeOpSInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A % B; });
+}
+
 void Invocation::executeStore(const Instruction *Inst)
 {
   uint32_t Id = Inst->Operands[1];
   const Object &Dest = Objects[Inst->Operands[0]];
   Memory &Mem = getMemory(Dest.getType()->getStorageClass());
   Objects[Id].store(Mem, Dest.get<uint64_t>());
+}
+
+void Invocation::executeUDiv(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
 }
 
 void Invocation::executeUGreaterThan(const Instruction *Inst)
@@ -602,6 +627,11 @@ void Invocation::executeULessThanEqual(const Instruction *Inst)
 void Invocation::executeUndef(const Instruction *Inst)
 {
   Objects[Inst->Operands[1]] = Object(Inst->ResultType);
+}
+
+void Invocation::executeUMod(const Instruction *Inst)
+{
+  executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A % B; });
 }
 
 void Invocation::executeVariable(const Instruction *Inst)
@@ -728,6 +758,7 @@ void Invocation::step()
     DISPATCH(SpvOpINotEqual, INotEqual);
     DISPATCH(SpvOpIsInf, IsInf);
     DISPATCH(SpvOpIsNan, IsNan);
+    DISPATCH(SpvOpISub, ISub);
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpLogicalEqual, LogicalEqual);
     DISPATCH(SpvOpLogicalNotEqual, LogicalNotEqual);
@@ -739,6 +770,7 @@ void Invocation::step()
     DISPATCH(SpvOpPtrAccessChain, PtrAccessChain);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpReturnValue, ReturnValue);
+    DISPATCH(SpvOpSDiv, SDiv);
     DISPATCH(SpvOpSelect, Select);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
     DISPATCH(SpvOpSGreaterThanEqual, SGreaterThanEqual);
@@ -747,11 +779,15 @@ void Invocation::step()
     DISPATCH(SpvOpShiftRightLogical, ShiftRightLogical);
     DISPATCH(SpvOpSLessThan, SLessThan);
     DISPATCH(SpvOpSLessThanEqual, SLessThanEqual);
+    DISPATCH(SpvOpSNegate, SNegate);
+    DISPATCH(SpvOpSRem, SRem);
     DISPATCH(SpvOpStore, Store);
     DISPATCH(SpvOpUGreaterThan, UGreaterThan);
     DISPATCH(SpvOpUGreaterThanEqual, UGreaterThanEqual);
+    DISPATCH(SpvOpUDiv, UDiv);
     DISPATCH(SpvOpULessThan, ULessThan);
     DISPATCH(SpvOpULessThanEqual, ULessThanEqual);
+    DISPATCH(SpvOpUMod, UMod);
     DISPATCH(SpvOpUndef, Undef);
     DISPATCH(SpvOpVariable, Variable);
     DISPATCH(SpvOpVectorShuffle, VectorShuffle);
