@@ -268,6 +268,11 @@ void Invocation::executeFMul(const Instruction *Inst)
   executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
 }
 
+void Invocation::executeFNegate(const Instruction *Inst)
+{
+  executeOpFP<1>(Inst, [](auto A) -> decltype(A) { return -A; });
+}
+
 void Invocation::executeFOrdEqual(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
@@ -308,6 +313,12 @@ void Invocation::executeFOrdNotEqual(const Instruction *Inst)
   executeOpFP<2>(Inst, [](auto A, auto B) -> bool {
     return A != B && !std::isunordered(A, B);
   });
+}
+
+void Invocation::executeFRem(const Instruction *Inst)
+{
+  executeOpFP<2>(Inst,
+                 [](auto A, auto B) -> decltype(A) { return fmod(A, B); });
 }
 
 void Invocation::executeFSub(const Instruction *Inst)
@@ -738,12 +749,14 @@ void Invocation::step()
     DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFDiv, FDiv);
     DISPATCH(SpvOpFMul, FMul);
+    DISPATCH(SpvOpFNegate, FNegate);
     DISPATCH(SpvOpFOrdEqual, FOrdEqual);
     DISPATCH(SpvOpFOrdGreaterThan, FOrdGreaterThan);
     DISPATCH(SpvOpFOrdGreaterThanEqual, FOrdGreaterThanEqual);
     DISPATCH(SpvOpFOrdLessThan, FOrdLessThan);
     DISPATCH(SpvOpFOrdLessThanEqual, FOrdLessThanEqual);
     DISPATCH(SpvOpFOrdNotEqual, FOrdNotEqual);
+    DISPATCH(SpvOpFRem, FRem);
     DISPATCH(SpvOpFSub, FSub);
     DISPATCH(SpvOpFunctionCall, FunctionCall);
     DISPATCH(SpvOpFUnordEqual, FUnordEqual);

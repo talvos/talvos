@@ -26,6 +26,8 @@ BUFFER add32 44 FILL FLOAT 0
 BUFFER sub32 44 FILL FLOAT 0
 BUFFER mul32 44 FILL FLOAT 0
 BUFFER div32 44 FILL FLOAT 0
+BUFFER neg32 44 FILL FLOAT 0
+BUFFER rem32 44 FILL FLOAT 0
 
 DESCRIPTOR_SET 0 0 A32
 DESCRIPTOR_SET 0 1 B32
@@ -33,6 +35,8 @@ DESCRIPTOR_SET 0 2 add32
 DESCRIPTOR_SET 0 3 sub32
 DESCRIPTOR_SET 0 4 mul32
 DESCRIPTOR_SET 0 5 div32
+DESCRIPTOR_SET 0 6 neg32
+DESCRIPTOR_SET 0 7 rem32
 ENTRY test_fp32_arithmetic
 DISPATCH 11 1 1
 
@@ -40,6 +44,8 @@ DUMP FLOAT add32
 DUMP FLOAT sub32
 DUMP FLOAT mul32
 DUMP FLOAT div32
+DUMP FLOAT neg32
+DUMP FLOAT rem32
 
 # CHECK: Buffer 'add32' (44 bytes):
 # CHECK:   add32[0] = 0
@@ -93,6 +99,31 @@ DUMP FLOAT div32
 # CHECK:   div32[9] = 1.67554
 # CHECK:   div32[10] = -0.974311
 
+# CHECK: Buffer 'neg32' (44 bytes):
+# CHECK:   neg32[0] = -0
+# CHECK:   neg32[1] = -0
+# CHECK:   neg32[2] = -1
+# CHECK:   neg32[3] = -1
+# CHECK:   neg32[4] = -1
+# CHECK:   neg32[5] = 1
+# CHECK:   neg32[6] = 1
+# CHECK:   neg32[7] = -42.1
+# CHECK:   neg32[8] = 72.4
+# CHECK:   neg32[9] = 72.4
+# CHECK:   neg32[10] = -42.1
+
+# CHECK: Buffer 'rem32' (44 bytes):
+# CHECK:   rem32[0] = nan
+# CHECK:   rem32[1] = 0
+# CHECK:   rem32[2] = nan
+# CHECK:   rem32[3] = 0
+# CHECK:   rem32[4] = 0
+# CHECK:   rem32[5] = -0
+# CHECK:   rem32[6] = -0
+# CHECK:   rem32[7] = 5.08
+# CHECK:   rem32[8] = -10.7
+# CHECK:   rem32[9] = -29.19
+# CHECK:   rem32[10] = 42.1
 
 
 
@@ -116,6 +147,8 @@ BUFFER add64 88 FILL DOUBLE 0
 BUFFER sub64 88 FILL DOUBLE 0
 BUFFER mul64 88 FILL DOUBLE 0
 BUFFER div64 88 FILL DOUBLE 0
+BUFFER neg64 88 FILL DOUBLE 0
+BUFFER rem64 88 FILL DOUBLE 0
 
 DESCRIPTOR_SET 0 0 A64
 DESCRIPTOR_SET 0 1 B64
@@ -123,6 +156,8 @@ DESCRIPTOR_SET 0 2 add64
 DESCRIPTOR_SET 0 3 sub64
 DESCRIPTOR_SET 0 4 mul64
 DESCRIPTOR_SET 0 5 div64
+DESCRIPTOR_SET 0 6 neg64
+DESCRIPTOR_SET 0 7 rem64
 ENTRY test_fp64_arithmetic
 DISPATCH 11 1 1
 
@@ -131,6 +166,8 @@ DUMP DOUBLE add64
 DUMP DOUBLE sub64
 DUMP DOUBLE mul64
 DUMP DOUBLE div64
+DUMP DOUBLE neg64
+DUMP DOUBLE rem64
 
 # CHECK: Buffer 'add64' (88 bytes):
 # CHECK:   add64[0] = 0
@@ -183,3 +220,29 @@ DUMP DOUBLE div64
 # CHECK:   div64[8] = -5.83556
 # CHECK:   div64[9] = 1.32619
 # CHECK:   div64[10] = -0.0776679
+
+# CHECK: Buffer 'neg64' (88 bytes):
+# CHECK:   neg64[0] = -0
+# CHECK:   neg64[1] = -0
+# CHECK:   neg64[2] = -1
+# CHECK:   neg64[3] = -1
+# CHECK:   neg64[4] = -1
+# CHECK:   neg64[5] = 1
+# CHECK:   neg64[6] = 1
+# CHECK:   neg64[7] = -42.19
+# CHECK:   neg64[8] = 720.4
+# CHECK:   neg64[9] = 720.4
+# CHECK:   neg64[10] = -42.19
+
+# CHECK: Buffer 'rem64' (88 bytes):
+# CHECK:   rem64[0] = nan
+# CHECK:   rem64[1] = 0
+# CHECK:   rem64[2] = nan
+# CHECK:   rem64[3] = 0
+# CHECK:   rem64[4] = 0
+# CHECK:   rem64[5] = -0
+# CHECK:   rem64[6] = -0
+# CHECK:   rem64[7] = 42.19
+# CHECK:   rem64[8] = -103.15
+# CHECK:   rem64[9] = -177.19
+# CHECK:   rem64[10] = 42.19

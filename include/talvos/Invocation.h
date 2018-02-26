@@ -76,12 +76,14 @@ public:
   void executeFAdd(const Instruction *Inst);
   void executeFDiv(const Instruction *Inst);
   void executeFMul(const Instruction *Inst);
+  void executeFNegate(const Instruction *Inst);
   void executeFOrdEqual(const Instruction *Inst);
   void executeFOrdGreaterThan(const Instruction *Inst);
   void executeFOrdGreaterThanEqual(const Instruction *Inst);
   void executeFOrdLessThan(const Instruction *Inst);
   void executeFOrdLessThanEqual(const Instruction *Inst);
   void executeFOrdNotEqual(const Instruction *Inst);
+  void executeFRem(const Instruction *Inst);
   void executeFSub(const Instruction *Inst);
   void executeFunctionCall(const Instruction *Inst);
   void executeFUnordEqual(const Instruction *Inst);

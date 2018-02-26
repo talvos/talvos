@@ -34,6 +34,10 @@
                OpDecorate %mul32_base Binding 4
                OpDecorate %div32_base DescriptorSet 0
                OpDecorate %div32_base Binding 5
+               OpDecorate %neg32_base DescriptorSet 0
+               OpDecorate %neg32_base Binding 6
+               OpDecorate %rem32_base DescriptorSet 0
+               OpDecorate %rem32_base Binding 7
 
                OpDecorate %a64_base DescriptorSet 0
                OpDecorate %a64_base Binding 0
@@ -47,6 +51,10 @@
                OpDecorate %mul64_base Binding 4
                OpDecorate %div64_base DescriptorSet 0
                OpDecorate %div64_base Binding 5
+               OpDecorate %neg64_base DescriptorSet 0
+               OpDecorate %neg64_base Binding 6
+               OpDecorate %rem64_base DescriptorSet 0
+               OpDecorate %rem64_base Binding 7
 
           %1 = OpTypeFloat 32
           %2 = OpTypePointer StorageBuffer %1
@@ -79,6 +87,8 @@
  %sub32_base = OpVariable %5 StorageBuffer
  %mul32_base = OpVariable %5 StorageBuffer
  %div32_base = OpVariable %5 StorageBuffer
+ %neg32_base = OpVariable %5 StorageBuffer
+ %rem32_base = OpVariable %5 StorageBuffer
 
    %a64_base = OpVariable %16 StorageBuffer
    %b64_base = OpVariable %16 StorageBuffer
@@ -86,6 +96,8 @@
  %sub64_base = OpVariable %16 StorageBuffer
  %mul64_base = OpVariable %16 StorageBuffer
  %div64_base = OpVariable %16 StorageBuffer
+ %neg64_base = OpVariable %16 StorageBuffer
+ %rem64_base = OpVariable %16 StorageBuffer
 
          %24 = OpFunction %7 None %8
          %25 = OpLabel
@@ -111,6 +123,14 @@
       %div32 = OpFDiv %1 %a32 %b32
   %div32_ptr = OpAccessChain %2 %div32_base %i0 %i32
                OpStore %div32_ptr %div32
+
+      %neg32 = OpFNegate %1 %a32
+  %neg32_ptr = OpAccessChain %2 %neg32_base %i0 %i32
+               OpStore %neg32_ptr %neg32
+
+      %rem32 = OpFRem %1 %a32 %b32
+  %rem32_ptr = OpAccessChain %2 %rem32_base %i0 %i32
+               OpStore %rem32_ptr %rem32
 
                OpReturn
                OpFunctionEnd
@@ -139,6 +159,14 @@
       %div64 = OpFDiv %12 %a64 %b64
   %div64_ptr = OpAccessChain %13 %div64_base %i0 %i64
                OpStore %div64_ptr %div64
+
+      %neg64 = OpFNegate %12 %a64
+  %neg64_ptr = OpAccessChain %13 %neg64_base %i0 %i64
+               OpStore %neg64_ptr %neg64
+
+      %rem64 = OpFRem %12 %a64 %b64
+  %rem64_ptr = OpAccessChain %13 %rem64_base %i0 %i64
+               OpStore %rem64_ptr %rem64
 
                OpReturn
                OpFunctionEnd
