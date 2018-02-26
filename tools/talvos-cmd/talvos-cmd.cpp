@@ -12,7 +12,7 @@
 
 using namespace std;
 
-static const char *FileName;
+static const char *FileName = nullptr;
 
 static bool parseArguments(int argc, char *argv[]);
 static void printUsage();
@@ -74,7 +74,7 @@ static bool parseArguments(int argc, char *argv[])
     }
     else
     {
-      if (FileName == NULL)
+      if (FileName == nullptr)
       {
         FileName = argv[i];
       }
