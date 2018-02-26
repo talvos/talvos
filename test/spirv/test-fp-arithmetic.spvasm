@@ -1,7 +1,5 @@
 ; SPIR-V
 ; Version: 1.0
-; Generator: Codeplay; 0
-; Bound: 81
 ; Schema: 0
                OpCapability Shader
                OpCapability Float64
@@ -9,44 +7,47 @@
                OpExtension "SPV_KHR_storage_buffer_storage_class"
                OpExtension "SPV_KHR_variable_pointers"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %37 "test_fp32_arithmetic" %19
-               OpEntryPoint GLCompute %59 "test_fp64_arithmetic" %19
+               OpEntryPoint GLCompute %24 "test_fp32_arithmetic" %18
+               OpEntryPoint GLCompute %26 "test_fp64_arithmetic" %18
                OpSource OpenCL_C 120
-               OpDecorate %20 SpecId 0
-               OpDecorate %21 SpecId 1
-               OpDecorate %22 SpecId 2
+               OpDecorate %19 SpecId 0
+               OpDecorate %20 SpecId 1
+               OpDecorate %21 SpecId 2
                OpDecorate %3 ArrayStride 4
                OpMemberDecorate %4 0 Offset 0
                OpDecorate %4 Block
                OpDecorate %14 ArrayStride 8
                OpMemberDecorate %15 0 Offset 0
                OpDecorate %15 Block
-               OpDecorate %19 BuiltIn GlobalInvocationId
-               OpDecorate %23 BuiltIn WorkgroupSize
-               OpDecorate %25 DescriptorSet 0
-               OpDecorate %25 Binding 0
-               OpDecorate %26 DescriptorSet 0
-               OpDecorate %26 Binding 1
-               OpDecorate %27 DescriptorSet 0
-               OpDecorate %27 Binding 2
-               OpDecorate %28 DescriptorSet 0
-               OpDecorate %28 Binding 3
-               OpDecorate %29 DescriptorSet 0
-               OpDecorate %29 Binding 4
-               OpDecorate %30 DescriptorSet 0
-               OpDecorate %30 Binding 5
-               OpDecorate %31 DescriptorSet 0
-               OpDecorate %31 Binding 0
-               OpDecorate %32 DescriptorSet 0
-               OpDecorate %32 Binding 1
-               OpDecorate %33 DescriptorSet 0
-               OpDecorate %33 Binding 2
-               OpDecorate %34 DescriptorSet 0
-               OpDecorate %34 Binding 3
-               OpDecorate %35 DescriptorSet 0
-               OpDecorate %35 Binding 4
-               OpDecorate %36 DescriptorSet 0
-               OpDecorate %36 Binding 5
+               OpDecorate %18 BuiltIn GlobalInvocationId
+               OpDecorate %22 BuiltIn WorkgroupSize
+
+               OpDecorate %a32_base DescriptorSet 0
+               OpDecorate %a32_base Binding 0
+               OpDecorate %b32_base DescriptorSet 0
+               OpDecorate %b32_base Binding 1
+               OpDecorate %add32_base DescriptorSet 0
+               OpDecorate %add32_base Binding 2
+               OpDecorate %sub32_base DescriptorSet 0
+               OpDecorate %sub32_base Binding 3
+               OpDecorate %mul32_base DescriptorSet 0
+               OpDecorate %mul32_base Binding 4
+               OpDecorate %div32_base DescriptorSet 0
+               OpDecorate %div32_base Binding 5
+
+               OpDecorate %a64_base DescriptorSet 0
+               OpDecorate %a64_base Binding 0
+               OpDecorate %b64_base DescriptorSet 0
+               OpDecorate %b64_base Binding 1
+               OpDecorate %add64_base DescriptorSet 0
+               OpDecorate %add64_base Binding 2
+               OpDecorate %sub64_base DescriptorSet 0
+               OpDecorate %sub64_base Binding 3
+               OpDecorate %mul64_base DescriptorSet 0
+               OpDecorate %mul64_base Binding 4
+               OpDecorate %div64_base DescriptorSet 0
+               OpDecorate %div64_base Binding 5
+
           %1 = OpTypeFloat 32
           %2 = OpTypePointer StorageBuffer %1
           %3 = OpTypeRuntimeArray %1
@@ -64,78 +65,80 @@
          %15 = OpTypeStruct %14
          %16 = OpTypePointer StorageBuffer %15
          %17 = OpTypePointer Private %9
-         %18 = OpConstant %6 0
-         %19 = OpVariable %10 Input
+         %i0 = OpConstant %6 0
+         %18 = OpVariable %10 Input
+         %19 = OpSpecConstant %6 1
          %20 = OpSpecConstant %6 1
          %21 = OpSpecConstant %6 1
-         %22 = OpSpecConstant %6 1
-         %23 = OpSpecConstantComposite %9 %20 %21 %22
-         %24 = OpVariable %17 Private %23
-         %25 = OpVariable %5 StorageBuffer
-         %26 = OpVariable %5 StorageBuffer
-         %27 = OpVariable %5 StorageBuffer
-         %28 = OpVariable %5 StorageBuffer
-         %29 = OpVariable %5 StorageBuffer
-         %30 = OpVariable %5 StorageBuffer
-         %31 = OpVariable %16 StorageBuffer
-         %32 = OpVariable %16 StorageBuffer
-         %33 = OpVariable %16 StorageBuffer
-         %34 = OpVariable %16 StorageBuffer
-         %35 = OpVariable %16 StorageBuffer
-         %36 = OpVariable %16 StorageBuffer
-         %37 = OpFunction %7 None %8
-         %38 = OpLabel
-         %39 = OpAccessChain %11 %19 %18
-         %40 = OpLoad %6 %39
-         %41 = OpAccessChain %2 %25 %18 %40
-         %42 = OpLoad %1 %41
-         %43 = OpAccessChain %2 %26 %18 %40
-         %44 = OpLoad %1 %43
-         %45 = OpFAdd %1 %42 %44
-         %46 = OpAccessChain %2 %27 %18 %40
-               OpStore %46 %45
-         %47 = OpLoad %1 %41
-         %48 = OpLoad %1 %43
-         %49 = OpFSub %1 %47 %48
-         %50 = OpAccessChain %2 %28 %18 %40
-               OpStore %50 %49
-         %51 = OpLoad %1 %41
-         %52 = OpLoad %1 %43
-         %53 = OpFMul %1 %51 %52
-         %54 = OpAccessChain %2 %29 %18 %40
-               OpStore %54 %53
-         %55 = OpLoad %1 %41
-         %56 = OpLoad %1 %43
-         %57 = OpFDiv %1 %55 %56
-         %58 = OpAccessChain %2 %30 %18 %40
-               OpStore %58 %57
+         %22 = OpSpecConstantComposite %9 %19 %20 %21
+         %23 = OpVariable %17 Private %22
+
+   %a32_base = OpVariable %5 StorageBuffer
+   %b32_base = OpVariable %5 StorageBuffer
+ %add32_base = OpVariable %5 StorageBuffer
+ %sub32_base = OpVariable %5 StorageBuffer
+ %mul32_base = OpVariable %5 StorageBuffer
+ %div32_base = OpVariable %5 StorageBuffer
+
+   %a64_base = OpVariable %16 StorageBuffer
+   %b64_base = OpVariable %16 StorageBuffer
+ %add64_base = OpVariable %16 StorageBuffer
+ %sub64_base = OpVariable %16 StorageBuffer
+ %mul64_base = OpVariable %16 StorageBuffer
+ %div64_base = OpVariable %16 StorageBuffer
+
+         %24 = OpFunction %7 None %8
+         %25 = OpLabel
+     %i32ptr = OpAccessChain %11 %18 %i0
+        %i32 = OpLoad %6 %i32ptr
+     %a32ptr = OpAccessChain %2 %a32_base %i0 %i32
+        %a32 = OpLoad %1 %a32ptr
+     %b32ptr = OpAccessChain %2 %b32_base %i0 %i32
+        %b32 = OpLoad %1 %b32ptr
+
+      %add32 = OpFAdd %1 %a32 %b32
+  %add32_ptr = OpAccessChain %2 %add32_base %i0 %i32
+               OpStore %add32_ptr %add32
+
+      %sub32 = OpFSub %1 %a32 %b32
+  %sub32_ptr = OpAccessChain %2 %sub32_base %i0 %i32
+               OpStore %sub32_ptr %sub32
+
+      %mul32 = OpFMul %1 %a32 %b32
+  %mul32_ptr = OpAccessChain %2 %mul32_base %i0 %i32
+               OpStore %mul32_ptr %mul32
+
+      %div32 = OpFDiv %1 %a32 %b32
+  %div32_ptr = OpAccessChain %2 %div32_base %i0 %i32
+               OpStore %div32_ptr %div32
+
                OpReturn
                OpFunctionEnd
-         %59 = OpFunction %7 None %8
-         %60 = OpLabel
-         %61 = OpAccessChain %11 %19 %18
-         %62 = OpLoad %6 %61
-         %63 = OpAccessChain %13 %31 %18 %62
-         %64 = OpLoad %12 %63
-         %65 = OpAccessChain %13 %32 %18 %62
-         %66 = OpLoad %12 %65
-         %67 = OpFAdd %12 %64 %66
-         %68 = OpAccessChain %13 %33 %18 %62
-               OpStore %68 %67
-         %69 = OpLoad %12 %63
-         %70 = OpLoad %12 %65
-         %71 = OpFSub %12 %69 %70
-         %72 = OpAccessChain %13 %34 %18 %62
-               OpStore %72 %71
-         %73 = OpLoad %12 %63
-         %74 = OpLoad %12 %65
-         %75 = OpFMul %12 %73 %74
-         %76 = OpAccessChain %13 %35 %18 %62
-               OpStore %76 %75
-         %77 = OpLoad %12 %63
-         %78 = OpLoad %12 %65
-         %79 = OpFDiv %12 %77 %78
-         %80 = OpAccessChain %13 %36 %18 %62
-               OpStore %80 %79
+
+         %26 = OpFunction %7 None %8
+         %27 = OpLabel
+     %i64ptr = OpAccessChain %11 %18 %i0
+        %i64 = OpLoad %6 %i64ptr
+     %a64ptr = OpAccessChain %13 %a64_base %i0 %i64
+        %a64 = OpLoad %12 %a64ptr
+     %b64ptr = OpAccessChain %13 %b64_base %i0 %i64
+        %b64 = OpLoad %12 %b64ptr
+
+      %add64 = OpFAdd %12 %a64 %b64
+  %add64_ptr = OpAccessChain %13 %add64_base %i0 %i64
+               OpStore %add64_ptr %add64
+
+      %sub64 = OpFSub %12 %a64 %b64
+  %sub64_ptr = OpAccessChain %13 %sub64_base %i0 %i64
+               OpStore %sub64_ptr %sub64
+
+      %mul64 = OpFMul %12 %a64 %b64
+  %mul64_ptr = OpAccessChain %13 %mul64_base %i0 %i64
+               OpStore %mul64_ptr %mul64
+
+      %div64 = OpFDiv %12 %a64 %b64
+  %div64_ptr = OpAccessChain %13 %div64_base %i0 %i64
+               OpStore %div64_ptr %div64
+
                OpReturn
                OpFunctionEnd
