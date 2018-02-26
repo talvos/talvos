@@ -44,6 +44,9 @@ public:
   /// terminator.
   const Instruction *next() const { return Next.get(); }
 
+  /// Return the string representation of an instruction opcode.
+  static const char *opToStr(uint16_t Opcode);
+
   // TODO: Make these private with getters once operands sorted out properly
   const Type *ResultType;
   uint16_t Opcode;

@@ -371,7 +371,10 @@ public:
                               : 0));
         break;
       default:
-        std::cout << "Unhandled opcode " << Inst->opcode << std::endl;
+        std::cerr << "Unhandled instruction: "
+                  << Instruction::opToStr(Inst->opcode) << " (" << Inst->opcode
+                  << ")" << std::endl;
+        abort();
       }
     }
   };
