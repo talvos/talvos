@@ -55,6 +55,9 @@ public:
   /// Clear the barrier state, allowing the invocation to continue.
   void clearBarrier() { AtBarrier = false; }
 
+  /// Returns the next instruction that this invocation will execute.
+  const Instruction *getNextInstruction() const { return CurrentInstruction; }
+
   /// Returns the state of this invocation.
   State getState() const;
 
