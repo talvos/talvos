@@ -60,7 +60,9 @@ set(TALVOS_SOURCES
     Module.cpp
     Object.cpp
     Type.cpp
-    Workgroup.cpp)
+    Workgroup.cpp
+    Utils.cpp
+    Utils.h)
 add_library(talvos SHARED ${TALVOS_SOURCES} ${TALVOS_HEADERS})
 target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")
