@@ -699,6 +699,14 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
   }
 }
 
+Object Invocation::getObject(uint32_t Id) const
+{
+  if (Id < Objects.size())
+    return Objects[Id];
+  else
+    return Object();
+}
+
 Invocation::State Invocation::getState() const
 {
   if (AtBarrier)
