@@ -58,6 +58,9 @@ public:
   /// Returns the next instruction that this invocation will execute.
   const Instruction *getNextInstruction() const { return CurrentInstruction; }
 
+  /// Returns the object with the specified ID.
+  const Object &getObject(uint32_t Id) const { return Objects[Id]; }
+
   /// Returns the state of this invocation.
   State getState() const;
 
