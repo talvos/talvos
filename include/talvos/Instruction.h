@@ -44,6 +44,9 @@ public:
   /// terminator.
   const Instruction *next() const { return Next.get(); }
 
+  /// Print a human-readable form of this instruction to \p O.
+  void print(std::ostream &O) const;
+
   /// Return the string representation of an instruction opcode.
   static const char *opToStr(uint16_t Opcode);
 

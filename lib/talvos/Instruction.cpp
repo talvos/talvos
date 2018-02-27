@@ -3,6 +3,7 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <iostream>
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Instruction.h"
@@ -14,6 +15,23 @@ void Instruction::insertAfter(Instruction *I)
 {
   this->Next = std::move(I->Next);
   I->Next = std::unique_ptr<Instruction>(this);
+}
+
+void Instruction::print(std::ostream &O) const
+{
+  // TODO: Adapt whitespace here based on module ID bound
+  if (ResultType)
+    O << "  %" << Operands[1] << " = ";
+  else
+    O << "        ";
+
+  O << opToStr(Opcode);
+  for (unsigned i = 0; i < NumOperands; i++)
+  {
+    if (ResultType && i == 1)
+      continue;
+    O << " %" << Operands[i];
+  }
 }
 
 const char *Instruction::opToStr(uint16_t Opcode)
