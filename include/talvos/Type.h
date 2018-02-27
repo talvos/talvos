@@ -27,6 +27,21 @@ typedef std::vector<std::pair<const Type *, uint32_t>> StructElementTypeList;
 class Type
 {
 public:
+  /// Identifiers that distinguish between different base types.
+  enum TypeId
+  {
+    VOID,
+    BOOL,
+    INT,
+    FLOAT,
+    VECTOR,
+    ARRAY,
+    RUNTIME_ARRAY,
+    STRUCT,
+    POINTER,
+    FUNCTION,
+  };
+
   /// Returns the bit-width of this type.
   /// Valid for integer and floating point types.
   uint32_t getBitWidth() const;
@@ -56,6 +71,12 @@ public:
   /// Valid for pointer types.
   uint32_t getStorageClass() const;
 
+  /// Returns the type ID of this type.
+  TypeId getTypeId() const { return Id; }
+
+  /// Returns \p true if this is a bool type.
+  bool isBool() const { return Id == BOOL; }
+
   /// Returns \p true if this is an array, struct, or vector type.
   bool isComposite() const;
 
@@ -64,6 +85,9 @@ public:
 
   /// Returns \p true if this is an integer type.
   bool isInt() const { return Id == INT; }
+
+  /// Returns \p true if this is a pointer type.
+  bool isPointer() const { return Id == POINTER; }
 
   /// Returns \p true if this is a scalar type.
   bool isScalar() const;
@@ -111,7 +135,7 @@ public:
 private:
   /// Create a new type.
   /// Used by the factory functions, which will populate class members directly.
-  Type(uint32_t Id, size_t ByteSize)
+  Type(TypeId Id, size_t ByteSize)
   {
     this->Id = Id;
     this->ByteSize = ByteSize;
@@ -119,22 +143,7 @@ private:
     ElementType = nullptr;
   };
 
-  /// Identifiers that distinguish between different base types.
-  enum
-  {
-    VOID,
-    BOOL,
-    INT,
-    FLOAT,
-    VECTOR,
-    ARRAY,
-    RUNTIME_ARRAY,
-    STRUCT,
-    POINTER,
-    FUNCTION,
-  };
-
-  uint32_t Id; ///< The ID of this type.
+  TypeId Id; ///< The ID of this type.
 
   size_t ByteSize; ///< The size of this type in bytes.
 
