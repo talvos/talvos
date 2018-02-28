@@ -44,6 +44,12 @@ public:
   /// Returns the component-wise multiplication of this Dim3 with \p D.
   Dim3 operator*(const Dim3 &D) const { return {X * D.X, Y * D.Y, Z * D.Z}; }
 
+  /// Returns true if this Dim3 is equal to \p D.
+  bool operator==(const Dim3 &D) const
+  {
+    return X == D.X && Y == D.Y && Z == D.Z;
+  }
+
   /// Returns a mutable reference to the component at index i (i must be < 3).
   uint32_t &operator[](unsigned i) { return Data[i]; }
 
