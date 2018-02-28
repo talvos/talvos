@@ -7,6 +7,7 @@
 #define TALVOS_DIM3_H
 
 #include <cstdint>
+#include <iosfwd>
 
 namespace talvos
 {
@@ -42,6 +43,16 @@ public:
 
   /// Returns the component-wise multiplication of this Dim3 with \p D.
   Dim3 operator*(const Dim3 &D) const { return {X * D.X, Y * D.Y, Z * D.Z}; }
+
+  /// Returns a mutable reference to the component at index i (i must be < 3).
+  uint32_t &operator[](unsigned i) { return Data[i]; }
+
+  /// Returns a const reference to the component at index i (i must be < 3).
+  const uint32_t &operator[](unsigned i) const { return Data[i]; }
+
+  /// Allow a Dim3 to be inserted into an output stream.
+  /// Produces the output "(X,Y,Z)".
+  friend std::ostream &operator<<(std::ostream &Stream, const Dim3 &D);
 };
 
 } // namespace talvos

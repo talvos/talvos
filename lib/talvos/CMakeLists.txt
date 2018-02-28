@@ -52,6 +52,7 @@ set(TALVOS_HEADERS
 set(TALVOS_SOURCES
     Block.cpp
     Device.cpp
+    Dim3.cpp
     DispatchCommand.cpp
     Function.cpp
     Instruction.cpp
