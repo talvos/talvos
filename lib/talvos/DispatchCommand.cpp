@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <iterator>
 #include <spirv/unified1/spirv.h>
 #include <sstream>
 
