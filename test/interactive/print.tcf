@@ -56,6 +56,7 @@ DISPATCH 2 1 1
 # CHECK: %63 = 8
 # CHECK: %65 = 100
 # CHECK: %67 = 50
+# CHECK: %71 = {86.52, 0, -94.33, 1}
 # CHECK: %72 = false
 # CHECK: %73 = true
 # CHECK: %55 = 0.0001

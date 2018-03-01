@@ -118,21 +118,15 @@ Object Object::load(const Type *Ty, const Memory &Mem, uint64_t Address)
   return Result;
 }
 
-std::ostream &operator<<(std::ostream &Stream, const Object &O)
+// Recursively print typed data to a stream.
+// Used by Object::operator<<().
+void print(std::ostream &Stream, uint8_t *Data, const Type *Ty)
 {
-  if (!O)
-  {
-    Stream << "<undefined>";
-    return Stream;
-  }
-
-  // TODO: Handle structures, vectors, arrays
-  const Type *Ty = O.getType();
   switch (Ty->getTypeId())
   {
   case Type::BOOL:
   {
-    Stream << (O.get<bool>() ? "true" : "false");
+    Stream << (*(bool *)Data ? "true" : "false");
     break;
   }
   case Type::INT:
@@ -141,13 +135,13 @@ std::ostream &operator<<(std::ostream &Stream, const Object &O)
     switch (Ty->getBitWidth())
     {
     case 16:
-      Stream << O.get<int16_t>();
+      Stream << *(int16_t *)Data;
       break;
     case 32:
-      Stream << O.get<int32_t>();
+      Stream << *(int32_t *)Data;
       break;
     case 64:
-      Stream << O.get<int64_t>();
+      Stream << *(int64_t *)Data;
       break;
     default:
       assert(false && "Invalid integer type.");
@@ -159,25 +153,50 @@ std::ostream &operator<<(std::ostream &Stream, const Object &O)
     switch (Ty->getBitWidth())
     {
     case 32:
-      Stream << O.get<float>();
+      Stream << *(float *)Data;
       break;
     case 64:
-      Stream << O.get<double>();
+      Stream << *(double *)Data;
       break;
     default:
       assert(false && "Invalid floating point type.");
     }
     break;
   }
+  case Type::ARRAY:
+  case Type::STRUCT:
+  case Type::VECTOR:
+  {
+    Stream << "{";
+    for (unsigned i = 0; i < Ty->getElementCount(); i++)
+    {
+      if (i > 0)
+        Stream << ", ";
+      print(Stream, Data + Ty->getElementOffset(i), Ty->getElementType(i));
+    }
+    Stream << "}";
+    break;
+  }
   case Type::POINTER:
   {
-    Stream << "0x" << std::hex << O.get<uint64_t>() << std::dec;
+    Stream << "0x" << std::hex << *(uint64_t *)Data << std::dec;
     break;
   }
   default:
     Stream << "<unhandled object type>";
     break;
   }
+}
+
+std::ostream &operator<<(std::ostream &Stream, const Object &O)
+{
+  if (!O)
+  {
+    Stream << "<undefined>";
+    return Stream;
+  }
+
+  print(Stream, O.Data, O.getType());
   return Stream;
 }
 
