@@ -1,0 +1,64 @@
+print
+print x
+print %a
+print %12345
+
+print %36
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+print %63
+print %65
+print %67
+print %72
+print %73
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+print %55
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+print %46
+print %47
+print %48
+quit
