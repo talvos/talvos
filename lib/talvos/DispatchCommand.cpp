@@ -3,12 +3,20 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include "config.h"
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <iterator>
 #include <spirv/unified1/spirv.h>
 #include <sstream>
+#include <unistd.h>
+
+#if HAVE_READLINE
+#include <readline/history.h>
+#include <readline/readline.h>
+#endif
 
 #include "Utils.h"
 #include "talvos/DispatchCommand.h"
@@ -165,19 +173,38 @@ void DispatchCommand::interact()
   printCurrentInstruction();
 
   // Loop until the user enters a command that resumes execution.
+  bool IsTTY = isatty(STDIN_FILENO);
   while (true)
   {
     // Get line of user input.
-    // TODO: Use readline to provide history and keyboard shortcuts
-    std::cout << "(talvos) " << std::flush;
+    bool eof = false;
     std::string Line;
-    getline(std::cin, Line);
+#if HAVE_READLINE
+    if (IsTTY)
+    {
+      char *CLine = readline("(talvos) ");
+      if (CLine)
+      {
+        Line = CLine;
+        free(CLine);
+      }
+      else
+        eof = true;
+    }
+    else
+#endif
+    {
+      if (IsTTY)
+        std::cout << "(talvos) " << std::flush;
+      getline(std::cin, Line);
+      eof = std::cin.eof();
+    }
 
     // Quit on EOF.
-    bool eof = std::cin.eof();
     if (eof)
     {
-      std::cout << "(quit)" << std::endl;
+      if (IsTTY)
+        std::cout << "(quit)" << std::endl;
       quit({});
       return;
     }
@@ -191,6 +218,10 @@ void DispatchCommand::interact()
     // TODO: Repeat last command instead?
     if (!Tokens.size())
       continue;
+
+#if HAVE_READLINE
+    add_history(Line.c_str());
+#endif
 
 #define CMD(LONG, SHORT, FUNC)                                                 \
   if (Tokens[0] == LONG || Tokens[0] == SHORT)                                 \
