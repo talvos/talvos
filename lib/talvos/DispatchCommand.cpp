@@ -115,12 +115,12 @@ void DispatchCommand::run()
           break;
         CurrentInvocation = I->get();
 
+        interact();
         while (CurrentInvocation->getState() == Invocation::READY)
         {
-          interact();
           CurrentInvocation->step();
+          interact();
         }
-        interact();
         CurrentInvocation = nullptr;
       }
 
