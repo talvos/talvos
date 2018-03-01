@@ -7,11 +7,12 @@ import os
 import subprocess
 import sys
 
-if len(sys.argv) != 3:
-    print 'Usage: python run-test.py TCF EXE'
+if len(sys.argv) < 3 or len(sys.argv) > 4:
+    print 'Usage: python run-test.py EXE TCF [STDIN]'
     exit(1)
 
-filename = sys.argv[1]
+exe = os.path.realpath(sys.argv[1])
+filename = sys.argv[2]
 
 if not os.path.isfile(filename):
   print('TCF file not found')
@@ -19,14 +20,21 @@ if not os.path.isfile(filename):
 
 test_dir  = os.path.dirname(os.path.realpath(filename))
 test_file = os.path.basename(filename)
-exe = os.path.realpath(sys.argv[2])
+
+stdin_file = None
+if len(sys.argv) >= 4:
+  if not os.path.isfile(filename):
+    print('STDIN file not found')
+    sys.exit(1)
+  stdin_file = open(sys.argv[3])
 
 os.chdir(test_dir)
 
 # Run talvos-cmd
 cmd = [exe]
 cmd.append(test_file)
-proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                        stdin=stdin_file)
 output = proc.communicate()
 retval = proc.returncode
 

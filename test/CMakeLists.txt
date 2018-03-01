@@ -39,6 +39,7 @@ foreach(test
     NAME ${test}
     COMMAND
     ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/test/run-test.py
+    $<TARGET_FILE:talvos-cmd>
     ${CMAKE_CURRENT_SOURCE_DIR}/${test}.tcf
-    $<TARGET_FILE:talvos-cmd>)
+  )
 endforeach(${test})
