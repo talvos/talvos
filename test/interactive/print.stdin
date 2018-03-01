@@ -3,6 +3,23 @@ print x
 print %a
 print %12345
 
+print %15
+print %16
+print %17
+print %18
+print %19
+print %20
+print %21
+print %22
+print %23
+print %24
+print %25
+print %26
+print %27
+print %28
+print %29
+print %30
+
 print %36
 step
 step

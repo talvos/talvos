@@ -33,6 +33,25 @@ DISPATCH 2 1 1
 # CHECK: Usage: print %<id>
 # CHECK: Invalid result ID
 # CHECK: Invalid result ID
+# CHECK: <undefined>
+
+# CHECK: %15 = float32
+# CHECK: %16 = float32v4
+# CHECK: %17 = float32v4*
+# CHECK: %18 = struct {float32v4[]}*
+# CHECK: %19 = int32
+# CHECK: %20 = struct {int32}*
+# CHECK: %21 = int32*
+# CHECK: %22 = struct {float32}*
+# CHECK: %23 = float32*
+# CHECK: %24 = void
+# CHECK: %25 = void function ()
+# CHECK: %26 = int32v3
+# CHECK: %27 = int32v3*
+# CHECK: %28 = int32*
+# CHECK: %29 = bool
+# CHECK: %30 = float32v4 function (float32v4,float32v4,float32)
+
 # CHECK: %36 = 4
 # CHECK: %63 = 8
 # CHECK: %65 = 100

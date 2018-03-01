@@ -294,6 +294,13 @@ bool DispatchCommand::print(const std::vector<std::string> &Args)
 
   std::cout << "  %" << std::dec << Id << " = ";
 
+  // Handle types.
+  if (const Type *Ty = Mod->getType(Id))
+  {
+    std::cout << Ty << std::endl;
+    return false;
+  }
+
   // Get object from current invocation.
   const Object &O = CurrentInvocation->getObject(Id);
   if (!O)

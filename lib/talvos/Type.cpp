@@ -6,6 +6,7 @@
 #include "talvos/Type.h"
 
 #include <cassert>
+#include <iostream>
 
 namespace talvos
 {
@@ -64,6 +65,66 @@ bool Type::isComposite() const
 bool Type::isScalar() const
 {
   return (Id == BOOL) || (Id == INT) || (Id == FLOAT) || (Id == POINTER);
+}
+
+std::ostream &operator<<(std::ostream &Stream, const Type *Ty)
+{
+  switch (Ty->Id)
+  {
+  case Type::VOID:
+    Stream << "void";
+    break;
+  case Type::BOOL:
+    Stream << "bool";
+    break;
+  case Type::INT:
+    Stream << "int" << Ty->BitWidth;
+    break;
+  case Type::FLOAT:
+    Stream << "float" << Ty->BitWidth;
+    break;
+  case Type::VECTOR:
+    Stream << Ty->ElementType << "v" << Ty->ElementCount;
+    break;
+  case Type::ARRAY:
+    Stream << Ty->ElementType << "[" << Ty->ElementCount << "]";
+    break;
+  case Type::RUNTIME_ARRAY:
+    Stream << Ty->ElementType << "[]";
+    break;
+  case Type::STRUCT:
+  {
+    Stream << "struct {";
+    for (unsigned i = 0; i < Ty->ElementCount; i++)
+    {
+      if (i > 0)
+        Stream << ",";
+      Stream << Ty->ElementTypes[i].first;
+      // TODO: Show member offsets?
+    }
+    Stream << "}";
+    break;
+  }
+  case Type::POINTER:
+    Stream << Ty->ElementType << "*";
+    break;
+  case Type::FUNCTION:
+  {
+    Stream << Ty->ReturnType << " function (";
+    for (unsigned i = 0; i < Ty->ArgumentTypes.size(); i++)
+    {
+      if (i > 0)
+        Stream << ",";
+      Stream << Ty->ArgumentTypes[i];
+    }
+    Stream << ")";
+    break;
+  }
+  default:
+    Stream << "<unhandled type>";
+    break;
+  }
+  return Stream;
 }
 
 std::unique_ptr<Type> Type::getArray(const Type *ElemType,

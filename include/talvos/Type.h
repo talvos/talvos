@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <iosfwd>
 #include <memory>
 #include <vector>
 
@@ -94,6 +95,10 @@ public:
 
   /// Returns \p true if this is a vector type.
   bool isVector() const { return Id == VECTOR; }
+
+  /// Allow a Type to be inserted into an output stream.
+  /// Converts the type to a human readable format.
+  friend std::ostream &operator<<(std::ostream &Stream, const Type *Ty);
 
   /// Create an array type.
   static std::unique_ptr<Type>
