@@ -43,3 +43,5 @@ foreach(test
     ${CMAKE_CURRENT_SOURCE_DIR}/${test}.tcf
   )
 endforeach(${test})
+
+add_subdirectory(interactive)
