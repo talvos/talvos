@@ -304,7 +304,7 @@ public:
       {
         uint32_t ReturnType = Inst->words[Inst->operands[1].offset];
         std::vector<const Type *> ArgTypes;
-        for (int i = 3; i < Inst->num_operands; i++)
+        for (int i = 2; i < Inst->num_operands; i++)
         {
           uint32_t ArgType = Inst->words[Inst->operands[i].offset];
           ArgTypes.push_back(Mod->getType(ArgType));
@@ -545,7 +545,8 @@ const std::vector<Object> &Module::getObjects() const { return Objects; }
 
 const Type *Module::getType(uint32_t Id) const
 {
-  assert(Types.count(Id));
+  if (Types.count(Id) == 0)
+    return nullptr;
   return Types.at(Id).get();
 }
 
