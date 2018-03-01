@@ -54,7 +54,7 @@ for ln in range(len(lines)):
         for o in range(oln, len(outlines)):
             if pattern in outlines[o]:
                 matched = True
-                oln = o
+                oln = o+1
                 break
         if not matched:
             print 'CHECK on line %d not found' % (ln+1)
