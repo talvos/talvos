@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <iostream>
 #include <vector>
 
 #include "talvos/Object.h"
@@ -115,6 +116,69 @@ Object Object::load(const Type *Ty, const Memory &Mem, uint64_t Address)
   Result.Data = new uint8_t[Ty->getSize()];
   Mem.load(Result.Data, Address, Ty->getSize());
   return Result;
+}
+
+std::ostream &operator<<(std::ostream &Stream, const Object &O)
+{
+  if (!O)
+  {
+    Stream << "<undefined>";
+    return Stream;
+  }
+
+  // TODO: Handle structures, vectors, arrays
+  const Type *Ty = O.getType();
+  switch (Ty->getTypeId())
+  {
+  case Type::BOOL:
+  {
+    Stream << (O.get<bool>() ? "true" : "false");
+    break;
+  }
+  case Type::INT:
+  {
+    Stream << std::dec;
+    switch (Ty->getBitWidth())
+    {
+    case 16:
+      Stream << O.get<int16_t>();
+      break;
+    case 32:
+      Stream << O.get<int32_t>();
+      break;
+    case 64:
+      Stream << O.get<int64_t>();
+      break;
+    default:
+      assert(false && "Invalid integer type.");
+    }
+    break;
+  }
+  case Type::FLOAT:
+  {
+    switch (Ty->getBitWidth())
+    {
+    case 32:
+      Stream << O.get<float>();
+      break;
+    case 64:
+      Stream << O.get<double>();
+      break;
+    default:
+      assert(false && "Invalid floating point type.");
+    }
+    break;
+  }
+  case Type::POINTER:
+  {
+    Stream << "0x" << std::hex << O.get<uint64_t>() << std::dec;
+    break;
+  }
+  default:
+    Stream << "<unhandled object type>";
+    break;
+  }
+  return Stream;
 }
 
 template <typename T> void Object::set(T Value, uint32_t Element)

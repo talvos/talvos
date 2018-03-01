@@ -301,69 +301,8 @@ bool DispatchCommand::print(const std::vector<std::string> &Args)
     return false;
   }
 
-  // Get object from current invocation.
-  const Object &O = CurrentInvocation->getObject(Id);
-  if (!O)
-  {
-    std::cout << "<undefined>" << std::endl;
-    return false;
-  }
-
-  // TODO: Handle types
-  // TODO: Handle structures, vectors, arrays
-  // TODO: Should this be a method of Object?
-  // Print object value.
-  const Type *Ty = O.getType();
-  switch (Ty->getTypeId())
-  {
-  case Type::BOOL:
-  {
-    std::cout << (O.get<bool>() ? "true" : "false");
-    break;
-  }
-  case Type::INT:
-  {
-    switch (Ty->getBitWidth())
-    {
-    case 16:
-      std::cout << O.get<int16_t>();
-      break;
-    case 32:
-      std::cout << O.get<int32_t>();
-      break;
-    case 64:
-      std::cout << O.get<int64_t>();
-      break;
-    default:
-      assert(false && "Invalid integer type.");
-    }
-    break;
-  }
-  case Type::FLOAT:
-  {
-    switch (Ty->getBitWidth())
-    {
-    case 32:
-      std::cout << O.get<float>();
-      break;
-    case 64:
-      std::cout << O.get<double>();
-      break;
-    default:
-      assert(false && "Invalid floating point type.");
-    }
-    break;
-  }
-  case Type::POINTER:
-  {
-    std::cout << "0x" << std::hex << O.get<uint64_t>() << std::dec;
-    break;
-  }
-  default:
-    std::cout << "<unhandled object type>";
-    break;
-  }
-  std::cout << std::endl;
+  // Print object value for current invocation.
+  std::cout << CurrentInvocation->getObject(Id) << std::endl;
 
   return false;
 }

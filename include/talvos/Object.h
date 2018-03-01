@@ -7,6 +7,7 @@
 #define TALVOS_OBJECT_H
 
 #include <cstdint>
+#include <iosfwd>
 
 #include "talvos/Type.h"
 
@@ -60,6 +61,10 @@ public:
 
   /// Returns true if this object has been allocated.
   operator bool() const { return Data ? true : false; }
+
+  /// Allow an Object to be inserted into an output stream.
+  /// Converts the value of this object to a human readable format.
+  friend std::ostream &operator<<(std::ostream &Stream, const Object &O);
 
   /// Set the value of this object to a scalar of type \p T.
   /// The type of this object must be either a scalar or a vector, and the size
