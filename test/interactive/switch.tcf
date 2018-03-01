@@ -1,0 +1,48 @@
+# Test the switch command.
+
+MODULE ../misc/reduce.spvasm
+ENTRY reduce
+
+BUFFER n      4   DATA UINT32 64
+BUFFER data   256 RANGE UINT32 0 1
+BUFFER result 32  FILL UINT32 0
+
+DESCRIPTOR_SET 0 0 n
+DESCRIPTOR_SET 0 1 data
+DESCRIPTOR_SET 0 2 result
+
+DISPATCH 8 1 1
+
+DUMP UINT32 result
+
+# CHECK: = OpAccessChain
+# CHECK: Usage: switch X [Y [Z]]
+# CHECK: Usage: switch X [Y [Z]]
+# CHECK: Invalid global ID 'x'
+# CHECK: Global ID is out of the bounds of the current dispatch.
+# CHECK: Global ID is out of the bounds of the current dispatch.
+# CHECK: Switched to invocation with global ID (3,0,0)
+# CHECK: = OpAccessChain
+# CHECK: = OpLoad
+# CHECK: = OpAccessChain
+# CHECK: %35 = 3
+# CHECK: Switched to invocation with global ID (53,0,0)
+# CHECK: = OpAccessChain
+# CHECK: = OpLoad
+# CHECK: = OpAccessChain
+# CHECK: %35 = 53
+# CHECK: <barrier>
+# CHECK: Switched to invocation with global ID (3,0,0)
+# CHECK: = OpLoad
+# CHECK: %35 = 3
+# CHECK: %43 = 3
+
+# CHECK: Buffer 'result' (32 bytes):
+# CHECK:   result[0] = 28
+# CHECK:   result[1] = 92
+# CHECK:   result[2] = 156
+# CHECK:   result[3] = 220
+# CHECK:   result[4] = 284
+# CHECK:   result[5] = 348
+# CHECK:   result[6] = 412
+# CHECK:   result[7] = 476

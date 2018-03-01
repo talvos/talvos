@@ -1,0 +1,53 @@
+switch
+switch 1 2 3 4
+switch 1 x
+switch 12345
+switch 2 2
+
+switch 3
+step
+step
+step
+print %35
+
+switch 53 0 0
+step
+step
+print %35
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+
+sw 3 0 0
+print %35
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+step
+print %43
+
+continue

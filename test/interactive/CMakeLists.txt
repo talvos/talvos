@@ -6,6 +6,7 @@
 foreach(test
   print
   step
+  switch
 )
   set(TEST_NAME "interactive/${test}")
   add_test(
