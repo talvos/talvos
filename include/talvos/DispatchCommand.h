@@ -16,8 +16,10 @@ namespace talvos
 
 class Device;
 class Function;
+class Invocation;
 class Module;
 class Object;
+class Workgroup;
 
 /// Map from Descriptor/Binding pair to an address in memory.
 typedef std::map<std::pair<uint32_t, uint32_t>, uint64_t> DescriptorSet;
@@ -72,7 +74,33 @@ private:
   Dim3 GroupSize;       ///< The size of each workgroup.
   Dim3 NumGroups;       ///< The number of workgroups.
 
+  /// Index of next group to run in PendingGroups.
+  size_t NextGroupIndex;
+
+  /// Pool of group IDs pending creation and execution.
+  std::vector<Dim3> PendingGroups;
+
+  /// Pool of groups that have begun execution and been suspended.
+  std::vector<Workgroup *> RunningGroups;
+
+  Invocation *CurrentInvocation; ///< The current invocation being executed.
+  Workgroup *CurrentGroup;       ///< The current workgroup being executed.
+
   VariableList Variables; ///< Resolved buffer variable values.
+
+  // Interactive debugging functionality.
+  bool Continue;
+  bool Interactive;
+  void interact();
+  void printCurrentInstruction();
+  // Interactive command handlers.
+  // Return true when the interpreter should resume executing instructions.
+  bool cont(const std::vector<std::string> &Args);
+  bool help(const std::vector<std::string> &Args);
+  bool print(const std::vector<std::string> &Args);
+  bool quit(const std::vector<std::string> &Args);
+  bool step(const std::vector<std::string> &Args);
+  bool swtch(const std::vector<std::string> &Args);
 };
 
 } // namespace talvos

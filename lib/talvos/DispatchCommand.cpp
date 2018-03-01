@@ -3,11 +3,16 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <spirv/unified1/spirv.h>
+#include <sstream>
 
+#include "Utils.h"
 #include "talvos/DispatchCommand.h"
 #include "talvos/Function.h"
+#include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
@@ -22,6 +27,9 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
   Dev = D;
   Mod = M;
   Func = F;
+
+  CurrentInvocation = nullptr;
+  Continue = false;
 
   this->NumGroups = NumGroups;
   this->GroupSize = M->getLocalSize(F->getId());
@@ -43,60 +51,399 @@ DispatchCommand::DispatchCommand(Device *D, const Module *M, const Function *F,
 
 void DispatchCommand::run()
 {
+  assert(PendingGroups.empty());
+  assert(RunningGroups.empty());
+
+  Interactive = checkEnv("TALVOS_INTERACTIVE", false);
+  // TODO: Print info about current command (entry name, dispatch size, etc).
+
+  // Build list of pending group IDs.
   for (uint32_t GZ = 0; GZ < NumGroups.Z; GZ++)
-  {
     for (uint32_t GY = 0; GY < NumGroups.Y; GY++)
-    {
       for (uint32_t GX = 0; GX < NumGroups.X; GX++)
+        PendingGroups.push_back({GX, GY, GZ});
+
+  // Loop until all groups are finished.
+  // A pool of running groups is maintained to allow the current group to be
+  // suspended and changed via the interactive debugger interface.
+  NextGroupIndex = 0;
+  while (true)
+  {
+    // Get next group to run.
+    // Take from running pool first, then pending pool.
+    if (!RunningGroups.empty())
+    {
+      CurrentGroup = RunningGroups.back();
+      RunningGroups.pop_back();
+    }
+    else if (NextGroupIndex < PendingGroups.size())
+    {
+      CurrentGroup = new Workgroup(this, PendingGroups[NextGroupIndex]);
+      ++NextGroupIndex;
+    }
+    else
+    {
+      // All groups are finished.
+      break;
+    }
+
+    // Loop until all work items in the group have completed.
+    while (true)
+    {
+      // Step each invocation in group until it hits a barrier or completes.
+      // Note that the interact() calls can potentially change the current
+      // invocation and group being processed.
+      while (true)
       {
-        Workgroup Group(this, {GX, GY, GZ});
+        // Get the next invocation in the current group in the READY state.
+        // TODO: Could move some of this logic into the Workgroup class?
+        const Workgroup::WorkItemList &WorkItems = CurrentGroup->getWorkItems();
+        auto I =
+            std::find_if(WorkItems.begin(), WorkItems.end(), [](const auto &I) {
+              return I->getState() == Invocation::READY;
+            });
+        if (I == WorkItems.end())
+          break;
+        CurrentInvocation = I->get();
 
-        // Loop until all work items have completed.
-        const Workgroup::WorkItemList &WorkItems = Group.getWorkItems();
-        size_t NumWorkItems = WorkItems.size();
-        while (true)
+        while (CurrentInvocation->getState() == Invocation::READY)
         {
-          uint32_t BarrierCount = 0;
-
-          // Step each invocation until it hits a barrier or completes.
-          for (uint32_t I = 0; I < NumWorkItems; I++)
-          {
-            auto &WI = WorkItems[I];
-            while (WI->getState() == Invocation::READY)
-              WI->step();
-
-            // Increment barrier count if necessary.
-            if (WI->getState() == Invocation::BARRIER)
-              BarrierCount++;
-          }
-
-          // Check for barriers.
-          if (BarrierCount > 0)
-          {
-            // All invocations in the group must hit the barrier.
-            // TODO: Ensure they hit the *same* barrier?
-            // TODO: Allow for other execution scopes.
-            if (BarrierCount != NumWorkItems)
-            {
-              // TODO: Better error message.
-              std::cerr << "Barrier not reached by every invocation."
-                        << std::endl;
-              abort();
-            }
-
-            // Clear the barrier.
-            for (auto &WI : WorkItems)
-              WI->clearBarrier();
-          }
-          else
-          {
-            // All invocations must have completed - this group is done.
-            break;
-          }
+          interact();
+          CurrentInvocation->step();
         }
+        interact();
+        CurrentInvocation = nullptr;
+      }
+
+      // Check for barriers.
+      // TODO: Move logic for barrier handling into Workgroup class?
+      const Workgroup::WorkItemList &WorkItems = CurrentGroup->getWorkItems();
+      uint32_t BarrierCount =
+          std::count_if(WorkItems.begin(), WorkItems.end(), [](const auto &I) {
+            return I->getState() == Invocation::BARRIER;
+          });
+      if (BarrierCount > 0)
+      {
+        // All invocations in the group must hit the barrier.
+        // TODO: Ensure they hit the *same* barrier?
+        // TODO: Allow for other execution scopes.
+        if (BarrierCount != WorkItems.size())
+        {
+          // TODO: Better error message.
+          // TODO: Try to carry on?
+          std::cerr << "Barrier not reached by every invocation." << std::endl;
+          abort();
+        }
+
+        // Clear the barrier.
+        for (auto &WI : WorkItems)
+          WI->clearBarrier();
+      }
+      else
+      {
+        // All invocations must have completed - this group is done.
+        delete CurrentGroup;
+        CurrentGroup = nullptr;
+        break;
       }
     }
   }
+}
+
+// Private functions for interactive execution and debugging.
+
+void DispatchCommand::interact()
+{
+  if (!Interactive)
+    return;
+
+  // Keep going if user used 'continue'.
+  if (Continue)
+    return;
+
+  printCurrentInstruction();
+
+  // Loop until the user enters a command that resumes execution.
+  while (true)
+  {
+    // Get line of user input.
+    // TODO: Use readline to provide history and keyboard shortcuts
+    std::cout << "(talvos) " << std::flush;
+    std::string Line;
+    getline(std::cin, Line);
+
+    // Quit on EOF.
+    bool eof = std::cin.eof();
+    if (eof)
+    {
+      std::cout << "(quit)" << std::endl;
+      quit({});
+      return;
+    }
+
+    // Split line into tokens.
+    std::istringstream ISS(Line);
+    std::vector<std::string> Tokens{std::istream_iterator<std::string>{ISS},
+                                    std::istream_iterator<std::string>{}};
+
+    // Skip empty lines.
+    // TODO: Repeat last command instead?
+    if (!Tokens.size())
+      continue;
+
+#define CMD(LONG, SHORT, FUNC)                                                 \
+  if (Tokens[0] == LONG || Tokens[0] == SHORT)                                 \
+  {                                                                            \
+    if (FUNC(Tokens))                                                          \
+      break;                                                                   \
+    else                                                                       \
+      continue;                                                                \
+  }
+    CMD("continue", "c", cont);
+    CMD("help", "h", help);
+    CMD("print", "p", print);
+    CMD("quit", "q", quit);
+    CMD("step", "s", step);
+    CMD("switch", "sw", swtch);
+#undef CMD
+    std::cerr << "Unrecognized command '" << Tokens[0] << "'" << std::endl;
+  }
+}
+
+void DispatchCommand::printCurrentInstruction()
+{
+  assert(CurrentInvocation);
+  if (CurrentInvocation->getState() == Invocation::BARRIER)
+    std::cout << "  <barrier>";
+  else if (CurrentInvocation->getState() == Invocation::FINISHED)
+    std::cout << "  <finished>";
+  else
+    CurrentInvocation->getNextInstruction()->print(std::cout);
+  std::cout << std::endl;
+}
+
+bool DispatchCommand::cont(const std::vector<std::string> &Args)
+{
+  Continue = true;
+  return true;
+}
+
+bool DispatchCommand::help(const std::vector<std::string> &Args)
+{
+  std::cout << "Command list:" << std::endl;
+  std::cout << "  continue     (c)" << std::endl;
+  std::cout << "  help         (h)" << std::endl;
+  std::cout << "  print        (p)" << std::endl;
+  std::cout << "  quit         (q)" << std::endl;
+  std::cout << "  step         (s)" << std::endl;
+  std::cout << "  switch       (sw)" << std::endl;
+  // TODO: help for specific commands
+  // std::cout << "(type 'help <command>' for more information)" << std::endl;
+
+  return false;
+}
+
+bool DispatchCommand::print(const std::vector<std::string> &Args)
+{
+  if (Args.size() != 2)
+  {
+    std::cerr << "Usage: print %<id>" << std::endl;
+    return false;
+  }
+
+  // Parse result ID.
+  char *Next;
+  uint32_t Id = strtoul(Args[1].c_str() + 1, &Next, 10);
+  if (Args[1][0] != '%' || strlen(Next))
+  {
+    std::cerr << "Invalid result ID" << std::endl;
+    return false;
+  }
+
+  std::cout << "  %" << std::dec << Id << " = ";
+
+  // Get object from current invocation.
+  const Object &O = CurrentInvocation->getObject(Id);
+  if (!O)
+  {
+    std::cout << "<undefined>" << std::endl;
+    return false;
+  }
+
+  // TODO: Handle types
+  // TODO: Handle structures, vectors, arrays
+  // TODO: Should this be a method of Object?
+  // Print object value.
+  const Type *Ty = O.getType();
+  switch (Ty->getTypeId())
+  {
+  case Type::BOOL:
+  {
+    std::cout << (O.get<bool>() ? "true" : "false");
+    break;
+  }
+  case Type::INT:
+  {
+    switch (Ty->getBitWidth())
+    {
+    case 16:
+      std::cout << O.get<int16_t>();
+      break;
+    case 32:
+      std::cout << O.get<int32_t>();
+      break;
+    case 64:
+      std::cout << O.get<int64_t>();
+      break;
+    default:
+      assert(false && "Invalid integer type.");
+    }
+    break;
+  }
+  case Type::FLOAT:
+  {
+    switch (Ty->getBitWidth())
+    {
+    case 32:
+      std::cout << O.get<float>();
+      break;
+    case 64:
+      std::cout << O.get<double>();
+      break;
+    default:
+      assert(false && "Invalid floating point type.");
+    }
+    break;
+  }
+  case Type::POINTER:
+  {
+    std::cout << "0x" << std::hex << O.get<uint64_t>() << std::dec;
+    break;
+  }
+  default:
+    std::cout << "<unhandled object type>";
+    break;
+  }
+  std::cout << std::endl;
+
+  return false;
+}
+
+bool DispatchCommand::quit(const std::vector<std::string> &Args) { exit(0); }
+
+bool DispatchCommand::step(const std::vector<std::string> &Args)
+{
+  if (CurrentInvocation->getState() == Invocation::FINISHED)
+  {
+    std::cout << "Invocation has finished." << std::endl;
+    return false;
+  }
+  else if (CurrentInvocation->getState() == Invocation::BARRIER)
+  {
+    std::cout << "Invocation is at a barrier." << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool DispatchCommand::swtch(const std::vector<std::string> &Args)
+{
+  // TODO: Allow `select group X Y Z` or `select local X Y Z` as well?
+  if (Args.size() < 2 || Args.size() > 4)
+  {
+    std::cerr << "Usage: switch X [Y [Z]]" << std::endl;
+    return false;
+  }
+
+  // Parse global invocation ID.
+  Dim3 Id(0, 0, 0);
+  for (unsigned i = 1; i < Args.size(); i++)
+  {
+    char *Next;
+    Id[i - 1] = strtoul(Args[i].c_str(), &Next, 10);
+    if (strlen(Next))
+    {
+      std::cerr << "Invalid global ID '" << Args[i] << "'" << std::endl;
+      return false;
+    }
+  }
+
+  // Check global index is within global bounds.
+  if (Id.X >= GroupSize.X * NumGroups.X || Id.Y >= GroupSize.Y * NumGroups.Y ||
+      Id.Z >= GroupSize.Z * NumGroups.Z)
+  {
+    std::cerr << "Global ID is out of the bounds of the current dispatch."
+              << std::endl;
+    return false;
+  }
+
+  // Check if we are already executing the target invocation.
+  if (CurrentInvocation->getGlobalId() == Id)
+  {
+    std::cerr << "Already executing this invocation!" << std::endl;
+    return false;
+  }
+
+  // Find workgroup with target group ID.
+  Dim3 GroupId(Id.X / GroupSize.X, Id.Y / GroupSize.Y, Id.Z / GroupSize.Z);
+  Workgroup *Group = nullptr;
+  if (GroupId == CurrentGroup->getGroupId())
+  {
+    // Already running - nothing to do.
+    Group = CurrentGroup;
+  }
+  if (!Group)
+  {
+    // Check running groups list.
+    auto RG = std::find_if(
+        RunningGroups.begin(), RunningGroups.end(),
+        [&GroupId](const Workgroup *G) { return G->getGroupId() == GroupId; });
+    if (RG != RunningGroups.end())
+    {
+      // Remove from running groups.
+      RunningGroups.erase(RG);
+      Group = *RG;
+    }
+  }
+  if (!Group)
+  {
+    // Check pending groups list.
+    auto PG = std::find(PendingGroups.begin() + NextGroupIndex,
+                        PendingGroups.end(), GroupId);
+    if (PG != PendingGroups.end())
+    {
+      // Remove from pending groups and create the new workgroup.
+      Group = new Workgroup(this, *PG);
+      PendingGroups.erase(PG);
+    }
+  }
+
+  if (!Group)
+  {
+    std::cerr << "Workgroup containing invocation has already finished."
+              << std::endl;
+    return false;
+  }
+
+  // Switch to target group.
+  if (Group != CurrentGroup)
+  {
+    RunningGroups.push_back(CurrentGroup);
+    CurrentGroup = Group;
+  }
+
+  // Switch to target invocation.
+  Dim3 LocalId(Id.X % GroupSize.X, Id.Y % GroupSize.Y, Id.Z % GroupSize.Z);
+  uint32_t LocalIndex =
+      LocalId.X + (LocalId.Y + LocalId.Z * GroupSize.Y) * GroupSize.X;
+  CurrentInvocation = CurrentGroup->getWorkItems()[LocalIndex].get();
+
+  std::cout << "Switched to invocation with global ID " << Id << std::endl;
+
+  printCurrentInstruction();
+
+  return false;
 }
 
 } // namespace talvos
