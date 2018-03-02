@@ -8,3 +8,12 @@ if (DOXYGEN_FOUND)
   configure_file(Doxyfile.in Doxyfile)
   add_custom_target(doxygen COMMAND ${DOXYGEN_EXECUTABLE} VERBATIM)
 endif()
+
+find_program(SPHINX_EXECUTABLE NAMES sphinx-build
+             DOC "Sphinx documentation generator")
+if (SPHINX_EXECUTABLE)
+  add_custom_target(sphinx VERBATIM
+                    COMMAND ${SPHINX_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
+                    ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
+endif()
