@@ -22,6 +22,7 @@ endif()
 
 include_directories(include)
 
+add_subdirectory(docs)
 add_subdirectory(lib)
 add_subdirectory(tools)
 
