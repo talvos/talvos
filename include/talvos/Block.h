@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Block.h
+/// This file declares the Block class.
+
 #ifndef TALVOS_BLOCK_H
 #define TALVOS_BLOCK_H
 

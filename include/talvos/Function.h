@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Function.h
+/// This file declares the Function class.
+
 #ifndef TALVOS_FUNCTION_H
 #define TALVOS_FUNCTION_H
 

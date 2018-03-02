@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Utils.h
+/// This file declares miscellaneous utilities used internally by libtalvos.
+
 #ifndef TALVOS_UTILS_H
 #define TALVOS_UTILS_H
 

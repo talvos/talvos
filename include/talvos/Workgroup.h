@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Workgroup.h
+/// This file declares the Workgroup class.
+
 #ifndef TALVOS_WORKGROUP_H
 #define TALVOS_WORKGROUP_H
 

@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Memory.h
+/// This file declares the Memory class.
+
 #ifndef TALVOS_MEMORY_H
 #define TALVOS_MEMORY_H
 

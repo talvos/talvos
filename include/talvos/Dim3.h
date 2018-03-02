@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Dim3.h
+/// This file declares the Dim3 class.
+
 #ifndef TALVOS_DIM3_H
 #define TALVOS_DIM3_H
 

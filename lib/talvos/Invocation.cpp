@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Invocation.cpp
+/// This file defines the Invocation class.
+
 #include <array>
 #include <cassert>
 #include <cmath>

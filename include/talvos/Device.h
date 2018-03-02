@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Device.h
+/// This file declares the Device class.
+
 #ifndef TALVOS_DEVICE_H
 #define TALVOS_DEVICE_H
 

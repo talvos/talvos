@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Invocation.h
+/// This file declares the Invocation class.
+
 #ifndef TALVOS_INVOCATION_H
 #define TALVOS_INVOCATION_H
 

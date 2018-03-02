@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file DispatchCommand.h
+/// This file declares the DispatchCommand class.
+
 #ifndef TALVOS_DISPATCHCOMMAND_H
 #define TALVOS_DISPATCHCOMMAND_H
 

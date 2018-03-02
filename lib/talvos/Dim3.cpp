@@ -3,6 +3,9 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+/// \file Dim3.cpp
+/// This file defines the Dim3 class.
+
 #include <iostream>
 
 #include "talvos/Dim3.h"
