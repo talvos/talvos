@@ -226,6 +226,7 @@ void DispatchCommand::interact()
     add_history(Line.c_str());
 #endif
 
+/// Map a command with a long and short name to a handler function.
 #define CMD(LONG, SHORT, FUNC)                                                 \
   if (Tokens[0] == LONG || Tokens[0] == SHORT)                                 \
   {                                                                            \

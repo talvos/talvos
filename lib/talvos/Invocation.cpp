@@ -24,6 +24,7 @@
 #include "talvos/Type.h"
 #include "talvos/Workgroup.h"
 
+/// Get scalar operand at index \p Index with type \p Type.
 #define OP(Index, Type) Objects[Inst->Operands[Index]].get<Type>()
 
 namespace talvos
@@ -742,10 +743,10 @@ void Invocation::step()
 #define DISPATCH(Op, Func)                                                     \
   case Op:                                                                     \
     execute##Func(I);                                                          \
-    break;
+    break
 #define NOP(Op)                                                                \
   case Op:                                                                     \
-    break;
+    break
 
     DISPATCH(SpvOpAccessChain, AccessChain);
     DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);

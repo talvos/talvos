@@ -121,8 +121,8 @@ Object Object::load(const Type *Ty, const Memory &Mem, uint64_t Address)
   return Result;
 }
 
-// Recursively print typed data to a stream.
-// Used by Object::operator<<().
+/// Recursively print typed data to a stream.
+/// Used by Object::operator<<().
 void print(std::ostream &Stream, uint8_t *Data, const Type *Ty)
 {
   switch (Ty->getTypeId())
@@ -221,6 +221,7 @@ void Object::store(Memory &Mem, uint64_t Address) const
 void Object::zero() { memset(Data, 0, Ty->getSize()); }
 
 // Explicit template instantiations for scalar types.
+///\{
 #define INSTANTIATE(TYPE)                                                      \
   template Object::Object(const talvos::Type *Ty, TYPE Value);                 \
   template TYPE Object::get(uint32_t) const;                                   \
@@ -234,5 +235,6 @@ INSTANTIATE(uint32_t);
 INSTANTIATE(uint64_t);
 INSTANTIATE(float);
 INSTANTIATE(double);
+///\}
 
 } // namespace talvos

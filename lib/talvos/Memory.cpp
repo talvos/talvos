@@ -12,9 +12,12 @@
 
 #include "talvos/Memory.h"
 
-// TODO: 32-bit?
 // TODO: Allow different number of buffer bits depending on address space
+
+/// Number of bits used for the buffer ID.
 #define BUFFER_BITS (16)
+
+/// Number of bits used for the address offset.
 #define OFFSET_BITS (64 - BUFFER_BITS)
 
 namespace talvos

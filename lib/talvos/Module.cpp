@@ -22,9 +22,11 @@
 namespace talvos
 {
 
+/// Internal class used to construct a Module during SPIRV-Tools parsing.
 class ModuleBuilder
 {
 public:
+  /// Initialize the module builder.
   void init(uint32_t IdBound)
   {
     assert(!Mod && "Module already initialized");
@@ -34,6 +36,7 @@ public:
     PreviousInstruction = nullptr;
   }
 
+  /// Process a parsed SPIR-V instruction.
   void processInstruction(const spv_parsed_instruction_t *Inst)
   {
     assert(Mod);
@@ -382,6 +385,7 @@ public:
     }
   };
 
+  /// Returns the Module that has been built.
   std::unique_ptr<Module> takeModule()
   {
     assert(Mod);
@@ -389,14 +393,18 @@ public:
   }
 
 private:
+  /// Internal ModuleBuilder variables.
+  ///\{
   std::unique_ptr<Module> Mod;
   std::unique_ptr<Function> CurrentFunction;
   std::unique_ptr<Block> CurrentBlock;
   Instruction *PreviousInstruction;
   std::map<uint32_t, uint32_t> ArrayStrides;
   std::map<std::pair<uint32_t, uint32_t>, uint32_t> MemberOffsets;
+  ///\}
 };
 
+/// Callback for SPIRV-Tools parsing a SPIR-V header.
 spv_result_t HandleHeader(void *user_data, spv_endianness_t endian,
                           uint32_t /* magic */, uint32_t version,
                           uint32_t generator, uint32_t id_bound,
@@ -406,6 +414,7 @@ spv_result_t HandleHeader(void *user_data, spv_endianness_t endian,
   return SPV_SUCCESS;
 }
 
+/// Callback for SPIRV-Tools parsing a SPIR-V instruction.
 spv_result_t
 HandleInstruction(void *user_data,
                   const spv_parsed_instruction_t *parsed_instruction)
