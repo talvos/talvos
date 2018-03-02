@@ -4,8 +4,8 @@
 MODULE struct-offset.spvasm
 ENTRY foo
 
-BUFFER input  48 RANGE INT32 0 1
-BUFFER output 16 FILL  INT32 0
+BUFFER input  48 SERIES INT32 0 1
+BUFFER output 16 FILL   INT32 0
 
 DESCRIPTOR_SET 0 0 input
 DESCRIPTOR_SET 0 1 output

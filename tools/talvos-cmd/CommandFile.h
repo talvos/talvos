@@ -37,7 +37,7 @@ private:
   template <typename T> void dump(unsigned VecWidth);
   template <typename T> void data(uint64_t Address, uint64_t NumBytes);
   template <typename T> void fill(uint64_t Address, uint64_t NumBytes);
-  template <typename T> void range(uint64_t Address, uint64_t NumBytes);
+  template <typename T> void series(uint64_t Address, uint64_t NumBytes);
 
   std::istream &Stream;
   talvos::Device *Device;

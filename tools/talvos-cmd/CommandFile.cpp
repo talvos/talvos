@@ -137,29 +137,29 @@ void CommandFile::parseBuffer()
     else
       throw NotRecognizedException();
   }
-  else if (Init == "RANGE")
+  else if (Init == "SERIES")
   {
-    string InitType = get<string>("range type");
+    string InitType = get<string>("series type");
     if (InitType == "INT8")
-      range<int8_t>(Address, NumBytes);
+      series<int8_t>(Address, NumBytes);
     else if (InitType == "UINT8")
-      range<uint8_t>(Address, NumBytes);
+      series<uint8_t>(Address, NumBytes);
     else if (InitType == "INT16")
-      range<int16_t>(Address, NumBytes);
+      series<int16_t>(Address, NumBytes);
     else if (InitType == "UINT16")
-      range<uint16_t>(Address, NumBytes);
+      series<uint16_t>(Address, NumBytes);
     else if (InitType == "INT32")
-      range<int32_t>(Address, NumBytes);
+      series<int32_t>(Address, NumBytes);
     else if (InitType == "UINT32")
-      range<uint32_t>(Address, NumBytes);
+      series<uint32_t>(Address, NumBytes);
     else if (InitType == "INT64")
-      range<int64_t>(Address, NumBytes);
+      series<int64_t>(Address, NumBytes);
     else if (InitType == "UINT64")
-      range<uint64_t>(Address, NumBytes);
+      series<uint64_t>(Address, NumBytes);
     else if (InitType == "FLOAT")
-      range<float>(Address, NumBytes);
+      series<float>(Address, NumBytes);
     else if (InitType == "DOUBLE")
-      range<double>(Address, NumBytes);
+      series<double>(Address, NumBytes);
     else
       throw NotRecognizedException();
   }
@@ -359,10 +359,10 @@ void CommandFile::fill(uint64_t Address, uint64_t NumBytes)
 }
 
 template <typename T>
-void CommandFile::range(uint64_t Address, uint64_t NumBytes)
+void CommandFile::series(uint64_t Address, uint64_t NumBytes)
 {
-  T Value = get<T>("range start");
-  T RangeInc = get<T>("range inc");
+  T Value = get<T>("series start");
+  T RangeInc = get<T>("series inc");
   for (uint64_t i = 0; i < NumBytes; i += sizeof(Value), Value += RangeInc)
     Device->getGlobalMemory().store(Address + i, sizeof(Value),
                                     (uint8_t *)&Value);

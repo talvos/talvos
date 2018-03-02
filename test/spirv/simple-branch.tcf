@@ -3,8 +3,8 @@
 MODULE simple-branch.spvasm
 ENTRY foo
 
-BUFFER input  16 RANGE INT32 40 1
-BUFFER output 16 FILL  INT32 0
+BUFFER input  16 SERIES INT32 40 1
+BUFFER output 16 FILL   INT32 0
 
 DESCRIPTOR_SET 0 0 input
 DESCRIPTOR_SET 0 1 output
