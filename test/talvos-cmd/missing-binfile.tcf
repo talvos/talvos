@@ -1,0 +1,3 @@
+# CHECK: line 3: ERROR: unable to open file
+# EXIT 1
+BUFFER foo 64 BINFILE missing.dat

@@ -1,0 +1,32 @@
+MODULE ../misc/vecadd.spvasm
+ENTRY vecadd
+
+BUFFER a 64 BINFILE a.dat # Same as SERIES 42 1
+BUFFER b 64 BINFILE b.dat # Alternating 123 and 7
+BUFFER c 64 FILL    INT32 0
+
+DESCRIPTOR_SET 0 0 a
+DESCRIPTOR_SET 0 1 b
+DESCRIPTOR_SET 0 2 c
+
+DISPATCH 16 1 1
+
+DUMP INT32 c
+
+# CHECK: Buffer 'c' (64 bytes):
+# CHECK:   c[0] = 165
+# CHECK:   c[1] = 50
+# CHECK:   c[2] = 167
+# CHECK:   c[3] = 52
+# CHECK:   c[4] = 169
+# CHECK:   c[5] = 54
+# CHECK:   c[6] = 171
+# CHECK:   c[7] = 56
+# CHECK:   c[8] = 173
+# CHECK:   c[9] = 58
+# CHECK:   c[10] = 175
+# CHECK:   c[11] = 60
+# CHECK:   c[12] = 177
+# CHECK:   c[13] = 62
+# CHECK:   c[14] = 179
+# CHECK:   c[15] = 64

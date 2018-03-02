@@ -24,6 +24,8 @@ foreach(test
   spirv/test-integer-comparisons
   spirv/test-logical-instructions
   spirv/test_OpIAdd
+  talvos-cmd/binfile
+  talvos-cmd/binfile-too-short
   talvos-cmd/dispatch-without-module
   talvos-cmd/duplicate-allocation-name
   talvos-cmd/empty
@@ -31,6 +33,7 @@ foreach(test
   talvos-cmd/invalid-resource-name
   talvos-cmd/invalid-vector-suffix
   talvos-cmd/loop-count-zero
+  talvos-cmd/missing-binfile
   talvos-cmd/parse-failure
   talvos-cmd/unexpected-eof
   talvos-cmd/unterminated-loop

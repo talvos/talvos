@@ -163,17 +163,17 @@ void CommandFile::parseBuffer()
     else
       throw NotRecognizedException();
   }
-  else if (Init == "DATFILE")
+  else if (Init == "BINFILE")
   {
-    // Open data file.
-    string Filename = get<string>("data filename");
-    std::ifstream DatFile(Filename, std::ios::binary);
-    if (!DatFile)
+    // Open binary data file.
+    string Filename = get<string>("binary data filename");
+    std::ifstream BinFile(Filename, std::ios::binary);
+    if (!BinFile)
       throw "unable to open file";
 
     // Load data from file.
     std::vector<char> Data(NumBytes);
-    if (!DatFile.read(Data.data(), NumBytes))
+    if (!BinFile.read(Data.data(), NumBytes))
       throw "failed to read binary data";
 
     // Copy data to buffer.
