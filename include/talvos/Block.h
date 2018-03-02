@@ -22,8 +22,12 @@ public:
   Block(uint32_t Id);
 
   ~Block();
+
+  // Do not allow Block objects to be copied.
+  ///\{
   Block(const Block &) = delete;
   Block &operator=(const Block &) = delete;
+  ///\}
 
   /// Returns the first instruction in this block.
   const Instruction *getFirstInstruction() const;

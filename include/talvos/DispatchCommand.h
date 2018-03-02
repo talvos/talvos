@@ -28,6 +28,7 @@ typedef std::map<std::pair<uint32_t, uint32_t>, uint64_t> DescriptorSet;
 class DispatchCommand
 {
 public:
+  /// List of mappings from SPIR-V result ID to Object for each variable.
   typedef std::vector<std::pair<uint32_t, Object>> VariableList;
 
   /// Create a new DispatchCommand.
@@ -43,8 +44,11 @@ public:
   DispatchCommand(Device *D, const Module *M, const Function *F, Dim3 NumGroups,
                   const DescriptorSet &DS);
 
+  // Do not allow DispatchCommand objects to be copied.
+  ///\{
   DispatchCommand(const DispatchCommand &) = delete;
   DispatchCommand &operator=(const DispatchCommand &) = delete;
+  ///\}
 
   /// Return the device this command is targeting.
   Device *getDevice() const { return Dev; }
@@ -89,18 +93,25 @@ private:
   VariableList Variables; ///< Resolved buffer variable values.
 
   // Interactive debugging functionality.
-  bool Continue;
-  bool Interactive;
+  bool Continue;    ///< True when the user has used \p continue command.
+  bool Interactive; ///< True when interactive mode is enabled.
+
+  /// Trigger interaction with the user (if necessary).
   void interact();
-  void printCurrentInstruction();
-  // Interactive command handlers.
-  // Return true when the interpreter should resume executing instructions.
+
+  /// Print the next instruction that will be executed.
+  void printNextInstruction();
+
+  /// \name Interactive command handlers.
+  /// Return true when the interpreter should resume executing instructions.
+  ///@{
   bool cont(const std::vector<std::string> &Args);
   bool help(const std::vector<std::string> &Args);
   bool print(const std::vector<std::string> &Args);
   bool quit(const std::vector<std::string> &Args);
   bool step(const std::vector<std::string> &Args);
   bool swtch(const std::vector<std::string> &Args);
+  ///@}
 };
 
 } // namespace talvos

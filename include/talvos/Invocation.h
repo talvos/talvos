@@ -48,9 +48,11 @@ public:
   /// Destroy this invocation.
   ~Invocation();
 
-  // Do not allow Invocations to be copied.
+  // Do not allow Invocation objects to be copied.
+  ///\{
   Invocation(const Invocation &) = delete;
   Invocation &operator=(const Invocation &) = delete;
+  ///\}
 
   /// Clear the barrier state, allowing the invocation to continue.
   void clearBarrier() { AtBarrier = false; }
@@ -74,7 +76,7 @@ public:
   /// Step this invocation by executing the next instruction.
   void step();
 
-  /// Instruction handlers.
+  /// \name Instruction handlers.
   ///@{
   void executeAccessChain(const Instruction *Inst);
   void executeBitwiseAnd(const Instruction *Inst);
@@ -158,9 +160,9 @@ private:
   struct StackEntry
   {
     // The instruction, block, and function to return to.
-    const Instruction *RetInst;
-    const Function *RetFunc;
-    uint32_t RetBlock;
+    const Instruction *CallInst; ///< The calling instruction.
+    const Function *CallFunc;    ///< The function containing \p CallInst.
+    uint32_t CallBlock;          ///< The block containing \p CallInst.
 
     /// Function scope allocations within this stack frame.
     std::vector<uint64_t> Allocations;

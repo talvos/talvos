@@ -27,8 +27,12 @@ public:
   Memory();
 
   ~Memory();
+
+  // Do not allow Memory objects to be copied.
+  ///\{
   Memory(const Memory &) = delete;
   Memory &operator=(const Memory &) = delete;
+  ///\}
 
   /// Allocate a new buffer of size \p NumBytes.
   /// \returns the virtual base address of the allocation.

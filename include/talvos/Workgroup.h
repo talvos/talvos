@@ -23,7 +23,10 @@ class Object;
 class Workgroup
 {
 public:
+  /// List of work items in the workgroup.
   typedef std::vector<std::unique_ptr<Invocation>> WorkItemList;
+
+  /// List of mappings from variable ID to object.
   typedef std::vector<std::pair<uint32_t, Object>> VariableList;
 
   /// Create a workgroup.
@@ -32,9 +35,11 @@ public:
   /// Destroy this workgroup.
   ~Workgroup();
 
-  // Do not allow Workgroups to be copied.
+  // Do not allow Workgroup objects to be copied.
+  ///\{
   Workgroup(const Workgroup &) = delete;
   Workgroup &operator=(const Workgroup &) = delete;
+  ///\}
 
   /// Returns the group ID of this workgroup.
   Dim3 getGroupId() const { return GroupId; }

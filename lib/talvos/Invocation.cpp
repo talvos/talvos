@@ -337,9 +337,9 @@ void Invocation::executeFunctionCall(const Instruction *Inst)
 
   // Create call stack entry.
   StackEntry SE;
-  SE.RetInst = Inst;
-  SE.RetFunc = CurrentFunction;
-  SE.RetBlock = CurrentBlock;
+  SE.CallInst = Inst;
+  SE.CallFunc = CurrentFunction;
+  SE.CallBlock = CurrentBlock;
   CallStack.push_back(SE);
 
   // Move to first block of callee function.
@@ -519,10 +519,10 @@ void Invocation::executeReturn(const Instruction *Inst)
   for (uint64_t Address : SE.Allocations)
     PrivateMemory->release(Address);
 
-  // Return to callee function.
-  CurrentFunction = SE.RetFunc;
-  CurrentBlock = SE.RetBlock;
-  CurrentInstruction = SE.RetInst->next();
+  // Return to calling function.
+  CurrentFunction = SE.CallFunc;
+  CurrentBlock = SE.CallBlock;
+  CurrentInstruction = SE.CallInst->next();
 }
 
 void Invocation::executeReturnValue(const Instruction *Inst)
@@ -533,16 +533,16 @@ void Invocation::executeReturnValue(const Instruction *Inst)
   CallStack.pop_back();
 
   // Set return value.
-  Objects[SE.RetInst->Operands[1]] = Objects[Inst->Operands[0]];
+  Objects[SE.CallInst->Operands[1]] = Objects[Inst->Operands[0]];
 
   // Release function scope allocations.
   for (uint64_t Address : SE.Allocations)
     PrivateMemory->release(Address);
 
-  // Return to callee function.
-  CurrentFunction = SE.RetFunc;
-  CurrentBlock = SE.RetBlock;
-  CurrentInstruction = SE.RetInst->next();
+  // Return to calling function.
+  CurrentFunction = SE.CallFunc;
+  CurrentBlock = SE.CallBlock;
+  CurrentInstruction = SE.CallInst->next();
 }
 
 void Invocation::executeSDiv(const Instruction *Inst)

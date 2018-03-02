@@ -32,8 +32,11 @@ public:
   /// destroy any instructions that follow it.
   ~Instruction() { delete[] Operands; }
 
+  // Do not allow Instruction objects to be copied.
+  ///\{
   Instruction(const Instruction &) = delete;
   const Instruction &operator=(const Instruction &) = delete;
+  ///\}
 
   /// Insert this instruction into a sequence, immediately following \p I.
   /// This transfers ownership of this instruction to the containing block.
@@ -51,11 +54,10 @@ public:
   static const char *opToStr(uint16_t Opcode);
 
   // TODO: Make these private with getters once operands sorted out properly
-  const Type *ResultType;
-  uint16_t Opcode;
-  uint16_t NumOperands;
-  // TODO: Currently assumes all operands are 32-bit IDs
-  uint32_t *Operands;
+  const Type *ResultType; ///< The type of the instruction result.
+  uint16_t Opcode;        ///< The instruction opcode.
+  uint16_t NumOperands;   ///< The number of operands in this instruction.
+  uint32_t *Operands;     ///< The operand values.
 
 private:
   std::unique_ptr<Instruction> Next; ///< The next instruction in the block.

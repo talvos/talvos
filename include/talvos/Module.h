@@ -24,23 +24,23 @@ class Type;
 /// A variable that represents a global buffer object.
 struct BufferVariable
 {
-  const Type *Ty;
-  uint32_t DescriptorSet;
-  uint32_t Binding;
+  const Type *Ty;         ///< Type of the variable.
+  uint32_t DescriptorSet; ///< Descriptor set for the variable.
+  uint32_t Binding;       ///< Binding for the variable.
 };
 
 /// A variable that represents a pipeline input.
 struct InputVariable
 {
-  const Type *Ty;
-  uint32_t Builtin;
+  const Type *Ty;   ///< Type of the variable.
+  uint32_t Builtin; ///< Builtin identifier.
 };
 
 /// A variable that represents a private memory allocation.
 struct PrivateVariable
 {
-  const Type *Ty;
-  uint32_t Initializer;
+  const Type *Ty;       ///< Type of the variable.
+  uint32_t Initializer; ///< SPIR-V result ID of the variable initializer.
 };
 
 /// Variable mapping types.
@@ -65,9 +65,11 @@ public:
   // Destroy the module and all its types, functions, blocks, and instructions.
   ~Module();
 
-  // Do not allow Modules to be copied.
+  // Do not allow Module objects to be copied.
+  ///\{
   Module(const Module &) = delete;
   Module &operator=(const Module &) = delete;
+  ///\}
 
   /// Add an entry point with the specified name and function ID.
   void addEntryPoint(std::string Name, uint32_t Id);
@@ -142,8 +144,13 @@ public:
   static std::unique_ptr<Module> load(const std::string &FileName);
 
 private:
+  /// Map from SPIR-V result ID to talvos::Type.
   typedef std::map<uint32_t, std::unique_ptr<Type>> TypeMap;
+
+  /// Map from SPIR-V result ID to talvos::Function.
   typedef std::map<uint32_t, std::unique_ptr<Function>> FunctionMap;
+
+  /// Map entry point name to SPIR-V result ID for each function.
   typedef std::map<std::string, uint32_t> EntryPointMap;
 
   uint32_t IdBound;                    ///< The ID bound of the module.

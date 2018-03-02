@@ -170,7 +170,7 @@ void DispatchCommand::interact()
   if (Continue)
     return;
 
-  printCurrentInstruction();
+  printNextInstruction();
 
   // Loop until the user enters a command that resumes execution.
   bool IsTTY = isatty(STDIN_FILENO);
@@ -242,7 +242,7 @@ void DispatchCommand::interact()
   }
 }
 
-void DispatchCommand::printCurrentInstruction()
+void DispatchCommand::printNextInstruction()
 {
   assert(CurrentInvocation);
   if (CurrentInvocation->getState() == Invocation::BARRIER)
@@ -419,7 +419,7 @@ bool DispatchCommand::swtch(const std::vector<std::string> &Args)
 
   std::cout << "Switched to invocation with global ID " << Id << std::endl;
 
-  printCurrentInstruction();
+  printNextInstruction();
 
   return false;
 }
