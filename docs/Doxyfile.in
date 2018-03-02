@@ -115,7 +115,7 @@ ABBREVIATE_BRIEF       =
 # description.
 # The default value is: NO.
 
-ALWAYS_DETAILED_SEC    = NO
+ALWAYS_DETAILED_SEC    = YES
 
 # If the INLINE_INHERITED_MEMB tag is set to YES, doxygen will show all
 # inherited members of a class in the documentation of that class as if those
@@ -396,7 +396,7 @@ LOOKUP_CACHE_SIZE      = 0
 # normally produced when WARNINGS is set to YES.
 # The default value is: NO.
 
-EXTRACT_ALL            = NO
+EXTRACT_ALL            = YES
 
 # If the EXTRACT_PRIVATE tag is set to YES all private members of a class will
 # be included in the documentation.
@@ -734,6 +734,7 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = @CMAKE_SOURCE_DIR@/include
+INPUT                 += @CMAKE_SOURCE_DIR@/lib
 INPUT                 += @CMAKE_SOURCE_DIR@/README.md
 
 # This tag can be used to specify the character encoding of the source files
@@ -883,7 +884,7 @@ USE_MDFILE_AS_MAINPAGE = README.md
 # also VERBATIM_HEADERS is set to NO.
 # The default value is: NO.
 
-SOURCE_BROWSER         = NO
+SOURCE_BROWSER         = YES
 
 # Setting the INLINE_SOURCES tag to YES will include the body of functions,
 # classes and enums directly into the documentation.
