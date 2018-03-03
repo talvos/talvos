@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "CommandFile.h"
+#include "version.h"
 
 using namespace std;
 
@@ -59,8 +60,8 @@ static bool parseArguments(int argc, char *argv[])
     else if (!strcmp(argv[i], "-v") || !strcmp(argv[i], "--version"))
     {
       cout << endl;
-      // TODO: Add proper version number
-      cout << "Talvos XXX" << endl;
+      cout << "Talvos " << TALVOS_VERSION_MAJOR << "." << TALVOS_VERSION_MINOR
+           << "." << TALVOS_VERSION_PATCH << TALVOS_VERSION_SUFFIX << endl;
       cout << endl;
       cout << "Copyright (c) 2018 the Talvos developers" << endl;
       cout << "https://github.com/jrprice/talvos" << endl;

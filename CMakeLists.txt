@@ -6,6 +6,12 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(Talvos)
 
+set(TALVOS_VERSION_MAJOR 0)
+set(TALVOS_VERSION_MINOR 1)
+set(TALVOS_VERSION_PATCH 0)
+set(TALVOS_VERSION_SUFFIX "-dev")
+configure_file("version.h.in" "version.h")
+
 include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 

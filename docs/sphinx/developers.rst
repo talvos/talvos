@@ -45,3 +45,5 @@ Doxygen documentation can be found
 
 Significant new features should generally also be accompanied by Sphinx
 documentation.
+
+Talvos uses a `semantic version numbering scheme <https://semver.org/>`_.
