@@ -400,7 +400,6 @@ bool CommandFile::run()
       }
     }
   }
-  // TODO: Add line numbers to error messages
   catch (NotRecognizedException e)
   {
     std::cerr << "line " << CurrentLine << ": ";

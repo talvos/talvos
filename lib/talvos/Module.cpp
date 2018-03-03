@@ -44,8 +44,6 @@ public:
     if (Inst->opcode == SpvOpFunction)
     {
       assert(CurrentFunction == nullptr);
-      // TODO: Cleanup - when is this destroyed?
-      // Should be owned by Module? Module::createFunction()?
       const Type *FuncType =
           Mod->getType(Inst->words[Inst->operands[3].offset]);
       CurrentFunction = std::make_unique<Function>(Inst->result_id, FuncType);
@@ -80,12 +78,10 @@ public:
       }
       else
       {
-        // TODO: Cleanup - when is this destroyed, by parent Function?
         Instruction *I = new Instruction;
         I->ResultType = Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
         I->Opcode = Inst->opcode;
         I->NumOperands = Inst->num_operands;
-        // TODO: Are all operands IDs?
         I->Operands = new uint32_t[I->NumOperands];
         for (int i = 0; i < Inst->num_operands; i++)
         {
