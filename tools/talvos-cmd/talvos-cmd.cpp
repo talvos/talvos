@@ -92,7 +92,7 @@ static bool parseArguments(int argc, char *argv[])
 
 static void printUsage()
 {
-  cout << "Usage: talvos-cmd [OPTIONS] [COMMAND_FILE]" << endl;
+  cout << "Usage: talvos-cmd [OPTIONS] <command file>" << endl;
   cout << "       talvos-cmd [--help | --version]" << endl;
   cout << endl;
   cout << "Options:" << endl;
