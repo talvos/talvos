@@ -40,8 +40,7 @@ Commits should be atomic where possible, with `meaningful commit messages
 First-time contributors should add their name to the
 `AUTHORS file <https://github.com/talvos/talvos/tree/master/AUTHORS>`_.
 
-Doxygen documentation can be found
-`here <https://talvos.github.io/doxygen/html>`_.
+Doxygen documentation can be found `here <https://talvos.github.io/api>`_.
 
 Significant new features should generally also be accompanied by Sphinx
 documentation.

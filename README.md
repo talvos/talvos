@@ -84,8 +84,8 @@ change the current invocation.
 Raise issues and ask questions via
 [GitHub](https://github.com/talvos/talvos/issues).
 
-The [Talvos documentation](https://talvos.github.io/sphinx/html) provides more
+The [Talvos documentation](https://talvos.github.io/docs) provides more
 detailed information about using Talvos, as well as information for developers.
 
-[Doxygen documentation](https://talvos.github.io/doxygen/html) for the source
-code is also available.
+[Doxygen documentation](https://talvos.github.io/api) for the source code is
+also available.
