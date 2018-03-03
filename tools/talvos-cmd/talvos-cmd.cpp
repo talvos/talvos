@@ -102,10 +102,9 @@ static void printUsage()
   cout << "  -v --version                 "
           "Display version information"
        << endl;
-  // TODO: Add a link to some online documentation somewhere
-  // cout << endl;
-  // cout << "For more information, please visit the Talvos documentation:"
-  //      << endl;
-  // cout << "-> http://TODO" << endl
+  cout << endl;
+  cout << "For more information, please visit the Talvos documentation:"
+       << endl;
+  cout << "-> https://talvos.github.io/docs/talvos-cmd.html" << endl;
   cout << endl;
 }
