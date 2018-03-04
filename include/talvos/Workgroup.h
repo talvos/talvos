@@ -17,6 +17,7 @@
 namespace talvos
 {
 
+class Device;
 class DispatchCommand;
 class Invocation;
 class Memory;
@@ -33,7 +34,7 @@ public:
   typedef std::vector<std::pair<uint32_t, Object>> VariableList;
 
   /// Create a workgroup.
-  Workgroup(const DispatchCommand *Dispatch, Dim3 GroupId);
+  Workgroup(Device &Dev, const DispatchCommand &Dispatch, Dim3 GroupId);
 
   /// Destroy this workgroup.
   ~Workgroup();

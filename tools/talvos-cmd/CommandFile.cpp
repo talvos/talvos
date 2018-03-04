@@ -207,9 +207,9 @@ void CommandFile::parseDispatch()
   GroupCount.X = get<uint32_t>("group count X");
   GroupCount.Y = get<uint32_t>("group count Y");
   GroupCount.Z = get<uint32_t>("group count Z");
-  talvos::DispatchCommand Command(Device, Module.get(), Function, GroupCount,
+  talvos::DispatchCommand Command(Module.get(), Function, GroupCount,
                                   DescriptorSet);
-  Command.run();
+  Device->run(Command);
 }
 
 void CommandFile::parseDump()

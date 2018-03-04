@@ -30,21 +30,21 @@
 namespace talvos
 {
 
-Invocation::Invocation(const DispatchCommand *Dispatch, Workgroup *Group,
-                       Dim3 LocalId)
+Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
+                       Workgroup *Group, Dim3 LocalId)
+    : Dev(Dev)
 {
-  Dev = Dispatch->getDevice();
   PrivateMemory = new Memory;
   this->Group = Group;
 
   AtBarrier = false;
-  CurrentModule = Dispatch->getModule();
-  CurrentFunction = Dispatch->getFunction();
+  CurrentModule = Command.getModule();
+  CurrentFunction = Command.getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
 
   // Set up the local and global ID.
-  Dim3 GroupSize = Dispatch->getGroupSize();
-  Dim3 NumGroups = Dispatch->getNumGroups();
+  Dim3 GroupSize = Command.getGroupSize();
+  Dim3 NumGroups = Command.getNumGroups();
   GroupId = Group->getGroupId();
   LocalId = LocalId;
   GlobalId = LocalId + GroupId * GroupSize;
@@ -53,7 +53,7 @@ Invocation::Invocation(const DispatchCommand *Dispatch, Workgroup *Group,
   Objects = CurrentModule->getObjects();
 
   // Copy buffer variable pointer values.
-  for (auto V : Dispatch->getVariables())
+  for (auto V : Command.getVariables())
     Objects[V.first] = V.second;
 
   // Copy workgroup variable pointer values.
@@ -689,7 +689,7 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
   switch (StorageClass)
   {
   case SpvStorageClassStorageBuffer:
-    return Dev->getGlobalMemory();
+    return Dev.getGlobalMemory();
   case SpvStorageClassWorkgroup:
     assert(Group && "Not executing within a workgroup.");
     return Group->getLocalMemory();

@@ -43,10 +43,11 @@ public:
   };
 
 public:
-  /// Create an invocation for \p Dispatch, with specific group and local IDs.
-  /// Global variables with their resolved pointer values are listed in
-  /// \p Variables.
-  Invocation(const DispatchCommand *Dispatch, Workgroup *Group, Dim3 LocalId);
+  /// Create an invocation for \p Command on \p Dev, with specific group and
+  /// local IDs. Global variables with their resolved pointer values are listed
+  /// in \p Variables.
+  Invocation(Device &Dev, const DispatchCommand &Command, Workgroup *Group,
+             Dim3 LocalId);
 
   /// Destroy this invocation.
   ~Invocation();
@@ -175,7 +176,7 @@ private:
 
   std::vector<Object> Objects; ///< Set of result objects.
 
-  Device *Dev;           ///< The device this invocation is executing on.
+  Device &Dev;           ///< The device this invocation is executing on.
   Workgroup *Group;      ///< The workgroup this invocation belongs to.
   Dim3 GroupId;          ///< The WorkgroupId.
   Dim3 LocalId;          ///< The LocalInvocationID.
