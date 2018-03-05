@@ -517,6 +517,16 @@ const Function *Module::getEntryPoint(const std::string &Name) const
   return Functions.at(EntryPoints.at(Name)).get();
 }
 
+std::string Module::getEntryPointName(uint32_t Id) const
+{
+  for (auto &E : EntryPoints)
+  {
+    if (E.second == Id)
+      return E.first;
+  }
+  return "";
+}
+
 const Function *Module::getFunction(uint32_t Id) const
 {
   if (!Functions.count(Id))

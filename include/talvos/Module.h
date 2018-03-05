@@ -100,6 +100,10 @@ public:
   /// Returns nullptr if no entry point called \p Name is found.
   const Function *getEntryPoint(const std::string &Name) const;
 
+  /// Get the entry point name for the specified function ID.
+  /// Returns an empty string if no entry point matching \p Id is found.
+  std::string getEntryPointName(uint32_t Id) const;
+
   /// Returns the function with the specified ID.
   const Function *getFunction(uint32_t Id) const;
 
