@@ -733,10 +733,6 @@ void Invocation::step()
 
   const Instruction *I = CurrentInstruction;
 
-  // Move program counter to next instruction.
-  // Execution of terminator instruction may change this.
-  CurrentInstruction = CurrentInstruction->next();
-
   // Dispatch instruction to handler method.
   switch (I->Opcode)
   {
@@ -829,6 +825,11 @@ void Invocation::step()
               << std::endl;
     abort();
   }
+
+  // Move program counter to next instruction, unless a terminator instruction
+  // was executed.
+  if (I == CurrentInstruction)
+    CurrentInstruction = CurrentInstruction->next();
 }
 
 // Private helper functions for executing simple instructions.
