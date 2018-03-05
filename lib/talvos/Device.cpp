@@ -70,7 +70,7 @@ void Device::reportError(const std::string &Error)
 
   // Show current instruction.
   std::cerr << "    ";
-  CurrentInvocation->getNextInstruction()->print(std::cerr);
+  CurrentInvocation->getCurrentInstruction()->print(std::cerr);
   std::cerr << std::endl;
 
   std::cerr << std::endl;
@@ -279,7 +279,7 @@ void Device::printNextInstruction()
   else if (CurrentInvocation->getState() == Invocation::FINISHED)
     std::cout << "  <finished>";
   else
-    CurrentInvocation->getNextInstruction()->print(std::cout);
+    CurrentInvocation->getCurrentInstruction()->print(std::cout);
   std::cout << std::endl;
 }
 

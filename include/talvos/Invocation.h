@@ -61,14 +61,17 @@ public:
   /// Clear the barrier state, allowing the invocation to continue.
   void clearBarrier() { AtBarrier = false; }
 
+  /// Returns the instruction that this invocation is executing.
+  const Instruction *getCurrentInstruction() const
+  {
+    return CurrentInstruction;
+  }
+
   /// Returns the global invocation ID.
   Dim3 getGlobalId() const { return GlobalId; }
 
   /// Returns the local invocation ID.
   Dim3 getLocalId() const { return LocalId; }
-
-  /// Returns the next instruction that this invocation will execute.
-  const Instruction *getNextInstruction() const { return CurrentInstruction; }
 
   /// Returns the object with the specified ID.
   /// Returns a null object if no object with this ID has been defined.
