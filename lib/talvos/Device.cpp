@@ -47,31 +47,35 @@ Device::~Device() { delete GlobalMemory; }
 
 void Device::reportError(const std::string &Error)
 {
-  // TODO: Handle errors that occur outside of command execution.
-  assert(CurrentCommand);
-
   std::cerr << std::endl;
   std::cerr << Error << std::endl;
 
-  // Show current entry point.
-  const Module *Mod = CurrentCommand->getModule();
-  uint32_t EntryPointId = CurrentCommand->getFunction()->getId();
-  std::cerr << "    Entry point:";
-  std::cerr << " %" << EntryPointId;
-  std::cerr << " " << Mod->getEntryPointName(EntryPointId);
-  std::cerr << std::endl;
+  if (CurrentCommand)
+  {
+    // Show current entry point.
+    const Module *Mod = CurrentCommand->getModule();
+    uint32_t EntryPointId = CurrentCommand->getFunction()->getId();
+    std::cerr << "    Entry point:";
+    std::cerr << " %" << EntryPointId;
+    std::cerr << " " << Mod->getEntryPointName(EntryPointId);
+    std::cerr << std::endl;
 
-  // Show current invocation.
-  std::cerr << "    Invocation:";
-  std::cerr << " Global" << CurrentInvocation->getGlobalId();
-  std::cerr << " Local" << CurrentInvocation->getLocalId();
-  std::cerr << " Group" << CurrentGroup->getGroupId();
-  std::cerr << std::endl;
+    // Show current invocation.
+    std::cerr << "    Invocation:";
+    std::cerr << " Global" << CurrentInvocation->getGlobalId();
+    std::cerr << " Local" << CurrentInvocation->getLocalId();
+    std::cerr << " Group" << CurrentGroup->getGroupId();
+    std::cerr << std::endl;
 
-  // Show current instruction.
-  std::cerr << "    ";
-  CurrentInvocation->getCurrentInstruction()->print(std::cerr);
-  std::cerr << std::endl;
+    // Show current instruction.
+    std::cerr << "    ";
+    CurrentInvocation->getCurrentInstruction()->print(std::cerr);
+    std::cerr << std::endl;
+  }
+  else
+  {
+    std::cerr << "    <origin unknown>";
+  }
 
   std::cerr << std::endl;
 
