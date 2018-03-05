@@ -25,6 +25,7 @@
 #include "Utils.h"
 #include "talvos/Device.h"
 #include "talvos/DispatchCommand.h"
+#include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
@@ -36,13 +37,46 @@ namespace talvos
 
 Device::Device()
 {
-  GlobalMemory = new Memory;
+  GlobalMemory = new Memory(*this);
 
   CurrentCommand = nullptr;
   CurrentInvocation = nullptr;
 }
 
 Device::~Device() { delete GlobalMemory; }
+
+void Device::reportError(const std::string &Error)
+{
+  // TODO: Handle errors that occur outside of command execution.
+  assert(CurrentCommand);
+
+  std::cerr << std::endl;
+  std::cerr << Error << std::endl;
+
+  // Show current entry point.
+  const Module *Mod = CurrentCommand->getModule();
+  uint32_t EntryPointId = CurrentCommand->getFunction()->getId();
+  std::cerr << "    Entry point:";
+  std::cerr << " %" << EntryPointId;
+  std::cerr << " " << Mod->getEntryPointName(EntryPointId);
+  std::cerr << std::endl;
+
+  // Show current invocation.
+  std::cerr << "    Invocation:";
+  std::cerr << " Global" << CurrentInvocation->getGlobalId();
+  std::cerr << " Local" << CurrentInvocation->getLocalId();
+  std::cerr << " Group" << CurrentGroup->getGroupId();
+  std::cerr << std::endl;
+
+  // Show current instruction.
+  std::cerr << "    ";
+  CurrentInvocation->getNextInstruction()->print(std::cerr);
+  std::cerr << std::endl;
+
+  std::cerr << std::endl;
+
+  // TODO: Break interactive debugger.
+}
 
 void Device::run(const DispatchCommand &Command)
 {

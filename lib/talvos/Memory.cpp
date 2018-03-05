@@ -9,7 +9,9 @@
 #include <cassert>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
+#include "talvos/Device.h"
 #include "talvos/Memory.h"
 
 // TODO: Allow different number of buffer bits depending on address space
@@ -23,7 +25,7 @@
 namespace talvos
 {
 
-Memory::Memory()
+Memory::Memory(Device &D) : Dev(D)
 {
   // Skip the first buffer identifier (0).
   Buffers.resize(1);
@@ -96,15 +98,33 @@ void Memory::dump(uint64_t Address) const
   std::cout << std::endl;
 }
 
+bool Memory::isAccessValid(uint64_t Address, uint64_t NumBytes) const
+{
+  uint64_t Id = (Address >> OFFSET_BITS);
+  uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
+  if (Id >= Buffers.size())
+    return false;
+  if (!Buffers[Id].Data)
+    return false;
+  if ((Offset + NumBytes) > Buffers[Id].NumBytes)
+    return false;
+  return true;
+}
+
 void Memory::load(uint8_t *Data, uint64_t Address, uint64_t NumBytes) const
 {
   uint64_t Id = (Address >> OFFSET_BITS);
   uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
 
-  // TODO: Generate useful error message for invalid memory accesses
-  assert(Id < Buffers.size());
-  assert(Buffers[Id].Data);
-  assert((Offset + NumBytes) <= Buffers[Id].NumBytes);
+  if (!isAccessValid(Address, NumBytes))
+  {
+    // TODO: Show memory scope (Device, Workgroup, Invocation)
+    std::stringstream Err;
+    Err << "Invalid load of " << NumBytes << " bytes"
+        << " from memory address 0x" << std::hex << Address;
+    Dev.reportError(Err.str());
+    return;
+  }
 
   memcpy(Data, Buffers[Id].Data + Offset, NumBytes);
 }
@@ -126,10 +146,15 @@ void Memory::store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data)
   uint64_t Id = (Address >> OFFSET_BITS);
   uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
 
-  // TODO: Generate useful error message for invalid memory accesses
-  assert(Id < Buffers.size());
-  assert(Buffers[Id].Data);
-  assert((Offset + NumBytes) <= Buffers[Id].NumBytes);
+  if (!isAccessValid(Address, NumBytes))
+  {
+    // TODO: Show memory scope (Device, Workgroup, Invocation)
+    std::stringstream Err;
+    Err << "Invalid store of " << NumBytes << " bytes"
+        << " to memory address 0x" << std::hex << Address;
+    Dev.reportError(Err.str());
+    return;
+  }
 
   memcpy(Buffers[Id].Data + Offset, Data, NumBytes);
 }

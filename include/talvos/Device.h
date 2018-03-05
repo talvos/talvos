@@ -40,6 +40,10 @@ public:
   /// Get the global memory instance associated with this device.
   Memory &getGlobalMemory() { return *GlobalMemory; }
 
+  /// Report an error that has occurred during emulation.
+  /// This prints \p Error to stderr along with the current execution context.
+  void reportError(const std::string &Error);
+
   /// Run \p Command to completion.
   void run(const DispatchCommand &Command);
 

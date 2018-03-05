@@ -4,6 +4,8 @@
 # terms please see the LICENSE file distributed with this source code.
 
 foreach(test
+  errors/load-invalid
+  errors/store-invalid
   misc/jacobi
   misc/multiple-entry-points
   misc/nbody

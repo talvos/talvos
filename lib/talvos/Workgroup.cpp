@@ -18,7 +18,7 @@ namespace talvos
 Workgroup::Workgroup(Device &Dev, const DispatchCommand &Dispatch, Dim3 GroupId)
 {
   this->GroupId = GroupId;
-  LocalMemory = new Memory;
+  LocalMemory = new Memory(Dev);
 
   // Allocate workgroup variables.
   for (auto V : Dispatch.getModule()->getWorkgroupVariables())

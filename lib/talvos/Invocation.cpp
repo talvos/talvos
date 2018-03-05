@@ -34,7 +34,7 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
                        Workgroup *Group, Dim3 LocalId)
     : Dev(Dev)
 {
-  PrivateMemory = new Memory;
+  PrivateMemory = new Memory(Dev);
   this->Group = Group;
 
   AtBarrier = false;

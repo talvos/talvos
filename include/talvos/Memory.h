@@ -16,6 +16,8 @@
 namespace talvos
 {
 
+class Device;
+
 /// This class represents an address space in the virtual device.
 ///
 /// This class provides methods to allocate and release buffers and access their
@@ -27,7 +29,7 @@ class Memory
 {
 public:
   /// Create a new Memory instance.
-  Memory();
+  Memory(Device &D);
 
   ~Memory();
 
@@ -57,6 +59,8 @@ public:
   void store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data);
 
 private:
+  Device &Dev; ///< The device this memory instance is part of.
+
   /// An allocation within this memory instance.
   struct Buffer
   {
@@ -65,6 +69,9 @@ private:
   };
   std::vector<Buffer> Buffers;       ///< List of allocations.
   std::vector<uint64_t> FreeBuffers; ///< Base addresses available for reuse.
+
+  /// Check whether an access resides in an allocated region of memory.
+  bool isAccessValid(uint64_t Address, uint64_t NumBytes) const;
 };
 
 } // namespace talvos
