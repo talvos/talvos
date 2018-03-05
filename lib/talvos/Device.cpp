@@ -79,7 +79,9 @@ void Device::reportError(const std::string &Error)
 
   std::cerr << std::endl;
 
-  // TODO: Break interactive debugger.
+  // Drop to interactive prompt.
+  Continue = false;
+  interact();
 }
 
 void Device::run(const DispatchCommand &Command)
