@@ -45,8 +45,8 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
   // Set up the local and global ID.
   Dim3 GroupSize = Command.getGroupSize();
   Dim3 NumGroups = Command.getNumGroups();
+  this->LocalId = LocalId;
   GroupId = Group->getGroupId();
-  LocalId = LocalId;
   GlobalId = LocalId + GroupId * GroupSize;
 
   // Clone module level objects.
