@@ -10,6 +10,8 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <sstream>
+
 #include <spirv/unified1/GLSL.std.450.h>
 #include <spirv/unified1/spirv.h>
 
@@ -118,8 +120,27 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   // Base pointer.
   Object &Base = Objects[Inst->Operands[2]];
 
-  // TODO: Generate useful error message for this
-  assert(Base && "Invalid base pointer - missing descriptor set?");
+  // Ensure base pointer is valid.
+  if (!Base)
+  {
+    // Check for buffer variable matching base pointer ID.
+    for (BufferVariableMap::value_type V : CurrentModule->getBufferVariables())
+    {
+      if (V.first == Inst->Operands[2])
+      {
+        // Report error for missing descriptor set entry.
+        std::stringstream Err;
+        Err << "Invalid base pointer for descriptor set entry ("
+            << V.second.DescriptorSet << "," << V.second.Binding << ")";
+        Dev.reportError(Err.str());
+
+        // Set result pointer to null.
+        Objects[Inst->Operands[1]] = Object(Inst->ResultType, (uint64_t)0);
+        return;
+      }
+    }
+    assert(false && "Invalid base pointer for OpAccessChain");
+  }
 
   uint64_t Result = Base.get<uint64_t>();
   const Type *ElemType = Base.getType()->getElementType(0);

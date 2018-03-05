@@ -1,0 +1,41 @@
+MODULE ../misc/vecadd.spvasm
+ENTRY vecadd
+
+BUFFER a 64 FILL INT32 19
+BUFFER b 60 FILL INT32 23
+BUFFER c 64 FILL INT32 0
+
+DESCRIPTOR_SET 0 0 a
+DESCRIPTOR_SET 0 2 c
+
+DISPATCH 16 1 1
+
+DUMP INT32 c
+
+# CHECK: Invalid base pointer for descriptor set entry (0,1)
+# CHECK: Entry point: %1 vecadd
+# CHECK: Invocation:
+# CHECK: = OpAccessChain %
+
+# CHECK: Invalid load of 4 bytes from memory address 0x0
+# CHECK: Entry point: %1 vecadd
+# CHECK: Invocation:
+# CHECK: = OpLoad %
+
+# CHECK: Buffer 'c' (64 bytes):
+# CHECK:   c[0] =
+# CHECK:   c[1] =
+# CHECK:   c[2] =
+# CHECK:   c[3] =
+# CHECK:   c[4] =
+# CHECK:   c[5] =
+# CHECK:   c[6] =
+# CHECK:   c[7] =
+# CHECK:   c[8] =
+# CHECK:   c[9] =
+# CHECK:   c[10] =
+# CHECK:   c[11] =
+# CHECK:   c[12] =
+# CHECK:   c[13] =
+# CHECK:   c[14] =
+# CHECK:   c[15] =

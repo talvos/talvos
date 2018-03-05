@@ -5,6 +5,7 @@
 
 foreach(test
   errors/load-invalid
+  errors/missing-ds-entry
   errors/store-invalid
   misc/jacobi
   misc/multiple-entry-points
