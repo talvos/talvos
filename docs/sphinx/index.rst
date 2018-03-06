@@ -11,6 +11,7 @@ Talvos documentation
    :caption: Contents:
 
    talvos-cmd
+   plugins
    developers
 
 .. mdinclude:: ../../README.md
