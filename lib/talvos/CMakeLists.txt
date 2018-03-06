@@ -74,6 +74,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Plugin.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Type.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
 set(TALVOS_SOURCES
@@ -96,6 +97,7 @@ target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(talvos "${SPIRV_TOOLS_LIB}")
+target_link_libraries(talvos "${CMAKE_DL_LIBS}")
 target_link_libraries(talvos "${TALVOS_OPTIONAL_LIBS}")
 
 install(TARGETS talvos DESTINATION lib)

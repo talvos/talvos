@@ -18,8 +18,10 @@ namespace talvos
 {
 
 class DispatchCommand;
+class Instruction;
 class Invocation;
 class Memory;
+class Plugin;
 class Workgroup;
 
 /// A Device instance encapsulates properties and state for the virtual device.
@@ -44,11 +46,27 @@ public:
   /// This prints \p Error to stderr along with the current execution context.
   void reportError(const std::string &Error);
 
+  /// \name Plugin notification functions.
+  ///@{
+  void reportDispatchCommandBegin(const DispatchCommand *Cmd);
+  void reportDispatchCommandComplete(const DispatchCommand *Cmd);
+  void reportInstructionExecuted(const Invocation *Invoc,
+                                 const Instruction *Inst);
+  void reportInvocationBegin(const Invocation *Invoc);
+  void reportInvocationComplete(const Invocation *Invoc);
+  void reportWorkgroupBegin(const Workgroup *Group);
+  void reportWorkgroupBarrier(const Workgroup *Group);
+  void reportWorkgroupComplete(const Workgroup *Group);
+  ///@}
+
   /// Run \p Command to completion.
   void run(const DispatchCommand &Command);
 
 private:
   Memory *GlobalMemory; ///< The global memory of this device.
+
+  /// List of plugins that are currently loaded.
+  std::vector<std::pair<void *, Plugin *>> Plugins;
 
   /// The command currently being executed.
   const DispatchCommand *CurrentCommand;

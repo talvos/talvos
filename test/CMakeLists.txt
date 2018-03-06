@@ -51,3 +51,4 @@ foreach(test
 endforeach(${test})
 
 add_subdirectory(interactive)
+add_subdirectory(plugins)

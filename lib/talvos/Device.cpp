@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <dlfcn.h>
 #include <iostream>
 #include <iterator>
 #include <sstream>
@@ -30,10 +31,14 @@
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
+#include "talvos/Plugin.h"
 #include "talvos/Workgroup.h"
 
 namespace talvos
 {
+
+typedef Plugin *(*CreatePluginFunc)(const Device *);
+typedef void (*DestroyPluginFunc)(Plugin *);
 
 Device::Device()
 {
@@ -41,9 +46,53 @@ Device::Device()
 
   CurrentCommand = nullptr;
   CurrentInvocation = nullptr;
+
+  // Load plugins from dynamic libraries.
+  const char *PluginList = getenv("TALVOS_PLUGINS");
+  if (PluginList)
+  {
+    std::istringstream SS(PluginList);
+    std::string LibPath;
+    while (std::getline(SS, LibPath, ';'))
+    {
+      // Open plugin library file.
+      void *Library = dlopen(LibPath.c_str(), RTLD_NOW);
+      if (!Library)
+      {
+        std::cerr << "Failed to load Talvos plugin '" << LibPath
+                  << "': " << dlerror() << std::endl;
+        abort();
+      }
+
+      // Get handle to plugin creation function.
+      void *Create = dlsym(Library, "talvosCreatePlugin");
+      if (!Create)
+      {
+        std::cerr << "Failed to load Talvos plugin '" << LibPath
+                  << "': " << dlerror() << std::endl;
+        abort();
+      }
+
+      // Create plugin and add to list.
+      Plugin *P = ((CreatePluginFunc)Create)(this);
+      Plugins.push_back({Library, P});
+    }
+  }
 }
 
-Device::~Device() { delete GlobalMemory; }
+Device::~Device()
+{
+  // Destroy plugins and unload their dynamic libraries.
+  for (auto P = Plugins.begin(); P != Plugins.end(); P++)
+  {
+    void *Destroy = dlsym(P->first, "talvosDestroyPlugin");
+    if (Destroy)
+      ((DestroyPluginFunc)Destroy)(P->second);
+    dlclose(P->first);
+  }
+
+  delete GlobalMemory;
+}
 
 void Device::reportError(const std::string &Error)
 {
@@ -84,6 +133,55 @@ void Device::reportError(const std::string &Error)
   interact();
 }
 
+#define REPORT(func, ...)                                                      \
+  for (auto &P : Plugins)                                                      \
+  {                                                                            \
+    P.second->func(__VA_ARGS__);                                               \
+  }
+
+void Device::reportDispatchCommandBegin(const talvos::DispatchCommand *Cmd)
+{
+  REPORT(dispatchCommandBegin, Cmd);
+}
+
+void Device::reportDispatchCommandComplete(const talvos::DispatchCommand *Cmd)
+{
+  REPORT(dispatchCommandComplete, Cmd);
+}
+
+void Device::reportInstructionExecuted(const talvos::Invocation *Invoc,
+                                       const talvos::Instruction *Inst)
+{
+  REPORT(instructionExecuted, Invoc, Inst);
+}
+
+void Device::reportInvocationBegin(const talvos::Invocation *Invoc)
+{
+  REPORT(invocationBegin, Invoc);
+}
+
+void Device::reportInvocationComplete(const talvos::Invocation *Invoc)
+{
+  REPORT(invocationComplete, Invoc);
+}
+
+void Device::reportWorkgroupBegin(const talvos::Workgroup *Group)
+{
+  REPORT(workgroupBegin, Group);
+}
+
+void Device::reportWorkgroupBarrier(const talvos::Workgroup *Group)
+{
+  REPORT(workgroupBarrier, Group);
+}
+
+void Device::reportWorkgroupComplete(const talvos::Workgroup *Group)
+{
+  REPORT(workgroupComplete, Group);
+}
+
+#undef REPORT
+
 void Device::run(const DispatchCommand &Command)
 {
   assert(PendingGroups.empty());
@@ -101,6 +199,8 @@ void Device::run(const DispatchCommand &Command)
     for (uint32_t GY = 0; GY < NumGroups.Y; GY++)
       for (uint32_t GX = 0; GX < NumGroups.X; GX++)
         PendingGroups.push_back({GX, GY, GZ});
+
+  reportDispatchCommandBegin(CurrentCommand);
 
   // Loop until all groups are finished.
   // A pool of running groups is maintained to allow the current group to be
@@ -120,6 +220,7 @@ void Device::run(const DispatchCommand &Command)
       CurrentGroup =
           new Workgroup(*this, Command, PendingGroups[NextGroupIndex]);
       ++NextGroupIndex;
+      reportWorkgroupBegin(CurrentGroup);
     }
     else
     {
@@ -178,16 +279,20 @@ void Device::run(const DispatchCommand &Command)
         // Clear the barrier.
         for (auto &WI : WorkItems)
           WI->clearBarrier();
+        reportWorkgroupBarrier(CurrentGroup);
       }
       else
       {
         // All invocations must have completed - this group is done.
+        reportWorkgroupComplete(CurrentGroup);
         delete CurrentGroup;
         CurrentGroup = nullptr;
         break;
       }
     }
   }
+
+  reportDispatchCommandComplete(CurrentCommand);
 
   CurrentCommand = nullptr;
   PendingGroups.clear();
@@ -430,6 +535,7 @@ bool Device::swtch(const std::vector<std::string> &Args)
     {
       // Remove from pending groups and create the new workgroup.
       Group = new Workgroup(*this, *CurrentCommand, *PG);
+      reportWorkgroupBegin(Group);
       PendingGroups.erase(PG);
     }
   }

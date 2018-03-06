@@ -108,6 +108,8 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
     Objects[V.second.Initializer].store(*PrivateMemory, Address);
     Objects[V.first] = Object(V.second.Ty, Address);
   }
+
+  Dev.reportInvocationBegin(this);
 }
 
 Invocation::~Invocation()
@@ -870,6 +872,11 @@ void Invocation::step()
   // was executed.
   if (I == CurrentInstruction)
     CurrentInstruction = CurrentInstruction->next();
+
+  Dev.reportInstructionExecuted(this, I);
+
+  if (getState() == FINISHED)
+    Dev.reportInvocationComplete(this);
 }
 
 // Private helper functions for executing simple instructions.
