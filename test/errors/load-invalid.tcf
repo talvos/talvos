@@ -13,7 +13,7 @@ DISPATCH 16 1 1
 
 DUMP INT32 c
 
-# CHECK: Invalid load of 4 bytes from memory address 0x
+# CHECK: Invalid load of 4 bytes from address 0x200000000003c (Device scope)
 # CHECK: Entry point: %1 vecadd
 # CHECK: Invocation: Global(15,0,0) Local(0,0,0) Group(15,0,0)
 # CHECK: = OpLoad %

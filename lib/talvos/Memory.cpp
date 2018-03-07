@@ -123,7 +123,8 @@ void Memory::load(uint8_t *Data, uint64_t Address, uint64_t NumBytes) const
     // TODO: Show memory scope (Device, Workgroup, Invocation)
     std::stringstream Err;
     Err << "Invalid load of " << NumBytes << " bytes"
-        << " from memory address 0x" << std::hex << Address;
+        << " from address 0x" << std::hex << Address << " ("
+        << scopeToString(Scope) << " scope) ";
     Dev.reportError(Err.str());
     return;
   }
@@ -155,7 +156,8 @@ void Memory::store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data)
     // TODO: Show memory scope (Device, Workgroup, Invocation)
     std::stringstream Err;
     Err << "Invalid store of " << NumBytes << " bytes"
-        << " to memory address 0x" << std::hex << Address;
+        << " to address 0x" << std::hex << Address << " ("
+        << scopeToString(Scope) << " scope) ";
     Dev.reportError(Err.str());
     return;
   }

@@ -69,8 +69,23 @@ public:
   /// Store \p NumBytes of data from \p Data to \p Address.
   void store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data);
 
+  /// Returns the string representation of \p Scope.
+  static const char *scopeToString(MemoryScope Scope)
+  {
+    switch (Scope)
+    {
+    case MemoryScope::Device:
+      return "Device";
+    case MemoryScope::Workgroup:
+      return "Workgroup";
+    case MemoryScope::Invocation:
+      return "Invocation";
+    }
+  }
+
 private:
   Device &Dev; ///< The device this memory instance is part of.
+
   MemoryScope Scope; ///< The scope of this memory instance.
 
   /// An allocation within this memory instance.

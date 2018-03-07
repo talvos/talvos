@@ -13,7 +13,7 @@ DISPATCH 16 1 1
 
 DUMP INT32 c
 
-# CHECK: Invalid store of 4 bytes to memory address 0x
+# CHECK: Invalid store of 4 bytes to address 0x300000000003c (Device scope)
 # CHECK: Entry point: %1 vecadd
 # CHECK: Invocation: Global(15,0,0) Local(0,0,0) Group(15,0,0)
 # CHECK: OpStore %

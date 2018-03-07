@@ -17,7 +17,7 @@ DUMP INT32 c
 # CHECK: Invocation:
 # CHECK: = OpAccessChain %
 
-# CHECK: Invalid load of 4 bytes from memory address 0x0
+# CHECK: Invalid load of 4 bytes from address 0x0 (Device scope)
 # CHECK: Entry point: %1 vecadd
 # CHECK: Invocation:
 # CHECK: = OpLoad %
