@@ -116,6 +116,8 @@ void Memory::load(uint8_t *Data, uint64_t Address, uint64_t NumBytes) const
   uint64_t Id = (Address >> OFFSET_BITS);
   uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
 
+  Dev.reportMemoryLoad(this, Address, NumBytes);
+
   if (!isAccessValid(Address, NumBytes))
   {
     // TODO: Show memory scope (Device, Workgroup, Invocation)
@@ -145,6 +147,8 @@ void Memory::store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data)
 {
   uint64_t Id = (Address >> OFFSET_BITS);
   uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
+
+  Dev.reportMemoryStore(this, Address, NumBytes, Data);
 
   if (!isAccessValid(Address, NumBytes))
   {

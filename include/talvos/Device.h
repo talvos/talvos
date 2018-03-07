@@ -54,6 +54,9 @@ public:
                                  const Instruction *Inst);
   void reportInvocationBegin(const Invocation *Invoc);
   void reportInvocationComplete(const Invocation *Invoc);
+  void reportMemoryLoad(const Memory *Mem, uint64_t Address, uint64_t NumBytes);
+  void reportMemoryStore(const Memory *Mem, uint64_t Address, uint64_t NumBytes,
+                         const uint8_t *Data);
   void reportWorkgroupBegin(const Workgroup *Group);
   void reportWorkgroupBarrier(const Workgroup *Group);
   void reportWorkgroupComplete(const Workgroup *Group);

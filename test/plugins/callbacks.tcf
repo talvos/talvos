@@ -17,6 +17,26 @@ DUMP UINT32 result
 
 # CHECK: plugin created
 
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+# CHECK: host memory store
+
 # CHECK: dispatchcommand begin
 
 # CHECK: invocation begin
@@ -29,14 +49,31 @@ DUMP UINT32 result
 # CHECK: invocation begin
 # CHECK: workgroup begin
 
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+
 # CHECK: workgroup barrier
 # CHECK: OpControlBarrier
 # CHECK: OpControlBarrier
@@ -56,6 +93,9 @@ DUMP UINT32 result
 # CHECK: OpControlBarrier
 # CHECK: OpControlBarrier
 # CHECK: workgroup barrier
+
+# CHECK: memory load
+# CHECK: memory store
 
 # CHECK: OpReturn
 # CHECK: invocation complete
@@ -85,14 +125,31 @@ DUMP UINT32 result
 # CHECK: invocation begin
 # CHECK: workgroup begin
 
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+# CHECK: memory load
+# CHECK: memory store
 # CHECK: OpControlBarrier
+
 # CHECK: workgroup barrier
 # CHECK: OpControlBarrier
 # CHECK: OpControlBarrier
@@ -112,6 +169,9 @@ DUMP UINT32 result
 # CHECK: OpControlBarrier
 # CHECK: OpControlBarrier
 # CHECK: workgroup barrier
+
+# CHECK: memory load
+# CHECK: memory store
 
 # CHECK: OpReturn
 # CHECK: invocation complete
@@ -133,8 +193,11 @@ DUMP UINT32 result
 
 # CHECK: dispatchcommand complete
 
+# Output is slightly mangled here as the plugin interferes with DUMP output.
 # CHECK: Buffer 'result' (8 bytes):
-# CHECK:   result[0] = 28
-# CHECK:   result[1] = 92
+# CHECK:   result[0] = host memory load
+# CHECK: 28
+# CHECK:   result[1] = host memory load
+# CHECK: 92
 
 # CHECK: plugin destroyed

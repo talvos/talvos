@@ -165,6 +165,38 @@ void Device::reportInvocationComplete(const talvos::Invocation *Invoc)
   REPORT(invocationComplete, Invoc);
 }
 
+void Device::reportMemoryLoad(const Memory *Mem, uint64_t Address,
+                              uint64_t NumBytes)
+{
+  // TODO: Workgroup/subgroup level accesses?
+  // TODO: Workgroup/Invocation scope initialization is not covered.
+  // TODO: Host could access memory concurrently with device command?
+  if (CurrentInvocation)
+  {
+    REPORT(memoryLoad, Mem, Address, NumBytes, CurrentInvocation);
+  }
+  else if (Mem->getScope() == MemoryScope::Device)
+  {
+    REPORT(hostMemoryLoad, Mem, Address, NumBytes);
+  }
+}
+
+void Device::reportMemoryStore(const Memory *Mem, uint64_t Address,
+                               uint64_t NumBytes, const uint8_t *Data)
+{
+  // TODO: Workgroup/subgroup level accesses?
+  // TODO: Workgroup/Invocation scope initialization is not covered.
+  // TODO: Host could access memory concurrently with device command?
+  if (CurrentInvocation)
+  {
+    REPORT(memoryStore, Mem, Address, NumBytes, Data, CurrentInvocation);
+  }
+  else if (Mem->getScope() == MemoryScope::Device)
+  {
+    REPORT(hostMemoryStore, Mem, Address, NumBytes, Data);
+  }
+}
+
 void Device::reportWorkgroupBegin(const talvos::Workgroup *Group)
 {
   REPORT(workgroupBegin, Group);
