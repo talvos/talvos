@@ -26,7 +26,7 @@ foreach(test
   spirv/test-integer-arithmetic
   spirv/test-integer-comparisons
   spirv/test-logical-instructions
-  spirv/test_OpIAdd
+  spirv/test-op-helpers
   talvos-cmd/binfile
   talvos-cmd/binfile-too-short
   talvos-cmd/dispatch-without-module

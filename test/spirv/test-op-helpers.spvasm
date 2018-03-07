@@ -10,7 +10,7 @@
                OpExtension "SPV_KHR_storage_buffer_storage_class"
                OpExtension "SPV_KHR_variable_pointers"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %109 "test_OpIAdd" %67
+               OpEntryPoint GLCompute %109 "test_op_helpers" %67
                OpSource OpenCL_C 120
                OpDecorate %68 SpecId 0
                OpDecorate %69 SpecId 1

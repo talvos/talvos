@@ -1,7 +1,8 @@
 # Test OpIAdd instruction for 16-, 32-, and 64-bit integers with scalars and
 # vectors of width 2, 3, and 4.
+# Gives some coverage for the simple scalar/vector instruction helpers.
 #
-# kernel void test_OpIAdd(
+# kernel void test_op_helpers(
 #   global short  *A_16x1, global short  *B_16x1, global short  *out_16x1,
 #   global short2 *A_16x2, global short2 *B_16x2, global short2 *out_16x2,
 #   global short3 *A_16x3, global short3 *B_16x3, global short3 *out_16x3,
@@ -36,8 +37,8 @@
 #   out_64x4[i] = A_64x4[i] + B_64x4[i];
 # }
 
-MODULE test_OpIAdd.spvasm
-ENTRY test_OpIAdd
+MODULE test-op-helpers.spvasm
+ENTRY test_op_helpers
 
 BUFFER A_16x1   8  SERIES INT16 0 1
 BUFFER B_16x1   8  SERIES INT16 1 2
