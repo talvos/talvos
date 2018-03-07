@@ -27,7 +27,7 @@
 #include "talvos/Workgroup.h"
 
 /// Get scalar operand at index \p Index with type \p Type.
-#define OP(Index, Type) Objects[Inst->Operands[Index]].get<Type>()
+#define OP(Index, Type) Objects[Inst->getOperand(Index)].get<Type>()
 
 namespace talvos
 {
@@ -120,7 +120,8 @@ Invocation::~Invocation()
 void Invocation::executeAccessChain(const Instruction *Inst)
 {
   // Base pointer.
-  Object &Base = Objects[Inst->Operands[2]];
+  uint32_t Id = Inst->getOperand(1);
+  Object &Base = Objects[Inst->getOperand(2)];
 
   // Ensure base pointer is valid.
   if (!Base)
@@ -128,7 +129,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
     // Check for buffer variable matching base pointer ID.
     for (BufferVariableMap::value_type V : CurrentModule->getBufferVariables())
     {
-      if (V.first == Inst->Operands[2])
+      if (V.first == Inst->getOperand(2))
       {
         // Report error for missing descriptor set entry.
         std::stringstream Err;
@@ -137,7 +138,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
         Dev.reportError(Err.str());
 
         // Set result pointer to null.
-        Objects[Inst->Operands[1]] = Object(Inst->ResultType, (uint64_t)0);
+        Objects[Id] = Object(Inst->getResultType(), (uint64_t)0);
         return;
       }
     }
@@ -148,7 +149,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   const Type *ElemType = Base.getType()->getElementType(0);
 
   // Loop over indices.
-  for (int i = 3; i < Inst->NumOperands; i++)
+  for (int i = 3; i < Inst->getNumOperands(); i++)
   {
     // TODO: Handle indices of different sizes.
     uint32_t Idx = OP(i, uint32_t);
@@ -156,7 +157,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
     ElemType = ElemType->getElementType(Idx);
   }
 
-  Objects[Inst->Operands[1]] = Object(Inst->ResultType, Result);
+  Objects[Id] = Object(Inst->getResultType(), Result);
 }
 
 void Invocation::executeBitwiseAnd(const Instruction *Inst)
@@ -176,47 +177,47 @@ void Invocation::executeBitwiseXor(const Instruction *Inst)
 
 void Invocation::executeBranch(const Instruction *Inst)
 {
-  moveToBlock(Inst->Operands[0]);
+  moveToBlock(Inst->getOperand(0));
 }
 
 void Invocation::executeBranchConditional(const Instruction *Inst)
 {
   bool Condition = OP(0, bool);
-  moveToBlock(Inst->Operands[Condition ? 1 : 2]);
+  moveToBlock(Inst->getOperand(Condition ? 1 : 2));
 }
 
 void Invocation::executeCompositeExtract(const Instruction *Inst)
 {
-  uint32_t Id = Inst->Operands[1];
+  uint32_t Id = Inst->getOperand(1);
   // TODO: Handle indices of different sizes.
-  std::vector<uint32_t> Indices(Inst->Operands + 3,
-                                Inst->Operands + Inst->NumOperands);
-  Objects[Id] = Objects[Inst->Operands[2]].extract(Indices);
+  std::vector<uint32_t> Indices(Inst->getOperands() + 3,
+                                Inst->getOperands() + Inst->getNumOperands());
+  Objects[Id] = Objects[Inst->getOperand(2)].extract(Indices);
 }
 
 void Invocation::executeCompositeInsert(const Instruction *Inst)
 {
-  uint32_t Id = Inst->Operands[1];
-  Object &Element = Objects[Inst->Operands[2]];
+  uint32_t Id = Inst->getOperand(1);
+  Object &Element = Objects[Inst->getOperand(2)];
   // TODO: Handle indices of different sizes.
-  std::vector<uint32_t> Indices(Inst->Operands + 4,
-                                Inst->Operands + Inst->NumOperands);
-  assert(Objects[Inst->Operands[3]].getType()->isComposite());
-  Objects[Id] = Objects[Inst->Operands[3]];
+  std::vector<uint32_t> Indices(Inst->getOperands() + 4,
+                                Inst->getOperands() + Inst->getNumOperands());
+  assert(Objects[Inst->getOperand(3)].getType()->isComposite());
+  Objects[Id] = Objects[Inst->getOperand(3)];
   Objects[Id].insert(Indices, Element);
 }
 
 void Invocation::executeControlBarrier(const Instruction *Inst)
 {
   // TODO: Handle other execution scopes
-  assert(Objects[Inst->Operands[0]].get<uint32_t>() == SpvScopeWorkgroup);
+  assert(Objects[Inst->getOperand(0)].get<uint32_t>() == SpvScopeWorkgroup);
   AtBarrier = true;
 }
 
 void Invocation::executeExtInst(const Instruction *Inst)
 {
   // TODO: Currently assumes extended instruction set is GLSL.std.450
-  uint32_t ExtInst = Inst->Operands[3];
+  uint32_t ExtInst = Inst->getOperand(3);
   switch (ExtInst)
   {
   case GLSLstd450Acos:
@@ -355,12 +356,12 @@ void Invocation::executeFSub(const Instruction *Inst)
 
 void Invocation::executeFunctionCall(const Instruction *Inst)
 {
-  const Function *Func = CurrentModule->getFunction(Inst->Operands[2]);
+  const Function *Func = CurrentModule->getFunction(Inst->getOperand(2));
 
   // Copy function parameters.
-  assert(Inst->NumOperands == Func->getNumParams() + 3);
-  for (int i = 3; i < Inst->NumOperands; i++)
-    Objects[Func->getParamId(i - 3)] = Objects[Inst->Operands[i]];
+  assert(Inst->getNumOperands() == Func->getNumParams() + 3);
+  for (int i = 3; i < Inst->getNumOperands(); i++)
+    Objects[Func->getParamId(i - 3)] = Objects[Inst->getOperand(i)];
 
   // Create call stack entry.
   StackEntry SE;
@@ -453,10 +454,10 @@ void Invocation::executeISub(const Instruction *Inst)
 
 void Invocation::executeLoad(const Instruction *Inst)
 {
-  uint32_t Id = Inst->Operands[1];
-  const Object &Src = Objects[Inst->Operands[2]];
+  uint32_t Id = Inst->getOperand(1);
+  const Object &Src = Objects[Inst->getOperand(2)];
   Memory &Mem = getMemory(Src.getType()->getStorageClass());
-  Objects[Id] = Object::load(Inst->ResultType, Mem, Src.get<uint64_t>());
+  Objects[Id] = Object::load(Inst->getResultType(), Mem, Src.get<uint64_t>());
 }
 
 void Invocation::executeLogicalAnd(const Instruction *Inst)
@@ -491,16 +492,16 @@ void Invocation::executeNot(const Instruction *Inst)
 
 void Invocation::executePhi(const Instruction *Inst)
 {
-  uint32_t Id = Inst->Operands[1];
+  uint32_t Id = Inst->getOperand(1);
 
   // TODO: Handle OpPhi as input to another OpPhi
   assert(PreviousBlock);
-  for (int i = 2; i < Inst->NumOperands; i += 2)
+  for (int i = 2; i < Inst->getNumOperands(); i += 2)
   {
-    assert(i + 1 < Inst->NumOperands);
-    if (Inst->Operands[i + 1] == PreviousBlock)
+    assert(i + 1 < Inst->getNumOperands());
+    if (Inst->getOperand(i + 1) == PreviousBlock)
     {
-      Objects[Id] = Objects[Inst->Operands[i]];
+      Objects[Id] = Objects[Inst->getOperand(i)];
       return;
     }
   }
@@ -510,7 +511,8 @@ void Invocation::executePhi(const Instruction *Inst)
 void Invocation::executePtrAccessChain(const Instruction *Inst)
 {
   // Base pointer.
-  Object &Base = Objects[Inst->Operands[2]];
+  uint32_t Id = Inst->getOperand(1);
+  Object &Base = Objects[Inst->getOperand(2)];
 
   // Ensure base pointer is valid.
   if (!Base)
@@ -518,7 +520,7 @@ void Invocation::executePtrAccessChain(const Instruction *Inst)
     // Check for buffer variable matching base pointer ID.
     for (BufferVariableMap::value_type V : CurrentModule->getBufferVariables())
     {
-      if (V.first == Inst->Operands[2])
+      if (V.first == Inst->getOperand(2))
       {
         // Report error for missing descriptor set entry.
         std::stringstream Err;
@@ -527,7 +529,7 @@ void Invocation::executePtrAccessChain(const Instruction *Inst)
         Dev.reportError(Err.str());
 
         // Set result pointer to null.
-        Objects[Inst->Operands[1]] = Object(Inst->ResultType, (uint64_t)0);
+        Objects[Id] = Object(Inst->getResultType(), (uint64_t)0);
         return;
       }
     }
@@ -541,7 +543,7 @@ void Invocation::executePtrAccessChain(const Instruction *Inst)
   Result += Base.getType()->getElementOffset(OP(3, uint32_t));
 
   // Loop over indices.
-  for (int i = 4; i < Inst->NumOperands; i++)
+  for (int i = 4; i < Inst->getNumOperands(); i++)
   {
     // TODO: Handle indices of different sizes.
     uint32_t Idx = OP(i, uint32_t);
@@ -549,7 +551,7 @@ void Invocation::executePtrAccessChain(const Instruction *Inst)
     ElemType = ElemType->getElementType(Idx);
   }
 
-  Objects[Inst->Operands[1]] = Object(Inst->ResultType, Result);
+  Objects[Id] = Object(Inst->getResultType(), Result);
 }
 
 void Invocation::executeReturn(const Instruction *Inst)
@@ -579,7 +581,7 @@ void Invocation::executeReturnValue(const Instruction *Inst)
   CallStack.pop_back();
 
   // Set return value.
-  Objects[SE.CallInst->Operands[1]] = Objects[Inst->Operands[0]];
+  Objects[SE.CallInst->getOperand(1)] = Objects[Inst->getOperand(0)];
 
   // Release function scope allocations.
   for (uint64_t Address : SE.Allocations)
@@ -599,8 +601,8 @@ void Invocation::executeSDiv(const Instruction *Inst)
 void Invocation::executeSelect(const Instruction *Inst)
 {
   bool Condition = OP(2, bool);
-  Objects[Inst->Operands[1]] =
-      Objects[Condition ? Inst->Operands[3] : Inst->Operands[4]];
+  Objects[Inst->getOperand(1)] =
+      Objects[Condition ? Inst->getOperand(3) : Inst->getOperand(4)];
 }
 
 void Invocation::executeSGreaterThan(const Instruction *Inst)
@@ -650,8 +652,8 @@ void Invocation::executeSRem(const Instruction *Inst)
 
 void Invocation::executeStore(const Instruction *Inst)
 {
-  uint32_t Id = Inst->Operands[1];
-  const Object &Dest = Objects[Inst->Operands[0]];
+  uint32_t Id = Inst->getOperand(1);
+  const Object &Dest = Objects[Inst->getOperand(0)];
   Memory &Mem = getMemory(Dest.getType()->getStorageClass());
   Objects[Id].store(Mem, Dest.get<uint64_t>());
 }
@@ -683,7 +685,7 @@ void Invocation::executeULessThanEqual(const Instruction *Inst)
 
 void Invocation::executeUndef(const Instruction *Inst)
 {
-  Objects[Inst->Operands[1]] = Object(Inst->ResultType);
+  Objects[Inst->getOperand(1)] = Object(Inst->getResultType());
 }
 
 void Invocation::executeUMod(const Instruction *Inst)
@@ -693,12 +695,12 @@ void Invocation::executeUMod(const Instruction *Inst)
 
 void Invocation::executeVariable(const Instruction *Inst)
 {
-  assert(Inst->Operands[2] == SpvStorageClassFunction);
+  assert(Inst->getOperand(2) == SpvStorageClassFunction);
 
-  uint32_t Id = Inst->Operands[1];
-  size_t AllocSize = Inst->ResultType->getElementType()->getSize();
+  uint32_t Id = Inst->getOperand(1);
+  size_t AllocSize = Inst->getResultType()->getElementType()->getSize();
   uint64_t Address = PrivateMemory->allocate(AllocSize);
-  Objects[Id] = Object(Inst->ResultType, Address);
+  Objects[Id] = Object(Inst->getResultType(), Address);
 
   // Track function scope allocations.
   if (!CallStack.empty())
@@ -707,16 +709,16 @@ void Invocation::executeVariable(const Instruction *Inst)
 
 void Invocation::executeVectorShuffle(const Instruction *Inst)
 {
-  uint32_t Id = Inst->Operands[1];
-  Object Result(Inst->ResultType);
+  uint32_t Id = Inst->getOperand(1);
+  Object Result(Inst->getResultType());
 
-  const Object &Vec1 = Objects[Inst->Operands[2]];
-  const Object &Vec2 = Objects[Inst->Operands[3]];
+  const Object &Vec1 = Objects[Inst->getOperand(2)];
+  const Object &Vec2 = Objects[Inst->getOperand(3)];
   uint32_t Vec1Length = Vec1.getType()->getElementCount();
 
-  for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
+  for (uint32_t i = 0; i < Inst->getResultType()->getElementCount(); i++)
   {
-    uint32_t Idx = Inst->Operands[4 + i];
+    uint32_t Idx = Inst->getOperand(4 + i);
     if (Idx < Vec1Length)
       Result.insert({i}, Vec1.extract({Idx}));
     else
@@ -776,7 +778,8 @@ void Invocation::step()
   const Instruction *I = CurrentInstruction;
 
   // Dispatch instruction to handler method.
-  switch (I->Opcode)
+  uint16_t Opcode = I->getOpcode();
+  switch (Opcode)
   {
 #define DISPATCH(Op, Func)                                                     \
   case Op:                                                                     \
@@ -862,9 +865,8 @@ void Invocation::step()
 #undef NOP
 
   default:
-    std::cerr << "Unimplemented instruction: "
-              << Instruction::opToStr(I->Opcode) << " (" << I->Opcode << ")"
-              << std::endl;
+    std::cerr << "Unimplemented instruction: " << Instruction::opToStr(Opcode)
+              << " (" << Opcode << ")" << std::endl;
     abort();
   }
 
@@ -902,16 +904,16 @@ static auto apply(const std::array<OpTy, 3> Operands, const F &Op)
 template <typename OpTy, unsigned N, unsigned Offset, typename F>
 void Invocation::executeOp(const Instruction *Inst, const F &Op)
 {
-  uint32_t Id = Inst->Operands[1];
-  Object Result(Inst->ResultType);
+  uint32_t Id = Inst->getOperand(1);
+  Object Result(Inst->getResultType());
   std::array<OpTy, N> Operands;
 
   // Loop over each vector component.
-  for (uint32_t i = 0; i < Inst->ResultType->getElementCount(); i++)
+  for (uint32_t i = 0; i < Inst->getResultType()->getElementCount(); i++)
   {
     // Gather operands.
     for (unsigned j = 0; j < N; j++)
-      Operands[j] = Objects[Inst->Operands[Offset + j]].get<OpTy>(i);
+      Operands[j] = Objects[Inst->getOperand(Offset + j)].get<OpTy>(i);
 
     // Apply lambda and set result.
     Result.set(apply(Operands, Op), i);
@@ -923,7 +925,7 @@ void Invocation::executeOp(const Instruction *Inst, const F &Op)
 template <unsigned N, unsigned Offset, typename F>
 void Invocation::executeOpSInt(const Instruction *Inst, const F &&Op)
 {
-  const Type *OpType = Objects[Inst->Operands[Offset]].getType();
+  const Type *OpType = Objects[Inst->getOperand(Offset)].getType();
   OpType = OpType->getScalarType();
   assert(OpType->isInt());
   switch (OpType->getBitWidth())
@@ -945,7 +947,7 @@ void Invocation::executeOpSInt(const Instruction *Inst, const F &&Op)
 template <unsigned N, unsigned Offset, typename F>
 void Invocation::executeOpFP(const Instruction *Inst, const F &&Op)
 {
-  const Type *OpType = Objects[Inst->Operands[Offset]].getType();
+  const Type *OpType = Objects[Inst->getOperand(Offset)].getType();
   OpType = OpType->getScalarType();
   assert(OpType->isFloat());
   switch (OpType->getBitWidth())
@@ -964,7 +966,7 @@ void Invocation::executeOpFP(const Instruction *Inst, const F &&Op)
 template <unsigned N, unsigned Offset, typename F>
 void Invocation::executeOpUInt(const Instruction *Inst, const F &&Op)
 {
-  const Type *OpType = Objects[Inst->Operands[Offset]].getType();
+  const Type *OpType = Objects[Inst->getOperand(Offset)].getType();
   OpType = OpType->getScalarType();
   assert(OpType->isInt());
   switch (OpType->getBitWidth())

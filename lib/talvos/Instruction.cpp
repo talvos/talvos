@@ -14,6 +14,18 @@
 namespace talvos
 {
 
+Instruction::Instruction(uint16_t Opcode, uint16_t NumOperands,
+                         const uint32_t *Operands, const Type *ResultType)
+{
+  this->Opcode = Opcode;
+  this->NumOperands = NumOperands;
+  this->ResultType = ResultType;
+  this->Next = nullptr;
+
+  this->Operands = new uint32_t[NumOperands];
+  memcpy(this->Operands, Operands, NumOperands * sizeof(uint32_t));
+}
+
 void Instruction::insertAfter(Instruction *I)
 {
   this->Next = std::move(I->Next);

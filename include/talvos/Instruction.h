@@ -28,7 +28,8 @@ class Instruction
 {
 public:
   /// Create a new instruction.
-  Instruction() : Next(nullptr) {}
+  Instruction(uint16_t Opcode, uint16_t NumOperands, const uint32_t *Operands,
+              const Type *ResultType);
 
   /// Destroy this instruction.
   /// If the instruction has been inserted into a sequence, this will also
@@ -40,6 +41,22 @@ public:
   Instruction(const Instruction &) = delete;
   const Instruction &operator=(const Instruction &) = delete;
   ///\}
+
+  /// Returns the number of operands this instruction has.
+  uint16_t getNumOperands() const { return NumOperands; }
+
+  /// Returns the opcode.
+  uint16_t getOpcode() const { return Opcode; }
+
+  /// Returns the operand at index \p i;
+  uint32_t getOperand(unsigned i) const { return Operands[i]; }
+
+  /// Returns the operands.
+  const uint32_t *getOperands() const { return Operands; }
+
+  /// Returns the result type of this instruction, or \p nullptr if it does not
+  /// produce a result.
+  const Type *getResultType() const { return ResultType; }
 
   /// Insert this instruction into a sequence, immediately following \p I.
   /// This transfers ownership of this instruction to the containing block.
@@ -56,13 +73,12 @@ public:
   /// Return the string representation of an instruction opcode.
   static const char *opToStr(uint16_t Opcode);
 
-  // TODO: Make these private with getters once operands sorted out properly
+private:
   const Type *ResultType; ///< The type of the instruction result.
   uint16_t Opcode;        ///< The instruction opcode.
   uint16_t NumOperands;   ///< The number of operands in this instruction.
   uint32_t *Operands;     ///< The operand values.
 
-private:
   std::unique_ptr<Instruction> Next; ///< The next instruction in the block.
 };
 

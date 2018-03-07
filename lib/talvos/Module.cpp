@@ -78,17 +78,21 @@ public:
       }
       else
       {
-        Instruction *I = new Instruction;
-        I->ResultType = Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
-        I->Opcode = Inst->opcode;
-        I->NumOperands = Inst->num_operands;
-        I->Operands = new uint32_t[I->NumOperands];
+        // Create an array of operand values.
+        uint32_t *Operands = new uint32_t[Inst->num_operands];
         for (int i = 0; i < Inst->num_operands; i++)
         {
           // TODO: Handle larger operands
           assert(Inst->operands[i].num_words == 1);
-          I->Operands[i] = Inst->words[Inst->operands[i].offset];
+          Operands[i] = Inst->words[Inst->operands[i].offset];
         }
+
+        // Create the instruction.
+        const Type *ResultType =
+            Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
+        Instruction *I = new Instruction(Inst->opcode, Inst->num_operands,
+                                         Operands, ResultType);
+        delete[] Operands;
 
         // Insert this instruction into the current block.
         if (PreviousInstruction)
