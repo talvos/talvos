@@ -378,8 +378,8 @@ public:
         break;
       default:
         std::cerr << "Unhandled instruction: "
-                  << Instruction::opToStr(Inst->opcode) << " (" << Inst->opcode
-                  << ")" << std::endl;
+                  << Instruction::opcodeToString(Inst->opcode) << " ("
+                  << Inst->opcode << ")" << std::endl;
         abort();
       }
     }

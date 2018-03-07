@@ -71,7 +71,7 @@ public:
   void print(std::ostream &O) const;
 
   /// Return the string representation of an instruction opcode.
-  static const char *opToStr(uint16_t Opcode);
+  static const char *opcodeToString(uint16_t Opcode);
 
 private:
   const Type *ResultType; ///< The type of the instruction result.

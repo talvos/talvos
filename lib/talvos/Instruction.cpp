@@ -40,7 +40,7 @@ void Instruction::print(std::ostream &O) const
   else
     O << "        ";
 
-  O << opToStr(Opcode);
+  O << opcodeToString(Opcode);
   for (unsigned i = 0; i < NumOperands; i++)
   {
     if (ResultType && i == 1)
@@ -49,9 +49,9 @@ void Instruction::print(std::ostream &O) const
   }
 }
 
-const char *Instruction::opToStr(uint16_t Opcode)
+const char *Instruction::opcodeToString(uint16_t Opcode)
 {
-  // TODO: SPIRV-Tools made expose spvOpcodeString at some point.
+  // TODO: SPIRV-Tools might expose spvOpcodeString at some point.
   switch (Opcode)
   {
 #define CASE(OP)                                                               \

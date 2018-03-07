@@ -865,8 +865,9 @@ void Invocation::step()
 #undef NOP
 
   default:
-    std::cerr << "Unimplemented instruction: " << Instruction::opToStr(Opcode)
-              << " (" << Opcode << ")" << std::endl;
+    std::cerr << "Unimplemented instruction: "
+              << Instruction::opcodeToString(Opcode) << " (" << Opcode << ")"
+              << std::endl;
     abort();
   }
 
