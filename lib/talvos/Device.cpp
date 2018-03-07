@@ -42,7 +42,7 @@ typedef void (*DestroyPluginFunc)(Plugin *);
 
 Device::Device()
 {
-  GlobalMemory = new Memory(*this);
+  GlobalMemory = new Memory(*this, MemoryScope::Device);
 
   CurrentCommand = nullptr;
   CurrentInvocation = nullptr;

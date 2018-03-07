@@ -25,7 +25,7 @@
 namespace talvos
 {
 
-Memory::Memory(Device &D) : Dev(D)
+Memory::Memory(Device &D, MemoryScope Scope) : Dev(D), Scope(Scope)
 {
   // Skip the first buffer identifier (0).
   Buffers.resize(1);

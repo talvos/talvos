@@ -18,6 +18,14 @@ namespace talvos
 
 class Device;
 
+/// Describes the scope of a memory instance.
+enum class MemoryScope
+{
+  Device,
+  Workgroup,
+  Invocation
+};
+
 /// This class represents an address space in the virtual device.
 ///
 /// This class provides methods to allocate and release buffers and access their
@@ -29,7 +37,7 @@ class Memory
 {
 public:
   /// Create a new Memory instance.
-  Memory(Device &D);
+  Memory(Device &D, MemoryScope Scope);
 
   ~Memory();
 
@@ -49,6 +57,9 @@ public:
   /// Dump the contents of the buffer with base address \p Address to stdout.
   void dump(uint64_t Address) const;
 
+  /// Get the scope of this memory instance.
+  MemoryScope getScope() const { return Scope; }
+
   /// Load \p NumBytes of data from \p Address into \p Result.
   void load(uint8_t *Result, uint64_t Address, uint64_t NumBytes) const;
 
@@ -60,12 +71,13 @@ public:
 
 private:
   Device &Dev; ///< The device this memory instance is part of.
+  MemoryScope Scope; ///< The scope of this memory instance.
 
   /// An allocation within this memory instance.
   struct Buffer
   {
     uint64_t NumBytes; ///< The size of the allocation in bytes.
-    uint8_t *Data;   ///< The raw data backing the allocation.
+    uint8_t *Data;     ///< The raw data backing the allocation.
   };
   std::vector<Buffer> Buffers;       ///< List of allocations.
   std::vector<uint64_t> FreeBuffers; ///< Base addresses available for reuse.
