@@ -429,9 +429,7 @@ Module::Module(uint32_t IdBound)
   this->Objects.resize(IdBound);
 }
 
-Module::~Module()
-{
-}
+Module::~Module() {}
 
 void Module::addEntryPoint(std::string Name, uint32_t Id)
 {
@@ -615,22 +613,22 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
   // Read file data.
   fseek(SPVFile, 0, SEEK_END);
   long NumBytes = ftell(SPVFile);
-  uint32_t Words[NumBytes];
+  std::vector<uint32_t> Words(NumBytes);
   fseek(SPVFile, 0, SEEK_SET);
-  fread(Words, 1, NumBytes, SPVFile);
+  fread(Words.data(), 1, NumBytes, SPVFile);
   fclose(SPVFile);
 
   // Check for SPIR-V magic number.
   if (Words[0] == 0x07230203)
-    return load(Words, NumBytes / 4);
+    return load(Words.data(), NumBytes / 4);
 
   // Assume file is in textual SPIR-V format.
   // Assemble it to a SPIR-V binary in memory.
   spv_binary Binary;
   spv_diagnostic Diagnostic = nullptr;
   spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
-  spvTextToBinary(SPVContext.CContext(), (const char *)Words, NumBytes, &Binary,
-                  &Diagnostic);
+  spvTextToBinary(SPVContext.CContext(), (const char *)Words.data(), NumBytes,
+                  &Binary, &Diagnostic);
   if (Diagnostic)
   {
     spvDiagnosticPrint(Diagnostic);
