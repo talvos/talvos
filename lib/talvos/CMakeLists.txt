@@ -56,7 +56,7 @@ else()
 endif()
 
 # Disable exceptions for libtalvos
-if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+if (NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
 endif()
 
