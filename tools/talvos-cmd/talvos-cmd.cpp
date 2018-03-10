@@ -105,6 +105,6 @@ static void printUsage()
   cout << endl;
   cout << "For more information, please visit the Talvos documentation:"
        << endl;
-  cout << "-> https://talvos.github.io/docs/talvos-cmd.html" << endl;
+  cout << "-> https://talvos.github.io/talvos-cmd.html" << endl;
   cout << endl;
 }
