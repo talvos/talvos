@@ -92,7 +92,12 @@ set(TALVOS_SOURCES
     Workgroup.cpp
     Utils.cpp
     Utils.h)
-add_library(talvos SHARED ${TALVOS_SOURCES} ${TALVOS_HEADERS})
+
+if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  set(CORE_LIB_TYPE SHARED)
+endif()
+
+add_library(talvos ${CORE_LIB_TYPE} ${TALVOS_SOURCES} ${TALVOS_HEADERS})
 target_include_directories(talvos PRIVATE "${SPIRV_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
