@@ -64,7 +64,7 @@ static bool parseArguments(int argc, char *argv[])
            << "." << TALVOS_VERSION_PATCH << TALVOS_VERSION_SUFFIX << endl;
       cout << endl;
       cout << "Copyright (c) 2018 the Talvos developers" << endl;
-      cout << "https://github.com/jrprice/talvos" << endl;
+      cout << "https://github.com/talvos/talvos" << endl;
       cout << endl;
       exit(0);
     }
