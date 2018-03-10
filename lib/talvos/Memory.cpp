@@ -165,4 +165,25 @@ void Memory::store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data)
   memcpy(Buffers[Id].Data + Offset, Data, NumBytes);
 }
 
+void Memory::copy(uint64_t DstAddress, Memory &DstMem, uint64_t SrcAddress,
+                  const Memory &SrcMem, uint64_t NumBytes)
+{
+  uint64_t SrcId = (SrcAddress >> OFFSET_BITS);
+  uint64_t SrcOffset = (SrcAddress & (((uint64_t)-1) >> BUFFER_BITS));
+
+  SrcMem.Dev.reportMemoryLoad(&SrcMem, SrcAddress, NumBytes);
+
+  if (!SrcMem.isAccessValid(SrcAddress, NumBytes))
+  {
+    std::stringstream Err;
+    Err << "Invalid load of " << NumBytes << " bytes"
+        << " from address 0x" << std::hex << SrcAddress << " ("
+        << scopeToString(SrcMem.Scope) << " scope) ";
+    SrcMem.Dev.reportError(Err.str());
+    return;
+  }
+
+  DstMem.store(DstAddress, NumBytes, SrcMem.Buffers[SrcId].Data + SrcOffset);
+}
+
 } // namespace talvos

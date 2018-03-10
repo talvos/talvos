@@ -69,6 +69,11 @@ public:
   /// Store \p NumBytes of data from \p Data to \p Address.
   void store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data);
 
+  /// Copy data between memory instances.
+  /// \p DstMem and \p SrcMem can be the same memory instance.
+  static void copy(uint64_t DstAddress, Memory &DstMem, uint64_t SrcAddress,
+                   const Memory &SrcMem, uint64_t NumBytes);
+
   /// Returns the string representation of \p Scope.
   static const char *scopeToString(MemoryScope Scope)
   {

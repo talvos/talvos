@@ -94,6 +94,7 @@ public:
   void executeCompositeExtract(const Instruction *Inst);
   void executeCompositeInsert(const Instruction *Inst);
   void executeControlBarrier(const Instruction *Inst);
+  void executeCopyMemory(const Instruction *Inst);
   void executeExtInst(const Instruction *Inst);
   void executeFAdd(const Instruction *Inst);
   void executeFDiv(const Instruction *Inst);

@@ -214,6 +214,24 @@ void Invocation::executeControlBarrier(const Instruction *Inst)
   AtBarrier = true;
 }
 
+void Invocation::executeCopyMemory(const Instruction *Inst)
+{
+  const Object &Dst = Objects[Inst->getOperand(0)];
+  const Object &Src = Objects[Inst->getOperand(1)];
+
+  const Type *DstType = Dst.getType();
+  const Type *SrcType = Src.getType();
+  assert(DstType->getElementType() == SrcType->getElementType());
+
+  Memory &DstMem = getMemory(DstType->getStorageClass());
+  Memory &SrcMem = getMemory(SrcType->getStorageClass());
+
+  uint64_t DstAddress = Dst.get<uint64_t>();
+  uint64_t SrcAddress = Src.get<uint64_t>();
+  uint64_t NumBytes = DstType->getElementType()->getSize();
+  Memory::copy(DstAddress, DstMem, SrcAddress, SrcMem, NumBytes);
+}
+
 void Invocation::executeExtInst(const Instruction *Inst)
 {
   // TODO: Currently assumes extended instruction set is GLSL.std.450
@@ -798,6 +816,7 @@ void Invocation::step()
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpCompositeInsert, CompositeInsert);
     DISPATCH(SpvOpControlBarrier, ControlBarrier);
+    DISPATCH(SpvOpCopyMemory, CopyMemory);
     DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFDiv, FDiv);
