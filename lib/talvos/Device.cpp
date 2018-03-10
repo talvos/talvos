@@ -79,7 +79,7 @@ Device::Device()
       void *Create = GetProcAddress(Library, "talvosCreatePlugin");
       if (!Create)
       {
-         std::cerr << "Failed to load Talvos plugin '" << LibPath
+        std::cerr << "Failed to load Talvos plugin '" << LibPath
                   << "': " << GetLastError() << std::endl;
         abort();
       }
@@ -116,10 +116,10 @@ Device::~Device()
   for (auto P = Plugins.begin(); P != Plugins.end(); P++)
   {
 #if defined(_WIN32) && !defined(__MINGW32__)
-      void *Destroy = GetProcAddress((HMODULE)P->first, "talvosDestroyPlugin");
-      if (Destroy)
-        ((DestroyPluginFunc)Destroy)(P->second);
-      FreeLibrary((HMODULE)P->first);
+    void *Destroy = GetProcAddress((HMODULE)P->first, "talvosDestroyPlugin");
+    if (Destroy)
+      ((DestroyPluginFunc)Destroy)(P->second);
+    FreeLibrary((HMODULE)P->first);
 #else
     void *Destroy = dlsym(P->first, "talvosDestroyPlugin");
     if (Destroy)
@@ -328,7 +328,7 @@ void Device::run(const DispatchCommand &Command)
       // Check for barriers.
       // TODO: Move logic for barrier handling into Workgroup class?
       const Workgroup::WorkItemList &WorkItems = CurrentGroup->getWorkItems();
-      uint32_t BarrierCount =
+      size_t BarrierCount =
           std::count_if(WorkItems.begin(), WorkItems.end(), [](const auto &I) {
             return I->getState() == Invocation::BARRIER;
           });
@@ -381,7 +381,7 @@ void Device::interact()
   printNextInstruction();
 
   // Loop until the user enters a command that resumes execution.
-  bool IsTTY = isatty(STDIN_FILENO);
+  bool IsTTY = isatty(STDIN_FILENO) == 1;
   while (true)
   {
     // Get line of user input.

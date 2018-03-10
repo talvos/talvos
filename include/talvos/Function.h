@@ -54,7 +54,7 @@ public:
   uint32_t getParamId(uint32_t I) const { return Parameters[I]; }
 
   /// Returns the number of parameters in this function.
-  uint32_t getNumParams() const { return Parameters.size(); }
+  size_t getNumParams() const { return Parameters.size(); }
 
   /// Sets the ID of the entry block in this function.
   void setFirstBlock(uint32_t Id) { FirstBlockId = Id; }

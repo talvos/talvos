@@ -144,7 +144,7 @@ public:
 
   /// Create a new module from the supplied SPIR-V binary data.
   /// Returns nullptr on failure.
-  static std::unique_ptr<Module> load(const uint32_t *Words, uint32_t NumWords);
+  static std::unique_ptr<Module> load(const uint32_t *Words, size_t NumWords);
 
   /// Create a new module from the given SPIR-V binary filename.
   /// Returns nullptr on failure.

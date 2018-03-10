@@ -282,7 +282,7 @@ public:
             Mod->getType(Inst->words[Inst->operands[1].offset]);
         uint32_t LengthId = Inst->words[Inst->operands[2].offset];
         uint32_t Length = Mod->getObject(LengthId).get<uint32_t>();
-        uint32_t ArrayStride = ElemType->getSize();
+        uint32_t ArrayStride = (uint32_t)ElemType->getSize();
         if (ArrayStrides.count(Inst->result_id))
           ArrayStride = ArrayStrides[Inst->result_id];
         Mod->addType(Inst->result_id,
@@ -324,7 +324,7 @@ public:
         uint32_t StorageClass = Inst->words[Inst->operands[1].offset];
         const Type *ElemType =
             Mod->getType(Inst->words[Inst->operands[2].offset]);
-        uint32_t ArrayStride = ElemType->getSize();
+        uint32_t ArrayStride = (uint32_t)ElemType->getSize();
         if (ArrayStrides.count(Inst->result_id))
           ArrayStride = ArrayStrides[Inst->result_id];
         Mod->addType(Inst->result_id,
@@ -335,7 +335,7 @@ public:
       {
         const Type *ElemType =
             Mod->getType(Inst->words[Inst->operands[1].offset]);
-        uint32_t ArrayStride = ElemType->getSize();
+        uint32_t ArrayStride = (uint32_t)ElemType->getSize();
         if (ArrayStrides.count(Inst->result_id))
           ArrayStride = ArrayStrides[Inst->result_id];
         Mod->addType(Inst->result_id,
@@ -575,7 +575,7 @@ const WorkgroupVariableMap &Module::getWorkgroupVariables() const
   return WorkgroupVariables;
 }
 
-std::unique_ptr<Module> Module::load(const uint32_t *Words, uint32_t NumWords)
+std::unique_ptr<Module> Module::load(const uint32_t *Words, size_t NumWords)
 {
   spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
   spv_diagnostic Diagnostic = nullptr;

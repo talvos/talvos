@@ -67,7 +67,7 @@ Object Object::extract(const std::vector<uint32_t> &Indices) const
   assert(Data);
 
   // Loop over indices to compute byte offset and result type.
-  uint32_t Offset = 0;
+  size_t Offset = 0;
   const Type *Ty = this->Ty;
   for (size_t i = 0; i < Indices.size(); i++)
   {
@@ -98,7 +98,7 @@ void Object::insert(const std::vector<uint32_t> &Indices, const Object &Element)
   assert(Data);
 
   // Loop over indices to compute byte offset.
-  uint32_t Offset = 0;
+  size_t Offset = 0;
   const Type *Ty = this->Ty;
   for (size_t i = 0; i < Indices.size(); i++)
   {

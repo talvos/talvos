@@ -199,7 +199,7 @@ std::unique_ptr<Type> Type::getStruct(const StructElementTypeList &ElemTypes)
                     ElemTypes[ElemTypes.size() - 1].first->getSize();
   std::unique_ptr<Type> T(new Type(STRUCT, ByteSize));
   T->ElementTypes = ElemTypes;
-  T->ElementCount = ElemTypes.size();
+  T->ElementCount = (uint32_t)ElemTypes.size();
   return T;
 }
 
