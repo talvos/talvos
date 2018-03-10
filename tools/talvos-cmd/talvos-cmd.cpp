@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
   if (FileName)
   {
     // Open command file.
-    File.open(FileName);
+    File.open(FileName, std::ios_base::binary);
     if (File.fail())
     {
       cerr << "Unable to open config file '" << FileName << "'" << endl;
