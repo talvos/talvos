@@ -1,0 +1,61 @@
+; SPIR-V
+; Version: 1.2
+; Generator: Khronos SPIR-V Tools Assembler; 0
+; Bound: 35
+; Schema: 0
+               OpCapability Shader
+               OpCapability VariablePointers
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpExtension "SPV_KHR_variable_pointers"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "workgroup_load_invalid" %2 %3
+               OpExecutionMode %1 LocalSize 4 1 1
+               OpSource OpenCL_C 120
+               OpDecorate %4 ArrayStride 4
+               OpMemberDecorate %5 0 Offset 0
+               OpDecorate %5 Block
+               OpDecorate %2 BuiltIn GlobalInvocationId
+               OpDecorate %3 BuiltIn LocalInvocationId
+               OpDecorate %6 DescriptorSet 0
+               OpDecorate %6 Binding 0
+               OpDecorate %7 DescriptorSet 0
+               OpDecorate %7 Binding 1
+          %8 = OpTypeInt 32 0
+          %9 = OpTypePointer StorageBuffer %8
+          %4 = OpTypeRuntimeArray %8
+          %5 = OpTypeStruct %4
+         %10 = OpTypePointer StorageBuffer %5
+         %11 = OpTypeVoid
+         %12 = OpTypeFunction %11
+         %13 = OpTypeVector %8 3
+         %14 = OpTypePointer Input %13
+         %15 = OpTypePointer Input %8
+         %16 = OpConstant %8 4
+         %17 = OpTypeArray %8 %16
+         %18 = OpTypePointer Workgroup %17
+         %19 = OpTypePointer Workgroup %8
+         %20 = OpConstant %8 0
+         %21 = OpConstant %8 2
+         %22 = OpConstant %8 272
+         %23 = OpVariable %18 Workgroup
+          %2 = OpVariable %14 Input
+          %3 = OpVariable %14 Input
+          %6 = OpVariable %10 StorageBuffer
+          %7 = OpVariable %10 StorageBuffer
+          %1 = OpFunction %11 None %12
+         %24 = OpLabel
+         %25 = OpAccessChain %15 %2 %20
+         %26 = OpLoad %8 %25
+         %27 = OpAccessChain %15 %3 %20
+         %28 = OpLoad %8 %27
+         %29 = OpAccessChain %19 %23 %28
+               OpStore %29 %28
+               OpControlBarrier %21 %21 %22
+         %30 = OpAccessChain %9 %6 %20 %26
+         %31 = OpLoad %8 %30
+         %32 = OpAccessChain %19 %23 %31
+         %33 = OpLoad %8 %32
+         %34 = OpAccessChain %9 %7 %20 %26
+               OpStore %34 %33
+               OpReturn
+               OpFunctionEnd

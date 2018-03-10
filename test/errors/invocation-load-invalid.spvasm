@@ -1,0 +1,87 @@
+; SPIR-V
+; Version: 1.2
+; Generator: Khronos SPIR-V Tools Assembler; 0
+; Bound: 54
+; Schema: 0
+               OpCapability Shader
+               OpCapability VariablePointers
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpExtension "SPV_KHR_variable_pointers"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "invocation_load_invalid" %2
+               OpSource OpenCL_C 120
+               OpDecorate %3 SpecId 0
+               OpDecorate %4 SpecId 1
+               OpDecorate %5 SpecId 2
+               OpDecorate %6 ArrayStride 4
+               OpMemberDecorate %7 0 Offset 0
+               OpDecorate %7 Block
+               OpDecorate %2 BuiltIn GlobalInvocationId
+               OpDecorate %8 BuiltIn WorkgroupSize
+               OpDecorate %9 DescriptorSet 0
+               OpDecorate %9 Binding 0
+               OpDecorate %10 DescriptorSet 0
+               OpDecorate %10 Binding 1
+         %11 = OpTypeInt 32 0
+         %12 = OpTypePointer StorageBuffer %11
+          %6 = OpTypeRuntimeArray %11
+          %7 = OpTypeStruct %6
+         %13 = OpTypePointer StorageBuffer %7
+         %14 = OpTypeVoid
+         %15 = OpTypeFunction %14
+         %16 = OpConstant %11 4
+         %17 = OpTypeArray %11 %16
+         %18 = OpTypePointer Function %17
+         %19 = OpTypePointer Function %11
+         %20 = OpTypeVector %11 3
+         %21 = OpTypePointer Input %20
+         %22 = OpTypePointer Private %20
+         %23 = OpConstant %11 0
+         %24 = OpConstant %11 1
+         %25 = OpConstant %11 2
+         %26 = OpConstant %11 3
+          %2 = OpVariable %21 Input
+          %3 = OpSpecConstant %11 1
+          %4 = OpSpecConstant %11 1
+          %5 = OpSpecConstant %11 1
+          %8 = OpSpecConstantComposite %20 %3 %4 %5
+         %27 = OpVariable %22 Private %8
+          %9 = OpVariable %13 StorageBuffer
+         %10 = OpVariable %13 StorageBuffer
+          %1 = OpFunction %14 None %15
+         %28 = OpLabel
+         %29 = OpVariable %18 Function
+         %30 = OpAccessChain %12 %9 %23 %23
+         %31 = OpAccessChain %12 %10 %23 %23
+         %32 = OpAccessChain %19 %29 %23
+               OpStore %32 %23
+         %33 = OpAccessChain %19 %29 %24
+               OpStore %33 %24
+         %34 = OpAccessChain %19 %29 %25
+               OpStore %34 %25
+         %35 = OpAccessChain %19 %29 %26
+               OpStore %35 %26
+         %36 = OpLoad %11 %30
+         %37 = OpAccessChain %19 %29 %36
+         %38 = OpLoad %11 %37
+               OpStore %31 %38
+         %39 = OpAccessChain %12 %9 %23 %24
+         %40 = OpLoad %11 %39
+         %41 = OpAccessChain %19 %29 %40
+         %42 = OpLoad %11 %41
+         %43 = OpAccessChain %12 %10 %23 %24
+               OpStore %43 %42
+         %44 = OpAccessChain %12 %9 %23 %25
+         %45 = OpLoad %11 %44
+         %46 = OpAccessChain %19 %29 %45
+         %47 = OpLoad %11 %46
+         %48 = OpAccessChain %12 %10 %23 %25
+               OpStore %48 %47
+         %49 = OpAccessChain %12 %9 %23 %26
+         %50 = OpLoad %11 %49
+         %51 = OpAccessChain %19 %29 %50
+         %52 = OpLoad %11 %51
+         %53 = OpAccessChain %12 %10 %23 %26
+               OpStore %53 %52
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,24 @@
+MODULE invocation-load-invalid.spvasm
+ENTRY invocation_load_invalid
+
+BUFFER indices 16 DATA INT32
+2 3 4 1
+BUFFER output  16 FILL INT32 0
+
+DESCRIPTOR_SET 0 0 indices
+DESCRIPTOR_SET 0 1 output
+
+DISPATCH 1 1 1
+
+DUMP INT32 output
+
+# CHECK: Invalid load of 4 bytes from address 0x3000000000010 (Invocation scope)
+# CHECK: Entry point: %1 invocation_load_invalid
+# CHECK: Invocation: Global(0,0,0) Local(0,0,0) Group(0,0,0)
+# CHECK: = OpLoad %
+
+# CHECK: Buffer 'output' (16 bytes):
+# CHECK:   output[0] = 2
+# CHECK:   output[1] = 3
+# CHECK:   output[2] =
+# CHECK:   output[3] = 1

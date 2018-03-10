@@ -4,9 +4,13 @@
 # terms please see the LICENSE file distributed with this source code.
 
 foreach(test
-  errors/load-invalid
+  errors/device-load-invalid
+  errors/device-store-invalid
+  errors/invocation-load-invalid
+  errors/invocation-store-invalid
   errors/missing-ds-entry
-  errors/store-invalid
+  errors/workgroup-load-invalid
+  errors/workgroup-store-invalid
   misc/jacobi
   misc/multiple-entry-points
   misc/nbody

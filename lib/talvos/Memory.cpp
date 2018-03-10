@@ -120,7 +120,6 @@ void Memory::load(uint8_t *Data, uint64_t Address, uint64_t NumBytes) const
 
   if (!isAccessValid(Address, NumBytes))
   {
-    // TODO: Show memory scope (Device, Workgroup, Invocation)
     std::stringstream Err;
     Err << "Invalid load of " << NumBytes << " bytes"
         << " from address 0x" << std::hex << Address << " ("
@@ -153,7 +152,6 @@ void Memory::store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data)
 
   if (!isAccessValid(Address, NumBytes))
   {
-    // TODO: Show memory scope (Device, Workgroup, Invocation)
     std::stringstream Err;
     Err << "Invalid store of " << NumBytes << " bytes"
         << " to address 0x" << std::hex << Address << " ("
