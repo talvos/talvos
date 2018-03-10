@@ -83,6 +83,7 @@ On a Unix system, this is compiled with the following command (assuming that
 the Talvos `include/` and `lib/` directories are in the relevant search paths):
 
 .. highlight:: bash
+
 ::
 
   c++ -std=c++14 tracer.cpp -shared -o libtracer.so -ltalvos
