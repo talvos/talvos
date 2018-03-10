@@ -30,9 +30,6 @@ template <typename T> T CommandFile::get(const char *ParseAction)
   CurrentParseAction = ParseAction;
   while (true)
   {
-    // Note the current stream position.
-    streampos Pos = Stream.tellg();
-
     // Skip leading whitespace and check for newlines.
     while (true)
     {
@@ -44,6 +41,9 @@ template <typename T> T CommandFile::get(const char *ParseAction)
         ++CurrentLine;
       Stream.get();
     }
+
+    // Note the current stream position.
+    streampos Pos = Stream.tellg();
 
     // Try to read a token.
     string Token;
