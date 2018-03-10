@@ -7,9 +7,18 @@ foreach(test
   callbacks
   missing-create
 )
+  # Export plugin create/destroy functions on Windows.
+  if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    if (NOT "${test}" STREQUAL "missing-create")
+      set(DLL_EXPORTS plugin-functions.def)
+    else()
+      set(DLL_EXPORTS "")
+    endif()
+  endif()
+
   # Build plugin library.
   set(TEST_LIB_NAME "${test}-test")
-  add_library(${TEST_LIB_NAME} MODULE ${test}.cpp)
+  add_library(${TEST_LIB_NAME} MODULE ${test}.cpp ${DLL_EXPORTS})
   target_link_libraries(${TEST_LIB_NAME} talvos)
 
   # Add test.
