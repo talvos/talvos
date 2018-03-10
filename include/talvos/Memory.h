@@ -85,6 +85,8 @@ public:
       return "Workgroup";
     case MemoryScope::Invocation:
       return "Invocation";
+    default:
+      return "<invalid>";
     }
   }
 
