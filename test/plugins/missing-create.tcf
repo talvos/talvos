@@ -1,3 +1,3 @@
 # Test scenario where target library has no talvosCreatePlugin() function.
 # CHECK: Failed to load Talvos plugin
-# EXIT -6
+# ABORT

@@ -45,6 +45,7 @@ outlines = output[0].splitlines()
 tcf = open(test_file)
 lines = tcf.read().splitlines()
 expected_exit_code = 0
+expected_abort = False
 for ln in range(len(lines)):
     line = lines[ln]
 
@@ -61,7 +62,12 @@ for ln in range(len(lines)):
             exit(1)
     elif line.startswith('# EXIT '):
         expected_exit_code = int(line[7:])
-if retval != expected_exit_code:
+    elif line.startswith('# ABORT'):
+        expected_abort = True
+if expected_abort and retval == 0:
+    print 'Test was expected to abort but returned success.'
+    exit(1)
+elif not expected_abort and (retval != expected_exit_code):
     if expected_exit_code == 0:
         print 'Test returned non-zero exit code (%d), full output below.' \
             % retval
