@@ -10,11 +10,21 @@
 
 #include <algorithm>
 #include <cassert>
-#include <dlfcn.h>
 #include <iostream>
 #include <iterator>
 #include <sstream>
+
+#if defined(_WIN32) && !defined(__MINGW32__)
+#include <io.h>
+#include <windows.h>
+#define isatty _isatty
+#define STDIN_FILENO _fileno(stdin)
+#undef ERROR
+#undef VOID
+#else
+#include <dlfcn.h>
 #include <unistd.h>
+#endif
 
 #if HAVE_READLINE
 #include <readline/history.h>
@@ -55,6 +65,25 @@ Device::Device()
     std::string LibPath;
     while (std::getline(SS, LibPath, ';'))
     {
+#if defined(_WIN32) && !defined(__MINGW32__)
+      // Open plugin library file.
+      HMODULE Library = LoadLibraryA(LibPath.c_str());
+      if (!Library)
+      {
+        std::cerr << "Failed to load Talvos plugin '" << LibPath
+                  << "': " << GetLastError() << std::endl;
+        abort();
+      }
+
+      // Get handle to plugin creation function.
+      void *Create = GetProcAddress(Library, "talvosCreatePlugin");
+      if (!Create)
+      {
+         std::cerr << "Failed to load Talvos plugin '" << LibPath
+                  << "': " << GetLastError() << std::endl;
+        abort();
+      }
+#else
       // Open plugin library file.
       void *Library = dlopen(LibPath.c_str(), RTLD_NOW);
       if (!Library)
@@ -72,6 +101,7 @@ Device::Device()
                   << "': " << dlerror() << std::endl;
         abort();
       }
+#endif
 
       // Create plugin and add to list.
       Plugin *P = ((CreatePluginFunc)Create)(this);
@@ -85,10 +115,17 @@ Device::~Device()
   // Destroy plugins and unload their dynamic libraries.
   for (auto P = Plugins.begin(); P != Plugins.end(); P++)
   {
+#if defined(_WIN32) && !defined(__MINGW32__)
+      void *Destroy = GetProcAddress((HMODULE)P->first, "talvosDestroyPlugin");
+      if (Destroy)
+        ((DestroyPluginFunc)Destroy)(P->second);
+      FreeLibrary((HMODULE)P->first);
+#else
     void *Destroy = dlsym(P->first, "talvosDestroyPlugin");
     if (Destroy)
       ((DestroyPluginFunc)Destroy)(P->second);
     dlclose(P->first);
+#endif
   }
 
   delete GlobalMemory;
