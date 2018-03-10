@@ -60,6 +60,11 @@ if (NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
 endif()
 
+# Disable non-secure function warnings for MSVC
+if (MSVC)
+  add_definitions("-D_CRT_SECURE_NO_WARNINGS")
+endif()
+
 # Generate config.h
 configure_file("config.h.in" "config.h")
 
