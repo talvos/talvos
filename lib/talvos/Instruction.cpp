@@ -6,6 +6,7 @@
 /// \file Instruction.cpp
 /// This file defines the Instruction class.
 
+#include <cstring>
 #include <iostream>
 #include <spirv/unified1/spirv.h>
 
