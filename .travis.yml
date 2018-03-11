@@ -11,13 +11,13 @@ matrix:
   include:
     # Clang
     - os: linux
-      env: COMPILER_NAME=clang CC=clang CXX=clang++
+      env: COMPILER_NAME=clang CC=clang CXX=clang++ DEPLOY_DOCS=1
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-7
+            - g++-7 doxygen
 
     # GCC 4.9
     - os: linux
@@ -39,6 +39,11 @@ matrix:
           packages:
             - g++-7
 
+install:
+  - if [[ "$DEPLOY_DOCS" == "1" ]]; then
+      pip install --user Sphinx;
+    fi
+
 script:
   - git clone https://github.com/KhronosGroup/SPIRV-Headers
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
@@ -53,3 +58,25 @@ script:
             -DSPIRV_TOOLS_LIBRARY_DIR=$PWD/SPIRV-Tools/lib
   - make -j 2
   - ctest . --output-on-failure
+
+after_success:
+  - if [[ "$DEPLOY_DOCS" == "1" ]]; then
+      mkdir build-docs;
+      touch build-docs/.nojekyll;
+      pip install --user m2r;
+      sphinx-build -b html -c $PWD/docs/ $PWD/docs/sphinx build-docs;
+      (cat docs/Doxyfile; echo "OUTPUT_DIRECTORY=build-docs/api"; echo "HTML_OUTPUT=.") | doxygen -;
+    fi
+
+deploy:
+  edge:
+    branch: v1.8.47
+  provider: pages
+  repo: talvos/talvos.github.io
+  target-branch: master
+  local-dir: build-docs
+  github_token: $GITHUB_TOKEN
+  skip-cleanup: true
+  on:
+    branch: master
+    condition: $DEPLOY_DOCS == 1
