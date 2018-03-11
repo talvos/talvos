@@ -1,0 +1,30 @@
+platform:
+  - x64
+
+matrix:
+  fast_finish: true
+
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: "Visual Studio 15 2017 Win64"
+      CONFIG: "Release"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: "Visual Studio 15 2017 Win64"
+      CONFIG: "Debug"
+
+before_build:
+  - git clone https://github.com/KhronosGroup/SPIRV-Headers
+  - curl -OL https://github.com/KhronosGroup/SPIRV-Tools/releases/download/master-tot/SPIRV-Tools-master-windows-x64-%CONFIG%.zip
+  - unzip -d SPIRV-Tools SPIRV-Tools-master-windows-x64-%CONFIG%.zip
+
+build_script:
+  - mkdir build && cd build
+  - cmake .. -G "%GENERATOR%"
+             -DSPIRV_INCLUDE_DIR="%APPVEYOR_BUILD_FOLDER%/SPIRV-Headers/include"
+             -DSPIRV_TOOLS_INCLUDE_DIR="%APPVEYOR_BUILD_FOLDER%/SPIRV-Tools/include"
+             -DSPIRV_TOOLS_LIBRARY_DIR="%APPVEYOR_BUILD_FOLDER%/SPIRV-Tools/lib"
+  - cmake --build . --target ALL_BUILD --config %CONFIG%
+
+test_script:
+  - ctest -j 1 . -C %CONFIG% --output-on-failure --timeout 10
