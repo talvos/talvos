@@ -591,8 +591,8 @@ bool Device::swtch(const std::vector<std::string> &Args)
     if (RG != RunningGroups.end())
     {
       // Remove from running groups.
-      RunningGroups.erase(RG);
       Group = *RG;
+      RunningGroups.erase(RG);
     }
   }
   if (!Group)
