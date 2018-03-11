@@ -162,7 +162,7 @@ The SPIR-V assembly file that works with this example can be found
   DESCRIPTOR_SET 0 5 delta
 
   # Run the shader in a loop.
-  # Each loop iterations launches the shader twice, swapping the position
+  # Each loop iteration launches the shader twice, swapping the position
   # buffers each time.
   LOOP 4
     DESCRIPTOR_SET 0 0 positionsIn
