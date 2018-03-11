@@ -70,36 +70,36 @@ Device::Device()
       HMODULE Library = LoadLibraryA(LibPath.c_str());
       if (!Library)
       {
-        std::cerr << "Failed to load Talvos plugin '" << LibPath
-                  << "': " << GetLastError() << std::endl;
-        abort();
+        std::cerr << "Talvos: Failed to load plugin '" << LibPath << "' - "
+                  << GetLastError() << std::endl;
+        continue;
       }
 
       // Get handle to plugin creation function.
       void *Create = GetProcAddress(Library, "talvosCreatePlugin");
       if (!Create)
       {
-        std::cerr << "Failed to load Talvos plugin '" << LibPath
-                  << "': " << GetLastError() << std::endl;
-        abort();
+        std::cerr << "Talvos: Failed to load plugin '" << LibPath << "' - "
+                  << GetLastError() << std::endl;
+        continue;
       }
 #else
       // Open plugin library file.
       void *Library = dlopen(LibPath.c_str(), RTLD_NOW);
       if (!Library)
       {
-        std::cerr << "Failed to load Talvos plugin '" << LibPath
-                  << "': " << dlerror() << std::endl;
-        abort();
+        std::cerr << "Talvos: Failed to load plugin '" << LibPath << "' - "
+                  << dlerror() << std::endl;
+        continue;
       }
 
       // Get handle to plugin creation function.
       void *Create = dlsym(Library, "talvosCreatePlugin");
       if (!Create)
       {
-        std::cerr << "Failed to load Talvos plugin '" << LibPath
-                  << "': " << dlerror() << std::endl;
-        abort();
+        std::cerr << "Talvos: Failed to load plugin '" << LibPath << "' - "
+                  << dlerror() << std::endl;
+        continue;
       }
 #endif
 

@@ -1,3 +1,2 @@
 # Test scenario where plugin library does not exist.
-# CHECK: Failed to load Talvos plugin
-# ABORT
+# CHECK: Talvos: Failed to load plugin
