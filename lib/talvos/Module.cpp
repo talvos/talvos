@@ -611,23 +611,24 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
   }
 
   // Read file data.
+  std::vector<uint8_t> Bytes;
   fseek(SPVFile, 0, SEEK_END);
   long NumBytes = ftell(SPVFile);
-  std::vector<uint32_t> Words(NumBytes);
+  Bytes.resize(NumBytes);
   fseek(SPVFile, 0, SEEK_SET);
-  fread(Words.data(), 1, NumBytes, SPVFile);
+  fread(Bytes.data(), 1, NumBytes, SPVFile);
   fclose(SPVFile);
 
   // Check for SPIR-V magic number.
-  if (Words[0] == 0x07230203)
-    return load(Words.data(), NumBytes / 4);
+  if (((uint32_t *)Bytes.data())[0] == 0x07230203)
+    return load((uint32_t *)Bytes.data(), NumBytes / 4);
 
   // Assume file is in textual SPIR-V format.
   // Assemble it to a SPIR-V binary in memory.
   spv_binary Binary;
   spv_diagnostic Diagnostic = nullptr;
   spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
-  spvTextToBinary(SPVContext.CContext(), (const char *)Words.data(), NumBytes,
+  spvTextToBinary(SPVContext.CContext(), (const char *)Bytes.data(), NumBytes,
                   &Binary, &Diagnostic);
   if (Diagnostic)
   {
