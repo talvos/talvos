@@ -10,6 +10,7 @@ Talvos documentation
    :maxdepth: 2
    :caption: Contents:
 
+   building
    talvos-cmd
    plugins
    developers

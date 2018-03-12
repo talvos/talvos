@@ -14,6 +14,7 @@ Talvos is still in the early stages of development.
 Compute shaders are the current focus, and Talvos is currently capable of
 executing various SPIR-V shaders generated from OpenCL kernels compiled with
 [Clspv](https://github.com/google/clspv).
+Linux, macOS, and Windows are supported.
 
 A simple file format is used to load and execute SPIR-V shaders.
 There is a lightweight interactive debugging interface that enables stepping
@@ -30,6 +31,9 @@ Contributions in these (or other) areas would be extremely welcome.
 
 ## Building
 
+More detailed build instructions are provided
+[here](https://talvos.github.io/building.html).
+
 Building Talvos requires a compiler that supports C++14, and Python to enable
 the internal test suite.
 Talvos depends on
@@ -41,7 +45,6 @@ Configure with CMake, indicating where SPIRV-Headers and SPIRV-Tools are
 installed if necessary:
 
     cmake <path_to_talvos_source>                           \
-          -G Ninja                                          \
           -DCMAKE_BUILD_TYPE=Debug                          \
           -DCMAKE_INSTALL_PREFIX=<target_install_directory> \
           -DSPIRV_INCLUDE_DIR=<...>                         \
@@ -52,8 +55,8 @@ Using the `Debug` build type is strongly recommended while Talvos is still in
 the early stages of development, to enable assertions that guard unimplemented
 features.
 
-Once configured, use `ninja` (or your preferred build tool) to build and
-install. Run `ninja test` to run the internal test suite.
+Once configured, use `make` (or your preferred build tool) to build and
+install. Run `make test` to run the internal test suite.
 
 
 ## Usage
