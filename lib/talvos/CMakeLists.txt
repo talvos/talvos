@@ -9,6 +9,7 @@ include(CheckLibraryExists)
 # Check for SPIRV headers
 set(SPIRV_INCLUDE_DIR "" CACHE STRING "Directory containing SPIR-V headers")
 set(CMAKE_REQUIRED_INCLUDES "${SPIRV_INCLUDE_DIR}")
+unset(SPIRV_HEADER_FOUND CACHE)
 check_include_file_cxx("spirv/unified1/spirv.hpp" SPIRV_HEADER_FOUND)
 if (NOT SPIRV_HEADER_FOUND)
   message(FATAL_ERROR "SPIR-V header required, try setting SPIRV_INCLUDE_DIR.")
@@ -18,6 +19,7 @@ endif()
 set(SPIRV_TOOLS_INCLUDE_DIR "" CACHE STRING
     "Directory containing SPIRV-Tools headers")
 set(CMAKE_REQUIRED_INCLUDES "${SPIRV_TOOLS_INCLUDE_DIR}")
+unset(SPIRV_TOOLS_HEADER_FOUND CACHE)
 check_include_file_cxx("spirv-tools/libspirv.hpp" SPIRV_TOOLS_HEADER_FOUND)
 if (NOT SPIRV_TOOLS_HEADER_FOUND)
   message(FATAL_ERROR
