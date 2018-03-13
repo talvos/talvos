@@ -69,8 +69,6 @@ after_success:
     fi
 
 deploy:
-  edge:
-    branch: v1.8.47
   provider: pages
   repo: talvos/talvos.github.io
   target-branch: master
