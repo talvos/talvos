@@ -10,7 +10,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateDeviceExtensionProperties(
     uint32_t *pPropertyCount, VkExtensionProperties *pProperties)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Return any extensions that are actually supported.
+  *pPropertyCount = 0;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateDeviceLayerProperties(
