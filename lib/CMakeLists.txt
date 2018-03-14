@@ -4,3 +4,4 @@
 # terms please see the LICENSE file distributed with this source code.
 
 add_subdirectory(talvos)
+add_subdirectory(vulkan)
