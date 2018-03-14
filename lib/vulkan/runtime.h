@@ -24,6 +24,11 @@ struct VkDevice_T
   talvos::Device *Device;
 };
 
+struct VkDeviceMemory_T
+{
+  uint64_t Address;
+};
+
 struct VkInstance_T
 {
 };

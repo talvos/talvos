@@ -5,12 +5,19 @@
 
 #include "runtime.h"
 
+#include "talvos/Device.h"
+#include "talvos/Memory.h"
+
 VKAPI_ATTR VkResult VKAPI_CALL vkAllocateMemory(
     VkDevice device, const VkMemoryAllocateInfo *pAllocateInfo,
     const VkAllocationCallbacks *pAllocator, VkDeviceMemory *pMemory)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  uint64_t Address =
+      device->Device->getGlobalMemory().allocate(pAllocateInfo->allocationSize);
+  (*pMemory) = new VkDeviceMemory_T;
+  (*pMemory)->Address = Address;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
