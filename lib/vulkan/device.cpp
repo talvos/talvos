@@ -5,6 +5,8 @@
 
 #include "runtime.h"
 
+#include <cstring>
+
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
     VkPhysicalDevice physicalDevice, const VkDeviceCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkDevice *pDevice)
@@ -68,7 +70,17 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties *pProperties)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  pProperties->apiVersion = VK_API_VERSION_1_1;
+  pProperties->driverVersion = 0; // TODO: Encode Talvos version somehow.
+  pProperties->vendorID = 0;      // TODO: Register a vendor ID.
+  pProperties->deviceID = 0;      // TODO: Something meaningful.
+  pProperties->deviceType = VK_PHYSICAL_DEVICE_TYPE_OTHER;
+  strcpy(pProperties->deviceName, "Talvos");
+
+  // TODO: Populate these with real values.
+  memset(&pProperties->limits, 0, sizeof(VkPhysicalDeviceLimits));
+  memset(&pProperties->sparseProperties, 0,
+         sizeof(VkPhysicalDeviceSparseProperties));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties2(
