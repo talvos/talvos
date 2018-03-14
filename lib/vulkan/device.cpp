@@ -41,7 +41,11 @@ vkEnumeratePhysicalDevices(VkInstance instance, uint32_t *pPhysicalDeviceCount,
                            VkPhysicalDevice *pPhysicalDevices)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  if (pPhysicalDevices && *pPhysicalDeviceCount < 1)
+    return VK_INCOMPLETE;
+
+  *pPhysicalDeviceCount = 1;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue(VkDevice device,
