@@ -7,6 +7,9 @@
 
 #include <cstring>
 
+// Utility to return the function pointer corresponding to a function name.
+PFN_vkVoidFunction getFunctionPointer(const char *Name);
+
 VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
                  const VkAllocationCallbacks *pAllocator, VkInstance *pInstance)
@@ -35,15 +38,20 @@ VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vkGetDeviceProcAddr(VkDevice device,
                                                              const char *pName)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return getFunctionPointer(pName);
 }
 
 VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL
 vkGetInstanceProcAddr(VkInstance instance, const char *pName)
 
 {
+  return getFunctionPointer(pName);
+}
+
+PFN_vkVoidFunction getFunctionPointer(const char *Name)
+{
 #define CASE(name)                                                             \
-  if (!strcmp(pName, #name))                                                   \
+  if (!strcmp(Name, #name))                                                    \
   return (PFN_vkVoidFunction)name
 
   // Core functions.
