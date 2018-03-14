@@ -19,6 +19,11 @@ class Device;
             << std::endl;                                                      \
   abort()
 
+struct VkBuffer_T
+{
+  uint64_t Address;
+};
+
 struct VkDevice_T
 {
   talvos::Device *Device;

@@ -32,7 +32,7 @@ VKAPI_ATTR void VKAPI_CALL vkFreeMemory(VkDevice device, VkDeviceMemory memory,
                                         const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  device->Device->getGlobalMemory().release(memory->Address);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceGroupPeerMemoryFeatures(

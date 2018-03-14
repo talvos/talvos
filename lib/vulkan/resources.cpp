@@ -59,7 +59,8 @@ vkCreateBuffer(VkDevice device, const VkBufferCreateInfo *pCreateInfo,
                const VkAllocationCallbacks *pAllocator, VkBuffer *pBuffer)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pBuffer = new VkBuffer_T;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
@@ -90,7 +91,7 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyBuffer(
     VkDevice device, VkBuffer buffer, const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete buffer;
 }
 
 VKAPI_ATTR void VKAPI_CALL
