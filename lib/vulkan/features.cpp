@@ -5,6 +5,8 @@
 
 #include "runtime.h"
 
+#include <cstring>
+
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalBufferProperties(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalBufferInfo *pExternalBufferInfo,
@@ -70,7 +72,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures2 *pFeatures)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Enable features that are supported.
+  memset(&pFeatures->features, 0, sizeof(VkPhysicalDeviceFeatures));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2KHR(
