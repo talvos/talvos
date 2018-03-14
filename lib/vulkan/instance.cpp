@@ -25,7 +25,8 @@ vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks *pAllocator)
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceVersion(uint32_t *pApiVersion)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pApiVersion = VK_API_VERSION_1_1;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vkGetDeviceProcAddr(VkDevice device,
