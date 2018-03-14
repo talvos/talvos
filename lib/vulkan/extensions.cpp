@@ -26,7 +26,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceExtensionProperties(
     VkExtensionProperties *pProperties)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Return any extensions that are actually supported.
+  *pPropertyCount = 0;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceLayerProperties(
