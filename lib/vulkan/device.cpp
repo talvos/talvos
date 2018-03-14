@@ -102,7 +102,21 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties(
     VkQueueFamilyProperties *pQueueFamilyProperties)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  if (!pQueueFamilyProperties)
+  {
+    *pQueueFamilyPropertyCount = 1;
+    return;
+  }
+
+  if (*pQueueFamilyPropertyCount < 1)
+    return;
+
+  *pQueueFamilyPropertyCount = 1;
+  pQueueFamilyProperties->queueFlags =
+      VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT;
+  pQueueFamilyProperties->queueCount = 1;
+  pQueueFamilyProperties->timestampValidBits = 0;
+  pQueueFamilyProperties->minImageTransferGranularity = {1, 1, 1};
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties2(
