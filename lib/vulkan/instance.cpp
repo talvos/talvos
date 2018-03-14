@@ -12,14 +12,16 @@ vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
                  const VkAllocationCallbacks *pAllocator, VkInstance *pInstance)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Check extensions are supported.
+  *pInstance = new VkInstance_T;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete instance;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceVersion(uint32_t *pApiVersion)

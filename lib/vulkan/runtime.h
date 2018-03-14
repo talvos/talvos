@@ -13,3 +13,7 @@
   std::cerr << "Talvos: Unimplemented Vulkan API '" << __func__ << "'"         \
             << std::endl;                                                      \
   abort()
+
+struct VkInstance_T
+{
+};
