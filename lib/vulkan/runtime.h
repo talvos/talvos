@@ -6,6 +6,11 @@
 #include "vk_platform.h"
 #include "vulkan_core.h"
 
+namespace talvos
+{
+class Device;
+}; // namespace talvos
+
 // TODO: Remove this when all functions have implementations.
 #include <cstdlib>
 #include <iostream>
@@ -13,6 +18,11 @@
   std::cerr << "Talvos: Unimplemented Vulkan API '" << __func__ << "'"         \
             << std::endl;                                                      \
   abort()
+
+struct VkDevice_T
+{
+  talvos::Device *Device;
+};
 
 struct VkInstance_T
 {

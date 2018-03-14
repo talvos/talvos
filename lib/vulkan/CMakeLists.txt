@@ -33,5 +33,6 @@ add_library(talvos-vulkan SHARED
 )
 
 target_include_directories(talvos-vulkan PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries(talvos-vulkan talvos)
 
 install(TARGETS talvos-vulkan DESTINATION lib)

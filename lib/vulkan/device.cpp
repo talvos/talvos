@@ -7,19 +7,24 @@
 
 #include <cstring>
 
+#include "talvos/Device.h"
+
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
     VkPhysicalDevice physicalDevice, const VkDeviceCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkDevice *pDevice)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pDevice = new VkDevice_T;
+  (*pDevice)->Device = new talvos::Device;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete device->Device;
+  delete device;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(
