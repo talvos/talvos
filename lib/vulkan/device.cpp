@@ -61,7 +61,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue(VkDevice device,
                                             VkQueue *pQueue)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pQueue = new VkQueue_T;
+  (*pQueue)->Device = device;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue2(

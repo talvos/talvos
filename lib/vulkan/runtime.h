@@ -41,6 +41,11 @@ struct VkInstance_T
 {
 };
 
+struct VkQueue_T
+{
+  VkDevice Device;
+};
+
 struct VkShaderModule_T
 {
   std::unique_ptr<talvos::Module> Module;
