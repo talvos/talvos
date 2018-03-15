@@ -218,6 +218,12 @@ void Device::reportMemoryLoad(const Memory *Mem, uint64_t Address,
   }
 }
 
+void Device::reportMemoryMap(const Memory *Memory, uint64_t Base,
+                             uint64_t Offset, uint64_t NumBytes)
+{
+  REPORT(memoryMap, Memory, Base, Offset, NumBytes);
+}
+
 void Device::reportMemoryStore(const Memory *Mem, uint64_t Address,
                                uint64_t NumBytes, const uint8_t *Data)
 {
@@ -232,6 +238,11 @@ void Device::reportMemoryStore(const Memory *Mem, uint64_t Address,
   {
     REPORT(hostMemoryStore, Mem, Address, NumBytes, Data);
   }
+}
+
+void Device::reportMemoryUnmap(const Memory *Memory, uint64_t Base)
+{
+  REPORT(memoryUnmap, Memory, Base);
 }
 
 void Device::reportWorkgroupBegin(const talvos::Workgroup *Group)

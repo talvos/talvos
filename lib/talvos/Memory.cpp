@@ -131,6 +131,25 @@ void Memory::load(uint8_t *Data, uint64_t Address, uint64_t NumBytes) const
   memcpy(Data, Buffers[Id].Data + Offset, NumBytes);
 }
 
+uint8_t *Memory::map(uint64_t Base, uint64_t Offset, uint64_t NumBytes)
+{
+  uint64_t Id = (Base >> OFFSET_BITS);
+
+  Dev.reportMemoryMap(this, Base, Offset, NumBytes);
+
+  if (!isAccessValid(Base + Offset, NumBytes))
+  {
+    std::stringstream Err;
+    Err << "Invalid mapping of " << NumBytes << " bytes"
+        << " from address 0x" << std::hex << (Base + Offset) << " ("
+        << scopeToString(Scope) << " scope) ";
+    Dev.reportError(Err.str());
+    return nullptr;
+  }
+
+  return Buffers[Id].Data + Offset;
+}
+
 void Memory::release(uint64_t Address)
 {
   uint64_t Id = (Address >> OFFSET_BITS);
@@ -162,6 +181,8 @@ void Memory::store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data)
 
   memcpy(Buffers[Id].Data + Offset, Data, NumBytes);
 }
+
+void Memory::unmap(uint64_t Base) { Dev.reportMemoryUnmap(this, Base); }
 
 void Memory::copy(uint64_t DstAddress, Memory &DstMem, uint64_t SrcAddress,
                   const Memory &SrcMem, uint64_t NumBytes)

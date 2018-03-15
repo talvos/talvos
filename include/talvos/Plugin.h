@@ -60,11 +60,19 @@ public:
                           uint64_t NumBytes, const Invocation *Invoc)
   {}
 
+  /// Called when a memory region is mapped by the host.
+  virtual void memoryMap(const Memory *Mem, uint64_t Base, uint64_t Offset,
+                         uint64_t NumBytes)
+  {}
+
   /// Called when an invocation stores data to memory.
   virtual void memoryStore(const Memory *Mem, uint64_t Address,
                            uint64_t NumBytes, const uint8_t *Data,
                            const Invocation *Invoc)
   {}
+
+  /// Called when a memory region is unmapped by the host.
+  virtual void memoryUnmap(const Memory *Mem, uint64_t Base) {}
 
   /// Called when a workgroup has begun executing.
   virtual void workgroupBegin(const Workgroup *Group) {}

@@ -63,11 +63,17 @@ public:
   /// Load \p NumBytes of data from \p Address into \p Result.
   void load(uint8_t *Result, uint64_t Address, uint64_t NumBytes) const;
 
+  /// Map a region of memory and return a pointer to it.
+  uint8_t *map(uint64_t Base, uint64_t Offset, uint64_t NumBytes);
+
   /// Release the allocation with base address \p Address.
   void release(uint64_t Address);
 
   /// Store \p NumBytes of data from \p Data to \p Address.
   void store(uint64_t Address, uint64_t NumBytes, const uint8_t *Data);
+
+  /// Unmap a previously mapped region of memory.
+  void unmap(uint64_t Base);
 
   /// Copy data between memory instances.
   /// \p DstMem and \p SrcMem can be the same memory instance.
