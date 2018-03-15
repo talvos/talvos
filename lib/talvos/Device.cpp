@@ -176,28 +176,28 @@ void Device::reportError(const std::string &Error)
     P.second->func(__VA_ARGS__);                                               \
   }
 
-void Device::reportDispatchCommandBegin(const talvos::DispatchCommand *Cmd)
+void Device::reportDispatchCommandBegin(const DispatchCommand *Cmd)
 {
   REPORT(dispatchCommandBegin, Cmd);
 }
 
-void Device::reportDispatchCommandComplete(const talvos::DispatchCommand *Cmd)
+void Device::reportDispatchCommandComplete(const DispatchCommand *Cmd)
 {
   REPORT(dispatchCommandComplete, Cmd);
 }
 
-void Device::reportInstructionExecuted(const talvos::Invocation *Invoc,
-                                       const talvos::Instruction *Inst)
+void Device::reportInstructionExecuted(const Invocation *Invoc,
+                                       const Instruction *Inst)
 {
   REPORT(instructionExecuted, Invoc, Inst);
 }
 
-void Device::reportInvocationBegin(const talvos::Invocation *Invoc)
+void Device::reportInvocationBegin(const Invocation *Invoc)
 {
   REPORT(invocationBegin, Invoc);
 }
 
-void Device::reportInvocationComplete(const talvos::Invocation *Invoc)
+void Device::reportInvocationComplete(const Invocation *Invoc)
 {
   REPORT(invocationComplete, Invoc);
 }
@@ -245,17 +245,17 @@ void Device::reportMemoryUnmap(const Memory *Memory, uint64_t Base)
   REPORT(memoryUnmap, Memory, Base);
 }
 
-void Device::reportWorkgroupBegin(const talvos::Workgroup *Group)
+void Device::reportWorkgroupBegin(const Workgroup *Group)
 {
   REPORT(workgroupBegin, Group);
 }
 
-void Device::reportWorkgroupBarrier(const talvos::Workgroup *Group)
+void Device::reportWorkgroupBarrier(const Workgroup *Group)
 {
   REPORT(workgroupBarrier, Group);
 }
 
-void Device::reportWorkgroupComplete(const talvos::Workgroup *Group)
+void Device::reportWorkgroupComplete(const Workgroup *Group)
 {
   REPORT(workgroupComplete, Group);
 }
