@@ -118,11 +118,13 @@ vkMapMemory(VkDevice device, VkDeviceMemory memory, VkDeviceSize offset,
             VkDeviceSize size, VkMemoryMapFlags flags, void **ppData)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  talvos::Memory &GlobalMemory = device->Device->getGlobalMemory();
+  *ppData = GlobalMemory.map(memory->Address, offset, size);
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkUnmapMemory(VkDevice device, VkDeviceMemory memory)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  device->Device->getGlobalMemory().unmap(memory->Address);
 }
