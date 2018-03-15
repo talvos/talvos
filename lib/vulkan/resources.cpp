@@ -11,7 +11,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkBindBufferMemory(VkDevice device,
                                                   VkDeviceSize memoryOffset)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  buffer->Address = memory->Address + memoryOffset;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
