@@ -6,9 +6,12 @@
 #include "vk_platform.h"
 #include "vulkan_core.h"
 
+#include <memory>
+
 namespace talvos
 {
 class Device;
+class Module;
 }; // namespace talvos
 
 // TODO: Remove this when all functions have implementations.
@@ -36,4 +39,9 @@ struct VkDeviceMemory_T
 
 struct VkInstance_T
 {
+};
+
+struct VkShaderModule_T
+{
+  std::unique_ptr<talvos::Module> Module;
 };
