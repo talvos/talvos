@@ -47,7 +47,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateCommandPool(
     const VkAllocationCallbacks *pAllocator, VkCommandPool *pCommandPool)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pCommandPool = new VkCommandPool_T;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL
@@ -55,7 +56,9 @@ vkDestroyCommandPool(VkDevice device, VkCommandPool commandPool,
                      const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (auto Cmd : commandPool->Pool)
+    delete Cmd;
+  delete commandPool;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEndCommandBuffer(VkCommandBuffer commandBuffer)

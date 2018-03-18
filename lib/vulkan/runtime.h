@@ -32,6 +32,11 @@ struct VkBuffer_T
   uint64_t Address;
 };
 
+struct VkCommandPool_T
+{
+  std::unordered_set<VkCommandBuffer> Pool;
+};
+
 struct VkDescriptorPool_T
 {
   std::unordered_set<VkDescriptorSet> Pool;
