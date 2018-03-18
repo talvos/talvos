@@ -12,7 +12,17 @@ vkCmdBindPipeline(VkCommandBuffer commandBuffer,
                   VkPipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  switch (pipelineBindPoint)
+  {
+  case VK_PIPELINE_BIND_POINT_GRAPHICS:
+    commandBuffer->PipelineGraphics = pipeline;
+    break;
+  case VK_PIPELINE_BIND_POINT_COMPUTE:
+    commandBuffer->PipelineCompute = pipeline;
+    break;
+  default:
+    assert(false && "invalid pipeline bind point");
+  }
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(

@@ -37,7 +37,8 @@ struct VkBuffer_T
 struct VkCommandBuffer_T
 {
   // Resources that are currently bound to the command buffer.
-  VkPipeline Pipeline;
+  VkPipeline PipelineGraphics;
+  VkPipeline PipelineCompute;
   talvos::DescriptorSetMap DescriptorSetsGraphics;
   talvos::DescriptorSetMap DescriptorSetsCompute;
 
