@@ -5,13 +5,19 @@
 
 #include "runtime.h"
 
+#include "talvos/DispatchCommand.h"
+
 VKAPI_ATTR void VKAPI_CALL vkCmdDispatch(VkCommandBuffer commandBuffer,
                                          uint32_t groupCountX,
                                          uint32_t groupCountY,
                                          uint32_t groupCountZ)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->Commands.push_back(
+      new talvos::DispatchCommand(commandBuffer->PipelineCompute->Module,
+                                  commandBuffer->PipelineCompute->Function,
+                                  {groupCountX, groupCountY, groupCountZ},
+                                  commandBuffer->DescriptorSetsCompute));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDispatchBase(
