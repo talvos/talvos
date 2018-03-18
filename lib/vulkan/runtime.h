@@ -11,6 +11,7 @@
 namespace talvos
 {
 class Device;
+class Function;
 class Module;
 }; // namespace talvos
 
@@ -39,6 +40,12 @@ struct VkDeviceMemory_T
 
 struct VkInstance_T
 {
+};
+
+struct VkPipeline_T
+{
+  const talvos::Module *Module;
+  const talvos::Function *Function;
 };
 
 struct VkQueue_T

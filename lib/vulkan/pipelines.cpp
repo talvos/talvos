@@ -5,6 +5,8 @@
 
 #include "runtime.h"
 
+#include "talvos/Module.h"
+
 VKAPI_ATTR void VKAPI_CALL
 vkCmdBindPipeline(VkCommandBuffer commandBuffer,
                   VkPipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
@@ -19,7 +21,14 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
     const VkAllocationCallbacks *pAllocator, VkPipeline *pPipelines)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (int i = 0; i < createInfoCount; i++)
+  {
+    pPipelines[i] = new VkPipeline_T;
+    pPipelines[i]->Module = pCreateInfos[i].stage.module->Module.get();
+    pPipelines[i]->Function =
+        pPipelines[i]->Module->getEntryPoint(pCreateInfos[i].stage.pName);
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
