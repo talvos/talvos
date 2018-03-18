@@ -9,12 +9,14 @@
 #include <cassert>
 #include <memory>
 #include <unordered_set>
+#include <vector>
 
 #include "talvos/DescriptorSet.h"
 
 namespace talvos
 {
 class Device;
+class DispatchCommand;
 class Function;
 class Module;
 }; // namespace talvos
@@ -30,6 +32,17 @@ class Module;
 struct VkBuffer_T
 {
   uint64_t Address;
+};
+
+struct VkCommandBuffer_T
+{
+  // Resources that are currently bound to the command buffer.
+  VkPipeline Pipeline;
+  talvos::DescriptorSetMap DescriptorSetsGraphics;
+  talvos::DescriptorSetMap DescriptorSetsCompute;
+
+  // TODO: Move this into libtalvos?
+  std::vector<talvos::DispatchCommand *> Commands;
 };
 
 struct VkCommandPool_T

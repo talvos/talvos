@@ -10,7 +10,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
     VkCommandBuffer *pCommandBuffers)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (int i = 0; i < pAllocateInfo->commandBufferCount; i++)
+  {
+    pCommandBuffers[i] = new VkCommandBuffer_T;
+    pAllocateInfo->commandPool->Pool.insert(pCommandBuffers[i]);
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkBeginCommandBuffer(
@@ -72,7 +77,11 @@ VKAPI_ATTR void VKAPI_CALL vkFreeCommandBuffers(
     const VkCommandBuffer *pCommandBuffers)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (int i = 0; i < commandBufferCount; i++)
+  {
+    commandPool->Pool.erase(pCommandBuffers[i]);
+    delete pCommandBuffers[i];
+  }
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
