@@ -9,9 +9,9 @@
 #ifndef TALVOS_DISPATCHCOMMAND_H
 #define TALVOS_DISPATCHCOMMAND_H
 
-#include <map>
 #include <vector>
 
+#include "talvos/DescriptorSet.h"
 #include "talvos/Dim3.h"
 
 namespace talvos
@@ -20,9 +20,6 @@ namespace talvos
 class Function;
 class Module;
 class Object;
-
-/// Map from Descriptor/Binding pair to an address in memory.
-typedef std::map<std::pair<uint32_t, uint32_t>, uint64_t> DescriptorSet;
 
 /// This class encapsulates information about a compute kernel launch.
 class DispatchCommand

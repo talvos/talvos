@@ -6,12 +6,14 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <vector>
 
-#include "talvos/DispatchCommand.h"
+#include "talvos/DescriptorSet.h"
 
 namespace talvos
 {
 class Device;
+class Function;
 class Module;
 }
 

@@ -72,6 +72,7 @@ configure_file("config.h.in" "config.h")
 
 set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Block.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/DescriptorSet.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Dim3.h
     ${CMAKE_SOURCE_DIR}/include/talvos/DispatchCommand.h
