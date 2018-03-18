@@ -200,5 +200,18 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
     const VkCopyDescriptorSet *pDescriptorCopies)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Handle copies.
+  assert(descriptorCopyCount == 0 && "descriptor set copies not implemented");
+
+  for (int i = 0; i < descriptorWriteCount; i++)
+  {
+    // TODO: Handle other types of descriptors.
+    assert(pDescriptorWrites[i].descriptorType ==
+           VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+
+    uint32_t Binding = pDescriptorWrites[i].dstBinding;
+    uint64_t Address = pDescriptorWrites[i].pBufferInfo->buffer->Address;
+    Address += pDescriptorWrites[i].pBufferInfo->offset;
+    pDescriptorWrites->dstSet->DescriptorSet[Binding] = Address;
+  }
 }

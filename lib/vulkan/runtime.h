@@ -6,6 +6,7 @@
 #include "vk_platform.h"
 #include "vulkan_core.h"
 
+#include <cassert>
 #include <memory>
 #include <unordered_set>
 
