@@ -25,7 +25,25 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
     const uint32_t *pDynamicOffsets)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  talvos::DescriptorSetMap *DSM;
+  switch (pipelineBindPoint)
+  {
+  case VK_PIPELINE_BIND_POINT_GRAPHICS:
+    DSM = &commandBuffer->DescriptorSetsGraphics;
+    break;
+  case VK_PIPELINE_BIND_POINT_COMPUTE:
+    DSM = &commandBuffer->DescriptorSetsCompute;
+    break;
+  default:
+    assert(false && "invalid pipeline bind point");
+  }
+
+  // TODO: Handle pDynamicOffsets?
+  assert(dynamicOffsetCount == 0 && "dynamic offsets not implemented");
+
+  // Update descriptor set map.
+  for (int i = 0; i < descriptorSetCount; i++)
+    (*DSM)[firstSet + i] = pDescriptorSets[i]->DescriptorSet;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdPushConstants(VkCommandBuffer commandBuffer,
