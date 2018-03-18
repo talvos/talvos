@@ -193,7 +193,7 @@ void CommandFile::parseDescriptorSet()
   if (!Buffers.count(Name))
     throw "invalid resource identifier";
 
-  DescriptorSet[{Set, Binding}] = Buffers[Name].first;
+  DescriptorSets[Set][Binding] = Buffers[Name].first;
 }
 
 void CommandFile::parseDispatch()
@@ -208,7 +208,7 @@ void CommandFile::parseDispatch()
   GroupCount.Y = get<uint32_t>("group count Y");
   GroupCount.Z = get<uint32_t>("group count Z");
   talvos::DispatchCommand Command(Module.get(), Function, GroupCount,
-                                  DescriptorSet);
+                                  DescriptorSets);
   Device->run(Command);
 }
 

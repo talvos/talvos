@@ -46,7 +46,7 @@ private:
   std::unique_ptr<talvos::Module> Module;
   const talvos::Function *Function;
   std::map<std::string, std::pair<uint64_t, uint64_t>> Buffers;
-  talvos::DescriptorSet DescriptorSet;
+  talvos::DescriptorSetMap DescriptorSets;
   std::vector<std::pair<size_t, std::streampos>> Loops;
 
   size_t CurrentLine;

@@ -14,8 +14,11 @@
 namespace talvos
 {
 
-/// Map from Descriptor/Binding pair to an address in memory.
-typedef std::map<std::pair<uint32_t, uint32_t>, uint64_t> DescriptorSet;
+/// Mapping from a variable Binding decoration to an address in memory.
+typedef std::map<uint32_t, uint64_t> DescriptorSet;
+
+/// Mapping from set numbers to descriptor sets.
+typedef std::map<uint32_t, talvos::DescriptorSet> DescriptorSetMap;
 
 }; // namespace talvos
 

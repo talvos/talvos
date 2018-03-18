@@ -36,9 +36,9 @@ public:
   /// \param M The module containing the entry point to invoke.
   /// \param F The entry point to invoke.
   /// \param NumGroups The number of groups to launch.
-  /// \param DS The descriptor set mapping to use.
+  /// \param DSM The descriptor set mapping to use.
   DispatchCommand(const Module *M, const Function *F, Dim3 NumGroups,
-                  const DescriptorSet &DS);
+                  const DescriptorSetMap &DSM);
 
   // Do not allow DispatchCommand objects to be copied.
   ///\{

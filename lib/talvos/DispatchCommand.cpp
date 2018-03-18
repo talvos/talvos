@@ -14,7 +14,7 @@ namespace talvos
 {
 
 DispatchCommand::DispatchCommand(const Module *M, const Function *F,
-                                 Dim3 NumGroups, const DescriptorSet &DS)
+                                 Dim3 NumGroups, const DescriptorSetMap &DSM)
 {
   Mod = M;
   Func = F;
@@ -26,14 +26,15 @@ DispatchCommand::DispatchCommand(const Module *M, const Function *F,
   // Resolve buffer variables.
   for (BufferVariableMap::value_type V : M->getBufferVariables())
   {
-    // Look up variable in descriptor set and set pointer value.
-    std::pair<uint32_t, uint32_t> Binding = {V.second.DescriptorSet,
-                                             V.second.Binding};
-    if (DS.count(Binding))
-    {
-      Object Pointer(V.second.Ty, DS.at(Binding));
-      Variables.push_back({V.first, Pointer});
-    }
+    // Look up variable in descriptor set and set pointer value if present.
+    uint32_t Set = V.second.DescriptorSet;
+    uint32_t Binding = V.second.Binding;
+    if (!DSM.count(Set))
+      continue;
+    if (!DSM.at(Set).count(Binding))
+      continue;
+    Object Pointer(V.second.Ty, DSM.at(Set).at(Binding));
+    Variables.push_back({V.first, Pointer});
   }
 }
 
