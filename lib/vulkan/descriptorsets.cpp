@@ -88,7 +88,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorSetLayout(
     const VkAllocationCallbacks *pAllocator, VkDescriptorSetLayout *pSetLayout)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Implement?
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorUpdateTemplate(
@@ -114,7 +115,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineLayout(
     const VkAllocationCallbacks *pAllocator, VkPipelineLayout *pPipelineLayout)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Implement?
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL
