@@ -3,8 +3,8 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-#include "vk_platform.h"
-#include "vulkan_core.h"
+#include "vulkan/vk_platform.h"
+#include "vulkan/vulkan_core.h"
 
 #include <cassert>
 #include <memory>

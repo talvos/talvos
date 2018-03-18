@@ -4,9 +4,10 @@
 # terms please see the LICENSE file distributed with this source code.
 
 add_library(talvos-vulkan SHARED
+  ${CMAKE_SOURCE_DIR}/include/vulkan/vk_platform.h
+  ${CMAKE_SOURCE_DIR}/include/vulkan/vulkan_core.h
+
   runtime.h
-  vk_platform.h
-  vulkan_core.h
   clears.cpp
   commandbuffers.cpp
   copies.cpp
