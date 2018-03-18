@@ -5,6 +5,8 @@
 
 #include "runtime.h"
 
+#include "talvos/Device.h"
+
 VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
     VkDevice device, const VkCommandBufferAllocateInfo *pAllocateInfo,
     VkCommandBuffer *pCommandBuffers)
@@ -92,7 +94,17 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
                                              VkFence fence)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (int s = 0; s < submitCount; s++)
+  {
+    for (int c = 0; c < pSubmits[s].commandBufferCount; c++)
+    {
+      for (auto Command : pSubmits[s].pCommandBuffers[c]->Commands)
+      {
+        queue->Device->Device->run(*Command);
+      }
+    }
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandBuffer(
