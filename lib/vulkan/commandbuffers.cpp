@@ -22,7 +22,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkBeginCommandBuffer(
     VkCommandBuffer commandBuffer, const VkCommandBufferBeginInfo *pBeginInfo)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Implement?
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL
@@ -69,7 +70,8 @@ vkDestroyCommandPool(VkDevice device, VkCommandPool commandPool,
 VKAPI_ATTR VkResult VKAPI_CALL vkEndCommandBuffer(VkCommandBuffer commandBuffer)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Implement?
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkFreeCommandBuffers(
