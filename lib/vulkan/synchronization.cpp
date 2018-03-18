@@ -142,7 +142,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkImportSemaphoreFdKHR(
 VKAPI_ATTR VkResult VKAPI_CALL vkQueueWaitIdle(VkQueue queue)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Implement? All work currently completes in vkQueueSubmit.
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetEvent(VkDevice device, VkEvent event)
