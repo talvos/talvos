@@ -7,6 +7,7 @@
 #include "vulkan_core.h"
 
 #include <memory>
+#include <unordered_set>
 
 namespace talvos
 {
@@ -26,6 +27,11 @@ class Module;
 struct VkBuffer_T
 {
   uint64_t Address;
+};
+
+struct VkDescriptorPool_T
+{
+  std::unordered_set<VkDescriptorSet> Pool;
 };
 
 struct VkDevice_T

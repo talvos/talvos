@@ -56,7 +56,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorPool(
     const VkAllocationCallbacks *pAllocator, VkDescriptorPool *pDescriptorPool)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  (*pDescriptorPool) = new VkDescriptorPool_T;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorSetLayout(
@@ -98,7 +99,9 @@ vkDestroyDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
                         const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (auto DS : descriptorPool->Pool)
+    delete DS;
+  delete descriptorPool;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorSetLayout(
