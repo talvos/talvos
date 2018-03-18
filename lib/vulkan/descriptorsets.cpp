@@ -10,7 +10,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
     VkDescriptorSet *pDescriptorSets)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (int i = 0; i < pAllocateInfo->descriptorSetCount; i++)
+  {
+    pDescriptorSets[i] = new VkDescriptorSet_T;
+    pAllocateInfo->descriptorPool->Pool.insert(pDescriptorSets[i]);
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
@@ -141,7 +146,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkFreeDescriptorSets(
     uint32_t descriptorSetCount, const VkDescriptorSet *pDescriptorSets)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (int i = 0; i < descriptorSetCount; i++)
+  {
+    descriptorPool->Pool.erase(pDescriptorSets[i]);
+    delete pDescriptorSets[i];
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetDescriptorSetLayoutSupport(

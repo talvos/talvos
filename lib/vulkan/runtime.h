@@ -9,6 +9,8 @@
 #include <memory>
 #include <unordered_set>
 
+#include "talvos/DescriptorSet.h"
+
 namespace talvos
 {
 class Device;
@@ -32,6 +34,11 @@ struct VkBuffer_T
 struct VkDescriptorPool_T
 {
   std::unordered_set<VkDescriptorSet> Pool;
+};
+
+struct VkDescriptorSet_T
+{
+  talvos::DescriptorSet DescriptorSet;
 };
 
 struct VkDevice_T
