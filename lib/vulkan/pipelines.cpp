@@ -31,7 +31,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
     const VkAllocationCallbacks *pAllocator, VkPipeline *pPipelines)
 
 {
-  for (int i = 0; i < createInfoCount; i++)
+  for (uint32_t i = 0; i < createInfoCount; i++)
   {
     pPipelines[i] = new VkPipeline_T;
     pPipelines[i]->Module = pCreateInfos[i].stage.module->Module.get();

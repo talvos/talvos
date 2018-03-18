@@ -12,7 +12,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
     VkCommandBuffer *pCommandBuffers)
 
 {
-  for (int i = 0; i < pAllocateInfo->commandBufferCount; i++)
+  for (uint32_t i = 0; i < pAllocateInfo->commandBufferCount; i++)
   {
     pCommandBuffers[i] = new VkCommandBuffer_T;
     pAllocateInfo->commandPool->Pool.insert(pCommandBuffers[i]);
@@ -81,7 +81,7 @@ VKAPI_ATTR void VKAPI_CALL vkFreeCommandBuffers(
     const VkCommandBuffer *pCommandBuffers)
 
 {
-  for (int i = 0; i < commandBufferCount; i++)
+  for (uint32_t i = 0; i < commandBufferCount; i++)
   {
     commandPool->Pool.erase(pCommandBuffers[i]);
     delete pCommandBuffers[i];
@@ -94,9 +94,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
                                              VkFence fence)
 
 {
-  for (int s = 0; s < submitCount; s++)
+  for (uint32_t s = 0; s < submitCount; s++)
   {
-    for (int c = 0; c < pSubmits[s].commandBufferCount; c++)
+    for (uint32_t c = 0; c < pSubmits[s].commandBufferCount; c++)
     {
       for (auto Command : pSubmits[s].pCommandBuffers[c]->Commands)
       {

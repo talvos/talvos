@@ -10,7 +10,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
     VkDescriptorSet *pDescriptorSets)
 
 {
-  for (int i = 0; i < pAllocateInfo->descriptorSetCount; i++)
+  for (uint32_t i = 0; i < pAllocateInfo->descriptorSetCount; i++)
   {
     pDescriptorSets[i] = new VkDescriptorSet_T;
     pAllocateInfo->descriptorPool->Pool.insert(pDescriptorSets[i]);
@@ -42,7 +42,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
   assert(dynamicOffsetCount == 0 && "dynamic offsets not implemented");
 
   // Update descriptor set map.
-  for (int i = 0; i < descriptorSetCount; i++)
+  for (uint32_t i = 0; i < descriptorSetCount; i++)
     (*DSM)[firstSet + i] = pDescriptorSets[i]->DescriptorSet;
 }
 
@@ -166,7 +166,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkFreeDescriptorSets(
     uint32_t descriptorSetCount, const VkDescriptorSet *pDescriptorSets)
 
 {
-  for (int i = 0; i < descriptorSetCount; i++)
+  for (uint32_t i = 0; i < descriptorSetCount; i++)
   {
     descriptorPool->Pool.erase(pDescriptorSets[i]);
     delete pDescriptorSets[i];
@@ -223,7 +223,7 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
   // TODO: Handle copies.
   assert(descriptorCopyCount == 0 && "descriptor set copies not implemented");
 
-  for (int i = 0; i < descriptorWriteCount; i++)
+  for (uint32_t i = 0; i < descriptorWriteCount; i++)
   {
     // TODO: Handle other types of descriptors.
     assert(pDescriptorWrites[i].descriptorType ==
