@@ -63,7 +63,7 @@ vkDestroyPipeline(VkDevice device, VkPipeline pipeline,
                   const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete pipeline;
 }
 
 VKAPI_ATTR void VKAPI_CALL
