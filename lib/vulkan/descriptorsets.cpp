@@ -158,7 +158,7 @@ vkDestroyPipelineLayout(VkDevice device, VkPipelineLayout pipelineLayout,
                         const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Implement if vkCreatePipelineLayout is not a NOP.
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkFreeDescriptorSets(
