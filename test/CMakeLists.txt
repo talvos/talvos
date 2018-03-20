@@ -56,3 +56,4 @@ endforeach(${test})
 
 add_subdirectory(interactive)
 add_subdirectory(plugins)
+add_subdirectory(runtime)
