@@ -3,10 +3,15 @@
 # This file is distributed under a three-clause BSD license. For full license
 # terms please see the LICENSE file distributed with this source code.
 
+# Export API functions on Windows.
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  set(DLL_EXPORTS exports.def)
+endif()
+
 add_library(talvos-vulkan SHARED
   ${CMAKE_SOURCE_DIR}/include/vulkan/vk_platform.h
   ${CMAKE_SOURCE_DIR}/include/vulkan/vulkan_core.h
-
+  ${DLL_EXPORTS}
   runtime.h
   clears.cpp
   commandbuffers.cpp
