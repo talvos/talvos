@@ -134,7 +134,7 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorSetLayout(
     const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Implement if vkCreateDescriptorSetLayout is not a NOP
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorUpdateTemplate(
