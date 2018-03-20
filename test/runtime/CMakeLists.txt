@@ -21,4 +21,11 @@ foreach(test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
+  if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    set_tests_properties(
+      ${TEST_NAME} PROPERTIES
+      ENVIRONMENT "PATH=$<TARGET_FILE_DIR:talvos-vulkan>;$ENV{PATH}"
+    )
+  endif()
+
 endforeach(${test})
