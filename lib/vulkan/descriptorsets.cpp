@@ -229,9 +229,14 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
     assert(pDescriptorWrites[i].descriptorType ==
            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 
-    uint32_t Binding = pDescriptorWrites[i].dstBinding;
-    uint64_t Address = pDescriptorWrites[i].pBufferInfo->buffer->Address;
-    Address += pDescriptorWrites[i].pBufferInfo->offset;
-    pDescriptorWrites->dstSet->DescriptorSet[Binding] = Address;
+    for (uint32_t b = 0; b < pDescriptorWrites[i].descriptorCount; b++)
+    {
+      assert(pDescriptorWrites[i].dstArrayElement == 0 &&
+             "dstArrayElement not handled");
+      uint32_t Binding = pDescriptorWrites[i].dstBinding + b;
+      uint64_t Address = pDescriptorWrites[i].pBufferInfo[b].buffer->Address;
+      Address += pDescriptorWrites[i].pBufferInfo[b].offset;
+      pDescriptorWrites->dstSet->DescriptorSet[Binding] = Address;
+    }
   }
 }
