@@ -9,6 +9,7 @@ foreach(test
   # Build test executable.
   set(TEST_EXE "${test}-test")
   add_executable(${TEST_EXE} ${test}.c)
+  set_property(TARGET ${TEST_EXE} PROPERTY C_STANDARD 99)
   target_link_libraries(${TEST_EXE} talvos-vulkan)
 
   # Add test.
