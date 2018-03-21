@@ -3,6 +3,8 @@
 This project provides a SPIR-V interpreter and Vulkan device emulator, with the
 aim of providing an extensible dynamic analysis framework and debugger for
 SPIR-V shaders.
+Talvos provides an implementation of the Vulkan API to enable it to execute
+real Vulkan applications.
 
 Talvos is distributed under a three-clause BSD license. For full license
 terms please see the LICENSE file distributed with this source code.
@@ -16,16 +18,12 @@ executing various SPIR-V shaders generated from OpenCL kernels compiled with
 [Clspv](https://github.com/google/clspv).
 Linux, macOS, and Windows are supported.
 
-A simple file format is used to load and execute SPIR-V shaders.
-There is a lightweight interactive debugging interface that enables stepping
-through SPIR-V instructions and printing instruction results.
-
 The codebase is changing relatively quickly as new features are added, so the
 internal and external APIs are all subject to change until we reach the 1.0
 release (suggestions for improvements always welcome).
 
 Future work may involve extending the emulator to support vertex and fragment
-shaders, and adding a Vulkan runtime interface.
+shaders, and implementing missing Vulkan API functions to reach conformance.
 Contributions in these (or other) areas would be extremely welcome.
 
 
@@ -61,7 +59,16 @@ install. Run `make test` to run the internal test suite.
 
 ## Usage
 
-The `talvos-cmd` command provides a simple interface to the emulator.
+More detailed usage information is provided
+[here](https://talvos.github.io/usage.html).
+
+Talvos provides an implementation of the Vulkan API which allows existing
+Vulkan applications to be executed through the emulator without modification.
+Simply linking an application against `libtalvos-vulkan.so` or
+`talvos-vulkan.lib` is enough for it to use Talvos.
+
+Alternatively, the `talvos-cmd` command provides a simple interface to the
+emulator.
 An example that runs a simple N-Body simulation can be found in
 `test/misc/nbody.tcf`.
 
