@@ -733,8 +733,8 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = @CMAKE_SOURCE_DIR@/include
-INPUT                 += @CMAKE_SOURCE_DIR@/lib
+INPUT                  = @CMAKE_SOURCE_DIR@/include/talvos
+INPUT                 += @CMAKE_SOURCE_DIR@/lib/talvos
 INPUT                 += @CMAKE_SOURCE_DIR@/README.md
 
 # This tag can be used to specify the character encoding of the source files
