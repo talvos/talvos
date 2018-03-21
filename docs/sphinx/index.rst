@@ -11,6 +11,7 @@ Talvos documentation
    :caption: Contents:
 
    building
+   usage
    talvos-cmd
    plugins
    developers

@@ -1,3 +1,5 @@
+.. _talvos-cmd:
+
 Talvos command files
 =====================
 
