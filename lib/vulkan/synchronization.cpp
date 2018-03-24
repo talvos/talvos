@@ -139,7 +139,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetFences(VkDevice device,
                                              uint32_t fenceCount,
                                              const VkFence *pFences)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (uint32_t i = 0; i < fenceCount; i++)
+  {
+    pFences[i]->Signaled = false;
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkSetEvent(VkDevice device, VkEvent event)
