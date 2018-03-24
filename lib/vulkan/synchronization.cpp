@@ -13,7 +13,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPipelineBarrier(
     const VkBufferMemoryBarrier *pBufferMemoryBarriers,
     uint32_t imageMemoryBarrierCount,
     const VkImageMemoryBarrier *pImageMemoryBarriers)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -21,7 +20,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPipelineBarrier(
 VKAPI_ATTR void VKAPI_CALL vkCmdResetEvent(VkCommandBuffer commandBuffer,
                                            VkEvent event,
                                            VkPipelineStageFlags stageMask)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -29,7 +27,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdResetEvent(VkCommandBuffer commandBuffer,
 VKAPI_ATTR void VKAPI_CALL vkCmdSetEvent(VkCommandBuffer commandBuffer,
                                          VkEvent event,
                                          VkPipelineStageFlags stageMask)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -42,7 +39,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(
     const VkBufferMemoryBarrier *pBufferMemoryBarriers,
     uint32_t imageMemoryBarrierCount,
     const VkImageMemoryBarrier *pImageMemoryBarriers)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -50,7 +46,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(
 VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateEvent(VkDevice device, const VkEventCreateInfo *pCreateInfo,
               const VkAllocationCallbacks *pAllocator, VkEvent *pEvent)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -58,7 +53,6 @@ vkCreateEvent(VkDevice device, const VkEventCreateInfo *pCreateInfo,
 VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateFence(VkDevice device, const VkFenceCreateInfo *pCreateInfo,
               const VkAllocationCallbacks *pAllocator, VkFence *pFence)
-
 {
   *pFence = new VkFence_T;
   (*pFence)->Signaled = pCreateInfo->flags & VK_FENCE_CREATE_SIGNALED_BIT;
@@ -68,21 +62,18 @@ vkCreateFence(VkDevice device, const VkFenceCreateInfo *pCreateInfo,
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateSemaphore(
     VkDevice device, const VkSemaphoreCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkSemaphore *pSemaphore)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyEvent(
     VkDevice device, VkEvent event, const VkAllocationCallbacks *pAllocator)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyFence(
     VkDevice device, VkFence fence, const VkAllocationCallbacks *pAllocator)
-
 {
   delete fence;
 }
@@ -90,66 +81,56 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyFence(
 VKAPI_ATTR void VKAPI_CALL
 vkDestroySemaphore(VkDevice device, VkSemaphore semaphore,
                    const VkAllocationCallbacks *pAllocator)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkDeviceWaitIdle(VkDevice device)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetEventStatus(VkDevice device, VkEvent event)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetFenceFdKHR(
     VkDevice device, const VkFenceGetFdInfoKHR *pGetFdInfo, int *pFd)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetFenceStatus(VkDevice device, VkFence fence)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetSemaphoreFdKHR(
     VkDevice device, const VkSemaphoreGetFdInfoKHR *pGetFdInfo, int *pFd)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkImportFenceFdKHR(
     VkDevice device, const VkImportFenceFdInfoKHR *pImportFenceFdInfo)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkImportSemaphoreFdKHR(
     VkDevice device, const VkImportSemaphoreFdInfoKHR *pImportSemaphoreFdInfo)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkQueueWaitIdle(VkQueue queue)
-
 {
   // TODO: Implement? All work currently completes in vkQueueSubmit.
   return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetEvent(VkDevice device, VkEvent event)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -157,13 +138,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetEvent(VkDevice device, VkEvent event)
 VKAPI_ATTR VkResult VKAPI_CALL vkResetFences(VkDevice device,
                                              uint32_t fenceCount,
                                              const VkFence *pFences)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkSetEvent(VkDevice device, VkEvent event)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -173,7 +152,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkWaitForFences(VkDevice device,
                                                const VkFence *pFences,
                                                VkBool32 waitAll,
                                                uint64_t timeout)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }

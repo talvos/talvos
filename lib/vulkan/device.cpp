@@ -12,7 +12,6 @@
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
     VkPhysicalDevice physicalDevice, const VkDeviceCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkDevice *pDevice)
-
 {
   *pDevice = new VkDevice_T;
   (*pDevice)->Device = new talvos::Device;
@@ -21,7 +20,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
 
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator)
-
 {
   delete device->Device;
   delete device;
@@ -30,7 +28,6 @@ vkDestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator)
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(
     VkInstance instance, uint32_t *pPhysicalDeviceGroupCount,
     VkPhysicalDeviceGroupProperties *pPhysicalDeviceGroupProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -38,7 +35,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroupsKHR(
     VkInstance instance, uint32_t *pPhysicalDeviceGroupCount,
     VkPhysicalDeviceGroupProperties *pPhysicalDeviceGroupProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -46,7 +42,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroupsKHR(
 VKAPI_ATTR VkResult VKAPI_CALL
 vkEnumeratePhysicalDevices(VkInstance instance, uint32_t *pPhysicalDeviceCount,
                            VkPhysicalDevice *pPhysicalDevices)
-
 {
   if (pPhysicalDevices && *pPhysicalDeviceCount < 1)
     return VK_INCOMPLETE;
@@ -59,7 +54,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue(VkDevice device,
                                             uint32_t queueFamilyIndex,
                                             uint32_t queueIndex,
                                             VkQueue *pQueue)
-
 {
   *pQueue = new VkQueue_T;
   (*pQueue)->Device = device;
@@ -67,14 +61,12 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue(VkDevice device,
 
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue2(
     VkDevice device, const VkDeviceQueueInfo2 *pQueueInfo, VkQueue *pQueue)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties *pProperties)
-
 {
   pProperties->apiVersion = VK_API_VERSION_1_1;
   pProperties->driverVersion = 0; // TODO: Encode Talvos version somehow.
@@ -91,14 +83,12 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties(
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties2(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties2 *pProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties2KHR(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties2 *pProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -106,7 +96,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties2KHR(
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties(
     VkPhysicalDevice physicalDevice, uint32_t *pQueueFamilyPropertyCount,
     VkQueueFamilyProperties *pQueueFamilyProperties)
-
 {
   if (!pQueueFamilyProperties)
   {
@@ -128,7 +117,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties(
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties2(
     VkPhysicalDevice physicalDevice, uint32_t *pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2 *pQueueFamilyProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -136,7 +124,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties2(
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties2KHR(
     VkPhysicalDevice physicalDevice, uint32_t *pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2 *pQueueFamilyProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }

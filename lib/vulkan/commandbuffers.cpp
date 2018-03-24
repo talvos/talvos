@@ -10,7 +10,6 @@
 VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
     VkDevice device, const VkCommandBufferAllocateInfo *pAllocateInfo,
     VkCommandBuffer *pCommandBuffers)
-
 {
   for (uint32_t i = 0; i < pAllocateInfo->commandBufferCount; i++)
   {
@@ -22,7 +21,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
 
 VKAPI_ATTR VkResult VKAPI_CALL vkBeginCommandBuffer(
     VkCommandBuffer commandBuffer, const VkCommandBufferBeginInfo *pBeginInfo)
-
 {
   // TODO: Implement?
   return VK_SUCCESS;
@@ -31,21 +29,18 @@ VKAPI_ATTR VkResult VKAPI_CALL vkBeginCommandBuffer(
 VKAPI_ATTR void VKAPI_CALL
 vkCmdExecuteCommands(VkCommandBuffer commandBuffer, uint32_t commandBufferCount,
                      const VkCommandBuffer *pCommandBuffers)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMask(VkCommandBuffer commandBuffer,
                                               uint32_t deviceMask)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMaskKHR(VkCommandBuffer commandBuffer,
                                                  uint32_t deviceMask)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -53,7 +48,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMaskKHR(VkCommandBuffer commandBuffer,
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateCommandPool(
     VkDevice device, const VkCommandPoolCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkCommandPool *pCommandPool)
-
 {
   *pCommandPool = new VkCommandPool_T;
   return VK_SUCCESS;
@@ -62,7 +56,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateCommandPool(
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyCommandPool(VkDevice device, VkCommandPool commandPool,
                      const VkAllocationCallbacks *pAllocator)
-
 {
   for (auto Cmd : commandPool->Pool)
     delete Cmd;
@@ -70,7 +63,6 @@ vkDestroyCommandPool(VkDevice device, VkCommandPool commandPool,
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEndCommandBuffer(VkCommandBuffer commandBuffer)
-
 {
   // TODO: Implement?
   return VK_SUCCESS;
@@ -79,7 +71,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEndCommandBuffer(VkCommandBuffer commandBuffer)
 VKAPI_ATTR void VKAPI_CALL vkFreeCommandBuffers(
     VkDevice device, VkCommandPool commandPool, uint32_t commandBufferCount,
     const VkCommandBuffer *pCommandBuffers)
-
 {
   for (uint32_t i = 0; i < commandBufferCount; i++)
   {
@@ -92,7 +83,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
                                              uint32_t submitCount,
                                              const VkSubmitInfo *pSubmits,
                                              VkFence fence)
-
 {
   for (uint32_t s = 0; s < submitCount; s++)
   {
@@ -109,7 +99,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandBuffer(
     VkCommandBuffer commandBuffer, VkCommandBufferResetFlags flags)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -117,7 +106,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandBuffer(
 VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandPool(VkDevice device,
                                                   VkCommandPool commandPool,
                                                   VkCommandPoolResetFlags flags)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -125,7 +113,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandPool(VkDevice device,
 VKAPI_ATTR void VKAPI_CALL vkTrimCommandPool(VkDevice device,
                                              VkCommandPool commandPool,
                                              VkCommandPoolTrimFlags flags)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -133,7 +120,6 @@ VKAPI_ATTR void VKAPI_CALL vkTrimCommandPool(VkDevice device,
 VKAPI_ATTR void VKAPI_CALL vkTrimCommandPoolKHR(VkDevice device,
                                                 VkCommandPool commandPool,
                                                 VkCommandPoolTrimFlags flags)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }

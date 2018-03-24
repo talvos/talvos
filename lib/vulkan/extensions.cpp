@@ -8,7 +8,6 @@
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateDeviceExtensionProperties(
     VkPhysicalDevice physicalDevice, const char *pLayerName,
     uint32_t *pPropertyCount, VkExtensionProperties *pProperties)
-
 {
   // TODO: Return any extensions that are actually supported.
   *pPropertyCount = 0;
@@ -18,7 +17,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateDeviceExtensionProperties(
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateDeviceLayerProperties(
     VkPhysicalDevice physicalDevice, uint32_t *pPropertyCount,
     VkLayerProperties *pProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -26,7 +24,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateDeviceLayerProperties(
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceExtensionProperties(
     const char *pLayerName, uint32_t *pPropertyCount,
     VkExtensionProperties *pProperties)
-
 {
   // TODO: Return any extensions that are actually supported.
   *pPropertyCount = 0;
@@ -35,7 +32,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceExtensionProperties(
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceLayerProperties(
     uint32_t *pPropertyCount, VkLayerProperties *pProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }

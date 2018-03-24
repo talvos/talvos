@@ -10,7 +10,6 @@
 VKAPI_ATTR void VKAPI_CALL
 vkCmdBindPipeline(VkCommandBuffer commandBuffer,
                   VkPipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
-
 {
   switch (pipelineBindPoint)
   {
@@ -29,7 +28,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
     VkDevice device, VkPipelineCache pipelineCache, uint32_t createInfoCount,
     const VkComputePipelineCreateInfo *pCreateInfos,
     const VkAllocationCallbacks *pAllocator, VkPipeline *pPipelines)
-
 {
   for (uint32_t i = 0; i < createInfoCount; i++)
   {
@@ -45,7 +43,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
     VkDevice device, VkPipelineCache pipelineCache, uint32_t createInfoCount,
     const VkGraphicsPipelineCreateInfo *pCreateInfos,
     const VkAllocationCallbacks *pAllocator, VkPipeline *pPipelines)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -53,7 +50,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
 VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineCache(
     VkDevice device, const VkPipelineCacheCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkPipelineCache *pPipelineCache)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -61,7 +57,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineCache(
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyPipeline(VkDevice device, VkPipeline pipeline,
                   const VkAllocationCallbacks *pAllocator)
-
 {
   delete pipeline;
 }
@@ -69,7 +64,6 @@ vkDestroyPipeline(VkDevice device, VkPipeline pipeline,
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyPipelineCache(VkDevice device, VkPipelineCache pipelineCache,
                        const VkAllocationCallbacks *pAllocator)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -77,7 +71,6 @@ vkDestroyPipelineCache(VkDevice device, VkPipelineCache pipelineCache,
 VKAPI_ATTR VkResult VKAPI_CALL
 vkGetPipelineCacheData(VkDevice device, VkPipelineCache pipelineCache,
                        size_t *pDataSize, void *pData)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -85,7 +78,6 @@ vkGetPipelineCacheData(VkDevice device, VkPipelineCache pipelineCache,
 VKAPI_ATTR VkResult VKAPI_CALL
 vkMergePipelineCaches(VkDevice device, VkPipelineCache dstCache,
                       uint32_t srcCacheCount, const VkPipelineCache *pSrcCaches)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }

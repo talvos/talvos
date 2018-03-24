@@ -7,7 +7,6 @@
 
 VKAPI_ATTR void VKAPI_CALL vkCmdSetBlendConstants(VkCommandBuffer commandBuffer,
                                                   const float blendConstants[4])
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }

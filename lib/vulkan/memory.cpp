@@ -11,7 +11,6 @@
 VKAPI_ATTR VkResult VKAPI_CALL vkAllocateMemory(
     VkDevice device, const VkMemoryAllocateInfo *pAllocateInfo,
     const VkAllocationCallbacks *pAllocator, VkDeviceMemory *pMemory)
-
 {
   uint64_t Address =
       device->Device->getGlobalMemory().allocate(pAllocateInfo->allocationSize);
@@ -23,14 +22,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateMemory(
 VKAPI_ATTR VkResult VKAPI_CALL
 vkFlushMappedMemoryRanges(VkDevice device, uint32_t memoryRangeCount,
                           const VkMappedMemoryRange *pMemoryRanges)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkFreeMemory(VkDevice device, VkDeviceMemory memory,
                                         const VkAllocationCallbacks *pAllocator)
-
 {
   device->Device->getGlobalMemory().release(memory->Address);
 }
@@ -38,7 +35,6 @@ VKAPI_ATTR void VKAPI_CALL vkFreeMemory(VkDevice device, VkDeviceMemory memory,
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceGroupPeerMemoryFeatures(
     VkDevice device, uint32_t heapIndex, uint32_t localDeviceIndex,
     uint32_t remoteDeviceIndex, VkPeerMemoryFeatureFlags *pPeerMemoryFeatures)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -46,7 +42,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceGroupPeerMemoryFeatures(
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceGroupPeerMemoryFeaturesKHR(
     VkDevice device, uint32_t heapIndex, uint32_t localDeviceIndex,
     uint32_t remoteDeviceIndex, VkPeerMemoryFeatureFlags *pPeerMemoryFeatures)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -54,14 +49,12 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceGroupPeerMemoryFeaturesKHR(
 VKAPI_ATTR void VKAPI_CALL
 vkGetDeviceMemoryCommitment(VkDevice device, VkDeviceMemory memory,
                             VkDeviceSize *pCommittedMemoryInBytes)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetMemoryFdKHR(
     VkDevice device, const VkMemoryGetFdInfoKHR *pGetFdInfo, int *pFd)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -69,7 +62,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetMemoryFdKHR(
 VKAPI_ATTR VkResult VKAPI_CALL vkGetMemoryFdPropertiesKHR(
     VkDevice device, VkExternalMemoryHandleTypeFlagBits handleType, int fd,
     VkMemoryFdPropertiesKHR *pMemoryFdProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -77,7 +69,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetMemoryFdPropertiesKHR(
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties *pMemoryProperties)
-
 {
   pMemoryProperties->memoryTypeCount = 1;
   pMemoryProperties->memoryTypes[0].heapIndex = 0;
@@ -92,7 +83,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties(
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties2 *pMemoryProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -100,7 +90,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties2(
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties2 *pMemoryProperties)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -108,7 +97,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties2KHR(
 VKAPI_ATTR VkResult VKAPI_CALL
 vkInvalidateMappedMemoryRanges(VkDevice device, uint32_t memoryRangeCount,
                                const VkMappedMemoryRange *pMemoryRanges)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -116,7 +104,6 @@ vkInvalidateMappedMemoryRanges(VkDevice device, uint32_t memoryRangeCount,
 VKAPI_ATTR VkResult VKAPI_CALL
 vkMapMemory(VkDevice device, VkDeviceMemory memory, VkDeviceSize offset,
             VkDeviceSize size, VkMemoryMapFlags flags, void **ppData)
-
 {
   talvos::Memory &GlobalMemory = device->Device->getGlobalMemory();
   *ppData = GlobalMemory.map(memory->Address, offset, size);
@@ -124,7 +111,6 @@ vkMapMemory(VkDevice device, VkDeviceMemory memory, VkDeviceSize offset,
 }
 
 VKAPI_ATTR void VKAPI_CALL vkUnmapMemory(VkDevice device, VkDeviceMemory memory)
-
 {
   device->Device->getGlobalMemory().unmap(memory->Address);
 }

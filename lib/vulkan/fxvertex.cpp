@@ -10,7 +10,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindVertexBuffers(VkCommandBuffer commandBuffer,
                                                   uint32_t bindingCount,
                                                   const VkBuffer *pBuffers,
                                                   const VkDeviceSize *pOffsets)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
@@ -19,7 +18,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetViewport(VkCommandBuffer commandBuffer,
                                             uint32_t firstViewport,
                                             uint32_t viewportCount,
                                             const VkViewport *pViewports)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }

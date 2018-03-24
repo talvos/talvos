@@ -9,14 +9,12 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetDepthBias(VkCommandBuffer commandBuffer,
                                              float depthBiasConstantFactor,
                                              float depthBiasClamp,
                                              float depthBiasSlopeFactor)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdSetLineWidth(VkCommandBuffer commandBuffer,
                                              float lineWidth)
-
 {
   TALVOS_ABORT_UNIMPLEMENTED;
 }

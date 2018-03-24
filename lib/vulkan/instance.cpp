@@ -13,7 +13,6 @@ PFN_vkVoidFunction getFunctionPointer(const char *Name);
 VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
                  const VkAllocationCallbacks *pAllocator, VkInstance *pInstance)
-
 {
   // TODO: Check extensions are supported.
   *pInstance = new VkInstance_T;
@@ -22,13 +21,11 @@ vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
 
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks *pAllocator)
-
 {
   delete instance;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceVersion(uint32_t *pApiVersion)
-
 {
   *pApiVersion = VK_API_VERSION_1_1;
   return VK_SUCCESS;
@@ -36,14 +33,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceVersion(uint32_t *pApiVersion)
 
 VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vkGetDeviceProcAddr(VkDevice device,
                                                              const char *pName)
-
 {
   return getFunctionPointer(pName);
 }
 
 VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL
 vkGetInstanceProcAddr(VkInstance instance, const char *pName)
-
 {
   return getFunctionPointer(pName);
 }

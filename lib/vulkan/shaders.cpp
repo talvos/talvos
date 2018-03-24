@@ -10,7 +10,6 @@
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateShaderModule(
     VkDevice device, const VkShaderModuleCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkShaderModule *pShaderModule)
-
 {
   *pShaderModule = new VkShaderModule_T;
   (*pShaderModule)->Module =
@@ -21,7 +20,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateShaderModule(
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyShaderModule(VkDevice device, VkShaderModule shaderModule,
                       const VkAllocationCallbacks *pAllocator)
-
 {
   delete shaderModule;
 }
