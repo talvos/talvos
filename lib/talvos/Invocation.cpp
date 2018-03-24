@@ -801,6 +801,27 @@ void Invocation::executeVectorShuffle(const Instruction *Inst)
   Objects[Id] = Result;
 }
 
+void Invocation::executeVectorTimesScalar(const Instruction *Inst)
+{
+  switch (Inst->getResultType()->getScalarType()->getBitWidth())
+  {
+  case 32:
+  {
+    float Scalar = Objects[Inst->getOperand(3)].get<float>();
+    executeOp<float, 1>(Inst, [&](float A) { return A * Scalar; });
+    break;
+  }
+  case 64:
+  {
+    double Scalar = Objects[Inst->getOperand(3)].get<double>();
+    executeOp<double, 1>(Inst, [&](double A) { return A * Scalar; });
+    break;
+  }
+  default:
+    assert(false && "Unhandled floating point size for OpDot");
+  }
+}
+
 Memory &Invocation::getMemory(uint32_t StorageClass)
 {
   switch (StorageClass)
@@ -935,6 +956,7 @@ void Invocation::step()
     DISPATCH(SpvOpUndef, Undef);
     DISPATCH(SpvOpVariable, Variable);
     DISPATCH(SpvOpVectorShuffle, VectorShuffle);
+    DISPATCH(SpvOpVectorTimesScalar, VectorTimesScalar);
 
     NOP(SpvOpLoopMerge);
     NOP(SpvOpSelectionMerge);

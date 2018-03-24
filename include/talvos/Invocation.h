@@ -157,6 +157,7 @@ public:
   void executeUMod(const Instruction *Inst);
   void executeVariable(const Instruction *Inst);
   void executeVectorShuffle(const Instruction *Inst);
+  void executeVectorTimesScalar(const Instruction *Inst);
   ///@}
 
 private:
