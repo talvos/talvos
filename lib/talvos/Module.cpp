@@ -257,6 +257,9 @@ public:
         }
         break;
       }
+      case SpvOpMemberName:
+        // TODO: Do something with this
+        break;
       case SpvOpMemoryModel:
       {
         uint32_t AddressingMode = Inst->words[Inst->operands[0].offset];
@@ -273,6 +276,9 @@ public:
         }
         break;
       }
+      case SpvOpName:
+        // TODO: Do something with this
+        break;
       case SpvOpSource:
         // TODO: Do something with this
         break;
