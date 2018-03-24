@@ -112,10 +112,7 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
   Dev.reportInvocationBegin(this);
 }
 
-Invocation::~Invocation()
-{
-  delete PrivateMemory;
-}
+Invocation::~Invocation() { delete PrivateMemory; }
 
 void Invocation::executeAccessChain(const Instruction *Inst)
 {
