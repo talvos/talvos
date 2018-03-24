@@ -31,7 +31,7 @@ class Module;
 
 struct VkBuffer_T
 {
-  uint32_t NumBytes;
+  VkDeviceSize NumBytes;
   uint64_t Address;
 };
 
