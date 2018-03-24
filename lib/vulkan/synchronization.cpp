@@ -157,5 +157,15 @@ VKAPI_ATTR VkResult VKAPI_CALL vkWaitForFences(VkDevice device,
                                                VkBool32 waitAll,
                                                uint64_t timeout)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  while (true)
+  {
+    uint32_t SignalCount = 0;
+    for (uint32_t i = 0; i < fenceCount; i++)
+    {
+      if (pFences[i]->Signaled)
+        SignalCount++;
+    }
+    if (waitAll ? SignalCount == fenceCount : SignalCount > 0)
+      return VK_SUCCESS;
+  }
 }
