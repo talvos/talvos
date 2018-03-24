@@ -282,6 +282,16 @@ public:
       case SpvOpSource:
         // TODO: Do something with this
         break;
+      case SpvOpSourceExtension:
+      {
+        char *Extension = (char *)(Inst->words + Inst->operands[0].offset);
+        if (strcmp(Extension, "GL_ARB_separate_shader_objects"))
+        {
+          std::cerr << "WARNING: Unrecognized extension " << Extension
+                    << std::endl;
+        }
+        break;
+      }
       case SpvOpTypeArray:
       {
         const Type *ElemType =
