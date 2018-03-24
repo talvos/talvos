@@ -751,6 +751,7 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
   switch (StorageClass)
   {
   case SpvStorageClassStorageBuffer:
+  case SpvStorageClassUniform:
     return Dev.getGlobalMemory();
   case SpvStorageClassWorkgroup:
     assert(Group && "Not executing within a workgroup.");

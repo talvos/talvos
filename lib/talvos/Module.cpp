@@ -482,6 +482,7 @@ void Module::addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer)
   switch (Ty->getStorageClass())
   {
   case SpvStorageClassStorageBuffer:
+  case SpvStorageClassUniform:
   {
     BufferVariable V;
 
