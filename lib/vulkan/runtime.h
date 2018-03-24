@@ -31,6 +31,7 @@ class Module;
 
 struct VkBuffer_T
 {
+  uint32_t NumBytes;
   uint64_t Address;
 };
 

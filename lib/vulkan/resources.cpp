@@ -61,6 +61,7 @@ vkCreateBuffer(VkDevice device, const VkBufferCreateInfo *pCreateInfo,
 
 {
   *pBuffer = new VkBuffer_T;
+  (*pBuffer)->NumBytes = pCreateInfo->size;
   return VK_SUCCESS;
 }
 
@@ -122,7 +123,9 @@ VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements(
     VkDevice device, VkBuffer buffer, VkMemoryRequirements *pMemoryRequirements)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  pMemoryRequirements->size = buffer->NumBytes;
+  pMemoryRequirements->alignment = 1;
+  pMemoryRequirements->memoryTypeBits = 0b1;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2(
