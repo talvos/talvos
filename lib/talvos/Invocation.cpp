@@ -260,6 +260,33 @@ void Invocation::executeCopyMemory(const Instruction *Inst)
   Memory::copy(DstAddress, DstMem, SrcAddress, SrcMem, NumBytes);
 }
 
+void Invocation::executeDot(const Instruction *Inst)
+{
+  Object &A = Objects[Inst->getOperand(2)];
+  Object &B = Objects[Inst->getOperand(3)];
+  switch (Inst->getResultType()->getBitWidth())
+  {
+  case 32:
+  {
+    float Result = 0.f;
+    for (uint32_t i = 0; i < A.getType()->getElementCount(); i++)
+      Result += A.get<float>(i) * B.get<float>(i);
+    Objects[Inst->getOperand(1)] = Object(Inst->getResultType(), Result);
+    break;
+  }
+  case 64:
+  {
+    double Result = 0.0;
+    for (uint32_t i = 0; i < A.getType()->getElementCount(); i++)
+      Result += A.get<double>(i) * B.get<double>(i);
+    Objects[Inst->getOperand(1)] = Object(Inst->getResultType(), Result);
+    break;
+  }
+  default:
+    assert(false && "Unhandled floating point size for OpDot");
+  }
+}
+
 void Invocation::executeExtInst(const Instruction *Inst)
 {
   // TODO: Currently assumes extended instruction set is GLSL.std.450
@@ -848,6 +875,7 @@ void Invocation::step()
     DISPATCH(SpvOpControlBarrier, ControlBarrier);
     DISPATCH(SpvOpConvertUToF, ConvertUToF);
     DISPATCH(SpvOpCopyMemory, CopyMemory);
+    DISPATCH(SpvOpDot, Dot);
     DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFDiv, FDiv);
