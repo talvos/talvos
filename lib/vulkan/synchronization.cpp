@@ -103,7 +103,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetFenceFdKHR(
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetFenceStatus(VkDevice device, VkFence fence)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return fence->Signaled ? VK_SUCCESS : VK_NOT_READY;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetSemaphoreFdKHR(
