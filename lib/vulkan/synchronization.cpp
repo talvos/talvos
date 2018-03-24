@@ -60,7 +60,9 @@ vkCreateFence(VkDevice device, const VkFenceCreateInfo *pCreateInfo,
               const VkAllocationCallbacks *pAllocator, VkFence *pFence)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pFence = new VkFence_T;
+  (*pFence)->Signaled = pCreateInfo->flags & VK_FENCE_CREATE_SIGNALED_BIT;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateSemaphore(
@@ -82,7 +84,7 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyFence(
     VkDevice device, VkFence fence, const VkAllocationCallbacks *pAllocator)
 
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete fence;
 }
 
 VKAPI_ATTR void VKAPI_CALL
