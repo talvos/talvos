@@ -91,6 +91,7 @@ public:
   void executeBitwiseXor(const Instruction *Inst);
   void executeBranch(const Instruction *Inst);
   void executeBranchConditional(const Instruction *Inst);
+  void executeCompositeConstruct(const Instruction *Inst);
   void executeCompositeExtract(const Instruction *Inst);
   void executeCompositeInsert(const Instruction *Inst);
   void executeControlBarrier(const Instruction *Inst);

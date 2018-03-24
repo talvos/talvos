@@ -183,6 +183,22 @@ void Invocation::executeBranchConditional(const Instruction *Inst)
   moveToBlock(Inst->getOperand(Condition ? 1 : 2));
 }
 
+void Invocation::executeCompositeConstruct(const Instruction *Inst)
+{
+  uint32_t Id = Inst->getOperand(1);
+
+  Object Result = Object(Inst->getResultType());
+
+  // Set constituent values.
+  for (uint32_t i = 2; i < Inst->getNumOperands(); i++)
+  {
+    uint32_t Id = Inst->getOperand(i);
+    Result.insert({i - 2}, Objects[Id]);
+  }
+
+  Objects[Id] = Result;
+}
+
 void Invocation::executeCompositeExtract(const Instruction *Inst)
 {
   uint32_t Id = Inst->getOperand(1);
@@ -811,6 +827,7 @@ void Invocation::step()
     DISPATCH(SpvOpBitwiseXor, BitwiseXor);
     DISPATCH(SpvOpBranch, Branch);
     DISPATCH(SpvOpBranchConditional, BranchConditional);
+    DISPATCH(SpvOpCompositeConstruct, CompositeConstruct);
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpCompositeInsert, CompositeInsert);
     DISPATCH(SpvOpControlBarrier, ControlBarrier);
