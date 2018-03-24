@@ -94,6 +94,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
       }
     }
   }
+  if (fence)
+    fence->Signaled = true;
   return VK_SUCCESS;
 }
 
