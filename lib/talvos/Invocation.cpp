@@ -227,6 +227,21 @@ void Invocation::executeControlBarrier(const Instruction *Inst)
   AtBarrier = true;
 }
 
+void Invocation::executeConvertUToF(const Instruction *Inst)
+{
+  switch (Inst->getResultType()->getBitWidth())
+  {
+  case 32:
+    executeOpUInt<1>(Inst, [](auto A) -> float { return (float)A; });
+    break;
+  case 64:
+    executeOpUInt<1>(Inst, [](auto A) -> double { return (double)A; });
+    break;
+  default:
+    assert(false && "Unhandled floating point size for OpConvertUToF");
+  }
+}
+
 void Invocation::executeCopyMemory(const Instruction *Inst)
 {
   const Object &Dst = Objects[Inst->getOperand(0)];
@@ -831,6 +846,7 @@ void Invocation::step()
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpCompositeInsert, CompositeInsert);
     DISPATCH(SpvOpControlBarrier, ControlBarrier);
+    DISPATCH(SpvOpConvertUToF, ConvertUToF);
     DISPATCH(SpvOpCopyMemory, CopyMemory);
     DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
