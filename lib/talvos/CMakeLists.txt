@@ -5,6 +5,7 @@
 
 include(CheckIncludeFiles)
 include(CheckLibraryExists)
+include(FindThreads)
 
 # Check for SPIRV headers
 set(SPIRV_INCLUDE_DIR "" CACHE STRING "Directory containing SPIR-V headers")
@@ -87,6 +88,8 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
 set(TALVOS_SOURCES
     Block.cpp
+    CommandInvocation.cpp
+    CommandInvocation.h
     Device.cpp
     Dim3.cpp
     DispatchCommand.cpp
@@ -111,6 +114,7 @@ target_include_directories(talvos PRIVATE "${SPIRV_TOOLS_INCLUDE_DIR}")
 target_include_directories(talvos PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(talvos "${SPIRV_TOOLS_LIB}")
 target_link_libraries(talvos "${CMAKE_DL_LIBS}")
+target_link_libraries(talvos "${CMAKE_THREAD_LIBS_INIT}")
 target_link_libraries(talvos "${TALVOS_OPTIONAL_LIBS}")
 
 install(TARGETS talvos DESTINATION lib)

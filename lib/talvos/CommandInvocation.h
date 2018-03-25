@@ -1,0 +1,104 @@
+// Copyright (c) 2018 the Talvos developers. All rights reserved.
+//
+// This file is distributed under a three-clause BSD license. For full license
+// terms please see the LICENSE file distributed with this source code.
+
+/// \file CommandInvocation.h
+/// This file declares the CommandInvocation class.
+
+#ifndef TALVOS_COMMANDINVOCATION_H
+#define TALVOS_COMMANDINVOCATION_H
+
+#include <atomic>
+#include <mutex>
+#include <vector>
+
+#include "talvos/Dim3.h"
+
+namespace talvos
+{
+
+class Device;
+class DispatchCommand;
+class Invocation;
+class Workgroup;
+
+/// An internal class that handles command execution, including the interactive
+/// debugger.
+class CommandInvocation
+{
+public:
+  /// Create a command invocation for \p Command on \p Dev.
+  CommandInvocation(Device &Dev, const DispatchCommand &Command);
+
+  // Do not allow CommandInvocation objects to be copied.
+  ///\{
+  CommandInvocation(const CommandInvocation &) = delete;
+  CommandInvocation &operator=(const CommandInvocation &) = delete;
+  ///\}
+
+  /// Returns the command that is being executed.
+  const DispatchCommand &getCommand() const { return Command; }
+
+  /// Returns the current invocation being executed.
+  const Invocation *getCurrentInvocation() const;
+
+  /// Returns the current workgroup being executed.
+  const Workgroup *getCurrentWorkgroup() const;
+
+  /// Returns true if the calling thread is a CommandInvocation worker thread.
+  bool isWorkerThread() const;
+
+  /// Run the command to completion.
+  void run();
+
+  /// Signal that an error has occurred, breaking the interactive debugger.
+  void signalError();
+
+private:
+  /// Worker thread entry point.
+  void runWorker();
+
+  /// The device this command invocation is executing on.
+  Device &Dev;
+
+  /// The command being executed.
+  const DispatchCommand &Command;
+
+  /// The number of worker threads currently executing.
+  unsigned NumThreads;
+
+  /// Index of next group to run in PendingGroups.
+  std::atomic<size_t> NextGroupIndex;
+
+  /// Pool of group IDs pending creation and execution.
+  std::vector<Dim3> PendingGroups;
+
+  /// Pool of groups that have begun execution and been suspended.
+  std::vector<Workgroup *> RunningGroups;
+
+  // Interactive debugging functionality.
+  bool Continue;    ///< True when the user has used \p continue command.
+  bool Interactive; ///< True when interactive mode is enabled.
+
+  /// Trigger interaction with the user (if necessary).
+  void interact();
+
+  /// Print the next instruction that will be executed.
+  void printNextInstruction();
+
+  /// \name Interactive command handlers.
+  /// Return true when the interpreter should resume executing instructions.
+  ///@{
+  bool cont(const std::vector<std::string> &Args);
+  bool help(const std::vector<std::string> &Args);
+  bool print(const std::vector<std::string> &Args);
+  bool quit(const std::vector<std::string> &Args);
+  bool step(const std::vector<std::string> &Args);
+  bool swtch(const std::vector<std::string> &Args);
+  ///@}
+};
+
+} // namespace talvos
+
+#endif
