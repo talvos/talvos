@@ -100,18 +100,18 @@ Device::Device()
 Device::~Device()
 {
   // Destroy plugins and unload their dynamic libraries.
-  for (auto P = Plugins.begin(); P != Plugins.end(); P++)
+  for (auto P : Plugins)
   {
 #if defined(_WIN32) && !defined(__MINGW32__)
-    void *Destroy = GetProcAddress((HMODULE)P->first, "talvosDestroyPlugin");
+    void *Destroy = GetProcAddress((HMODULE)P.first, "talvosDestroyPlugin");
     if (Destroy)
-      ((DestroyPluginFunc)Destroy)(P->second);
-    FreeLibrary((HMODULE)P->first);
+      ((DestroyPluginFunc)Destroy)(P.second);
+    FreeLibrary((HMODULE)P.first);
 #else
-    void *Destroy = dlsym(P->first, "talvosDestroyPlugin");
+    void *Destroy = dlsym(P.first, "talvosDestroyPlugin");
     if (Destroy)
-      ((DestroyPluginFunc)Destroy)(P->second);
-    dlclose(P->first);
+      ((DestroyPluginFunc)Destroy)(P.second);
+    dlclose(P.first);
 #endif
   }
 
