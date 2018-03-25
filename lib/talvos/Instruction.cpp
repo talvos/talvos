@@ -22,6 +22,7 @@ Instruction::Instruction(uint16_t Opcode, uint16_t NumOperands,
   this->NumOperands = NumOperands;
   this->ResultType = ResultType;
   this->Next = nullptr;
+  this->Previous = nullptr;
 
   this->Operands = new uint32_t[NumOperands];
   memcpy(this->Operands, Operands, NumOperands * sizeof(uint32_t));
@@ -29,7 +30,10 @@ Instruction::Instruction(uint16_t Opcode, uint16_t NumOperands,
 
 void Instruction::insertAfter(Instruction *I)
 {
+  this->Previous = I;
   this->Next = std::move(I->Next);
+  if (this->Next)
+    this->Next->Previous = this;
   I->Next = std::unique_ptr<Instruction>(this);
 }
 

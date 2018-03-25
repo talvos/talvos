@@ -63,9 +63,14 @@ public:
   void insertAfter(Instruction *I);
 
   /// Get the next instruction in the containing block.
-  /// /returns the next instruction, or nullptr if this instruction is a
+  /// \returns the next instruction, or nullptr if this instruction is a
   /// terminator.
   const Instruction *next() const { return Next.get(); }
+
+  /// Get the previous instruction in the containing block.
+  /// \returns the previous instruction, or nullptr if this instruction is the
+  /// first in its block.
+  const Instruction *previous() const { return Previous; }
 
   /// Print a human-readable form of this instruction to \p O.
   void print(std::ostream &O) const;
@@ -80,6 +85,8 @@ private:
   uint32_t *Operands;     ///< The operand values.
 
   std::unique_ptr<Instruction> Next; ///< The next instruction in the block.
+
+  const Instruction *Previous; ///< The previous instruction in the block.
 };
 
 } // namespace talvos
