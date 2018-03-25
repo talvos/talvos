@@ -47,10 +47,10 @@ install:
 script:
   - git clone https://github.com/KhronosGroup/SPIRV-Headers
   - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      wget https://github.com/KhronosGroup/SPIRV-Tools/releases/download/master-tot/SPIRV-Tools-master-linux-RelWithDebInfo.zip;
+      wget -q https://github.com/KhronosGroup/SPIRV-Tools/releases/download/master-tot/SPIRV-Tools-master-linux-RelWithDebInfo.zip;
       unzip SPIRV-Tools-master-linux-RelWithDebInfo.zip -d SPIRV-Tools;
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      wget https://github.com/KhronosGroup/SPIRV-Tools/releases/download/master-tot/SPIRV-Tools-master-osx-RelWithDebInfo.zip;
+      wget -q https://github.com/KhronosGroup/SPIRV-Tools/releases/download/master-tot/SPIRV-Tools-master-osx-RelWithDebInfo.zip;
       unzip SPIRV-Tools-master-osx-RelWithDebInfo.zip -d SPIRV-Tools;
     fi
   - cmake . -DSPIRV_INCLUDE_DIR=$PWD/SPIRV-Headers/include
