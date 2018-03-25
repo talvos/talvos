@@ -16,6 +16,10 @@ namespace talvos
 /// or \p Default if it is not set.
 bool checkEnv(const char *Name, bool Default);
 
+/// Returns the integer value for the environment variable \p Name, or
+/// \p Default if it is not set.
+unsigned long getEnvUInt(const char *Name, unsigned Default);
+
 } // namespace talvos
 
 #endif

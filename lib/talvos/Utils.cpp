@@ -30,4 +30,22 @@ bool checkEnv(const char *Name, bool Default)
   abort();
 }
 
+unsigned long getEnvUInt(const char *Name, unsigned Default)
+{
+  const char *StrValue = getenv(Name);
+  if (!StrValue)
+    return Default;
+
+  char *End;
+  unsigned long Value = strtoul(StrValue, &End, 10);
+  if (strlen(End) || !strlen(StrValue) || Value == 0)
+  {
+    std::cerr << std::endl
+              << "ERROR: Invalid value for " << Name << " environment variable"
+              << std::endl;
+    abort();
+  }
+  return Value;
+}
+
 } // namespace talvos
