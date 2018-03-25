@@ -6,6 +6,8 @@
 /// \file CommandInvocation.cpp
 /// This file defines the CommandInvocation class.
 
+#include "config.h"
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>

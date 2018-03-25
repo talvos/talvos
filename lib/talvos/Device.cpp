@@ -6,8 +6,6 @@
 /// \file Device.cpp
 /// This file defines the Device class.
 
-#include "config.h"
-
 #include <cassert>
 #include <iostream>
 #include <sstream>
