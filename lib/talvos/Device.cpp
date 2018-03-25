@@ -118,6 +118,14 @@ Device::~Device()
   delete GlobalMemory;
 }
 
+bool Device::isThreadSafe() const
+{
+  for (auto P : Plugins)
+    if (!P.second->isThreadSafe())
+      return false;
+  return true;
+}
+
 void Device::reportError(const std::string &Error)
 {
   // Guard output to avoid mangling error messages from multiple threads.

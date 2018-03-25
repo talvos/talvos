@@ -39,6 +39,9 @@ public:
   /// Get the global memory instance associated with this device.
   Memory &getGlobalMemory() { return *GlobalMemory; }
 
+  /// Returns true if all of the loaded plugins are thread-safe.
+  bool isThreadSafe() const;
+
   /// Report an error that has occurred during emulation.
   /// This prints \p Error to stderr along with the current execution context.
   void reportError(const std::string &Error);

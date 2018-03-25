@@ -87,7 +87,7 @@ void CommandInvocation::run()
 
   // Create worker threads.
   NumThreads = 1;
-  if (!Interactive)
+  if (!Interactive && Dev.isThreadSafe())
     NumThreads =
         getEnvUInt("TALVOS_NUM_WORKERS", std::thread::hardware_concurrency());
   std::vector<std::thread> Threads;

@@ -14,6 +14,8 @@ public:
 
   ~CallbackTest() { std::cout << "plugin destroyed" << std::endl; }
 
+  bool isThreadSafe() const override { return false; }
+
   void dispatchCommandBegin(const DispatchCommand *Cmd) override
   {
     std::cout << "dispatchcommand begin" << std::endl;

@@ -28,6 +28,9 @@ class Plugin
 public:
   virtual ~Plugin() = default;
 
+  /// Returns true if the plugin is thread-safe.
+  virtual bool isThreadSafe() const { return true; }
+
   /// Called when a dispatch command has begun executing.
   virtual void dispatchCommandBegin(const DispatchCommand *Cmd) {}
 
