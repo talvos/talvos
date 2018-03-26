@@ -224,7 +224,8 @@ void CommandInvocation::interact()
 
   // Check if a breakpoint has been reached.
   const Instruction *CI = CurrentInvocation->getCurrentInstruction();
-  if (CI && CI->getResultType())
+  if (CI && CI->getResultType() &&
+      CurrentInvocation->getState() != Invocation::BARRIER)
   {
     uint32_t ResultId = CI->getOperand(1);
     auto BP = std::find_if(
