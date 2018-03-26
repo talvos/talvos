@@ -266,15 +266,21 @@ void CommandInvocation::interact()
     std::istringstream ISS(Line);
     std::vector<std::string> Tokens{std::istream_iterator<std::string>{ISS},
                                     std::istream_iterator<std::string>{}};
-
-    // Skip empty lines.
-    // TODO: Repeat last command instead?
     if (!Tokens.size())
-      continue;
-
+    {
+      // Repeat last command if possible, otherwise skip.
+      if (!LastLine.size())
+        continue;
+      Tokens = LastLine;
+    }
+    else
+    {
+      // Save tokens for repeating command.
+      LastLine = Tokens;
 #if HAVE_READLINE
-    add_history(Line.c_str());
+      add_history(Line.c_str());
 #endif
+    }
 
 /// Map a command with a long and short name to a handler function.
 #define CMD(LONG, SHORT, FUNC)                                                 \

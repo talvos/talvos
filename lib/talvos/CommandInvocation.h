@@ -87,6 +87,9 @@ private:
   /// Print the context for the current invocation.
   void printContext() const;
 
+  /// Tokens for the most recent interactive command entered.
+  std::vector<std::string> LastLine;
+
   /// \name Interactive command handlers.
   /// Return true when the interpreter should resume executing instructions.
   ///@{
