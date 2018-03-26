@@ -79,14 +79,38 @@ below:
 ::
 
   $ TALVOS_INTERACTIVE=1 talvos-cmd nbody.tcf
-    %62 = OpAccessChain %21 %12 %31
+
+            OpLabel %61
+  ->  %62 = OpAccessChain %21 %12 %31
+      %63 = OpLoad %19 %62
+      %64 = OpAccessChain %23 %13 %31
+      %65 = OpLoad %15 %64
   (talvos) step
-    %63 = OpLoad %19 %62
+            OpLabel %61
+      %62 = OpAccessChain %21 %12 %31
+  ->  %63 = OpLoad %19 %62
+      %64 = OpAccessChain %23 %13 %31
+      %65 = OpLoad %15 %64
+      %66 = OpAccessChain %23 %14 %31
+
   ...
+
   (talvos) step
-    %71 = OpLoad %16 %70
+      %68 = OpAccessChain %28 %3 %31
+      %69 = OpLoad %19 %68
+      %70 = OpAccessChain %17 %9 %31 %69
+  ->  %71 = OpLoad %16 %70
+      %72 = OpIEqual %29 %63 %31
+      %73 = OpLogicalNot %29 %72
+            OpSelectionMerge %74 %0
   (talvos) step
-    %72 = OpIEqual %29 %63 %31
+      %69 = OpLoad %19 %68
+      %70 = OpAccessChain %17 %9 %31 %69
+      %71 = OpLoad %16 %70
+  ->  %72 = OpIEqual %29 %63 %31
+      %73 = OpLogicalNot %29 %72
+            OpSelectionMerge %74 %0
+            OpBranchConditional %73 %75 %74
 
   (talvos) print %16
     %16 = float32v4
@@ -95,13 +119,36 @@ below:
 
   (talvos) switch 7 0 0
   Switched to invocation with global ID (7,0,0)
-    %62 = OpAccessChain %21 %12 %31
+            OpLabel %61
+  ->  %62 = OpAccessChain %21 %12 %31
+      %63 = OpLoad %19 %62
+      %64 = OpAccessChain %23 %13 %31
+      %65 = OpLoad %15 %64
   (talvos) step
-    %63 = OpLoad %19 %62
+            OpLabel %61
+      %62 = OpAccessChain %21 %12 %31
+  ->  %63 = OpLoad %19 %62
+      %64 = OpAccessChain %23 %13 %31
+      %65 = OpLoad %15 %64
+      %66 = OpAccessChain %23 %14 %31
+
   ...
-    %72 = OpIEqual %29 %63 %31
+
   (talvos) step
-    %73 = OpLogicalNot %29 %72
+      %69 = OpLoad %19 %68
+      %70 = OpAccessChain %17 %9 %31 %69
+      %71 = OpLoad %16 %70
+  ->  %72 = OpIEqual %29 %63 %31
+      %73 = OpLogicalNot %29 %72
+            OpSelectionMerge %74 %0
+            OpBranchConditional %73 %75 %74
+  (talvos) step
+      %70 = OpAccessChain %17 %9 %31 %69
+      %71 = OpLoad %16 %70
+  ->  %72 = OpIEqual %29 %63 %31
+      %73 = OpLogicalNot %29 %72
+            OpSelectionMerge %74 %0
+            OpBranchConditional %73 %75 %74
 
   (talvos) print %29
     %29 = bool
@@ -115,7 +162,13 @@ inspect the state of the current invocation:
 ::
 
   $ TALVOS_INTERACTIVE=1 talvos-cmd device-load-invalid.tcf
-    %24 = OpAccessChain %19 %2 %21
+
+            OpLabel %23
+  ->  %24 = OpAccessChain %19 %2 %21
+      %25 = OpLoad %12 %24
+      %26 = OpAccessChain %13 %9 %21 %25
+      %27 = OpLoad %12 %26
+      %24 = OpAccessChain %19 %2 %21
   (talvos) continue
 
   Invalid load of 4 bytes from address 0x200000000003c (Device scope)
@@ -123,7 +176,14 @@ inspect the state of the current invocation:
       Invocation: Global(15,0,0) Local(0,0,0) Group(15,0,0)
         %29 = OpLoad %12 %28
 
-    %29 = OpLoad %12 %28
+      %26 = OpAccessChain %13 %9 %21 %25
+      %27 = OpLoad %12 %26
+      %28 = OpAccessChain %13 %10 %21 %25
+  ->  %29 = OpLoad %12 %28
+      %30 = OpIAdd %12 %29 %27
+      %31 = OpAccessChain %13 %11 %21 %25
+            OpStore %31 %30
+
   (talvos) print %28
     %28 = 0x200000000003c
   (talvos) print %12
