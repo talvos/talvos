@@ -40,13 +40,24 @@ void Instruction::insertAfter(Instruction *I)
   I->Next = std::unique_ptr<Instruction>(this);
 }
 
-void Instruction::print(std::ostream &O) const
+void Instruction::print(std::ostream &O, bool Align) const
 {
-  // TODO: Adapt whitespace here based on module ID bound
+  if (Align)
+  {
+    if (ResultType)
+    {
+      // TODO: Adapt extra whitespace based on module ID bound.
+      if (Operands[1] < 100)
+        O << " ";
+      if (Operands[1] < 10)
+        O << " ";
+    }
+    else
+      O << "       ";
+  }
+
   if (ResultType)
-    O << "  %" << Operands[1] << " = ";
-  else
-    O << "        ";
+    O << "%" << Operands[1] << " = ";
 
   O << opcodeToString(Opcode);
   for (unsigned i = 0; i < NumOperands; i++)

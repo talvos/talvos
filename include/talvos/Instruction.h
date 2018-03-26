@@ -73,7 +73,9 @@ public:
   const Instruction *previous() const { return Previous; }
 
   /// Print a human-readable form of this instruction to \p O.
-  void print(std::ostream &O) const;
+  /// If \p Align is true then whitespace will be added to align output with
+  /// any other instructions printed using this method.
+  void print(std::ostream &O, bool Align = true) const;
 
   /// Return the string representation of an instruction opcode.
   static const char *opcodeToString(uint16_t Opcode);

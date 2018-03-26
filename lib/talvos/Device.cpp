@@ -153,8 +153,8 @@ void Device::reportError(const std::string &Error)
     std::cerr << std::endl;
 
     // Show current instruction.
-    std::cerr << "    ";
-    Inv->getCurrentInstruction()->print(std::cerr);
+    std::cerr << "      ";
+    Inv->getCurrentInstruction()->print(std::cerr, false);
     std::cerr << std::endl;
   }
   else
