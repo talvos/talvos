@@ -53,6 +53,9 @@ static thread_local bool IsWorkerThread = false;
 static thread_local Workgroup *CurrentGroup;
 static thread_local Invocation *CurrentInvocation;
 
+uint32_t CommandInvocation::NextBreakpoint = 1;
+std::map<uint32_t, uint32_t> CommandInvocation::Breakpoints;
+
 CommandInvocation::CommandInvocation(Device &Dev,
                                      const DispatchCommand &Command)
     : Dev(Dev), Command(Command)
@@ -219,6 +222,22 @@ void CommandInvocation::interact()
   if (!Interactive)
     return;
 
+  // Check if a breakpoint has been reached.
+  const Instruction *CI = CurrentInvocation->getCurrentInstruction();
+  if (CI && CI->getResultType())
+  {
+    uint32_t ResultId = CI->getOperand(1);
+    auto BP = std::find_if(
+        Breakpoints.begin(), Breakpoints.end(),
+        [ResultId](const auto &BP) { return BP.second == ResultId; });
+    if (BP != Breakpoints.end())
+    {
+      std::cout << "Breakpoint " << BP->first << " hit by invocation "
+                << CurrentInvocation->getGlobalId() << std::endl;
+      Continue = false;
+    }
+  }
+
   // Keep going if user used 'continue'.
   if (Continue)
     return;
@@ -291,6 +310,7 @@ void CommandInvocation::interact()
     else                                                                       \
       continue;                                                                \
   }
+    CMD("break", "b", brk);
     CMD("continue", "c", cont);
     CMD("help", "h", help);
     CMD("print", "p", print);
@@ -342,6 +362,32 @@ void CommandInvocation::printContext() const
   }
 }
 
+bool CommandInvocation::brk(const std::vector<std::string> &Args)
+{
+  if (Args.size() != 2)
+  {
+    std::cerr << "Usage: break %id" << std::endl;
+    return false;
+  }
+
+  // Parse target result ID.
+  char *Next;
+  uint32_t Id = strtoul(Args[1].c_str() + 1, &Next, 10);
+  if (Args[1][0] != '%' || strlen(Next))
+  {
+    std::cerr << "Invalid result ID '" << Args[1] << "'" << std::endl;
+    return false;
+  }
+
+  // Set breakpoint.
+  Breakpoints[NextBreakpoint] = Id;
+  std::cout << "Breakpoint " << NextBreakpoint << " set for result ID %" << Id
+            << std::endl;
+  NextBreakpoint++;
+
+  return false;
+}
+
 bool CommandInvocation::cont(const std::vector<std::string> &Args)
 {
   Continue = true;
@@ -351,6 +397,7 @@ bool CommandInvocation::cont(const std::vector<std::string> &Args)
 bool CommandInvocation::help(const std::vector<std::string> &Args)
 {
   std::cout << "Command list:" << std::endl;
+  std::cout << "  break        (b)" << std::endl;
   std::cout << "  continue     (c)" << std::endl;
   std::cout << "  help         (h)" << std::endl;
   std::cout << "  print        (p)" << std::endl;

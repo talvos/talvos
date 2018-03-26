@@ -10,6 +10,7 @@
 #define TALVOS_COMMANDINVOCATION_H
 
 #include <atomic>
+#include <map>
 #include <mutex>
 #include <vector>
 
@@ -90,9 +91,16 @@ private:
   /// Tokens for the most recent interactive command entered.
   std::vector<std::string> LastLine;
 
+  /// Index of the next breakpoint to create.
+  static uint32_t NextBreakpoint;
+
+  /// Map from breakpoint ID to instruction result ID.
+  static std::map<uint32_t, uint32_t> Breakpoints;
+
   /// \name Interactive command handlers.
   /// Return true when the interpreter should resume executing instructions.
   ///@{
+  bool brk(const std::vector<std::string> &Args);
   bool cont(const std::vector<std::string> &Args);
   bool help(const std::vector<std::string> &Args);
   bool print(const std::vector<std::string> &Args);
