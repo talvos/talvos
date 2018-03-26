@@ -73,6 +73,7 @@ Type ``help`` to see a list of available commands.
 Using ``step`` will advance the current invocation by a single SPIR-V
 instruction, and ``print %<id>`` will display the value of the SPIR-V object
 with the specified ID.
+Breakpoints can be set on instruction result IDs using ``break %<id>``.
 The ``switch`` command can be used to change to a different invocation.
 An example interactive debugging session demonstrating these commands is shown
 below:
@@ -93,17 +94,11 @@ below:
       %65 = OpLoad %15 %64
       %66 = OpAccessChain %23 %14 %31
 
-  ...
+  (talvos) break %72
+  Breakpoint 1 set for result ID %72
+  (talvos) continue
 
-  (talvos) step
-      %68 = OpAccessChain %28 %3 %31
-      %69 = OpLoad %19 %68
-      %70 = OpAccessChain %17 %9 %31 %69
-  ->  %71 = OpLoad %16 %70
-      %72 = OpIEqual %29 %63 %31
-      %73 = OpLogicalNot %29 %72
-            OpSelectionMerge %74 %0
-  (talvos) step
+  Breakpoint 1 hit by invocation (0,0,0)
       %69 = OpLoad %19 %68
       %70 = OpAccessChain %17 %9 %31 %69
       %71 = OpLoad %16 %70
@@ -124,17 +119,9 @@ below:
       %63 = OpLoad %19 %62
       %64 = OpAccessChain %23 %13 %31
       %65 = OpLoad %15 %64
-  (talvos) step
-            OpLabel %61
-      %62 = OpAccessChain %21 %12 %31
-  ->  %63 = OpLoad %19 %62
-      %64 = OpAccessChain %23 %13 %31
-      %65 = OpLoad %15 %64
-      %66 = OpAccessChain %23 %14 %31
+  (talvos) continue
 
-  ...
-
-  (talvos) step
+  Breakpoint 1 hit by invocation (7,0,0)
       %69 = OpLoad %19 %68
       %70 = OpAccessChain %17 %9 %31 %69
       %71 = OpLoad %16 %70
@@ -145,8 +132,8 @@ below:
   (talvos) step
       %70 = OpAccessChain %17 %9 %31 %69
       %71 = OpLoad %16 %70
-  ->  %72 = OpIEqual %29 %63 %31
-      %73 = OpLogicalNot %29 %72
+      %72 = OpIEqual %29 %63 %31
+  ->  %73 = OpLogicalNot %29 %72
             OpSelectionMerge %74 %0
             OpBranchConditional %73 %75 %74
 
@@ -154,6 +141,8 @@ below:
     %29 = bool
   (talvos) print %72
     %72 = false
+  (talvos) breakpoint clear
+  All breakpoints cleared.
   (talvos) continue
 
 While running with ``continue``, the interactive debugger will automatically
