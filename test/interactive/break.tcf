@@ -1,0 +1,54 @@
+# Test general breakpoint usage.
+
+MODULE ../misc/reduce.spvasm
+ENTRY reduce
+
+BUFFER n      4   DATA   UINT32 64
+BUFFER data   256 SERIES UINT32 0 1
+BUFFER result 32  FILL   UINT32 0
+
+DESCRIPTOR_SET 0 0 n
+DESCRIPTOR_SET 0 1 data
+DESCRIPTOR_SET 0 2 result
+
+DISPATCH 8 1 1
+
+# CHECK: Usage: break
+# CHECK: Invalid result ID '%x'
+# CHECK: Invalid result ID '%1x'
+# CHECK: Breakpoint 1 set for result ID %45
+# CHECK: Breakpoint 2 set for result ID %47
+# CHECK: Breakpoint 3 set for result ID %54
+# CHECK: Usage: breakpoint
+# CHECK: Breakpoint 1: %45
+# CHECK: Breakpoint 2: %47
+# CHECK: Breakpoint 3: %54
+# CHECK: Breakpoint 1 hit by invocation (0,0,0)
+# CHECK: ->  %45 = OpShiftRightLogical
+# CHECK: Breakpoint 2 hit by invocation (0,0,0)
+# CHECK: ->  %47 = OpLogicalNot
+# CHECK: Breakpoint 1 hit by invocation (1,0,0)
+# CHECK: ->  %45 = OpShiftRightLogical
+# CHECK: Usage: breakpoint delete
+# CHECK: Invalid breakpoint ID 'x'
+# CHECK: Invalid breakpoint ID '7'
+# CHECK: Breakpoint 2 deleted.
+# CHECK: Breakpoint 1: %45
+# CHECK: Breakpoint 3: %54
+# CHECK: Breakpoint 1 deleted.
+# CHECK: Breakpoint 3 hit by invocation (0,0,0)
+# CHECK: ->  %54 = OpULessThan
+# CHECK: All breakpoints cleared.
+# CHECK: No breakpoints.
+
+DUMP UINT32 result
+
+# CHECK: Buffer 'result' (32 bytes):
+# CHECK:   result[0] = 28
+# CHECK:   result[1] = 92
+# CHECK:   result[2] = 156
+# CHECK:   result[3] = 220
+# CHECK:   result[4] = 284
+# CHECK:   result[5] = 348
+# CHECK:   result[6] = 412
+# CHECK:   result[7] = 476

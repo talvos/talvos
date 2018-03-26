@@ -4,6 +4,7 @@
 # terms please see the LICENSE file distributed with this source code.
 
 foreach(test
+  break
   break-on-error
   print
   step

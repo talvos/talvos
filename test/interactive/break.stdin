@@ -1,0 +1,21 @@
+break
+break %x
+break %1x
+break %45
+b %47
+b %54
+breakpoint foo
+breakpoint list
+continue
+continue
+continue
+breakpoint delete
+breakpoint delete x
+breakpoint delete 7
+breakpoint delete 2
+bp list
+bp delete 1
+continue
+breakpoint clear
+breakpoint list
+continue
