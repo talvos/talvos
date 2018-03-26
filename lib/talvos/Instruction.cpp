@@ -6,6 +6,7 @@
 /// \file Instruction.cpp
 /// This file defines the Instruction class.
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <spirv/unified1/spirv.h>
@@ -30,6 +31,8 @@ Instruction::Instruction(uint16_t Opcode, uint16_t NumOperands,
 
 void Instruction::insertAfter(Instruction *I)
 {
+  assert(Opcode != SpvOpLabel);
+
   this->Previous = I;
   this->Next = std::move(I->Next);
   if (this->Next)

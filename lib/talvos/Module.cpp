@@ -61,46 +61,41 @@ public:
     {
       CurrentFunction->addParam(Inst->result_id);
     }
+    else if (Inst->opcode == SpvOpLabel)
+    {
+      if (CurrentBlock)
+        // Add previous block to function.
+        CurrentFunction->addBlock(std::move(CurrentBlock));
+      else
+        // First block - set as entry block.
+        CurrentFunction->setFirstBlock(Inst->result_id);
+
+      // Create new block.
+      CurrentBlock = std::make_unique<Block>(Inst->result_id);
+      PreviousInstruction = &CurrentBlock->getLabel();
+    }
     else if (CurrentFunction)
     {
-      if (Inst->opcode == SpvOpLabel)
+      // Create an array of operand values.
+      uint32_t *Operands = new uint32_t[Inst->num_operands];
+      for (int i = 0; i < Inst->num_operands; i++)
       {
-        if (CurrentBlock)
-          // Add previous block to function.
-          CurrentFunction->addBlock(std::move(CurrentBlock));
-        else
-          // First block - set as entry block.
-          CurrentFunction->setFirstBlock(Inst->result_id);
-
-        // Create new block.
-        CurrentBlock = std::make_unique<Block>(Inst->result_id);
-        PreviousInstruction = nullptr;
+        // TODO: Handle larger operands
+        assert(Inst->operands[i].num_words == 1);
+        Operands[i] = Inst->words[Inst->operands[i].offset];
       }
-      else
-      {
-        // Create an array of operand values.
-        uint32_t *Operands = new uint32_t[Inst->num_operands];
-        for (int i = 0; i < Inst->num_operands; i++)
-        {
-          // TODO: Handle larger operands
-          assert(Inst->operands[i].num_words == 1);
-          Operands[i] = Inst->words[Inst->operands[i].offset];
-        }
 
-        // Create the instruction.
-        const Type *ResultType =
-            Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
-        Instruction *I = new Instruction(Inst->opcode, Inst->num_operands,
-                                         Operands, ResultType);
-        delete[] Operands;
+      // Create the instruction.
+      const Type *ResultType =
+          Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
+      Instruction *I = new Instruction(Inst->opcode, Inst->num_operands,
+                                       Operands, ResultType);
+      delete[] Operands;
 
-        // Insert this instruction into the current block.
-        if (PreviousInstruction)
-          I->insertAfter(PreviousInstruction);
-        else
-          CurrentBlock->insertAtStart(I);
-        PreviousInstruction = I;
-      }
+      // Insert this instruction into the current block.
+      assert(PreviousInstruction);
+      I->insertAfter(PreviousInstruction);
+      PreviousInstruction = I;
     }
     else
     {

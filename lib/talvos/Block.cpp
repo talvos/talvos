@@ -9,27 +9,17 @@
 #include "talvos/Block.h"
 #include "talvos/Instruction.h"
 
+#include <spirv/unified1/spirv.h>
+
 namespace talvos
 {
 
 Block::Block(uint32_t Id)
 {
   this->Id = Id;
-  FirstInstruction = nullptr;
+  Label = std::make_unique<Instruction>(SpvOpLabel, 1, &Id, nullptr);
 }
 
 Block::~Block() {}
-
-const Instruction *Block::getFirstInstruction() const
-{
-  return FirstInstruction.get();
-}
-
-void Block::insertAtStart(Instruction *I)
-{
-  if (FirstInstruction)
-    FirstInstruction.release()->insertAfter(I);
-  FirstInstruction = std::unique_ptr<Instruction>(I);
-}
 
 } // namespace talvos

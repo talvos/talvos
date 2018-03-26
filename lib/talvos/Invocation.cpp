@@ -860,7 +860,7 @@ Invocation::State Invocation::getState() const
 void Invocation::moveToBlock(uint32_t Id)
 {
   const Block *B = CurrentFunction->getBlock(Id);
-  CurrentInstruction = B->getFirstInstruction();
+  CurrentInstruction = B->getLabel().next();
   PreviousBlock = CurrentBlock;
   CurrentBlock = Id;
 }

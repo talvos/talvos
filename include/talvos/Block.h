@@ -17,7 +17,7 @@ namespace talvos
 
 class Instruction;
 
-/// A block of instruction ending with a termination instruction.
+/// A block of instructions ending with a termination instruction.
 class Block
 {
 public:
@@ -32,20 +32,16 @@ public:
   Block &operator=(const Block &) = delete;
   ///\}
 
-  /// Returns the first instruction in this block.
-  const Instruction *getFirstInstruction() const;
-
   /// Returns the ID of this block.
   uint32_t getId() const { return Id; }
 
-  /// Insert \p I at the beginning of this block.
-  /// This transfers ownership of \p I to this block.
-  void insertAtStart(Instruction *I);
+  /// Returns the label instruction for this block.
+  Instruction &getLabel() const { return *Label.get(); }
 
 private:
   uint32_t Id; ///< The unique ID of the block.
-  std::unique_ptr<Instruction>
-      FirstInstruction; ///< The first instruction in the block.
+
+  std::unique_ptr<Instruction> Label; ///< The label instruction.
 };
 
 } // namespace talvos
