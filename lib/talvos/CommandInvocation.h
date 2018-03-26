@@ -84,8 +84,8 @@ private:
   /// Trigger interaction with the user (if necessary).
   void interact();
 
-  /// Print the next instruction that will be executed.
-  void printNextInstruction();
+  /// Print the context for the current invocation.
+  void printContext() const;
 
   /// \name Interactive command handlers.
   /// Return true when the interpreter should resume executing instructions.

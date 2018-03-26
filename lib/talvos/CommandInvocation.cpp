@@ -42,6 +42,9 @@
 #include "talvos/Module.h"
 #include "talvos/Workgroup.h"
 
+/// The number of lines before and after the current instruction to print.
+#define CONTEXT_SIZE 3
+
 namespace talvos
 {
 
@@ -220,7 +223,7 @@ void CommandInvocation::interact()
   if (Continue)
     return;
 
-  printNextInstruction();
+  printContext();
 
   // Loop until the user enters a command that resumes execution.
   bool IsTTY = isatty(STDIN_FILENO) == 1;
@@ -293,16 +296,44 @@ void CommandInvocation::interact()
   }
 }
 
-void CommandInvocation::printNextInstruction()
+void CommandInvocation::printContext() const
 {
   assert(CurrentInvocation);
-  if (CurrentInvocation->getState() == Invocation::BARRIER)
-    std::cout << "  <barrier>";
-  else if (CurrentInvocation->getState() == Invocation::FINISHED)
-    std::cout << "  <finished>";
+  if (CurrentInvocation->getState() == Invocation::FINISHED)
+    std::cout << "  <finished>" << std::endl;
   else
-    CurrentInvocation->getCurrentInstruction()->print(std::cout);
-  std::cout << std::endl;
+  {
+    const Instruction *CI = CurrentInvocation->getCurrentInstruction();
+    const Instruction *I = CI;
+
+    // Print set of instructions around current location.
+    // TODO: Show instructions in adjacent blocks?
+    int i;
+    for (i = 0; i > -CONTEXT_SIZE; i--)
+    {
+      if (!I->previous())
+        break;
+      I = I->previous();
+    }
+    for (; i < CONTEXT_SIZE + 1; i++)
+    {
+      if (CI == I)
+      {
+        std::cout << "-> ";
+        if (CurrentInvocation->getState() == Invocation::BARRIER)
+          std::cout << "  <barrier>" << std::endl << "   ";
+      }
+      else
+        std::cout << "   ";
+
+      I->print(std::cout);
+      std::cout << std::endl;
+
+      I = I->next();
+      if (!I)
+        break;
+    }
+  }
 }
 
 bool CommandInvocation::cont(const std::vector<std::string> &Args)
@@ -473,7 +504,7 @@ bool CommandInvocation::swtch(const std::vector<std::string> &Args)
 
   std::cout << "Switched to invocation with global ID " << Id << std::endl;
 
-  printNextInstruction();
+  printContext();
 
   return false;
 }
