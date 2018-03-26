@@ -312,6 +312,7 @@ void CommandInvocation::interact()
       continue;                                                                \
   }
     CMD("break", "b", brk);
+    CMD("breakpoint", "bp", breakpoint);
     CMD("continue", "c", cont);
     CMD("help", "h", help);
     CMD("print", "p", print);
@@ -389,6 +390,56 @@ bool CommandInvocation::brk(const std::vector<std::string> &Args)
   return false;
 }
 
+bool CommandInvocation::breakpoint(const std::vector<std::string> &Args)
+{
+  if (Args.size() < 2)
+  {
+    std::cerr << "Usage: breakpoint [clear|delete|list]" << std::endl;
+    return false;
+  }
+
+  if (Args[1] == "clear")
+  {
+    Breakpoints.clear();
+    std::cout << "All breakpoints cleared." << std::endl;
+  }
+  else if (Args[1] == "delete")
+  {
+    if (Args.size() != 3)
+    {
+      std::cerr << "Usage: breakpoint delete ID" << std::endl;
+      return false;
+    }
+
+    // Parse breakpoint ID.
+    char *Next;
+    uint32_t Id = strtoul(Args[2].c_str(), &Next, 10);
+    if (strlen(Next) || !Breakpoints.count(Id))
+    {
+      std::cerr << "Invalid breakpoint ID '" << Args[2] << "'" << std::endl;
+      return false;
+    }
+
+    Breakpoints.erase(Id);
+    std::cout << "Breakpoint " << Id << " deleted." << std::endl;
+  }
+  else if (Args[1] == "list")
+  {
+    if (Breakpoints.empty())
+      std::cout << "No breakpoints." << std::endl;
+    else
+    {
+      for (auto &BP : Breakpoints)
+        std::cout << "Breakpoint " << BP.first << ": %" << BP.second
+                  << std::endl;
+    }
+  }
+  else
+    std::cerr << "Usage: breakpoint [clear|delete|list]" << std::endl;
+
+  return false;
+}
+
 bool CommandInvocation::cont(const std::vector<std::string> &Args)
 {
   Continue = true;
@@ -399,6 +450,7 @@ bool CommandInvocation::help(const std::vector<std::string> &Args)
 {
   std::cout << "Command list:" << std::endl;
   std::cout << "  break        (b)" << std::endl;
+  std::cout << "  breakpoint   (bp)" << std::endl;
   std::cout << "  continue     (c)" << std::endl;
   std::cout << "  help         (h)" << std::endl;
   std::cout << "  print        (p)" << std::endl;

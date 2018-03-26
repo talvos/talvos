@@ -101,6 +101,7 @@ private:
   /// Return true when the interpreter should resume executing instructions.
   ///@{
   bool brk(const std::vector<std::string> &Args);
+  bool breakpoint(const std::vector<std::string> &Args);
   bool cont(const std::vector<std::string> &Args);
   bool help(const std::vector<std::string> &Args);
   bool print(const std::vector<std::string> &Args);
