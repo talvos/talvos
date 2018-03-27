@@ -28,8 +28,10 @@ public:
   /// Create an empty, uninitialized object.
   Object() { Data = nullptr; }
 
-  /// Allocate an object with type \p Ty, leaving its data uninitialized.
-  Object(const Type *Ty);
+  /// Allocate an object with type \p Ty.
+  /// If \p Data is nullptr, the object data will be left uninitialized.
+  /// Otherwise, the object data will be copied from \p Data.
+  Object(const Type *Ty, const uint8_t *Data = nullptr);
 
   /// Allocate an object with type \p Ty, initializing it with \p Value.
   /// \p Ty must be a scalar type, and its size must match \p sizeof(T).

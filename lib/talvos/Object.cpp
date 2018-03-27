@@ -17,11 +17,13 @@
 namespace talvos
 {
 
-Object::Object(const Type *Ty)
+Object::Object(const Type *Ty, const uint8_t *Data)
 {
   assert(Ty);
   this->Ty = Ty;
   this->Data = new uint8_t[Ty->getSize()];
+  if (Data)
+    memcpy(this->Data, Data, Ty->getSize());
 }
 
 template <typename T> Object::Object(const Type *Ty, T Value) : Object(Ty)
