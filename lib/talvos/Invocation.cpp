@@ -350,7 +350,7 @@ void Invocation::executeExtInst(const Instruction *Inst)
     executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return tanh(X); });
     break;
   default:
-    assert(false && "Unhandled GLSL.std.450 extended instruction");
+    Dev.reportError("Unimplemented GLSL.std.450 extended instruction", true);
   }
 }
 
@@ -965,10 +965,7 @@ void Invocation::step()
 #undef NOP
 
   default:
-    std::cerr << "Unimplemented instruction: "
-              << Instruction::opcodeToString(Opcode) << " (" << Opcode << ")"
-              << std::endl;
-    abort();
+    Dev.reportError("Unimplemented instruction", true);
   }
 
   // Move program counter to next instruction, unless a terminator instruction
