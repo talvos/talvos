@@ -278,6 +278,9 @@ public:
       case SpvOpName:
         // TODO: Do something with this
         break;
+      case SpvOpNoLine:
+        // TODO: Do something with this
+        break;
       case SpvOpSource:
       case SpvOpSourceContinued:
         // TODO: Do something with these
