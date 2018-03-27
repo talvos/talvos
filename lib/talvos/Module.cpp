@@ -292,6 +292,9 @@ public:
         }
         break;
       }
+      case SpvOpString:
+        // TODO: Do something with this
+        break;
       case SpvOpTypeArray:
       {
         const Type *ElemType =
