@@ -276,7 +276,8 @@ public:
         // TODO: Do something with this
         break;
       case SpvOpSource:
-        // TODO: Do something with this
+      case SpvOpSourceContinued:
+        // TODO: Do something with these
         break;
       case SpvOpSourceExtension:
       {
