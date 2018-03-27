@@ -58,6 +58,9 @@ public:
   /// of the scalar type must match \p sizeof(T).
   template <typename T> T get(uint32_t Element = 0) const;
 
+  /// Returns a pointer to the raw data backing this object.
+  const uint8_t *getData() const { return Data; }
+
   /// Returns the type of this object.
   const Type *getType() const { return Ty; }
 
