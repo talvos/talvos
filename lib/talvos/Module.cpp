@@ -237,6 +237,9 @@ public:
         }
         break;
       }
+      case SpvOpLine:
+        // TODO: Do something with this
+        break;
       case SpvOpMemberDecorate:
       {
         uint32_t Target = Inst->words[Inst->operands[0].offset];
