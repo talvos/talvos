@@ -17,6 +17,7 @@ foreach(test
   misc/reduce
   misc/vecadd
   misc/vecadd_binary
+  spirv/bitcast
   spirv/composite-extract
   spirv/constant-composite
   spirv/function-call

@@ -1,0 +1,37 @@
+# Test OpBitcast instruction.
+
+MODULE bitcast.spvasm
+ENTRY bitcast
+
+BUFFER inS 16 DATA FLOAT
+42.0 123.456 -1001.99 -0.000321
+BUFFER outS 16 FILL FLOAT 0
+
+BUFFER inV 32 DATA INT16
+42 -7 123 -321
+32767 -1 -32768 1
+10001 0 0 10001
+-2 9999 9999 -2
+BUFFER outV 32 FILL INT16 0
+
+DESCRIPTOR_SET 0 0 inS
+DESCRIPTOR_SET 0 1 outS
+DESCRIPTOR_SET 0 2 inV
+DESCRIPTOR_SET 0 3 outV
+
+DISPATCH 4 1 1
+
+DUMP FLOAT outS
+DUMP INT16v4 outV
+
+# CHECK: Buffer 'outS' (16 bytes):
+# CHECK:   outS[0] = 42
+# CHECK:   outS[1] = 123.456
+# CHECK:   outS[2] = -1001.99
+# CHECK:   outS[3] = -0.000321
+
+# CHECK: Buffer 'outV' (32 bytes):
+# CHECK:   outV[0] = (42, -7, 123, -321)
+# CHECK:   outV[1] = (32767, -1, -32768, 1)
+# CHECK:   outV[2] = (10001, 0, 0, 10001)
+# CHECK:   outV[3] = (-2, 9999, 9999, -2)

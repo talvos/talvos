@@ -157,6 +157,13 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   Objects[Id] = Object(Inst->getResultType(), Result);
 }
 
+void Invocation::executeBitcast(const Instruction *Inst)
+{
+  const Object &Source = Objects[Inst->getOperand(2)];
+  Object Result = Object(Inst->getResultType(), Source.getData());
+  Objects[Inst->getOperand(1)] = Result;
+}
+
 void Invocation::executeBitwiseAnd(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A & B; });
@@ -885,6 +892,7 @@ void Invocation::step()
     break
 
     DISPATCH(SpvOpAccessChain, AccessChain);
+    DISPATCH(SpvOpBitcast, Bitcast);
     DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);
     DISPATCH(SpvOpBitwiseOr, BitwiseOr);
     DISPATCH(SpvOpBitwiseXor, BitwiseXor);

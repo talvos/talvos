@@ -86,6 +86,7 @@ public:
   /// \name Instruction handlers.
   ///@{
   void executeAccessChain(const Instruction *Inst);
+  void executeBitcast(const Instruction *Inst);
   void executeBitwiseAnd(const Instruction *Inst);
   void executeBitwiseOr(const Instruction *Inst);
   void executeBitwiseXor(const Instruction *Inst);
