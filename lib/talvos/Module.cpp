@@ -275,6 +275,8 @@ public:
         }
         break;
       }
+      case SpvOpModuleProcessed:
+        break;
       case SpvOpName:
         // TODO: Do something with this
         break;
