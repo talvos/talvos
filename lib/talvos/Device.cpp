@@ -7,6 +7,7 @@
 /// This file defines the Device class.
 
 #include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -124,7 +125,7 @@ bool Device::isThreadSafe() const
   return true;
 }
 
-void Device::reportError(const std::string &Error)
+void Device::reportError(const std::string &Error, bool Fatal)
 {
   // Guard output to avoid mangling error messages from multiple threads.
   static std::mutex ErrorMutex;
@@ -166,6 +167,9 @@ void Device::reportError(const std::string &Error)
 
   if (CurrentCommand)
     CurrentCommand->signalError();
+
+  if (Fatal)
+    abort();
 }
 
 #define REPORT(func, ...)                                                      \

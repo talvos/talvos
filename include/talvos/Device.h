@@ -44,7 +44,8 @@ public:
 
   /// Report an error that has occurred during emulation.
   /// This prints \p Error to stderr along with the current execution context.
-  void reportError(const std::string &Error);
+  /// If \p Fatal is true, abort() will be called after handling the error.
+  void reportError(const std::string &Error, bool Fatal = false);
 
   /// \name Plugin notification functions.
   ///@{
