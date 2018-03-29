@@ -28,8 +28,9 @@ opened to ensure that there are no regressions.
 Changes that add new functionality or fix serious bugs should almost always be
 accompanied by new tests (or additions to existing tests where appropriate).
 
-There is a Travis CI configuration that will test that each commit and pull
-request builds and passes the test suite for multiple platforms and compilers.
+There are Travis CI and AppVeyor configurations that will test that each commit
+and pull request builds and passes the test suite for multiple platforms
+and compilers.
 
 
 Other information
