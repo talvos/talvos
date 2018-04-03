@@ -967,7 +967,9 @@ void Invocation::step()
     DISPATCH(SpvOpVectorTimesScalar, VectorTimesScalar);
 
     NOP(SpvOpNop);
+    NOP(SpvOpLine);
     NOP(SpvOpLoopMerge);
+    NOP(SpvOpNoLine);
     NOP(SpvOpSelectionMerge);
 
 #undef DISPATCH
