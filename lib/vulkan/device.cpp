@@ -29,7 +29,19 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(
     VkInstance instance, uint32_t *pPhysicalDeviceGroupCount,
     VkPhysicalDeviceGroupProperties *pPhysicalDeviceGroupProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  if (!pPhysicalDeviceGroupProperties)
+  {
+    *pPhysicalDeviceGroupCount = 1;
+    return VK_SUCCESS;
+  }
+
+  if (*pPhysicalDeviceGroupCount < 1)
+    return VK_INCOMPLETE;
+
+  *pPhysicalDeviceGroupCount = 1;
+  pPhysicalDeviceGroupProperties->physicalDeviceCount = 1;
+  pPhysicalDeviceGroupProperties->subsetAllocation = VK_FALSE;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroupsKHR(
