@@ -72,6 +72,11 @@ struct VkDeviceMemory_T
   uint64_t Address;
 };
 
+struct VkEvent_T
+{
+  bool Signaled;
+};
+
 struct VkFence_T
 {
   bool Signaled;

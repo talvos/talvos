@@ -47,7 +47,9 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateEvent(VkDevice device, const VkEventCreateInfo *pCreateInfo,
               const VkAllocationCallbacks *pAllocator, VkEvent *pEvent)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pEvent = new VkEvent_T;
+  (*pEvent)->Signaled = false;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
@@ -69,7 +71,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateSemaphore(
 VKAPI_ATTR void VKAPI_CALL vkDestroyEvent(
     VkDevice device, VkEvent event, const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete event;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyFence(
