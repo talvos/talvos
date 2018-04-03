@@ -100,6 +100,7 @@ public:
   void executeConvertSToF(const Instruction *Inst);
   void executeConvertUToF(const Instruction *Inst);
   void executeCopyMemory(const Instruction *Inst);
+  void executeCopyObject(const Instruction *Inst);
   void executeDot(const Instruction *Inst);
   void executeExtInst(const Instruction *Inst);
   void executeFAdd(const Instruction *Inst);

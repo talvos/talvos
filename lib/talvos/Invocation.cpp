@@ -300,6 +300,11 @@ void Invocation::executeCopyMemory(const Instruction *Inst)
   Memory::copy(DstAddress, DstMem, SrcAddress, SrcMem, NumBytes);
 }
 
+void Invocation::executeCopyObject(const Instruction *Inst)
+{
+  Objects[Inst->getOperand(1)] = Objects[Inst->getOperand(2)];
+}
+
 void Invocation::executeDot(const Instruction *Inst)
 {
   Object &A = Objects[Inst->getOperand(2)];
@@ -963,6 +968,7 @@ void Invocation::step()
     DISPATCH(SpvOpConvertSToF, ConvertSToF);
     DISPATCH(SpvOpConvertUToF, ConvertUToF);
     DISPATCH(SpvOpCopyMemory, CopyMemory);
+    DISPATCH(SpvOpCopyObject, CopyObject);
     DISPATCH(SpvOpDot, Dot);
     DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
