@@ -844,6 +844,10 @@ void Invocation::executeVariable(const Instruction *Inst)
   uint64_t Address = PrivateMemory->allocate(AllocSize);
   Objects[Id] = Object(Inst->getResultType(), Address);
 
+  // Initialize if necessary.
+  if (Inst->getNumOperands() > 3)
+    Objects[Inst->getOperand(3)].store(*PrivateMemory, Address);
+
   // Track function scope allocations.
   if (!CallStack.empty())
     CallStack.back().Allocations.push_back(Address);
