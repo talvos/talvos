@@ -155,9 +155,9 @@ public:
   void executeUGreaterThanEqual(const Instruction *Inst);
   void executeULessThan(const Instruction *Inst);
   void executeULessThanEqual(const Instruction *Inst);
+  void executeUMod(const Instruction *Inst);
   void executeUndef(const Instruction *Inst);
   void executeUnreachable(const Instruction *Inst);
-  void executeUMod(const Instruction *Inst);
   void executeVariable(const Instruction *Inst);
   void executeVectorShuffle(const Instruction *Inst);
   void executeVectorTimesScalar(const Instruction *Inst);
