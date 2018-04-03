@@ -738,6 +738,25 @@ void Invocation::executeStore(const Instruction *Inst)
   Objects[Id].store(Mem, Dest.get<uint64_t>());
 }
 
+void Invocation::executeSwitch(const Instruction *Inst)
+{
+  const Object &Selector = Objects[Inst->getOperand(0)];
+
+  // TODO: Handle other selector sizes
+  if (Selector.getType()->getBitWidth() != 32)
+    Dev.reportError("OpSwitch is only implemented for 32-bit selectors", true);
+
+  for (uint32_t i = 2; i < Inst->getNumOperands(); i += 2)
+  {
+    if (Selector.get<uint32_t>() == Inst->getOperand(i))
+    {
+      moveToBlock(Inst->getOperand(i + 1));
+      return;
+    }
+  }
+  moveToBlock(Inst->getOperand(1));
+}
+
 void Invocation::executeUDiv(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
@@ -960,6 +979,7 @@ void Invocation::step()
     DISPATCH(SpvOpSNegate, SNegate);
     DISPATCH(SpvOpSRem, SRem);
     DISPATCH(SpvOpStore, Store);
+    DISPATCH(SpvOpSwitch, Switch);
     DISPATCH(SpvOpUGreaterThan, UGreaterThan);
     DISPATCH(SpvOpUGreaterThanEqual, UGreaterThanEqual);
     DISPATCH(SpvOpUDiv, UDiv);

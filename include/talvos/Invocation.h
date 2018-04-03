@@ -149,6 +149,7 @@ public:
   void executeSNegate(const Instruction *Inst);
   void executeSRem(const Instruction *Inst);
   void executeStore(const Instruction *Inst);
+  void executeSwitch(const Instruction *Inst);
   void executeUDiv(const Instruction *Inst);
   void executeUGreaterThan(const Instruction *Inst);
   void executeUGreaterThanEqual(const Instruction *Inst);
