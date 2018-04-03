@@ -768,6 +768,11 @@ void Invocation::executeUndef(const Instruction *Inst)
   Objects[Inst->getOperand(1)] = Object(Inst->getResultType());
 }
 
+void Invocation::executeUnreachable(const Instruction *Inst)
+{
+  Dev.reportError("OpUnreachable instruction executed", true);
+}
+
 void Invocation::executeUMod(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A % B; });
@@ -962,6 +967,7 @@ void Invocation::step()
     DISPATCH(SpvOpULessThanEqual, ULessThanEqual);
     DISPATCH(SpvOpUMod, UMod);
     DISPATCH(SpvOpUndef, Undef);
+    DISPATCH(SpvOpUnreachable, Unreachable);
     DISPATCH(SpvOpVariable, Variable);
     DISPATCH(SpvOpVectorShuffle, VectorShuffle);
     DISPATCH(SpvOpVectorTimesScalar, VectorTimesScalar);
