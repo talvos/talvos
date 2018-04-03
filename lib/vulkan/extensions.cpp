@@ -34,5 +34,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceExtensionProperties(
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceLayerProperties(
     uint32_t *pPropertyCount, VkLayerProperties *pProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pPropertyCount = 0;
+  return VK_SUCCESS;
 }
