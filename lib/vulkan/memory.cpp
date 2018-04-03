@@ -86,7 +86,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties2 *pMemoryProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceMemoryProperties(physicalDevice,
+                                      &pMemoryProperties->memoryProperties);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties2KHR(
