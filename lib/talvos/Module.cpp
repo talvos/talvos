@@ -147,6 +147,12 @@ public:
         Mod->addObject(Inst->result_id, Composite);
         break;
       }
+      case SpvOpConstantFalse:
+      {
+        const Type *Ty = Mod->getType(Inst->type_id);
+        Mod->addObject(Inst->result_id, Object(Ty, false));
+        break;
+      }
       case SpvOpConstantNull:
       {
         // Create and add object.
@@ -154,6 +160,12 @@ public:
         Object Value(Ty);
         Value.zero();
         Mod->addObject(Inst->result_id, Value);
+        break;
+      }
+      case SpvOpConstantTrue:
+      {
+        const Type *Ty = Mod->getType(Inst->type_id);
+        Mod->addObject(Inst->result_id, Object(Ty, true));
         break;
       }
       case SpvOpDecorate:
