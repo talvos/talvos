@@ -96,7 +96,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue(VkDevice device,
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue2(
     VkDevice device, const VkDeviceQueueInfo2 *pQueueInfo, VkQueue *pQueue)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pQueue = new VkQueue_T;
+  (*pQueue)->Device = device;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties(
