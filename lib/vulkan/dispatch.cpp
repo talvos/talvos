@@ -12,6 +12,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDispatch(VkCommandBuffer commandBuffer,
                                          uint32_t groupCountY,
                                          uint32_t groupCountZ)
 {
+  // TODO: These dispatch commands are currently never deleted.
   commandBuffer->Commands.push_back(
       new talvos::DispatchCommand(commandBuffer->PipelineCompute->Module,
                                   commandBuffer->PipelineCompute->Function,

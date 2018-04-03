@@ -109,7 +109,15 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandPool(VkDevice device,
                                                   VkCommandPool commandPool,
                                                   VkCommandPoolResetFlags flags)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (auto Cmd : commandPool->Pool)
+  {
+    Cmd->PipelineGraphics = nullptr;
+    Cmd->PipelineCompute = nullptr;
+    Cmd->DescriptorSetsGraphics.clear();
+    Cmd->DescriptorSetsCompute.clear();
+    Cmd->Commands.clear();
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkTrimCommandPool(VkDevice device,
