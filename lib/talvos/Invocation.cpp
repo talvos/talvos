@@ -234,6 +234,24 @@ void Invocation::executeControlBarrier(const Instruction *Inst)
   AtBarrier = true;
 }
 
+void Invocation::executeConvertFToU(const Instruction *Inst)
+{
+  switch (Inst->getResultType()->getBitWidth())
+  {
+  case 16:
+    executeOpFP<1>(Inst, [](auto A) -> uint16_t { return (uint16_t)A; });
+    break;
+  case 32:
+    executeOpFP<1>(Inst, [](auto A) -> uint32_t { return (uint32_t)A; });
+    break;
+  case 64:
+    executeOpFP<1>(Inst, [](auto A) -> uint64_t { return (uint64_t)A; });
+    break;
+  default:
+    assert(false && "Unhandled floating point size for OpConvertUToF");
+  }
+}
+
 void Invocation::executeConvertSToF(const Instruction *Inst)
 {
   switch (Inst->getResultType()->getBitWidth())
@@ -941,6 +959,7 @@ void Invocation::step()
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpCompositeInsert, CompositeInsert);
     DISPATCH(SpvOpControlBarrier, ControlBarrier);
+    DISPATCH(SpvOpConvertFToU, ConvertFToU);
     DISPATCH(SpvOpConvertSToF, ConvertSToF);
     DISPATCH(SpvOpConvertUToF, ConvertUToF);
     DISPATCH(SpvOpCopyMemory, CopyMemory);
