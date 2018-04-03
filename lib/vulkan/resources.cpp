@@ -117,7 +117,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2(
     VkDevice device, const VkBufferMemoryRequirementsInfo2 *pInfo,
     VkMemoryRequirements2 *pMemoryRequirements)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetBufferMemoryRequirements(device, pInfo->buffer,
+                                &pMemoryRequirements->memoryRequirements);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2KHR(
