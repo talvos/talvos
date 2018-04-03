@@ -58,14 +58,61 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures *pFeatures)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pFeatures = physicalDevice->Features;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures2 *pFeatures)
 {
-  // TODO: Enable features that are supported.
-  memset(&pFeatures->features, 0, sizeof(VkPhysicalDeviceFeatures));
+  pFeatures->features = physicalDevice->Features;
+
+  // Walk through list of feature extensions.
+  void *Ext = pFeatures->pNext;
+  while (Ext)
+  {
+    if (*(VkStructureType *)Ext ==
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES)
+    {
+      VkPhysicalDevice16BitStorageFeatures *Features =
+          (VkPhysicalDevice16BitStorageFeatures *)Ext;
+      Features->storageBuffer16BitAccess = VK_FALSE;
+      Features->uniformAndStorageBuffer16BitAccess = VK_FALSE;
+      Features->storagePushConstant16 = VK_FALSE;
+      Features->storageInputOutput16 = VK_FALSE;
+    }
+    if (*(VkStructureType *)Ext ==
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES)
+    {
+      VkPhysicalDeviceMultiviewFeatures *Features =
+          (VkPhysicalDeviceMultiviewFeatures *)Ext;
+      Features->multiview = VK_FALSE;
+      Features->multiviewGeometryShader = VK_FALSE;
+      Features->multiviewTessellationShader = VK_FALSE;
+    }
+    if (*(VkStructureType *)Ext ==
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES)
+    {
+      VkPhysicalDeviceProtectedMemoryFeatures *Features =
+          (VkPhysicalDeviceProtectedMemoryFeatures *)Ext;
+      Features->protectedMemory = VK_FALSE;
+    }
+    if (*(VkStructureType *)Ext ==
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES)
+    {
+      VkPhysicalDeviceSamplerYcbcrConversionFeatures *Features =
+          (VkPhysicalDeviceSamplerYcbcrConversionFeatures *)Ext;
+      Features->samplerYcbcrConversion = VK_FALSE;
+    }
+    if (*(VkStructureType *)Ext ==
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES)
+    {
+      VkPhysicalDeviceVariablePointerFeatures *Features =
+          (VkPhysicalDeviceVariablePointerFeatures *)Ext;
+      Features->variablePointersStorageBuffer = VK_TRUE;
+      Features->variablePointers = VK_TRUE;
+    }
+    Ext = ((void **)Ext)[1];
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2KHR(
