@@ -94,7 +94,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkDeviceWaitIdle(VkDevice device)
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetEventStatus(VkDevice device, VkEvent event)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return event->Signaled ? VK_EVENT_SET : VK_EVENT_RESET;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetFenceFdKHR(
