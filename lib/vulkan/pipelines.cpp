@@ -51,7 +51,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineCache(
     VkDevice device, const VkPipelineCacheCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkPipelineCache *pPipelineCache)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL
