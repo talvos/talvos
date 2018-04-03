@@ -14,7 +14,13 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
                  const VkAllocationCallbacks *pAllocator, VkInstance *pInstance)
 {
-  // TODO: Check extensions are supported.
+  // Check extensions are supported.
+  for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; i++)
+  {
+    // TODO: Check whether we actually can support the extension.
+    return VK_ERROR_EXTENSION_NOT_PRESENT;
+  }
+
   *pInstance = new VkInstance_T;
   return VK_SUCCESS;
 }
