@@ -13,6 +13,25 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
     VkPhysicalDevice physicalDevice, const VkDeviceCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkDevice *pDevice)
 {
+  // Check extensions are supported.
+  for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; i++)
+  {
+    // TODO: Check whether we actually can support the extension.
+    return VK_ERROR_EXTENSION_NOT_PRESENT;
+  }
+
+  // Check features are supported.
+  if (pCreateInfo->pEnabledFeatures)
+  {
+    for (uint32_t i = 0;
+         i < sizeof(VkPhysicalDeviceFeatures) / sizeof(VkBool32); i++)
+    {
+      if (((VkBool32 *)pCreateInfo->pEnabledFeatures)[i] &&
+          !((VkBool32 *)&physicalDevice->Features)[i])
+        return VK_ERROR_FEATURE_NOT_PRESENT;
+    }
+  }
+
   *pDevice = new VkDevice_T;
   (*pDevice)->Device = new talvos::Device;
   return VK_SUCCESS;
