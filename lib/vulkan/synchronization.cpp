@@ -150,7 +150,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetFences(VkDevice device,
 
 VKAPI_ATTR VkResult VKAPI_CALL vkSetEvent(VkDevice device, VkEvent event)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  event->Signaled = true;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkWaitForFences(VkDevice device,
