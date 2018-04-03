@@ -64,6 +64,7 @@ void Instruction::print(std::ostream &O, bool Align) const
   {
     if (ResultType && i == 1)
       continue;
+    // TODO: Omit the '%' if this is a literal operand.
     O << " %" << Operands[i];
   }
 }
