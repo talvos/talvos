@@ -134,7 +134,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueWaitIdle(VkQueue queue)
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetEvent(VkDevice device, VkEvent event)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  event->Signaled = false;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetFences(VkDevice device,
