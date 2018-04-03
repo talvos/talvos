@@ -252,7 +252,14 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties2(
     VkPhysicalDevice physicalDevice, uint32_t *pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2 *pQueueFamilyProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  if (!pQueueFamilyProperties)
+  {
+    *pQueueFamilyPropertyCount = 1;
+    return;
+  }
+  vkGetPhysicalDeviceQueueFamilyProperties(
+      physicalDevice, pQueueFamilyPropertyCount,
+      &pQueueFamilyProperties->queueFamilyProperties);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties2KHR(
