@@ -103,6 +103,11 @@ struct VkQueue_T
   VkDevice Device;
 };
 
+struct VkSemaphore_T
+{
+  bool Signaled;
+};
+
 struct VkShaderModule_T
 {
   std::unique_ptr<talvos::Module> Module;

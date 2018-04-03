@@ -65,7 +65,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateSemaphore(
     VkDevice device, const VkSemaphoreCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkSemaphore *pSemaphore)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pSemaphore = new VkSemaphore_T;
+  (*pSemaphore)->Signaled = false;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyEvent(
@@ -84,7 +86,7 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroySemaphore(VkDevice device, VkSemaphore semaphore,
                    const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete semaphore;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkDeviceWaitIdle(VkDevice device)
