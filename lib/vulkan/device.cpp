@@ -85,6 +85,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties(
   pProperties->vendorID = 0;      // TODO: Register a vendor ID.
   pProperties->deviceID = 0;      // TODO: Something meaningful.
   pProperties->deviceType = VK_PHYSICAL_DEVICE_TYPE_OTHER;
+  memset(pProperties->pipelineCacheUUID, 0,
+         sizeof(pProperties->pipelineCacheUUID));
   strcpy(pProperties->deviceName, "Talvos");
 
   // TODO: Populate these with real values.
