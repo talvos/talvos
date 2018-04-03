@@ -21,13 +21,21 @@ vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
     return VK_ERROR_EXTENSION_NOT_PRESENT;
   }
 
+  // Create physical device.
+  VkPhysicalDevice_T *Device = new VkPhysicalDevice_T;
+  memset(&Device->Features, 0, sizeof(VkPhysicalDeviceFeatures));
+  Device->Features.robustBufferAccess = VK_TRUE;
+
   *pInstance = new VkInstance_T;
+  (*pInstance)->Device = Device;
+
   return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks *pAllocator)
 {
+  delete instance->Device;
   delete instance;
 }
 

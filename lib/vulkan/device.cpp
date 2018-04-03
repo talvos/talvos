@@ -59,6 +59,9 @@ vkEnumeratePhysicalDevices(VkInstance instance, uint32_t *pPhysicalDeviceCount,
     return VK_INCOMPLETE;
 
   *pPhysicalDeviceCount = 1;
+  if (pPhysicalDevices)
+    *pPhysicalDevices = instance->Device;
+
   return VK_SUCCESS;
 }
 

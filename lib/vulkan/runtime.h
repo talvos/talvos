@@ -79,6 +79,12 @@ struct VkFence_T
 
 struct VkInstance_T
 {
+  VkPhysicalDevice Device;
+};
+
+struct VkPhysicalDevice_T
+{
+  VkPhysicalDeviceFeatures Features;
 };
 
 struct VkPipeline_T
