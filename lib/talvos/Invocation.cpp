@@ -612,14 +612,13 @@ void Invocation::executePhi(const Instruction *Inst)
 {
   uint32_t Id = Inst->getOperand(1);
 
-  // TODO: Handle OpPhi as input to another OpPhi
   assert(PreviousBlock);
   for (int i = 2; i < Inst->getNumOperands(); i += 2)
   {
     assert(i + 1 < Inst->getNumOperands());
     if (Inst->getOperand(i + 1) == PreviousBlock)
     {
-      Objects[Id] = Objects[Inst->getOperand(i)];
+      PhiTemps.push_back({Id, Objects[Inst->getOperand(i)]});
       return;
     }
   }
@@ -944,6 +943,14 @@ void Invocation::step()
   assert(CurrentInstruction);
 
   const Instruction *I = CurrentInstruction;
+
+  if (!PhiTemps.empty() && I->getOpcode() != SpvOpPhi &&
+      I->getOpcode() != SpvOpLine)
+  {
+    for (auto &P : PhiTemps)
+      Objects[P.first] = std::move(P.second);
+    PhiTemps.clear();
+  }
 
   // Dispatch instruction to handler method.
   uint16_t Opcode = I->getOpcode();

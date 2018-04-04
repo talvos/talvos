@@ -22,6 +22,7 @@ foreach(test
   spirv/constant-composite
   spirv/function-call
   spirv/group-builtins
+  spirv/phi-swap
   spirv/simple-branch
   spirv/simple-loop
   spirv/struct-offset

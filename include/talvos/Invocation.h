@@ -197,6 +197,9 @@ private:
   Dim3 GlobalId;         ///< The GlobalInvocationID.
   Memory *PrivateMemory; ///< The private memory instance.
 
+  /// Temporary OpPhi results to be applied when we reach first non-OpPhi.
+  std::vector<std::pair<uint32_t, Object>> PhiTemps;
+
   /// Helper functions to execute simple instructions that can either operate
   /// on scalars or component-wise for vectors.
   /// \p OpTy is the C++ scalar type of each operand.

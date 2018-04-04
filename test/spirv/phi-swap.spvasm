@@ -1,0 +1,51 @@
+               OpCapability Shader
+               OpCapability VariablePointers
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpExtension "SPV_KHR_variable_pointers"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "phi-swap"
+          %2 = OpString "filename"
+               OpDecorate %3 DescriptorSet 0
+               OpDecorate %3 Binding 0
+               OpMemberDecorate %4 0 Offset 0
+
+          %5 = OpTypeVoid
+          %6 = OpTypeFunction %5
+          %7 = OpTypeBool
+          %8 = OpTypeInt 32 0
+          %9 = OpTypeRuntimeArray %8
+          %4 = OpTypeStruct %9
+         %10 = OpTypePointer StorageBuffer %4
+         %11 = OpTypePointer StorageBuffer %8
+
+          %3 = OpVariable %10 StorageBuffer
+
+         %12 = OpConstantTrue %7
+         %13 = OpConstantFalse %7
+         %14 = OpConstant %8 42
+         %15 = OpConstant %8 7
+         %16 = OpConstant %8 0
+         %17 = OpConstant %8 1
+
+
+          %1 = OpFunction %5 None %6
+
+         %18 = OpLabel
+               OpBranch %19
+         %19 = OpLabel
+         %20 = OpPhi %7 %12 %18 %13 %19
+         %21 = OpPhi %8 %14 %18 %22 %19
+
+               OpLine %2 0 0
+         %22 = OpPhi %8 %15 %18 %21 %19
+               OpLoopMerge %23 %19 None
+               OpBranchConditional %20 %19 %23
+
+         %23 = OpLabel
+         %24 = OpAccessChain %11 %3 %16 %16
+               OpStore %24 %21
+         %25 = OpAccessChain %11 %3 %16 %17
+               OpStore %25 %22
+               OpReturn
+
+               OpFunctionEnd
