@@ -123,9 +123,23 @@ public:
       case SpvOpSpecConstant: // TODO: Handle specialization constants
       {
         const Type *Ty = Mod->getType(Inst->type_id);
-        // TODO: Use actual type
-        uint32_t Value = Inst->words[Inst->operands[2].offset];
-        Mod->addObject(Inst->result_id, Object(Ty, Value));
+
+        Object Constant = Object(Ty);
+        uint16_t Offset = Inst->operands[2].offset;
+        switch (Ty->getSize())
+        {
+        case 4:
+          Constant.set<uint32_t>(Inst->words[Offset]);
+          break;
+        case 8:
+          Constant.set<uint64_t>(*(uint64_t *)(Inst->words + Offset));
+          break;
+        default:
+          std::cerr << "Unhandled OpConstant type size:" << Ty->getSize()
+                    << std::endl;
+          abort();
+        }
+        Mod->addObject(Inst->result_id, Constant);
         break;
       }
       case SpvOpConstantComposite:
