@@ -148,10 +148,25 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   // Loop over indices.
   for (int i = 3; i < Inst->getNumOperands(); i++)
   {
-    // TODO: Handle indices of different sizes.
-    uint32_t Idx = OP(i, uint32_t);
-    Result += ElemType->getElementOffset(Idx);
-    ElemType = ElemType->getElementType(Idx);
+    uint64_t Index;
+    const Object &IndexObj = Objects[Inst->getOperand(i)];
+    switch (IndexObj.getType()->getSize())
+    {
+    case 2:
+      Index = IndexObj.get<uint16_t>();
+      break;
+    case 4:
+      Index = IndexObj.get<uint32_t>();
+      break;
+    case 8:
+      Index = IndexObj.get<uint64_t>();
+      break;
+    default:
+      Dev.reportError("Unhandled index size", true);
+      return;
+    }
+    Result += ElemType->getElementOffset(Index);
+    ElemType = ElemType->getElementType(Index);
   }
 
   Objects[Id] = Object(Inst->getResultType(), Result);
@@ -662,10 +677,25 @@ void Invocation::executePtrAccessChain(const Instruction *Inst)
   // Loop over indices.
   for (int i = 4; i < Inst->getNumOperands(); i++)
   {
-    // TODO: Handle indices of different sizes.
-    uint32_t Idx = OP(i, uint32_t);
-    Result += ElemType->getElementOffset(Idx);
-    ElemType = ElemType->getElementType(Idx);
+    uint64_t Index;
+    const Object &IndexObj = Objects[Inst->getOperand(i)];
+    switch (IndexObj.getType()->getSize())
+    {
+    case 2:
+      Index = IndexObj.get<uint16_t>();
+      break;
+    case 4:
+      Index = IndexObj.get<uint32_t>();
+      break;
+    case 8:
+      Index = IndexObj.get<uint64_t>();
+      break;
+    default:
+      Dev.reportError("Unhandled index size", true);
+      return;
+    }
+    Result += ElemType->getElementOffset(Index);
+    ElemType = ElemType->getElementType(Index);
   }
 
   Objects[Id] = Object(Inst->getResultType(), Result);
