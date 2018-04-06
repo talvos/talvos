@@ -62,6 +62,10 @@ struct VkDescriptorSet_T
   talvos::DescriptorSet DescriptorSet;
 };
 
+struct VkDescriptorSetLayout_T
+{
+};
+
 struct VkDevice_T
 {
   talvos::Device *Device;

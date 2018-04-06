@@ -82,6 +82,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorSetLayout(
     const VkAllocationCallbacks *pAllocator, VkDescriptorSetLayout *pSetLayout)
 {
   // TODO: Implement?
+  *pSetLayout = new VkDescriptorSetLayout_T;
   return VK_SUCCESS;
 }
 
@@ -122,7 +123,7 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorSetLayout(
     VkDevice device, VkDescriptorSetLayout descriptorSetLayout,
     const VkAllocationCallbacks *pAllocator)
 {
-  // TODO: Implement if vkCreateDescriptorSetLayout is not a NOP
+  delete descriptorSetLayout;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorUpdateTemplate(
