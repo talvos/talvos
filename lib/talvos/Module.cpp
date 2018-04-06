@@ -110,6 +110,7 @@ public:
         case SpvCapabilityInt64:
         case SpvCapabilityFloat64:
         case SpvCapabilityShader:
+        case SpvCapabilityStorageBuffer16BitAccess:
         case SpvCapabilityVariablePointers:
         case SpvCapabilityVariablePointersStorageBuffer:
           break;
@@ -244,7 +245,8 @@ public:
       case SpvOpExtension:
       {
         char *Extension = (char *)(Inst->words + Inst->operands[0].offset);
-        if (strcmp(Extension, "SPV_KHR_storage_buffer_storage_class") &&
+        if (strcmp(Extension, "SPV_KHR_16bit_storage") &&
+            strcmp(Extension, "SPV_KHR_storage_buffer_storage_class") &&
             strcmp(Extension, "SPV_KHR_variable_pointers"))
         {
           std::cerr << "WARNING: Unrecognized extension " << Extension
