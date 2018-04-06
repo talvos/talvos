@@ -369,6 +369,14 @@ public:
                      Type::getFunction(Mod->getType(ReturnType), ArgTypes));
         break;
       }
+      case SpvOpTypeMatrix:
+      {
+        const Type *ColumnType =
+            Mod->getType(Inst->words[Inst->operands[1].offset]);
+        uint32_t NumColumns = Inst->words[Inst->operands[2].offset];
+        Mod->addType(Inst->result_id, Type::getMatrix(ColumnType, NumColumns));
+        break;
+      }
       case SpvOpTypePointer:
       {
         uint32_t StorageClass = Inst->words[Inst->operands[1].offset];

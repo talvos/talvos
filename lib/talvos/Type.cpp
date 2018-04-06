@@ -24,7 +24,7 @@ size_t Type::getElementOffset(uint32_t Index) const
 {
   if (Id == STRUCT)
     return ElementTypes[Index].second;
-  else if (Id == VECTOR)
+  else if (Id == VECTOR || Id == MATRIX)
     return ElementType->getSize() * Index;
   else if (Id == ARRAY || Id == POINTER || Id == RUNTIME_ARRAY)
     return ArrayStride * Index;
@@ -62,7 +62,7 @@ uint32_t Type::getStorageClass() const
 
 bool Type::isComposite() const
 {
-  return (Id == ARRAY || Id == STRUCT || Id == VECTOR);
+  return (Id == ARRAY || Id == STRUCT || Id == VECTOR || Id == MATRIX);
 }
 
 bool Type::isScalar() const
@@ -168,6 +168,15 @@ Type::getFunction(const Type *ReturnType,
   std::unique_ptr<Type> T(new Type(FUNCTION, 0));
   T->ReturnType = ReturnType;
   T->ArgumentTypes = ArgTypes;
+  return T;
+}
+
+std::unique_ptr<Type> Type::getMatrix(const Type *ColumnType,
+                                      uint32_t NumColumns)
+{
+  std::unique_ptr<Type> T(new Type(MATRIX, NumColumns * ColumnType->getSize()));
+  T->ElementType = ColumnType;
+  T->ElementCount = NumColumns;
   return T;
 }
 

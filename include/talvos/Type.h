@@ -39,6 +39,7 @@ public:
     INT,
     FLOAT,
     VECTOR,
+    MATRIX,
     ARRAY,
     RUNTIME_ARRAY,
     STRUCT,
@@ -121,6 +122,10 @@ public:
   getFunction(const Type *ReturnType,
               const std::vector<const Type *> &ArgTypes);
 
+  /// Create a matrix type.
+  static std::unique_ptr<Type> getMatrix(const Type *ColumnType,
+                                         uint32_t NumColumns);
+
   /// Create a pointer type.
   static std::unique_ptr<Type>
   getPointer(uint32_t StorageClass, const Type *ElemType, uint32_t ArrayStride);
@@ -159,8 +164,8 @@ private:
 
   uint32_t StorageClass; ///< Valid for pointer types.
 
-  const Type *ElementType; ///< Valid for for pointer, array, and vector types.
-  uint32_t ElementCount;   ///< Valid for array, struct, and vector types.
+  const Type *ElementType; ///< Valid for pointer and composite types.
+  uint32_t ElementCount;   ///< Valid for composite types.
   uint32_t ArrayStride;    ///< Valid for array and pointer types.
   StructElementTypeList ElementTypes; ///< Valid for struct types.
 
