@@ -104,9 +104,9 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
     // Allocate and initialize variable in private memory.
     uint64_t NumBytes = V.second.Ty->getElementType()->getSize();
     uint64_t Address = PrivateMemory->allocate(NumBytes);
-    assert(V.second.Initializer);
-    Objects[V.second.Initializer].store(*PrivateMemory, Address);
     Objects[V.first] = Object(V.second.Ty, Address);
+    if (V.second.Initializer)
+      Objects[V.second.Initializer].store(*PrivateMemory, Address);
   }
 
   Dev.reportInvocationBegin(this);
