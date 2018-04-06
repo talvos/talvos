@@ -263,7 +263,7 @@ void Invocation::executeConvertFToU(const Instruction *Inst)
     executeOpFP<1>(Inst, [](auto A) -> uint64_t { return (uint64_t)A; });
     break;
   default:
-    assert(false && "Unhandled floating point size for OpConvertUToF");
+    assert(false && "Unhandled integer size for OpConvertFToU");
   }
 }
 
