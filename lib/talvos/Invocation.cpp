@@ -394,6 +394,19 @@ void Invocation::executeExtInst(const Instruction *Inst)
     executeOpFP<1, 4>(Inst,
                       [](auto X) -> decltype(X) { return 1.f / sqrt(X); });
     break;
+  case GLSLstd450NClamp:
+    executeOpFP<3, 4>(Inst, [](auto X, auto Min, auto Max) -> decltype(X) {
+      return fmin(fmax(X, Min), Max);
+    });
+    break;
+  case GLSLstd450NMax:
+    executeOpFP<2, 4>(Inst,
+                      [](auto X, auto Y) -> decltype(X) { return fmax(X, Y); });
+    break;
+  case GLSLstd450NMin:
+    executeOpFP<2, 4>(Inst,
+                      [](auto X, auto Y) -> decltype(X) { return fmin(X, Y); });
+    break;
   case GLSLstd450Sin:
     executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return sin(X); });
     break;
