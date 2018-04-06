@@ -685,7 +685,21 @@ void Invocation::executePtrAccessChain(const Instruction *Inst)
   const Type *ElemType = Base.getType()->getElementType();
 
   // Perform initial deference for element index.
-  Result += Base.getType()->getElementOffset(OP(3, uint32_t));
+  switch (Objects[Inst->getOperand(3)].getType()->getSize())
+  {
+  case 2:
+    Result += Base.getType()->getElementOffset(OP(3, uint16_t));
+    break;
+  case 4:
+    Result += Base.getType()->getElementOffset(OP(3, uint32_t));
+    break;
+  case 8:
+    Result += Base.getType()->getElementOffset(OP(3, uint64_t));
+    break;
+  default:
+    Dev.reportError("Unhandled index size", true);
+    return;
+  }
 
   // Loop over indices.
   for (int i = 4; i < Inst->getNumOperands(); i++)
