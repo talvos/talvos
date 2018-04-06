@@ -140,6 +140,7 @@ public:
   void executePtrAccessChain(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeReturnValue(const Instruction *Inst);
+  void executeSConvert(const Instruction *Inst);
   void executeSDiv(const Instruction *Inst);
   void executeSelect(const Instruction *Inst);
   void executeSGreaterThan(const Instruction *Inst);

@@ -740,6 +740,24 @@ void Invocation::executeReturnValue(const Instruction *Inst)
   CurrentInstruction = SE.CallInst->next();
 }
 
+void Invocation::executeSConvert(const Instruction *Inst)
+{
+  switch (Inst->getResultType()->getBitWidth())
+  {
+  case 16:
+    executeOpSInt<1>(Inst, [](auto A) -> int16_t { return (int16_t)A; });
+    break;
+  case 32:
+    executeOpSInt<1>(Inst, [](auto A) -> int32_t { return (int32_t)A; });
+    break;
+  case 64:
+    executeOpSInt<1>(Inst, [](auto A) -> int64_t { return (int64_t)A; });
+    break;
+  default:
+    assert(false && "Unhandled integer size for OpSConvert");
+  }
+}
+
 void Invocation::executeSDiv(const Instruction *Inst)
 {
   executeOpSInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
@@ -1049,6 +1067,7 @@ void Invocation::step()
     DISPATCH(SpvOpPtrAccessChain, PtrAccessChain);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpReturnValue, ReturnValue);
+    DISPATCH(SpvOpSConvert, SConvert);
     DISPATCH(SpvOpSDiv, SDiv);
     DISPATCH(SpvOpSelect, Select);
     DISPATCH(SpvOpSGreaterThan, SGreaterThan);
