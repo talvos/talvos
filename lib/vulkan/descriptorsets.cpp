@@ -207,7 +207,9 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
   {
     // TODO: Handle other types of descriptors.
     assert(pDescriptorWrites[i].descriptorType ==
-           VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+               VK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
+           pDescriptorWrites[i].descriptorType ==
+               VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 
     for (uint32_t b = 0; b < pDescriptorWrites[i].descriptorCount; b++)
     {
