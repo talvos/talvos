@@ -260,8 +260,9 @@ public:
         char *ExtInstSet = (char *)(Inst->words + Inst->operands[1].offset);
         if (strcmp(ExtInstSet, "GLSL.std.450"))
         {
-          std::cerr << "WARNING: Unrecognized extended instruction set "
-                    << ExtInstSet << std::endl;
+          std::cerr << "Unrecognized extended instruction set " << ExtInstSet
+                    << std::endl;
+          abort();
         }
         break;
       }
