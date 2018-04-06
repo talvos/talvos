@@ -842,6 +842,24 @@ void Invocation::executeSwitch(const Instruction *Inst)
   moveToBlock(Inst->getOperand(1));
 }
 
+void Invocation::executeUConvert(const Instruction *Inst)
+{
+  switch (Inst->getResultType()->getBitWidth())
+  {
+  case 16:
+    executeOpUInt<1>(Inst, [](auto A) -> uint16_t { return (uint16_t)A; });
+    break;
+  case 32:
+    executeOpUInt<1>(Inst, [](auto A) -> uint32_t { return (uint32_t)A; });
+    break;
+  case 64:
+    executeOpUInt<1>(Inst, [](auto A) -> uint64_t { return (uint64_t)A; });
+    break;
+  default:
+    assert(false && "Unhandled integer size for OpUConvert");
+  }
+}
+
 void Invocation::executeUDiv(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
@@ -1081,9 +1099,10 @@ void Invocation::step()
     DISPATCH(SpvOpSRem, SRem);
     DISPATCH(SpvOpStore, Store);
     DISPATCH(SpvOpSwitch, Switch);
+    DISPATCH(SpvOpUConvert, UConvert);
+    DISPATCH(SpvOpUDiv, UDiv);
     DISPATCH(SpvOpUGreaterThan, UGreaterThan);
     DISPATCH(SpvOpUGreaterThanEqual, UGreaterThanEqual);
-    DISPATCH(SpvOpUDiv, UDiv);
     DISPATCH(SpvOpULessThan, ULessThan);
     DISPATCH(SpvOpULessThanEqual, ULessThanEqual);
     DISPATCH(SpvOpUMod, UMod);
