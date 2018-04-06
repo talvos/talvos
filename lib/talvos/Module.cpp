@@ -403,11 +403,15 @@ public:
       case SpvOpTypeStruct:
       {
         StructElementTypeList ElemTypes;
+        uint32_t ElemOffset = 0;
         for (int i = 1; i < Inst->num_operands; i++)
         {
-          uint32_t ElemType = Inst->words[Inst->operands[i].offset];
-          uint32_t ElemOffset = MemberOffsets.at({Inst->result_id, i - 1});
-          ElemTypes.push_back({Mod->getType(ElemType), ElemOffset});
+          uint32_t ElemTypeId = Inst->words[Inst->operands[i].offset];
+          const Type *ElemType = Mod->getType(ElemTypeId);
+          if (MemberOffsets.count({Inst->result_id, i - 1}))
+            ElemOffset = MemberOffsets.at({Inst->result_id, i - 1});
+          ElemTypes.push_back({ElemType, ElemOffset});
+          ElemOffset += ElemType->getSize();
         }
         Mod->addType(Inst->result_id, Type::getStruct(ElemTypes));
         break;
