@@ -1070,6 +1070,7 @@ void Invocation::step()
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpIMul, IMul);
+    DISPATCH(SpvOpInBoundsAccessChain, AccessChain);
     DISPATCH(SpvOpINotEqual, INotEqual);
     DISPATCH(SpvOpIsInf, IsInf);
     DISPATCH(SpvOpIsNan, IsNan);
