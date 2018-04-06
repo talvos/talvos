@@ -129,6 +129,9 @@ public:
         uint16_t Offset = Inst->operands[2].offset;
         switch (Ty->getSize())
         {
+        case 2:
+          Constant.set<uint16_t>(*(uint16_t *)(Inst->words + Offset));
+          break;
         case 4:
           Constant.set<uint32_t>(Inst->words[Offset]);
           break;
@@ -136,7 +139,7 @@ public:
           Constant.set<uint64_t>(*(uint64_t *)(Inst->words + Offset));
           break;
         default:
-          std::cerr << "Unhandled OpConstant type size:" << Ty->getSize()
+          std::cerr << "Unhandled OpConstant type size: " << Ty->getSize()
                     << std::endl;
           abort();
         }
