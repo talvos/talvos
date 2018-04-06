@@ -107,6 +107,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineLayout(
     const VkAllocationCallbacks *pAllocator, VkPipelineLayout *pPipelineLayout)
 {
   // TODO: Implement?
+  *pPipelineLayout = new VkPipelineLayout_T;
   return VK_SUCCESS;
 }
 
@@ -144,7 +145,7 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyPipelineLayout(VkDevice device, VkPipelineLayout pipelineLayout,
                         const VkAllocationCallbacks *pAllocator)
 {
-  // TODO: Implement if vkCreatePipelineLayout is not a NOP.
+  delete pipelineLayout;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkFreeDescriptorSets(

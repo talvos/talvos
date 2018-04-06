@@ -102,6 +102,10 @@ struct VkPipeline_T
   const talvos::Function *Function;
 };
 
+struct VkPipelineLayout_T
+{
+};
+
 struct VkQueue_T
 {
   VkDevice Device;
