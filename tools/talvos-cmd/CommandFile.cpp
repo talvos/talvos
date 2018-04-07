@@ -10,6 +10,7 @@
 #include "talvos/DispatchCommand.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
+#include "talvos/Pipeline.h"
 
 using namespace std;
 
@@ -207,8 +208,9 @@ void CommandFile::parseDispatch()
   GroupCount.X = get<uint32_t>("group count X");
   GroupCount.Y = get<uint32_t>("group count Y");
   GroupCount.Z = get<uint32_t>("group count Z");
-  talvos::DispatchCommand Command(Module.get(), Function, GroupCount,
-                                  DescriptorSets);
+
+  talvos::Pipeline Pipeline(*Device, Module.get(), Function);
+  talvos::DispatchCommand Command(&Pipeline, GroupCount, DescriptorSets);
   Device->run(Command);
 }
 

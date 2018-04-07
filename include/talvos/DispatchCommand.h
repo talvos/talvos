@@ -17,9 +17,8 @@
 namespace talvos
 {
 
-class Function;
-class Module;
 class Object;
+class Pipeline;
 
 /// This class encapsulates information about a compute kernel launch.
 class DispatchCommand
@@ -30,14 +29,12 @@ public:
 
   /// Create a new DispatchCommand.
   ///
-  /// The function \p F must belong to module \p M. Any buffers used by \p F
-  /// must have a corresponding entry in \p DS.
+  /// Any buffers used by \p PL must have a corresponding entry in \p DS.
   ///
-  /// \param M The module containing the entry point to invoke.
-  /// \param F The entry point to invoke.
+  /// \param PL The compute pipeline to invoke.
   /// \param NumGroups The number of groups to launch.
   /// \param DSM The descriptor set mapping to use.
-  DispatchCommand(const Module *M, const Function *F, Dim3 NumGroups,
+  DispatchCommand(const Pipeline *PL, Dim3 NumGroups,
                   const DescriptorSetMap &DSM);
 
   // Do not allow DispatchCommand objects to be copied.
@@ -46,26 +43,19 @@ public:
   DispatchCommand &operator=(const DispatchCommand &) = delete;
   ///\}
 
-  /// Return the function this command is invoking.
-  const Function *getFunction() const { return Func; }
-
-  /// Return the workgroup size.
-  Dim3 getGroupSize() const { return GroupSize; }
-
   /// Return the number of workgroups.
   Dim3 getNumGroups() const { return NumGroups; }
 
-  /// Return the module this command is using.
-  const Module *getModule() const { return Mod; }
+  /// Returns the pipeline this command is invoking.
+  const Pipeline *getPipeline() const { return PL; }
 
   /// Return the resolved buffer variable pointer values for this command.
   const VariableList &getVariables() const { return Variables; }
 
 private:
-  const Module *Mod;    ///< The module containing the entry point to invoke.
-  const Function *Func; ///< The entry point to invoke.
-  Dim3 GroupSize;       ///< The size of each workgroup.
-  Dim3 NumGroups;       ///< The number of workgroups.
+  const Pipeline *PL; ///< The pipeline to use.
+
+  Dim3 NumGroups; ///< The number of workgroups.
 
   VariableList Variables; ///< Resolved buffer variable values.
 };

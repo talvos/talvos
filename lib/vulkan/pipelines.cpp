@@ -6,6 +6,7 @@
 #include "runtime.h"
 
 #include "talvos/Module.h"
+#include "talvos/Pipeline.h"
 
 VKAPI_ATTR void VKAPI_CALL
 vkCmdBindPipeline(VkCommandBuffer commandBuffer,
@@ -31,10 +32,35 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
 {
   for (uint32_t i = 0; i < createInfoCount; i++)
   {
+    const VkPipelineShaderStageCreateInfo &Stage = pCreateInfos[i].stage;
+    const talvos::Module *Mod = Stage.module->Module.get();
+
+    // Build specialization constant map if necessary.
+    talvos::SpecConstantMap SM;
+    if (Stage.pSpecializationInfo)
+    {
+      const uint8_t *Data = (const uint8_t *)Stage.pSpecializationInfo->pData;
+      for (uint32_t s = 0; s < Stage.pSpecializationInfo->mapEntryCount; s++)
+      {
+        const VkSpecializationMapEntry &Entry =
+            Stage.pSpecializationInfo->pMapEntries[s];
+
+        uint32_t ResultId = Mod->getSpecConstant(Entry.constantID);
+        if (!ResultId)
+          continue;
+
+        const talvos::Type *Ty = Mod->getObject(ResultId).getType();
+        assert(Ty->getSize() == Entry.size);
+
+        SM[Entry.constantID] = talvos::Object(Ty, Data + Entry.offset);
+      }
+    }
+
+    // Create pipeline.
     pPipelines[i] = new VkPipeline_T;
-    pPipelines[i]->Module = pCreateInfos[i].stage.module->Module.get();
-    pPipelines[i]->Function =
-        pPipelines[i]->Module->getEntryPoint(pCreateInfos[i].stage.pName);
+    pPipelines[i]->Pipeline = new talvos::Pipeline(
+        *device->Device, Mod, Mod->getEntryPoint(pCreateInfos[i].stage.pName),
+        SM);
   }
   return VK_SUCCESS;
 }
@@ -58,6 +84,7 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyPipeline(VkDevice device, VkPipeline pipeline,
                   const VkAllocationCallbacks *pAllocator)
 {
+  delete pipeline->Pipeline;
   delete pipeline;
 }
 

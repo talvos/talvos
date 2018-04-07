@@ -11,6 +11,7 @@
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
+#include "talvos/Pipeline.h"
 
 namespace talvos
 {
@@ -21,7 +22,7 @@ Workgroup::Workgroup(Device &Dev, const DispatchCommand &Dispatch, Dim3 GroupId)
   LocalMemory = new Memory(Dev, MemoryScope::Workgroup);
 
   // Allocate workgroup variables.
-  for (auto V : Dispatch.getModule()->getWorkgroupVariables())
+  for (auto V : Dispatch.getPipeline()->getModule()->getWorkgroupVariables())
   {
     size_t NumBytes = V.second->getElementType()->getSize();
     uint64_t Address = LocalMemory->allocate(NumBytes);
@@ -29,7 +30,7 @@ Workgroup::Workgroup(Device &Dev, const DispatchCommand &Dispatch, Dim3 GroupId)
   }
 
   // Create invocations for this group.
-  Dim3 GroupSize = Dispatch.getGroupSize();
+  Dim3 GroupSize = Dispatch.getPipeline()->getGroupSize();
   for (uint32_t LZ = 0; LZ < GroupSize.Z; LZ++)
     for (uint32_t LY = 0; LY < GroupSize.Y; LY++)
       for (uint32_t LX = 0; LX < GroupSize.X; LX++)

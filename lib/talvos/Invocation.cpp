@@ -23,6 +23,7 @@
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
+#include "talvos/Pipeline.h"
 #include "talvos/Type.h"
 #include "talvos/Workgroup.h"
 
@@ -32,6 +33,15 @@
 namespace talvos
 {
 
+Invocation::Invocation(Device &Dev, const std::vector<Object> &InitialObjects)
+    : Dev(Dev)
+{
+  CurrentModule = nullptr;
+  CurrentInstruction = nullptr;
+  PrivateMemory = nullptr;
+  Objects = InitialObjects;
+}
+
 Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
                        Workgroup *Group, Dim3 LocalId)
     : Dev(Dev)
@@ -40,19 +50,19 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
   this->Group = Group;
 
   AtBarrier = false;
-  CurrentModule = Command.getModule();
-  CurrentFunction = Command.getFunction();
+  CurrentModule = Command.getPipeline()->getModule();
+  CurrentFunction = Command.getPipeline()->getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
 
   // Set up the local and global ID.
-  Dim3 GroupSize = Command.getGroupSize();
+  Dim3 GroupSize = Command.getPipeline()->getGroupSize();
   Dim3 NumGroups = Command.getNumGroups();
   this->LocalId = LocalId;
   GroupId = Group->getGroupId();
   GlobalId = LocalId + GroupId * GroupSize;
 
-  // Clone module level objects.
-  Objects = CurrentModule->getObjects();
+  // Clone module/pipeline level objects.
+  Objects = Command.getPipeline()->getObjects();
 
   // Copy buffer variable pointer values.
   for (auto V : Command.getVariables())
@@ -113,6 +123,120 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
 }
 
 Invocation::~Invocation() { delete PrivateMemory; }
+
+void Invocation::execute(const talvos::Instruction *Inst)
+{
+  // Dispatch instruction to handler method.
+  uint16_t Opcode = Inst->getOpcode();
+  switch (Opcode)
+  {
+#define DISPATCH(Op, Func)                                                     \
+  case Op:                                                                     \
+    execute##Func(Inst);                                                       \
+    break
+#define NOP(Op)                                                                \
+  case Op:                                                                     \
+    break
+
+    DISPATCH(SpvOpAccessChain, AccessChain);
+    DISPATCH(SpvOpBitcast, Bitcast);
+    DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);
+    DISPATCH(SpvOpBitwiseOr, BitwiseOr);
+    DISPATCH(SpvOpBitwiseXor, BitwiseXor);
+    DISPATCH(SpvOpBranch, Branch);
+    DISPATCH(SpvOpBranchConditional, BranchConditional);
+    DISPATCH(SpvOpCompositeConstruct, CompositeConstruct);
+    DISPATCH(SpvOpCompositeExtract, CompositeExtract);
+    DISPATCH(SpvOpCompositeInsert, CompositeInsert);
+    DISPATCH(SpvOpControlBarrier, ControlBarrier);
+    DISPATCH(SpvOpConvertFToU, ConvertFToU);
+    DISPATCH(SpvOpConvertSToF, ConvertSToF);
+    DISPATCH(SpvOpConvertUToF, ConvertUToF);
+    DISPATCH(SpvOpCopyMemory, CopyMemory);
+    DISPATCH(SpvOpCopyObject, CopyObject);
+    DISPATCH(SpvOpDot, Dot);
+    DISPATCH(SpvOpExtInst, ExtInst);
+    DISPATCH(SpvOpFAdd, FAdd);
+    DISPATCH(SpvOpFConvert, FConvert);
+    DISPATCH(SpvOpFDiv, FDiv);
+    DISPATCH(SpvOpFMod, FMod);
+    DISPATCH(SpvOpFMul, FMul);
+    DISPATCH(SpvOpFNegate, FNegate);
+    DISPATCH(SpvOpFOrdEqual, FOrdEqual);
+    DISPATCH(SpvOpFOrdGreaterThan, FOrdGreaterThan);
+    DISPATCH(SpvOpFOrdGreaterThanEqual, FOrdGreaterThanEqual);
+    DISPATCH(SpvOpFOrdLessThan, FOrdLessThan);
+    DISPATCH(SpvOpFOrdLessThanEqual, FOrdLessThanEqual);
+    DISPATCH(SpvOpFOrdNotEqual, FOrdNotEqual);
+    DISPATCH(SpvOpFRem, FRem);
+    DISPATCH(SpvOpFSub, FSub);
+    DISPATCH(SpvOpFunctionCall, FunctionCall);
+    DISPATCH(SpvOpFUnordEqual, FUnordEqual);
+    DISPATCH(SpvOpFUnordGreaterThan, FUnordGreaterThan);
+    DISPATCH(SpvOpFUnordGreaterThanEqual, FUnordGreaterThanEqual);
+    DISPATCH(SpvOpFUnordLessThan, FUnordLessThan);
+    DISPATCH(SpvOpFUnordLessThanEqual, FUnordLessThanEqual);
+    DISPATCH(SpvOpFUnordNotEqual, FUnordNotEqual);
+    DISPATCH(SpvOpIAdd, IAdd);
+    DISPATCH(SpvOpIEqual, IEqual);
+    DISPATCH(SpvOpIMul, IMul);
+    DISPATCH(SpvOpInBoundsAccessChain, AccessChain);
+    DISPATCH(SpvOpINotEqual, INotEqual);
+    DISPATCH(SpvOpIsInf, IsInf);
+    DISPATCH(SpvOpIsNan, IsNan);
+    DISPATCH(SpvOpISub, ISub);
+    DISPATCH(SpvOpLoad, Load);
+    DISPATCH(SpvOpLogicalEqual, LogicalEqual);
+    DISPATCH(SpvOpLogicalNotEqual, LogicalNotEqual);
+    DISPATCH(SpvOpLogicalOr, LogicalOr);
+    DISPATCH(SpvOpLogicalAnd, LogicalAnd);
+    DISPATCH(SpvOpLogicalNot, LogicalNot);
+    DISPATCH(SpvOpNot, Not);
+    DISPATCH(SpvOpPhi, Phi);
+    DISPATCH(SpvOpPtrAccessChain, PtrAccessChain);
+    DISPATCH(SpvOpReturn, Return);
+    DISPATCH(SpvOpReturnValue, ReturnValue);
+    DISPATCH(SpvOpSConvert, SConvert);
+    DISPATCH(SpvOpSDiv, SDiv);
+    DISPATCH(SpvOpSelect, Select);
+    DISPATCH(SpvOpSGreaterThan, SGreaterThan);
+    DISPATCH(SpvOpSGreaterThanEqual, SGreaterThanEqual);
+    DISPATCH(SpvOpShiftLeftLogical, ShiftLeftLogical);
+    DISPATCH(SpvOpShiftRightArithmetic, ShiftRightArithmetic);
+    DISPATCH(SpvOpShiftRightLogical, ShiftRightLogical);
+    DISPATCH(SpvOpSLessThan, SLessThan);
+    DISPATCH(SpvOpSLessThanEqual, SLessThanEqual);
+    DISPATCH(SpvOpSMod, SMod);
+    DISPATCH(SpvOpSNegate, SNegate);
+    DISPATCH(SpvOpSRem, SRem);
+    DISPATCH(SpvOpStore, Store);
+    DISPATCH(SpvOpSwitch, Switch);
+    DISPATCH(SpvOpUConvert, UConvert);
+    DISPATCH(SpvOpUDiv, UDiv);
+    DISPATCH(SpvOpUGreaterThan, UGreaterThan);
+    DISPATCH(SpvOpUGreaterThanEqual, UGreaterThanEqual);
+    DISPATCH(SpvOpULessThan, ULessThan);
+    DISPATCH(SpvOpULessThanEqual, ULessThanEqual);
+    DISPATCH(SpvOpUMod, UMod);
+    DISPATCH(SpvOpUndef, Undef);
+    DISPATCH(SpvOpUnreachable, Unreachable);
+    DISPATCH(SpvOpVariable, Variable);
+    DISPATCH(SpvOpVectorShuffle, VectorShuffle);
+    DISPATCH(SpvOpVectorTimesScalar, VectorTimesScalar);
+
+    NOP(SpvOpNop);
+    NOP(SpvOpLine);
+    NOP(SpvOpLoopMerge);
+    NOP(SpvOpNoLine);
+    NOP(SpvOpSelectionMerge);
+
+#undef DISPATCH
+#undef NOP
+
+  default:
+    Dev.reportError("Unimplemented instruction", true);
+  }
+}
 
 void Invocation::executeAccessChain(const Instruction *Inst)
 {
@@ -1074,116 +1198,7 @@ void Invocation::step()
     PhiTemps.clear();
   }
 
-  // Dispatch instruction to handler method.
-  uint16_t Opcode = I->getOpcode();
-  switch (Opcode)
-  {
-#define DISPATCH(Op, Func)                                                     \
-  case Op:                                                                     \
-    execute##Func(I);                                                          \
-    break
-#define NOP(Op)                                                                \
-  case Op:                                                                     \
-    break
-
-    DISPATCH(SpvOpAccessChain, AccessChain);
-    DISPATCH(SpvOpBitcast, Bitcast);
-    DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);
-    DISPATCH(SpvOpBitwiseOr, BitwiseOr);
-    DISPATCH(SpvOpBitwiseXor, BitwiseXor);
-    DISPATCH(SpvOpBranch, Branch);
-    DISPATCH(SpvOpBranchConditional, BranchConditional);
-    DISPATCH(SpvOpCompositeConstruct, CompositeConstruct);
-    DISPATCH(SpvOpCompositeExtract, CompositeExtract);
-    DISPATCH(SpvOpCompositeInsert, CompositeInsert);
-    DISPATCH(SpvOpControlBarrier, ControlBarrier);
-    DISPATCH(SpvOpConvertFToU, ConvertFToU);
-    DISPATCH(SpvOpConvertSToF, ConvertSToF);
-    DISPATCH(SpvOpConvertUToF, ConvertUToF);
-    DISPATCH(SpvOpCopyMemory, CopyMemory);
-    DISPATCH(SpvOpCopyObject, CopyObject);
-    DISPATCH(SpvOpDot, Dot);
-    DISPATCH(SpvOpExtInst, ExtInst);
-    DISPATCH(SpvOpFAdd, FAdd);
-    DISPATCH(SpvOpFConvert, FConvert);
-    DISPATCH(SpvOpFDiv, FDiv);
-    DISPATCH(SpvOpFMod, FMod);
-    DISPATCH(SpvOpFMul, FMul);
-    DISPATCH(SpvOpFNegate, FNegate);
-    DISPATCH(SpvOpFOrdEqual, FOrdEqual);
-    DISPATCH(SpvOpFOrdGreaterThan, FOrdGreaterThan);
-    DISPATCH(SpvOpFOrdGreaterThanEqual, FOrdGreaterThanEqual);
-    DISPATCH(SpvOpFOrdLessThan, FOrdLessThan);
-    DISPATCH(SpvOpFOrdLessThanEqual, FOrdLessThanEqual);
-    DISPATCH(SpvOpFOrdNotEqual, FOrdNotEqual);
-    DISPATCH(SpvOpFRem, FRem);
-    DISPATCH(SpvOpFSub, FSub);
-    DISPATCH(SpvOpFunctionCall, FunctionCall);
-    DISPATCH(SpvOpFUnordEqual, FUnordEqual);
-    DISPATCH(SpvOpFUnordGreaterThan, FUnordGreaterThan);
-    DISPATCH(SpvOpFUnordGreaterThanEqual, FUnordGreaterThanEqual);
-    DISPATCH(SpvOpFUnordLessThan, FUnordLessThan);
-    DISPATCH(SpvOpFUnordLessThanEqual, FUnordLessThanEqual);
-    DISPATCH(SpvOpFUnordNotEqual, FUnordNotEqual);
-    DISPATCH(SpvOpIAdd, IAdd);
-    DISPATCH(SpvOpIEqual, IEqual);
-    DISPATCH(SpvOpIMul, IMul);
-    DISPATCH(SpvOpInBoundsAccessChain, AccessChain);
-    DISPATCH(SpvOpINotEqual, INotEqual);
-    DISPATCH(SpvOpIsInf, IsInf);
-    DISPATCH(SpvOpIsNan, IsNan);
-    DISPATCH(SpvOpISub, ISub);
-    DISPATCH(SpvOpLoad, Load);
-    DISPATCH(SpvOpLogicalEqual, LogicalEqual);
-    DISPATCH(SpvOpLogicalNotEqual, LogicalNotEqual);
-    DISPATCH(SpvOpLogicalOr, LogicalOr);
-    DISPATCH(SpvOpLogicalAnd, LogicalAnd);
-    DISPATCH(SpvOpLogicalNot, LogicalNot);
-    DISPATCH(SpvOpNot, Not);
-    DISPATCH(SpvOpPhi, Phi);
-    DISPATCH(SpvOpPtrAccessChain, PtrAccessChain);
-    DISPATCH(SpvOpReturn, Return);
-    DISPATCH(SpvOpReturnValue, ReturnValue);
-    DISPATCH(SpvOpSConvert, SConvert);
-    DISPATCH(SpvOpSDiv, SDiv);
-    DISPATCH(SpvOpSelect, Select);
-    DISPATCH(SpvOpSGreaterThan, SGreaterThan);
-    DISPATCH(SpvOpSGreaterThanEqual, SGreaterThanEqual);
-    DISPATCH(SpvOpShiftLeftLogical, ShiftLeftLogical);
-    DISPATCH(SpvOpShiftRightArithmetic, ShiftRightArithmetic);
-    DISPATCH(SpvOpShiftRightLogical, ShiftRightLogical);
-    DISPATCH(SpvOpSLessThan, SLessThan);
-    DISPATCH(SpvOpSLessThanEqual, SLessThanEqual);
-    DISPATCH(SpvOpSMod, SMod);
-    DISPATCH(SpvOpSNegate, SNegate);
-    DISPATCH(SpvOpSRem, SRem);
-    DISPATCH(SpvOpStore, Store);
-    DISPATCH(SpvOpSwitch, Switch);
-    DISPATCH(SpvOpUConvert, UConvert);
-    DISPATCH(SpvOpUDiv, UDiv);
-    DISPATCH(SpvOpUGreaterThan, UGreaterThan);
-    DISPATCH(SpvOpUGreaterThanEqual, UGreaterThanEqual);
-    DISPATCH(SpvOpULessThan, ULessThan);
-    DISPATCH(SpvOpULessThanEqual, ULessThanEqual);
-    DISPATCH(SpvOpUMod, UMod);
-    DISPATCH(SpvOpUndef, Undef);
-    DISPATCH(SpvOpUnreachable, Unreachable);
-    DISPATCH(SpvOpVariable, Variable);
-    DISPATCH(SpvOpVectorShuffle, VectorShuffle);
-    DISPATCH(SpvOpVectorTimesScalar, VectorTimesScalar);
-
-    NOP(SpvOpNop);
-    NOP(SpvOpLine);
-    NOP(SpvOpLoopMerge);
-    NOP(SpvOpNoLine);
-    NOP(SpvOpSelectionMerge);
-
-#undef DISPATCH
-#undef NOP
-
-  default:
-    Dev.reportError("Unimplemented instruction", true);
-  }
+  execute(I);
 
   // Move program counter to next instruction, unless a terminator instruction
   // was executed.

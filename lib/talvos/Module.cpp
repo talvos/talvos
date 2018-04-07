@@ -121,7 +121,7 @@ public:
         break;
       }
       case SpvOpConstant:
-      case SpvOpSpecConstant: // TODO: Handle specialization constants
+      case SpvOpSpecConstant:
       {
         const Type *Ty = Mod->getType(Inst->type_id);
 
@@ -209,7 +209,7 @@ public:
           Mod->setBuiltin(Target, Inst->words[Inst->operands[2].offset]);
           break;
         case SpvDecorationSpecId:
-          // TODO: Handle this
+          Mod->addSpecConstant(Inst->words[Inst->operands[2].offset], Target);
           break;
         default:
           std::cout << "Unhandled decoration " << Decoration << std::endl;
@@ -315,6 +315,29 @@ public:
       case SpvOpNoLine:
         // TODO: Do something with this
         break;
+      case SpvOpSpecConstantOp:
+      {
+        const Type *ResultType =
+            Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
+
+        uint16_t Opcode = Inst->words[Inst->operands[2].offset];
+
+        // Build list of operands (skip opcode).
+        std::vector<uint32_t> Operands;
+        for (int i = 0; i < Inst->num_operands; i++)
+        {
+          if (i == 2)
+            continue;
+          assert(Inst->operands[i].num_words == 1);
+          Operands.push_back(Inst->words[Inst->operands[i].offset]);
+        }
+
+        // Create the instruction.
+        Mod->addSpecConstantOp(new Instruction(Opcode, Operands.size(),
+                                               Operands.data(), ResultType));
+
+        break;
+      }
       case SpvOpSource:
       case SpvOpSourceContinued:
         // TODO: Do something with these
@@ -498,7 +521,11 @@ Module::Module(uint32_t IdBound)
   WorkgroupSizeId = 0;
 }
 
-Module::~Module() {}
+Module::~Module()
+{
+  for (auto Op : SpecConstantOps)
+    delete Op;
+}
 
 void Module::addEntryPoint(std::string Name, uint32_t Id)
 {
@@ -522,6 +549,18 @@ void Module::addObject(uint32_t Id, const Object &Obj)
 {
   assert(Id < Objects.size());
   Objects[Id] = Obj;
+}
+
+void Module::addSpecConstant(uint32_t SpecId, uint32_t ResultId)
+{
+  // TODO: Allow the same SpecId to apply to multiple results.
+  assert(SpecConstants.count(SpecId) == 0);
+  SpecConstants[SpecId] = ResultId;
+}
+
+void Module::addSpecConstantOp(Instruction *Op)
+{
+  SpecConstantOps.push_back(Op);
 }
 
 void Module::addType(uint32_t Id, std::unique_ptr<Type> Ty)
@@ -632,6 +671,18 @@ Dim3 Module::getLocalSize(uint32_t Entry) const
 const Object &Module::getObject(uint32_t Id) const { return Objects.at(Id); }
 
 const std::vector<Object> &Module::getObjects() const { return Objects; }
+
+uint32_t Module::getSpecConstant(uint32_t SpecId) const
+{
+  if (SpecConstants.count(SpecId) == 0)
+    return 0;
+  return SpecConstants.at(SpecId);
+}
+
+const std::vector<Instruction *> &Module::getSpecConstantOps() const
+{
+  return SpecConstantOps;
+}
 
 const Type *Module::getType(uint32_t Id) const
 {

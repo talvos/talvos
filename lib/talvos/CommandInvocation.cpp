@@ -40,6 +40,7 @@
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Module.h"
+#include "talvos/Pipeline.h"
 #include "talvos/Workgroup.h"
 
 /// The number of lines before and after the current instruction to print.
@@ -483,7 +484,7 @@ bool CommandInvocation::print(const std::vector<std::string> &Args)
   std::cout << "  %" << std::dec << Id << " = ";
 
   // Handle types.
-  if (const Type *Ty = Command.getModule()->getType(Id))
+  if (const Type *Ty = Command.getPipeline()->getModule()->getType(Id))
   {
     std::cout << Ty << std::endl;
     return false;
@@ -536,7 +537,7 @@ bool CommandInvocation::swtch(const std::vector<std::string> &Args)
   }
 
   // Check global index is within global bounds.
-  Dim3 GroupSize = Command.getGroupSize();
+  Dim3 GroupSize = Command.getPipeline()->getGroupSize();
   Dim3 NumGroups = Command.getNumGroups();
   if (Id.X >= GroupSize.X * NumGroups.X || Id.Y >= GroupSize.Y * NumGroups.Y ||
       Id.Z >= GroupSize.Z * NumGroups.Z)

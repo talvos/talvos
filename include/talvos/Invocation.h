@@ -43,6 +43,10 @@ public:
   };
 
 public:
+  /// Create a standalone invocation for a device, with an initial set of
+  /// result objects.
+  Invocation(Device &Dev, const std::vector<Object> &InitialObjects);
+
   /// Create an invocation for \p Command on \p Dev, with specific group and
   /// local IDs. Global variables with their resolved pointer values are listed
   /// in \p Variables.
@@ -60,6 +64,9 @@ public:
 
   /// Clear the barrier state, allowing the invocation to continue.
   void clearBarrier() { AtBarrier = false; }
+
+  /// Execute \p Inst in this invocation.
+  void execute(const Instruction *Inst);
 
   /// Returns the instruction that this invocation is executing.
   const Instruction *getCurrentInstruction() const

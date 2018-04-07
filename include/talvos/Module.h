@@ -86,6 +86,13 @@ public:
   /// Add an object to this module.
   void addObject(uint32_t Id, const Object &Obj);
 
+  /// Add a specialization constant ID mapping.
+  void addSpecConstant(uint32_t SpecId, uint32_t ResultId);
+
+  /// Add a specialization constant operation instruction to this module.
+  /// Transfers ownership of \p Op to the module.
+  void addSpecConstantOp(Instruction *Op);
+
   /// Add a type to this module.
   void addType(uint32_t Id, std::unique_ptr<Type> Ty);
 
@@ -126,6 +133,13 @@ public:
 
   /// Returns the private variable map.
   const PrivateVariableMap &getPrivateVariables() const;
+
+  /// Returns the result ID for the given specialization constant ID.
+  /// Returns 0 if no specialization constants with this ID are present.
+  uint32_t getSpecConstant(uint32_t SpecId) const;
+
+  /// Returns the list of specialization constant operation instructions.
+  const std::vector<Instruction *> &getSpecConstantOps() const;
 
   /// Returns the type with the specified ID.
   const Type *getType(uint32_t Id) const;
@@ -170,6 +184,12 @@ private:
   FunctionMap Functions;               ///< Function mapping.
   EntryPointMap EntryPoints;           ///< Entry point mapping.
   std::map<uint32_t, Dim3> LocalSizes; ///< LocalSize execution modes.
+
+  /// Map specialization constant IDs to result IDs.
+  std::map<uint32_t, uint32_t> SpecConstants;
+
+  /// List of specialization constant operation instructions.
+  std::vector<Instruction *> SpecConstantOps;
 
   /// The ID of the object decorated with WorkgroupSize.
   uint32_t WorkgroupSizeId;

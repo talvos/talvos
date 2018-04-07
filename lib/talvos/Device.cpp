@@ -28,6 +28,7 @@
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
+#include "talvos/Pipeline.h"
 #include "talvos/Plugin.h"
 #include "talvos/Workgroup.h"
 
@@ -137,8 +138,9 @@ void Device::reportError(const std::string &Error, bool Fatal)
   if (CurrentCommand && CurrentCommand->isWorkerThread())
   {
     // Show current entry point.
-    const Module *Mod = CurrentCommand->getCommand().getModule();
-    uint32_t EntryPointId = CurrentCommand->getCommand().getFunction()->getId();
+    const Module *Mod = CurrentCommand->getCommand().getPipeline()->getModule();
+    uint32_t EntryPointId =
+        CurrentCommand->getCommand().getPipeline()->getFunction()->getId();
     std::cerr << "    Entry point:";
     std::cerr << " %" << EntryPointId;
     std::cerr << " " << Mod->getEntryPointName(EntryPointId);

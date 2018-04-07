@@ -78,6 +78,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Pipeline.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Plugin.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Type.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
@@ -94,6 +95,7 @@ set(TALVOS_SOURCES
     Memory.cpp
     Module.cpp
     Object.cpp
+    Pipeline.cpp
     Type.cpp
     Workgroup.cpp
     Utils.cpp
