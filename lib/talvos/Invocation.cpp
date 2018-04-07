@@ -1129,7 +1129,9 @@ void Invocation::executeVectorShuffle(const Instruction *Inst)
   for (uint32_t i = 0; i < Inst->getResultType()->getElementCount(); i++)
   {
     uint32_t Idx = Inst->getOperand(4 + i);
-    if (Idx < Vec1Length)
+    if (Idx == 0xFFFFFFFF)
+      ;
+    else if (Idx < Vec1Length)
       Result.insert({i}, Vec1.extract({Idx}));
     else
       Result.insert({i}, Vec2.extract({Idx - Vec1Length}));
