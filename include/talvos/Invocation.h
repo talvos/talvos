@@ -105,6 +105,7 @@ public:
   void executeExtInst(const Instruction *Inst);
   void executeFAdd(const Instruction *Inst);
   void executeFDiv(const Instruction *Inst);
+  void executeFMod(const Instruction *Inst);
   void executeFMul(const Instruction *Inst);
   void executeFNegate(const Instruction *Inst);
   void executeFOrdEqual(const Instruction *Inst);

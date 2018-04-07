@@ -437,6 +437,13 @@ void Invocation::executeFDiv(const Instruction *Inst)
   executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
 }
 
+void Invocation::executeFMod(const Instruction *Inst)
+{
+  executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) {
+    return fmod(fabs(A), B) * (signbit(B) ? -1 : 1);
+  });
+}
+
 void Invocation::executeFMul(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
@@ -1077,6 +1084,7 @@ void Invocation::step()
     DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
     DISPATCH(SpvOpFDiv, FDiv);
+    DISPATCH(SpvOpFMod, FMod);
     DISPATCH(SpvOpFMul, FMul);
     DISPATCH(SpvOpFNegate, FNegate);
     DISPATCH(SpvOpFOrdEqual, FOrdEqual);
