@@ -229,6 +229,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     NOP(SpvOpNop);
     NOP(SpvOpLine);
     NOP(SpvOpLoopMerge);
+    NOP(SpvOpMemoryBarrier);
     NOP(SpvOpNoLine);
     NOP(SpvOpSelectionMerge);
 
