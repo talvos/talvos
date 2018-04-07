@@ -110,7 +110,7 @@ void Object::insert(const std::vector<uint32_t> &Indices, const Object &Element)
   }
 
   // Copy element data.
-  assert(Ty == Element.Ty);
+  assert(Ty->getSize() == Element.Ty->getSize());
   memcpy(Data + Offset, Element.Data, Ty->getSize());
 }
 
