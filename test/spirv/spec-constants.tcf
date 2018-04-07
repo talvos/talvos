@@ -1,0 +1,53 @@
+# Test specialization constants and the SPECIALIZE command.
+
+MODULE spec-constants.spvasm
+ENTRY spec-constants
+
+BUFFER output 16 FILL INT32 0
+
+DESCRIPTOR_SET 0 0 output
+
+DISPATCH 1 1 1
+DUMP INT32 output
+# CHECK: Buffer 'output' (16 bytes):
+# CHECK:   output[0] = 0
+# CHECK:   output[1] = -7
+# CHECK:   output[2] = 49
+# CHECK:   output[3] = 0
+
+SPECIALIZE 1 INT32 123
+DISPATCH 1 1 1
+DUMP INT32 output
+# CHECK: Buffer 'output' (16 bytes):
+# CHECK:   output[0] = 0
+# CHECK:   output[1] = -123
+# CHECK:   output[2] = 165
+# CHECK:   output[3] = 0
+
+SPECIALIZE 2 BOOL 0
+DISPATCH 1 1 1
+DUMP INT32 output
+# CHECK: Buffer 'output' (16 bytes):
+# CHECK:   output[0] = 0
+# CHECK:   output[1] = 123
+# CHECK:   output[2] = 165
+# CHECK:   output[3] = 0
+
+SPECIALIZE 3 BOOL 1
+DISPATCH 1 1 1
+DUMP INT32 output
+# CHECK: Buffer 'output' (16 bytes):
+# CHECK:   output[0] = 42
+# CHECK:   output[1] = 123
+# CHECK:   output[2] = 165
+# CHECK:   output[3] = 0
+
+SPECIALIZE 0 INT32 7
+SPECIALIZE 4 INT16 3
+DISPATCH 1 1 1
+DUMP INT32 output
+# CHECK: Buffer 'output' (16 bytes):
+# CHECK:   output[0] = 7
+# CHECK:   output[1] = 123
+# CHECK:   output[2] = 165
+# CHECK:   output[3] = 130

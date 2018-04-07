@@ -125,6 +125,21 @@ disassembled SPIR-V module produced by ``spirv-dis``.
 
 .. _tcf-example:
 
+
+``SPECIALIZE``
+~~~~~~~~~~~~~~
+::
+
+  SPECIALIZE <spec_id> <type> <value>
+
+Set the value of the specialization constant with id ``<spec_id>`` to
+``<value>``, interpreting it using ``<type>``.
+This affects any subsequent ``DISPATCH`` commands.
+In addition to the types listed above, the command also accepts ``BOOL`` to
+set the value of ``OpSpecConstantTrue`` and ``OpSpecConstantFalse``
+instructions, where ``<value>`` should be ``0`` or ``1``.
+
+
 Example
 -------
 

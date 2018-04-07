@@ -209,7 +209,7 @@ void CommandFile::parseDispatch()
   GroupCount.Y = get<uint32_t>("group count Y");
   GroupCount.Z = get<uint32_t>("group count Z");
 
-  talvos::Pipeline Pipeline(*Device, Module.get(), Function);
+  talvos::Pipeline Pipeline(*Device, Module.get(), Function, SpecConstMap);
   talvos::DispatchCommand Command(&Pipeline, GroupCount, DescriptorSets);
   Device->run(Command);
 }
@@ -298,6 +298,33 @@ void CommandFile::parseModule()
     throw "failed to load SPIR-V module";
 }
 
+void CommandFile::parseSpecialize()
+{
+  uint32_t SpecId = get<uint32_t>("spec constant ID");
+  string SpecType = get<string>("specialize type");
+
+  if (SpecType == "BOOL")
+    specialize<bool>(SpecId);
+  else if (SpecType == "INT16")
+    specialize<int16_t>(SpecId);
+  else if (SpecType == "UINT16")
+    specialize<uint16_t>(SpecId);
+  else if (SpecType == "INT32")
+    specialize<int32_t>(SpecId);
+  else if (SpecType == "UINT32")
+    specialize<uint32_t>(SpecId);
+  else if (SpecType == "INT64")
+    specialize<int64_t>(SpecId);
+  else if (SpecType == "UINT64")
+    specialize<uint64_t>(SpecId);
+  else if (SpecType == "FLOAT")
+    specialize<float>(SpecId);
+  else if (SpecType == "DOUBLE")
+    specialize<double>(SpecId);
+  else
+    throw NotRecognizedException();
+}
+
 template <typename T> void CommandFile::dump(unsigned VecWidth)
 {
   string Name = get<string>("allocation name");
@@ -370,6 +397,19 @@ void CommandFile::series(uint64_t Address, uint64_t NumBytes)
                                     (uint8_t *)&Value);
 }
 
+template <typename T> void CommandFile::specialize(uint32_t SpecId)
+{
+  uint32_t ResultId = Module->getSpecConstant(SpecId);
+  if (!ResultId)
+    throw "invalid specialization constant ID";
+
+  const talvos::Type *Ty = Module->getObject(ResultId).getType();
+  if (Ty->getSize() != sizeof(T))
+    throw "wrong type size for specialization constant";
+
+  SpecConstMap[SpecId] = talvos::Object(Ty, get<T>("specialization value"));
+}
+
 bool CommandFile::run()
 {
   try
@@ -394,6 +434,8 @@ bool CommandFile::run()
         parseLoop();
       else if (Command == "MODULE")
         parseModule();
+      else if (Command == "SPECIALIZE")
+        parseSpecialize();
       else
       {
         std::cerr << "line " << CurrentLine << ": ";

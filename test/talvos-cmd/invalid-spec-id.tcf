@@ -1,0 +1,4 @@
+# CHECK: line 4: ERROR: invalid specialization constant ID
+# EXIT 1
+MODULE ../spirv/spec-constants.spvasm
+SPECIALIZE 42 INT32 0

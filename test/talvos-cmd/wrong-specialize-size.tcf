@@ -1,0 +1,4 @@
+# CHECK: line 4: ERROR: wrong type size for specialization constant
+# EXIT 1
+MODULE ../spirv/spec-constants.spvasm
+SPECIALIZE 1 INT64 0

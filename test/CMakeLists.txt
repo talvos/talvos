@@ -25,6 +25,7 @@ foreach(test
   spirv/phi-swap
   spirv/simple-branch
   spirv/simple-loop
+  spirv/spec-constants
   spirv/struct-offset
   spirv/test-bitwise-instructions
   spirv/test-fp-arithmetic
@@ -40,12 +41,14 @@ foreach(test
   talvos-cmd/empty
   talvos-cmd/endloop-without-loop
   talvos-cmd/invalid-resource-name
+  talvos-cmd/invalid-spec-id
   talvos-cmd/invalid-vector-suffix
   talvos-cmd/loop-count-zero
   talvos-cmd/missing-binfile
   talvos-cmd/parse-failure
   talvos-cmd/unexpected-eof
   talvos-cmd/unterminated-loop
+  talvos-cmd/wrong-specialize-size
 )
   add_test(
     NAME ${test}

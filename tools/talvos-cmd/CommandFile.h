@@ -9,13 +9,14 @@
 #include <vector>
 
 #include "talvos/DescriptorSet.h"
+#include "talvos/Pipeline.h"
 
 namespace talvos
 {
 class Device;
 class Function;
 class Module;
-}
+} // namespace talvos
 
 class CommandFile
 {
@@ -35,17 +36,20 @@ private:
   void parseEntry();
   void parseLoop();
   void parseModule();
+  void parseSpecialize();
 
   template <typename T> void dump(unsigned VecWidth);
   template <typename T> void data(uint64_t Address, uint64_t NumBytes);
   template <typename T> void fill(uint64_t Address, uint64_t NumBytes);
   template <typename T> void series(uint64_t Address, uint64_t NumBytes);
+  template <typename T> void specialize(uint32_t SpecId);
 
   std::istream &Stream;
   talvos::Device *Device;
   std::unique_ptr<talvos::Module> Module;
   const talvos::Function *Function;
   std::map<std::string, std::pair<uint64_t, uint64_t>> Buffers;
+  talvos::SpecConstantMap SpecConstMap;
   talvos::DescriptorSetMap DescriptorSets;
   std::vector<std::pair<size_t, std::streampos>> Loops;
 
