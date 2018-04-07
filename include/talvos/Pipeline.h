@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "talvos/Dim3.h"
+#include "talvos/Object.h"
 
 namespace talvos
 {
@@ -20,7 +21,6 @@ namespace talvos
 class Device;
 class Function;
 class Module;
-class Object;
 
 /// Mapping from specialization constant ID to Object values.
 typedef std::map<uint32_t, Object> SpecConstantMap;
