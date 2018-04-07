@@ -22,7 +22,7 @@ class Type;
 
 /// A list of types used for structure members.
 /// The second element of each pair is the byte offset of the member.
-typedef std::vector<std::pair<const Type *, uint32_t>> StructElementTypeList;
+typedef std::vector<std::pair<const Type *, uint64_t>> StructElementTypeList;
 
 /// This class represents a SPIR-V type.
 ///
@@ -57,12 +57,12 @@ public:
 
   /// Returns the byte offset of the element at \p Index.
   /// Valid for array, pointer, runtime array, struct, and vector types.
-  size_t getElementOffset(uint32_t Index) const;
+  size_t getElementOffset(uint64_t Index) const;
 
   /// Returns the type of the element at \p Index.
   /// Valid for array, pointer, runtime array, struct, and vector types.
   /// For non-structure types, the value of \p Index is ignored.
-  const Type *getElementType(uint32_t Index = 0) const;
+  const Type *getElementType(uint64_t Index = 0) const;
 
   /// Returns the element type for vector types, or \p this for scalar types.
   /// Not valid for any other type.

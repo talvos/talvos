@@ -20,7 +20,7 @@ uint32_t Type::getBitWidth() const
   return BitWidth;
 }
 
-size_t Type::getElementOffset(uint32_t Index) const
+size_t Type::getElementOffset(uint64_t Index) const
 {
   if (Id == STRUCT)
     return ElementTypes[Index].second;
@@ -32,7 +32,7 @@ size_t Type::getElementOffset(uint32_t Index) const
   abort();
 }
 
-const Type *Type::getElementType(uint32_t Index) const
+const Type *Type::getElementType(uint64_t Index) const
 {
   if (Id == STRUCT)
   {

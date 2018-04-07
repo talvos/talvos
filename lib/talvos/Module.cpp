@@ -409,7 +409,7 @@ public:
       case SpvOpTypeStruct:
       {
         StructElementTypeList ElemTypes;
-        uint32_t ElemOffset = 0;
+        uint64_t ElemOffset = 0;
         for (int i = 1; i < Inst->num_operands; i++)
         {
           uint32_t ElemTypeId = Inst->words[Inst->operands[i].offset];
