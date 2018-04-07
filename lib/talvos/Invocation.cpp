@@ -432,6 +432,21 @@ void Invocation::executeFAdd(const Instruction *Inst)
   executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A + B; });
 }
 
+void Invocation::executeFConvert(const Instruction *Inst)
+{
+  switch (Inst->getResultType()->getBitWidth())
+  {
+  case 32:
+    executeOpFP<1>(Inst, [](auto A) -> float { return (float)A; });
+    break;
+  case 64:
+    executeOpFP<1>(Inst, [](auto A) -> double { return (double)A; });
+    break;
+  default:
+    assert(false && "Unhandled floating point size for OpFConvert");
+  }
+}
+
 void Invocation::executeFDiv(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) { return A / B; });
@@ -1090,6 +1105,7 @@ void Invocation::step()
     DISPATCH(SpvOpDot, Dot);
     DISPATCH(SpvOpExtInst, ExtInst);
     DISPATCH(SpvOpFAdd, FAdd);
+    DISPATCH(SpvOpFConvert, FConvert);
     DISPATCH(SpvOpFDiv, FDiv);
     DISPATCH(SpvOpFMod, FMod);
     DISPATCH(SpvOpFMul, FMul);

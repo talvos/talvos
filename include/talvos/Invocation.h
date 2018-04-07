@@ -104,6 +104,7 @@ public:
   void executeDot(const Instruction *Inst);
   void executeExtInst(const Instruction *Inst);
   void executeFAdd(const Instruction *Inst);
+  void executeFConvert(const Instruction *Inst);
   void executeFDiv(const Instruction *Inst);
   void executeFMod(const Instruction *Inst);
   void executeFMul(const Instruction *Inst);
