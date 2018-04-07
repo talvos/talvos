@@ -222,6 +222,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpUndef, Undef);
     DISPATCH(SpvOpUnreachable, Unreachable);
     DISPATCH(SpvOpVariable, Variable);
+    DISPATCH(SpvOpVectorExtractDynamic, VectorExtractDynamic);
     DISPATCH(SpvOpVectorShuffle, VectorShuffle);
     DISPATCH(SpvOpVectorTimesScalar, VectorTimesScalar);
 
@@ -1115,6 +1116,31 @@ void Invocation::executeVariable(const Instruction *Inst)
   // Track function scope allocations.
   if (!CallStack.empty())
     CallStack.back().Allocations.push_back(Address);
+}
+
+void Invocation::executeVectorExtractDynamic(const Instruction *Inst)
+{
+  uint32_t Id = Inst->getOperand(1);
+  uint16_t Index = 0;
+  switch (Objects[Inst->getOperand(3)].getType()->getSize())
+  {
+  case 2:
+    Index = OP(3, uint16_t);
+    break;
+  case 4:
+    Index = (uint16_t)OP(3, uint32_t);
+    break;
+  case 8:
+    Index = (uint16_t)OP(3, uint64_t);
+    break;
+  default:
+    assert(false && "Unhandled index size in OpVectorExtractDynamic");
+  }
+
+  const Object &Vector = Objects[Inst->getOperand(2)];
+  if (Index >= Vector.getType()->getElementCount())
+    Dev.reportError("Vector index out of range");
+  Objects[Id] = Vector.extract({Index});
 }
 
 void Invocation::executeVectorShuffle(const Instruction *Inst)
