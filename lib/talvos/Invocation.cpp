@@ -440,7 +440,7 @@ void Invocation::executeFDiv(const Instruction *Inst)
 void Invocation::executeFMod(const Instruction *Inst)
 {
   executeOpFP<2>(Inst, [](auto A, auto B) -> decltype(A) {
-    return fmod(fabs(A), B) * (signbit(B) ? -1 : 1);
+    return fmod(fabs(A), B) * (std::signbit(B) ? -1 : 1);
   });
 }
 
