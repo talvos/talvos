@@ -495,6 +495,7 @@ Module::Module(uint32_t IdBound)
 {
   this->IdBound = IdBound;
   this->Objects.resize(IdBound);
+  WorkgroupSizeId = 0;
 }
 
 Module::~Module() {}
@@ -729,7 +730,7 @@ void Module::setBuiltin(uint32_t Id, uint32_t Builtin)
     InputVariables[Id].Builtin = Builtin;
     break;
   case SpvBuiltInWorkgroupSize:
-    // TODO: Handle this?
+    WorkgroupSizeId = Id;
     break;
   default:
     std::cout << "Unhandled builtin decoration: " << Builtin << std::endl;

@@ -130,6 +130,10 @@ public:
   /// Returns the type with the specified ID.
   const Type *getType(uint32_t Id) const;
 
+  /// Returns the ID of the object decorated with WorkgroupSize.
+  /// Returns 0 if no object has been decorated with WorkgroupSize.
+  uint32_t getWorkgroupSizeId() const { return WorkgroupSizeId; }
+
   /// Returns the workgroup variable map.
   const WorkgroupVariableMap &getWorkgroupVariables() const;
 
@@ -166,6 +170,9 @@ private:
   FunctionMap Functions;               ///< Function mapping.
   EntryPointMap EntryPoints;           ///< Entry point mapping.
   std::map<uint32_t, Dim3> LocalSizes; ///< LocalSize execution modes.
+
+  /// The ID of the object decorated with WorkgroupSize.
+  uint32_t WorkgroupSizeId;
 
   BufferVariableMap BufferVariables;       ///< Buffer variables.
   InputVariableMap InputVariables;         ///< Input variables.

@@ -21,7 +21,14 @@ DispatchCommand::DispatchCommand(const Module *M, const Function *F,
 
   this->NumGroups = NumGroups;
   this->GroupSize = M->getLocalSize(F->getId());
-  // TODO: Handle WorkgroupSize decoration
+  if (uint32_t WorkgroupSizeId = M->getWorkgroupSizeId())
+  {
+    // TODO: Handle specialization.
+    const Object &WorkgroupSize = M->getObject(WorkgroupSizeId);
+    this->GroupSize.X = WorkgroupSize.get<uint32_t>(0);
+    this->GroupSize.Y = WorkgroupSize.get<uint32_t>(1);
+    this->GroupSize.Z = WorkgroupSize.get<uint32_t>(2);
+  }
 
   // Resolve buffer variables.
   for (BufferVariableMap::value_type V : M->getBufferVariables())
