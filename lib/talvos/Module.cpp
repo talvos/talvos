@@ -166,6 +166,7 @@ public:
         break;
       }
       case SpvOpConstantFalse:
+      case SpvOpSpecConstantFalse:
       {
         const Type *Ty = Mod->getType(Inst->type_id);
         Mod->addObject(Inst->result_id, Object(Ty, false));
@@ -181,6 +182,7 @@ public:
         break;
       }
       case SpvOpConstantTrue:
+      case SpvOpSpecConstantTrue:
       {
         const Type *Ty = Mod->getType(Inst->type_id);
         Mod->addObject(Inst->result_id, Object(Ty, true));

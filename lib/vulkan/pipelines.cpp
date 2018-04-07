@@ -50,9 +50,16 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
           continue;
 
         const talvos::Type *Ty = Mod->getObject(ResultId).getType();
-        assert(Ty->getSize() == Entry.size);
-
-        SM[Entry.constantID] = talvos::Object(Ty, Data + Entry.offset);
+        if (Ty->isBool())
+        {
+          bool Value = *(VkBool32 *)(Data + Entry.offset) ? true : false;
+          SM[Entry.constantID] = talvos::Object(Ty, Value);
+        }
+        else
+        {
+          assert(Ty->getSize() == Entry.size);
+          SM[Entry.constantID] = talvos::Object(Ty, Data + Entry.offset);
+        }
       }
     }
 
