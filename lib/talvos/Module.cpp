@@ -336,9 +336,7 @@ public:
       }
       case SpvOpSpecConstantOp:
       {
-        const Type *ResultType =
-            Inst->type_id ? Mod->getType(Inst->type_id) : nullptr;
-
+        const Type *ResultType = Mod->getType(Inst->type_id);
         uint16_t Opcode = Inst->words[Inst->operands[2].offset];
 
         // Build list of operands (skip opcode).
@@ -354,7 +352,6 @@ public:
         // Create the instruction.
         Mod->addSpecConstantOp(new Instruction(Opcode, Inst->num_operands - 1,
                                                Operands.data(), ResultType));
-
         break;
       }
       case SpvOpSource:
