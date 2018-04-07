@@ -65,8 +65,8 @@ The initializer can be one of the following:
 
   DESCRIPTOR_SET <d> <b> <name>
 
-Associate the buffer ``<name>`` with descriptor set <d>, binding <b> for the
-next command dispatched.
+Associate the buffer ``<name>`` with descriptor set ``<d>``, binding ``<b>``
+for the next command dispatched.
 
 
 ``DISPATCH``
