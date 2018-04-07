@@ -151,6 +151,7 @@ public:
   void executeShiftRightLogical(const Instruction *Inst);
   void executeSLessThan(const Instruction *Inst);
   void executeSLessThanEqual(const Instruction *Inst);
+  void executeSMod(const Instruction *Inst);
   void executeSNegate(const Instruction *Inst);
   void executeSRem(const Instruction *Inst);
   void executeStore(const Instruction *Inst);

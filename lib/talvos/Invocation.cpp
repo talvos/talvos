@@ -839,6 +839,13 @@ void Invocation::executeSLessThanEqual(const Instruction *Inst)
   executeOpSInt<2>(Inst, [](auto A, auto B) -> bool { return A <= B; });
 }
 
+void Invocation::executeSMod(const Instruction *Inst)
+{
+  executeOpSInt<2>(Inst, [](auto A, auto B) -> decltype(A) {
+    return (abs(A) % B) * (B < 0 ? -1 : 1);
+  });
+}
+
 void Invocation::executeSNegate(const Instruction *Inst)
 {
   executeOpSInt<1>(Inst, [](auto A) -> decltype(A) { return -A; });
@@ -1131,6 +1138,7 @@ void Invocation::step()
     DISPATCH(SpvOpShiftRightLogical, ShiftRightLogical);
     DISPATCH(SpvOpSLessThan, SLessThan);
     DISPATCH(SpvOpSLessThanEqual, SLessThanEqual);
+    DISPATCH(SpvOpSMod, SMod);
     DISPATCH(SpvOpSNegate, SNegate);
     DISPATCH(SpvOpSRem, SRem);
     DISPATCH(SpvOpStore, Store);
