@@ -147,7 +147,6 @@ public:
         break;
       }
       case SpvOpConstantComposite:
-      case SpvOpSpecConstantComposite: // TODO: Handle specialization constants
       {
         const Type *Ty = Mod->getType(Inst->type_id);
 
@@ -317,6 +316,24 @@ public:
       case SpvOpNoLine:
         // TODO: Do something with this
         break;
+      case SpvOpSpecConstantComposite:
+      {
+        const Type *ResultType = Mod->getType(Inst->type_id);
+
+        // Build list of operands (the IDs of the constituents).
+        std::vector<uint32_t> Operands(Inst->num_operands);
+        for (int i = 0; i < Inst->num_operands; i++)
+        {
+          assert(Inst->operands[i].num_words == 1);
+          Operands[i] = Inst->words[Inst->operands[i].offset];
+        }
+
+        // Create an OpCompositeConstruct instruction.
+        Mod->addSpecConstantOp(new Instruction(SpvOpCompositeConstruct,
+                                               Inst->num_operands,
+                                               Operands.data(), ResultType));
+        break;
+      }
       case SpvOpSpecConstantOp:
       {
         const Type *ResultType =

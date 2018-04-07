@@ -26,6 +26,7 @@ foreach(test
   spirv/simple-branch
   spirv/simple-loop
   spirv/spec-constants
+  spirv/spec-constant-workgroupsize
   spirv/struct-offset
   spirv/test-bitwise-instructions
   spirv/test-fp-arithmetic
