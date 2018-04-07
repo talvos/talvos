@@ -27,6 +27,11 @@ if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
 endif()
 
+# Disable non-secure function warnings for MSVC
+if (MSVC)
+  add_definitions("-D_CRT_SECURE_NO_WARNINGS")
+endif()
+
 include_directories(include)
 
 add_subdirectory(docs)

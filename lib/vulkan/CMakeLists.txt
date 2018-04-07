@@ -8,11 +8,6 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set(DLL_EXPORTS exports.def)
 endif()
 
-# Disable non-secure function warnings for MSVC
-if (MSVC)
-  add_definitions("-D_CRT_SECURE_NO_WARNINGS")
-endif()
-
 add_library(talvos-vulkan SHARED
   ${CMAKE_SOURCE_DIR}/include/vulkan/vk_platform.h
   ${CMAKE_SOURCE_DIR}/include/vulkan/vulkan_core.h
