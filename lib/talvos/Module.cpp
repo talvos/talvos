@@ -335,7 +335,7 @@ public:
         }
 
         // Create the instruction.
-        Mod->addSpecConstantOp(new Instruction(Opcode, Operands.size(),
+        Mod->addSpecConstantOp(new Instruction(Opcode, Inst->num_operands - 1,
                                                Operands.data(), ResultType));
 
         break;
