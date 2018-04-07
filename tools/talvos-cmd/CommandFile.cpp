@@ -221,7 +221,7 @@ void CommandFile::parseDump()
   if (VPos != string::npos)
   {
     char *End;
-    VecWidth = strtoul(DumpType.c_str() + VPos + 1, &End, 10);
+    VecWidth = (unsigned)strtoul(DumpType.c_str() + VPos + 1, &End, 10);
     if (VecWidth == 0 || strlen(End))
       throw "invalid vector suffix";
     DumpType = DumpType.substr(0, VPos);
