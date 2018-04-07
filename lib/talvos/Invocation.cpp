@@ -149,6 +149,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpCompositeExtract, CompositeExtract);
     DISPATCH(SpvOpCompositeInsert, CompositeInsert);
     DISPATCH(SpvOpControlBarrier, ControlBarrier);
+    DISPATCH(SpvOpConvertFToS, ConvertFToS);
     DISPATCH(SpvOpConvertFToU, ConvertFToU);
     DISPATCH(SpvOpConvertSToF, ConvertSToF);
     DISPATCH(SpvOpConvertUToF, ConvertUToF);
@@ -371,6 +372,24 @@ void Invocation::executeControlBarrier(const Instruction *Inst)
   // TODO: Handle other execution scopes
   assert(Objects[Inst->getOperand(0)].get<uint32_t>() == SpvScopeWorkgroup);
   AtBarrier = true;
+}
+
+void Invocation::executeConvertFToS(const Instruction *Inst)
+{
+  switch (Inst->getResultType()->getBitWidth())
+  {
+  case 16:
+    executeOpFP<1>(Inst, [](auto A) -> int16_t { return (int16_t)A; });
+    break;
+  case 32:
+    executeOpFP<1>(Inst, [](auto A) -> int32_t { return (int32_t)A; });
+    break;
+  case 64:
+    executeOpFP<1>(Inst, [](auto A) -> int64_t { return (int64_t)A; });
+    break;
+  default:
+    assert(false && "Unhandled integer size for OpConvertFToS");
+  }
 }
 
 void Invocation::executeConvertFToU(const Instruction *Inst)

@@ -103,6 +103,7 @@ public:
   void executeCompositeExtract(const Instruction *Inst);
   void executeCompositeInsert(const Instruction *Inst);
   void executeControlBarrier(const Instruction *Inst);
+  void executeConvertFToS(const Instruction *Inst);
   void executeConvertFToU(const Instruction *Inst);
   void executeConvertSToF(const Instruction *Inst);
   void executeConvertUToF(const Instruction *Inst);
