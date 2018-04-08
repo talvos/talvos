@@ -959,9 +959,25 @@ void Invocation::executeSDiv(const Instruction *Inst)
 
 void Invocation::executeSelect(const Instruction *Inst)
 {
-  bool Condition = OP(2, bool);
-  Objects[Inst->getOperand(1)] =
-      Objects[Condition ? Inst->getOperand(3) : Inst->getOperand(4)];
+  uint32_t Id = Inst->getOperand(1);
+  const Object &Condition = Objects[Inst->getOperand(2)];
+  const Object &Object1 = Objects[Inst->getOperand(3)];
+  const Object &Object2 = Objects[Inst->getOperand(4)];
+
+  if (Condition.getType()->isScalar())
+  {
+    Objects[Id] = Condition.get<bool>() ? Object1 : Object2;
+  }
+  else
+  {
+    Object Result(Inst->getResultType());
+    for (uint32_t i = 0; i < Result.getType()->getElementCount(); i++)
+    {
+      Result.insert({i}, Condition.get<bool>(i) ? Object1.extract({i})
+                                                : Object2.extract({i}));
+    }
+    Objects[Id] = Result;
+  }
 }
 
 void Invocation::executeSGreaterThan(const Instruction *Inst)
