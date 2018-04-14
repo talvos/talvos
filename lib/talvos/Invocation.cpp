@@ -769,12 +769,12 @@ void Invocation::executeINotEqual(const Instruction *Inst)
 
 void Invocation::executeIsInf(const Instruction *Inst)
 {
-  executeOpFP<1>(Inst, [](auto A) -> bool { return isinf(A); });
+  executeOpFP<1>(Inst, [](auto A) -> bool { return std::isinf(A); });
 }
 
 void Invocation::executeIsNan(const Instruction *Inst)
 {
-  executeOpFP<1>(Inst, [](auto A) -> bool { return isnan(A); });
+  executeOpFP<1>(Inst, [](auto A) -> bool { return std::isnan(A); });
 }
 
 void Invocation::executeISub(const Instruction *Inst)
