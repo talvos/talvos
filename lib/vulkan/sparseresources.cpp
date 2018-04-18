@@ -34,7 +34,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceSparseImageFormatProperties(
     VkImageTiling tiling, uint32_t *pPropertyCount,
     VkSparseImageFormatProperties *pProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pPropertyCount = 0;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceSparseImageFormatProperties2(
@@ -42,7 +42,10 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceSparseImageFormatProperties2(
     const VkPhysicalDeviceSparseImageFormatInfo2 *pFormatInfo,
     uint32_t *pPropertyCount, VkSparseImageFormatProperties2 *pProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceSparseImageFormatProperties(
+      physicalDevice, pFormatInfo->format, pFormatInfo->type,
+      pFormatInfo->samples, pFormatInfo->usage, pFormatInfo->tiling,
+      pPropertyCount, &pProperties->properties);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
