@@ -70,7 +70,19 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateImage(VkDevice device, const VkImageCreateInfo *pCreateInfo,
               const VkAllocationCallbacks *pAllocator, VkImage *pImage)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pImage = new VkImage_T;
+  (*pImage)->Type = pCreateInfo->imageType;
+  (*pImage)->Format = pCreateInfo->format;
+  (*pImage)->Extent = pCreateInfo->extent;
+  (*pImage)->MipLevels = pCreateInfo->mipLevels;
+  (*pImage)->ArrayLayers = pCreateInfo->arrayLayers;
+
+  // TODO: Handle multisampling
+  assert(pCreateInfo->samples == VK_SAMPLE_COUNT_1_BIT);
+
+  // TODO: Handle image layout parameter
+
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
@@ -96,7 +108,7 @@ vkDestroyBufferView(VkDevice device, VkBufferView bufferView,
 VKAPI_ATTR void VKAPI_CALL vkDestroyImage(
     VkDevice device, VkImage image, const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete image;
 }
 
 VKAPI_ATTR void VKAPI_CALL

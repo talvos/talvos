@@ -87,6 +87,17 @@ struct VkFence_T
   bool Signaled;
 };
 
+struct VkImage_T
+{
+  VkImageType Type;
+  VkFormat Format;
+  VkExtent3D Extent;
+  uint32_t MipLevels;
+  uint32_t ArrayLayers;
+  //VkDeviceSize NumBytes;
+  uint64_t Address;
+};
+
 struct VkInstance_T
 {
   VkPhysicalDevice Device;
