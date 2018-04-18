@@ -40,6 +40,7 @@ public:
     FLOAT,
     VECTOR,
     MATRIX,
+    IMAGE,
     ARRAY,
     RUNTIME_ARRAY,
     STRUCT,
@@ -122,6 +123,11 @@ public:
   getFunction(const Type *ReturnType,
               const std::vector<const Type *> &ArgTypes);
 
+  /// Create an image type.
+  static std::unique_ptr<Type> getImage(const Type *SampledType, uint32_t Dim,
+                                        uint32_t Depth, bool Arrayed, bool MS,
+                                        uint32_t Sampled, uint32_t Format);
+
   /// Create a matrix type.
   static std::unique_ptr<Type> getMatrix(const Type *ColumnType,
                                          uint32_t NumColumns);
@@ -171,6 +177,13 @@ private:
 
   const Type *ReturnType;                  ///< Valid for function types.
   std::vector<const Type *> ArgumentTypes; ///< Valid for function types.
+
+  uint32_t Dimensionality; ///< Valid for image types.
+  uint32_t Depth;          ///< Valid for image types.
+  bool Arrayed;            ///< Valid for image types.
+  bool Multisampled;       ///< Valid for image types.
+  uint32_t Sampled;        ///< Valid for image types.
+  uint32_t Format;         ///< Valid for image types.
 };
 
 } // namespace talvos

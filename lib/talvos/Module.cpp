@@ -414,6 +414,21 @@ public:
                      Type::getFunction(Mod->getType(ReturnType), ArgTypes));
         break;
       }
+      case SpvOpTypeImage:
+      {
+        const Type *SampledType =
+            Mod->getType(Inst->words[Inst->operands[1].offset]);
+        uint32_t Dim = Inst->words[Inst->operands[2].offset];
+        uint32_t Depth = Inst->words[Inst->operands[3].offset];
+        uint32_t Arrayed = Inst->words[Inst->operands[4].offset];
+        uint32_t MS = Inst->words[Inst->operands[5].offset];
+        uint32_t Sampled = Inst->words[Inst->operands[6].offset];
+        uint32_t Format = Inst->words[Inst->operands[7].offset];
+        Mod->addType(Inst->result_id,
+                     Type::getImage(SampledType, Dim, Depth, Arrayed, MS,
+                                    Sampled, Format));
+        break;
+      }
       case SpvOpTypeMatrix:
       {
         const Type *ColumnType =

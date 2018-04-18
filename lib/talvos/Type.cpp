@@ -171,6 +171,21 @@ Type::getFunction(const Type *ReturnType,
   return T;
 }
 
+std::unique_ptr<Type> Type::getImage(const Type *SampledType, uint32_t Dim,
+                                     uint32_t Depth, bool Arrayed, bool MS,
+                                     uint32_t Sampled, uint32_t Format)
+{
+  std::unique_ptr<Type> T(new Type(IMAGE, sizeof(uint64_t)));
+  T->ElementType = SampledType;
+  T->Dimensionality = Dim;
+  T->Depth = Depth;
+  T->Arrayed = Arrayed;
+  T->Multisampled = MS;
+  T->Sampled = Sampled;
+  T->Format = Format;
+  return T;
+}
+
 std::unique_ptr<Type> Type::getMatrix(const Type *ColumnType,
                                       uint32_t NumColumns)
 {
