@@ -55,6 +55,7 @@ vkCreateBuffer(VkDevice device, const VkBufferCreateInfo *pCreateInfo,
 {
   *pBuffer = new VkBuffer_T;
   (*pBuffer)->NumBytes = pCreateInfo->size;
+  (*pBuffer)->Address = 0;
   return VK_SUCCESS;
 }
 
