@@ -134,7 +134,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFormatProperties2(
     VkPhysicalDevice physicalDevice, VkFormat format,
     VkFormatProperties2 *pFormatProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceFormatProperties(physicalDevice, format,
+                                      &pFormatProperties->formatProperties);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFormatProperties2KHR(
