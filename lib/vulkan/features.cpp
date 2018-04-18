@@ -150,7 +150,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceImageFormatProperties(
     VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags,
     VkImageFormatProperties *pImageFormatProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return VK_ERROR_FORMAT_NOT_SUPPORTED;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceImageFormatProperties2(
@@ -158,7 +158,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceImageFormatProperties2(
     const VkPhysicalDeviceImageFormatInfo2 *pImageFormatInfo,
     VkImageFormatProperties2 *pImageFormatProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return vkGetPhysicalDeviceImageFormatProperties(
+      physicalDevice, pImageFormatInfo->format, pImageFormatInfo->type,
+      pImageFormatInfo->tiling, pImageFormatInfo->usage,
+      pImageFormatInfo->flags, &pImageFormatProperties->imageFormatProperties);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceImageFormatProperties2KHR(
