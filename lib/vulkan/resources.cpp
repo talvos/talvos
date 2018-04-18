@@ -32,7 +32,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkBindImageMemory(VkDevice device, VkImage image,
                                                  VkDeviceMemory memory,
                                                  VkDeviceSize memoryOffset)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  image->Address = memory->Address + memoryOffset;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
