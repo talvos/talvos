@@ -81,6 +81,7 @@ vkCreateImage(VkDevice device, const VkImageCreateInfo *pCreateInfo,
   (*pImage)->Extent = pCreateInfo->extent;
   (*pImage)->MipLevels = pCreateInfo->mipLevels;
   (*pImage)->ArrayLayers = pCreateInfo->arrayLayers;
+  (*pImage)->Address = 0;
 
   // TODO: Handle multisampling
   assert(pCreateInfo->samples == VK_SAMPLE_COUNT_1_BIT);
