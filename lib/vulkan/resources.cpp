@@ -64,7 +64,11 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateBufferView(VkDevice device, const VkBufferViewCreateInfo *pCreateInfo,
                    const VkAllocationCallbacks *pAllocator, VkBufferView *pView)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pView = new VkBufferView_T;
+  (*pView)->Format = pCreateInfo->format;
+  (*pView)->NumBytes = pCreateInfo->range;
+  (*pView)->Address = pCreateInfo->buffer->Address + pCreateInfo->offset;
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
@@ -103,7 +107,7 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyBufferView(VkDevice device, VkBufferView bufferView,
                     const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete bufferView;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyImage(

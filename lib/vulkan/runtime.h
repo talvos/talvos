@@ -36,6 +36,13 @@ struct VkBuffer_T
   uint64_t Address;
 };
 
+struct VkBufferView_T
+{
+  VkFormat Format;
+  VkDeviceSize NumBytes;
+  uint64_t Address;
+};
+
 struct VkCommandBuffer_T
 {
   // Resources that are currently bound to the command buffer.
