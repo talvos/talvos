@@ -217,6 +217,13 @@ std::unique_ptr<Type> Type::getRuntimeArray(const Type *ElemType,
   return T;
 }
 
+std::unique_ptr<Type> Type::getSampledImage(const Type *ImageType)
+{
+  std::unique_ptr<Type> T(new Type(SAMPLED_IMAGE, sizeof(uint64_t)));
+  T->ElementType = ImageType;
+  return T;
+}
+
 std::unique_ptr<Type> Type::getStruct(const StructElementTypeList &ElemTypes)
 {
   size_t ByteSize = ElemTypes[ElemTypes.size() - 1].second +

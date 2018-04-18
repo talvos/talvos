@@ -460,6 +460,13 @@ public:
                      Type::getRuntimeArray(ElemType, ArrayStride));
         break;
       }
+      case SpvOpTypeSampledImage:
+      {
+        const Type *ImageType =
+            Mod->getType(Inst->words[Inst->operands[1].offset]);
+        Mod->addType(Inst->result_id, Type::getSampledImage(ImageType));
+        break;
+      }
       case SpvOpTypeStruct:
       {
         StructElementTypeList ElemTypes;

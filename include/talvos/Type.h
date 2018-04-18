@@ -41,6 +41,7 @@ public:
     VECTOR,
     MATRIX,
     IMAGE,
+    SAMPLED_IMAGE,
     ARRAY,
     RUNTIME_ARRAY,
     STRUCT,
@@ -139,6 +140,9 @@ public:
   /// Create a runtime array type.
   static std::unique_ptr<Type> getRuntimeArray(const Type *ElemType,
                                                uint32_t ArrayStride);
+
+  /// Create a sampled image type
+  static std::unique_ptr<Type> getSampledImage(const Type *ImageType);
 
   /// Create a structure type.
   static std::unique_ptr<Type>
