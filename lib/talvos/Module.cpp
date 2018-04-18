@@ -467,6 +467,11 @@ public:
         Mod->addType(Inst->result_id, Type::getSampledImage(ImageType));
         break;
       }
+      case SpvOpTypeSampler:
+      {
+        Mod->addType(Inst->result_id, Type::getSampler());
+        break;
+      }
       case SpvOpTypeStruct:
       {
         StructElementTypeList ElemTypes;

@@ -224,6 +224,11 @@ std::unique_ptr<Type> Type::getSampledImage(const Type *ImageType)
   return T;
 }
 
+std::unique_ptr<Type> Type::getSampler()
+{
+  return std::unique_ptr<Type>(new Type(SAMPLER, sizeof(uint64_t)));
+}
+
 std::unique_ptr<Type> Type::getStruct(const StructElementTypeList &ElemTypes)
 {
   size_t ByteSize = ElemTypes[ElemTypes.size() - 1].second +

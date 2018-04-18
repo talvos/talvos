@@ -41,6 +41,7 @@ public:
     VECTOR,
     MATRIX,
     IMAGE,
+    SAMPLER,
     SAMPLED_IMAGE,
     ARRAY,
     RUNTIME_ARRAY,
@@ -143,6 +144,9 @@ public:
 
   /// Create a sampled image type
   static std::unique_ptr<Type> getSampledImage(const Type *ImageType);
+
+  /// Create a sampler type.
+  static std::unique_ptr<Type> getSampler();
 
   /// Create a structure type.
   static std::unique_ptr<Type>
