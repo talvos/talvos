@@ -105,6 +105,13 @@ struct VkImage_T
   uint64_t Address;
 };
 
+struct VkImageView_T
+{
+  VkImage Image;
+  VkImageViewType Type;
+  VkFormat Format;
+};
+
 struct VkInstance_T
 {
   VkPhysicalDevice Device;
