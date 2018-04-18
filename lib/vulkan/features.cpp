@@ -125,7 +125,9 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFormatProperties(
     VkPhysicalDevice physicalDevice, VkFormat format,
     VkFormatProperties *pFormatProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  pFormatProperties->linearTilingFeatures = 0;
+  pFormatProperties->optimalTilingFeatures = 0;
+  pFormatProperties->bufferFeatures = 0;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFormatProperties2(
