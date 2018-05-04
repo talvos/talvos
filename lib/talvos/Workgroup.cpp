@@ -7,7 +7,7 @@
 /// This file defines the Workgroup class.
 
 #include "talvos/Workgroup.h"
-#include "talvos/DispatchCommand.h"
+#include "talvos/Commands.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"

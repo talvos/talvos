@@ -5,7 +5,7 @@
 
 #include "runtime.h"
 
-#include "talvos/DispatchCommand.h"
+#include "talvos/Commands.h"
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDispatch(VkCommandBuffer commandBuffer,
                                          uint32_t groupCountX,

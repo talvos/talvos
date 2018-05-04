@@ -16,8 +16,8 @@
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Block.h"
+#include "talvos/Commands.h"
 #include "talvos/Device.h"
-#include "talvos/DispatchCommand.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"

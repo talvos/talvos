@@ -6,8 +6,8 @@
 #include <iostream>
 
 #include "CommandFile.h"
+#include "talvos/Commands.h"
 #include "talvos/Device.h"
-#include "talvos/DispatchCommand.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
 #include "talvos/Pipeline.h"

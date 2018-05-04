@@ -3,10 +3,10 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-/// \file DispatchCommand.cpp
-/// This file defines the DispatchCommand class.
+/// \file Commands.cpp
+/// This file defines the Command class and its subclasses.
 
-#include "talvos/DispatchCommand.h"
+#include "talvos/Commands.h"
 #include "talvos/Module.h"
 #include "talvos/Pipeline.h"
 

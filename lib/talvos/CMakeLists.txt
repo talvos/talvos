@@ -68,10 +68,10 @@ configure_file("config.h.in" "config.h")
 
 set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Block.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Commands.h
     ${CMAKE_SOURCE_DIR}/include/talvos/DescriptorSet.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Dim3.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/DispatchCommand.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Function.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Instruction.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
@@ -86,9 +86,9 @@ set(TALVOS_SOURCES
     Block.cpp
     CommandInvocation.cpp
     CommandInvocation.h
+    Commands.cpp
     Device.cpp
     Dim3.cpp
-    DispatchCommand.cpp
     Function.cpp
     Instruction.cpp
     Invocation.cpp

@@ -21,8 +21,8 @@
 
 #include "CommandInvocation.h"
 #include "Utils.h"
+#include "talvos/Commands.h"
 #include "talvos/Device.h"
-#include "talvos/DispatchCommand.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
