@@ -16,14 +16,14 @@ public:
 
   bool isThreadSafe() const override { return false; }
 
-  void dispatchCommandBegin(const DispatchCommand *Cmd) override
+  void commandBegin(const Command *Cmd) override
   {
-    std::cout << "dispatchcommand begin" << std::endl;
+    std::cout << "command begin" << std::endl;
   }
 
-  void dispatchCommandComplete(const DispatchCommand *Cmd) override
+  void commandComplete(const Command *Cmd) override
   {
-    std::cout << "dispatchcommand complete" << std::endl;
+    std::cout << "command complete" << std::endl;
   }
 
   void hostMemoryLoad(const Memory *Mem, uint64_t Address,

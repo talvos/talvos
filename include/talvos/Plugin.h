@@ -14,7 +14,7 @@
 namespace talvos
 {
 
-class DispatchCommand;
+class Command;
 class Instruction;
 class Invocation;
 class Memory;
@@ -31,11 +31,11 @@ public:
   /// Returns true if the plugin is thread-safe.
   virtual bool isThreadSafe() const { return true; }
 
-  /// Called when a dispatch command has begun executing.
-  virtual void dispatchCommandBegin(const DispatchCommand *Cmd) {}
+  /// Called when a command has begun executing.
+  virtual void commandBegin(const Command *Cmd) {}
 
-  /// Called when a dispatch command has completed.
-  virtual void dispatchCommandComplete(const DispatchCommand *Cmd) {}
+  /// Called when a command has completed.
+  virtual void commandComplete(const Command *Cmd) {}
 
   /// Called when the host loads data from memory.
   virtual void hostMemoryLoad(const Memory *Mem, uint64_t Address,

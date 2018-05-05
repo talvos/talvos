@@ -180,14 +180,14 @@ void Device::reportError(const std::string &Error, bool Fatal)
     P.second->func(__VA_ARGS__);                                               \
   }
 
-void Device::reportDispatchCommandBegin(const DispatchCommand *Cmd)
+void Device::reportCommandBegin(const Command *Cmd)
 {
-  REPORT(dispatchCommandBegin, Cmd);
+  REPORT(commandBegin, Cmd);
 }
 
-void Device::reportDispatchCommandComplete(const DispatchCommand *Cmd)
+void Device::reportCommandComplete(const Command *Cmd)
 {
-  REPORT(dispatchCommandComplete, Cmd);
+  REPORT(commandComplete, Cmd);
 }
 
 void Device::reportInstructionExecuted(const Invocation *Invoc,
@@ -270,16 +270,20 @@ void Device::reportWorkgroupComplete(const Workgroup *Group)
 
 #undef REPORT
 
-void Device::run(const DispatchCommand &Command)
+void Device::run(const Command &Cmd)
 {
   // TODO: Mutex instead?
   assert(CurrentCommand == nullptr);
 
-  CurrentCommand = new CommandInvocation(*this, Command);
+  reportCommandBegin(&Cmd);
+
+  CurrentCommand = new CommandInvocation(*this, (const DispatchCommand &)Cmd);
   CurrentCommand->run();
 
   delete CurrentCommand;
   CurrentCommand = nullptr;
+
+  reportCommandComplete(&Cmd);
 }
 
 } // namespace talvos

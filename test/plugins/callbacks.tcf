@@ -37,7 +37,7 @@ DUMP UINT32 result
 # CHECK: host memory store
 # CHECK: host memory store
 
-# CHECK: dispatchcommand begin
+# CHECK: command begin
 
 # CHECK: invocation begin
 # CHECK: invocation begin
@@ -191,7 +191,7 @@ DUMP UINT32 result
 # CHECK: invocation complete
 # CHECK: workgroup complete
 
-# CHECK: dispatchcommand complete
+# CHECK: command complete
 
 # Output is slightly mangled here as the plugin interferes with DUMP output.
 # CHECK: Buffer 'result' (8 bytes):

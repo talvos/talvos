@@ -15,8 +15,8 @@
 
 namespace talvos
 {
+class Command;
 class Device;
-class DispatchCommand;
 class Function;
 class Module;
 class Pipeline;
@@ -52,7 +52,7 @@ struct VkCommandBuffer_T
   talvos::DescriptorSetMap DescriptorSetsCompute;
 
   // TODO: Move this into libtalvos?
-  std::vector<talvos::DispatchCommand *> Commands;
+  std::vector<talvos::Command *> Commands;
 };
 
 struct VkCommandPool_T

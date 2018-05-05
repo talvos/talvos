@@ -90,8 +90,6 @@ void CommandInvocation::run()
       for (uint32_t GX = 0; GX < NumGroups.X; GX++)
         PendingGroups.push_back({GX, GY, GZ});
 
-  Dev.reportDispatchCommandBegin(&Command);
-
   NextGroupIndex = 0;
 
   // Create worker threads.
@@ -106,8 +104,6 @@ void CommandInvocation::run()
   // Wait for workers to complete
   for (unsigned i = 0; i < NumThreads; i++)
     Threads[i].join();
-
-  Dev.reportDispatchCommandComplete(&Command);
 
   PendingGroups.clear();
 }

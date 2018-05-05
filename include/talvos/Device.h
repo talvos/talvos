@@ -15,8 +15,8 @@
 namespace talvos
 {
 
+class Command;
 class CommandInvocation;
-class DispatchCommand;
 class Instruction;
 class Invocation;
 class Memory;
@@ -49,8 +49,8 @@ public:
 
   /// \name Plugin notification functions.
   ///@{
-  void reportDispatchCommandBegin(const DispatchCommand *Cmd);
-  void reportDispatchCommandComplete(const DispatchCommand *Cmd);
+  void reportCommandBegin(const Command *Cmd);
+  void reportCommandComplete(const Command *Cmd);
   void reportInstructionExecuted(const Invocation *Invoc,
                                  const Instruction *Inst);
   void reportInvocationBegin(const Invocation *Invoc);
@@ -66,8 +66,8 @@ public:
   void reportWorkgroupComplete(const Workgroup *Group);
   ///@}
 
-  /// Run \p Command to completion.
-  void run(const DispatchCommand &Command);
+  /// Run \p Cmd to completion.
+  void run(const Command &Cmd);
 
 private:
   Memory *GlobalMemory; ///< The global memory of this device.
