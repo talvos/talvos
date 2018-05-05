@@ -38,12 +38,9 @@ public:
 class DispatchCommand : public Command
 {
 public:
-  /// List of mappings from SPIR-V result ID to Object for each variable.
-  typedef std::vector<std::pair<uint32_t, Object>> VariableList;
-
   /// Create a new DispatchCommand.
   ///
-  /// Any buffers used by \p PL must have a corresponding entry in \p DS.
+  /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
   ///
   /// \param PL The compute pipeline to invoke.
   /// \param NumGroups The number of groups to launch.
@@ -57,15 +54,15 @@ public:
   /// Returns the pipeline this command is invoking.
   const Pipeline *getPipeline() const { return PL; }
 
-  /// Return the resolved buffer variable pointer values for this command.
-  const VariableList &getVariables() const { return Variables; }
+  /// Returns the initial object values for this command.
+  const std::vector<Object> &getObjects() const { return Objects; };
 
 private:
   const Pipeline *PL; ///< The pipeline to use.
 
   Dim3 NumGroups; ///< The number of workgroups.
 
-  VariableList Variables; ///< Resolved buffer variable values.
+  std::vector<Object> Objects; ///< Initial object values.
 };
 
 } // namespace talvos

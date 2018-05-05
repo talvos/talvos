@@ -61,12 +61,8 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
   GroupId = Group->getGroupId();
   GlobalId = LocalId + GroupId * GroupSize;
 
-  // Clone module/pipeline level objects.
-  Objects = Command.getPipeline()->getObjects();
-
-  // Copy buffer variable pointer values.
-  for (auto V : Command.getVariables())
-    Objects[V.first] = V.second;
+  // Clone initial object values.
+  Objects = Command.getObjects();
 
   // Copy workgroup variable pointer values.
   for (auto V : Group->getVariables())

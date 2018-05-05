@@ -20,6 +20,8 @@ DispatchCommand::DispatchCommand(const Pipeline *P, Dim3 NumGroups,
 
   this->NumGroups = NumGroups;
 
+  Objects = P->getObjects();
+
   // Resolve buffer variables.
   for (BufferVariableMap::value_type V : P->getModule()->getBufferVariables())
   {
@@ -30,8 +32,7 @@ DispatchCommand::DispatchCommand(const Pipeline *P, Dim3 NumGroups,
       continue;
     if (!DSM.at(Set).count(Binding))
       continue;
-    Object Pointer(V.second.Ty, DSM.at(Set).at(Binding));
-    Variables.push_back({V.first, Pointer});
+    Objects[V.first] = Object(V.second.Ty, DSM.at(Set).at(Binding));
   }
 }
 
