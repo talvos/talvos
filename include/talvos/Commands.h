@@ -16,6 +16,7 @@ namespace talvos
 {
 
 class ComputePipeline;
+class GraphicsPipeline;
 class Object;
 
 /// This class is a base class for all commands.
@@ -26,6 +27,7 @@ public:
   enum Type
   {
     DISPATCH,
+    DRAW,
   };
 
   /// Returns the type of this command.
@@ -67,6 +69,56 @@ private:
   const ComputePipeline *Pipeline; ///< The pipeline to use.
 
   Dim3 NumGroups; ///< The number of workgroups to launch.
+
+  DescriptorSetMap DSM; ///< The descriptor set map to use.
+};
+
+/// This class encapsulates information about a draw command.
+class DrawCommand : public Command
+{
+public:
+  /// Create a new DrawCommand.
+  ///
+  /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
+  ///
+  /// \param PL The graphics pipeline to invoke.
+  /// \param NumVertices The number of vertices to draw.
+  /// \param VertexOffset The offset of the first vertex.
+  /// \param NumInstances The number of instances to draw.
+  /// \param InstanceOffset The offset of the first instance.
+  /// \param DSM The descriptor set mapping to use.
+  DrawCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
+              uint32_t VertexOffset, uint32_t NumInstances,
+              uint32_t InstanceOffset, const DescriptorSetMap &DSM)
+      : Command(DRAW), Pipeline(PL), NumVertices(NumVertices),
+        VertexOffset(VertexOffset), NumInstances(NumInstances),
+        InstanceOffset(InstanceOffset), DSM(DSM){};
+
+  /// Returns the descriptor set map used by the command.
+  const DescriptorSetMap &getDescriptorSetMap() const { return DSM; }
+
+  /// Returns the offset of the first instance.
+  uint32_t getInstanceOffset() const { return InstanceOffset; }
+
+  /// Returns the number of instances.
+  uint32_t getNumInstances() const { return NumInstances; }
+
+  /// Returns the number of vertices.
+  uint32_t getNumVertices() const { return NumVertices; }
+
+  /// Returns the pipeline this command is invoking.
+  const GraphicsPipeline *getPipeline() const { return Pipeline; }
+
+  /// Returns the offset of the first vertex.
+  uint32_t getVertexOffset() const { return VertexOffset; }
+
+private:
+  const GraphicsPipeline *Pipeline; ///< The pipeline to use.
+
+  uint32_t NumVertices;    ///< Number of vertices.
+  uint32_t VertexOffset;   ///< Offset of first vertex.
+  uint32_t NumInstances;   ///< Number of instances.
+  uint32_t InstanceOffset; ///< Offset of first instance.
 
   DescriptorSetMap DSM; ///< The descriptor set map to use.
 };
