@@ -3,11 +3,11 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-/// \file CommandInvocation.h
-/// This file declares the CommandInvocation class.
+/// \file ShaderExecution.h
+/// This file declares the ShaderExecution class.
 
-#ifndef TALVOS_COMMANDINVOCATION_H
-#define TALVOS_COMMANDINVOCATION_H
+#ifndef TALVOS_SHADEREXECUTION_H
+#define TALVOS_SHADEREXECUTION_H
 
 #include <atomic>
 #include <map>
@@ -24,18 +24,18 @@ class DispatchCommand;
 class Invocation;
 class Workgroup;
 
-/// An internal class that handles command execution, including the interactive
+/// An internal class that handles shader execution, including the interactive
 /// debugger.
-class CommandInvocation
+class ShaderExecution
 {
 public:
-  /// Create a command invocation for \p Command on \p Dev.
-  CommandInvocation(Device &Dev, const DispatchCommand &Command);
+  /// Create a shader execution for \p Command on \p Dev.
+  ShaderExecution(Device &Dev, const DispatchCommand &Command);
 
-  // Do not allow CommandInvocation objects to be copied.
+  // Do not allow ShaderExecution objects to be copied.
   ///\{
-  CommandInvocation(const CommandInvocation &) = delete;
-  CommandInvocation &operator=(const CommandInvocation &) = delete;
+  ShaderExecution(const ShaderExecution &) = delete;
+  ShaderExecution &operator=(const ShaderExecution &) = delete;
   ///\}
 
   /// Returns the command that is being executed.
@@ -47,10 +47,10 @@ public:
   /// Returns the current workgroup being executed.
   const Workgroup *getCurrentWorkgroup() const;
 
-  /// Returns true if the calling thread is a CommandInvocation worker thread.
+  /// Returns true if the calling thread is a ShaderExecution worker thread.
   bool isWorkerThread() const;
 
-  /// Run the command to completion.
+  /// Run the shader to completion.
   void run();
 
   /// Signal that an error has occurred, breaking the interactive debugger.
@@ -60,7 +60,7 @@ private:
   /// Worker thread entry point.
   void runWorker();
 
-  /// The device this command invocation is executing on.
+  /// The device this shader is executing on.
   Device &Dev;
 
   /// The command being executed.

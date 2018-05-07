@@ -19,7 +19,7 @@
 #include <dlfcn.h>
 #endif
 
-#include "CommandInvocation.h"
+#include "ShaderExecution.h"
 #include "Utils.h"
 #include "talvos/Commands.h"
 #include "talvos/Device.h"
@@ -42,7 +42,7 @@ Device::Device()
 {
   GlobalMemory = new Memory(*this, MemoryScope::Device);
 
-  CurrentCommand = nullptr;
+  CurrentShader = nullptr;
 
   // Load plugins from dynamic libraries.
   const char *PluginList = getenv("TALVOS_PLUGINS");
@@ -135,20 +135,20 @@ void Device::reportError(const std::string &Error, bool Fatal)
   std::cerr << std::endl;
   std::cerr << Error << std::endl;
 
-  if (CurrentCommand && CurrentCommand->isWorkerThread())
+  if (CurrentShader && CurrentShader->isWorkerThread())
   {
     // Show current entry point.
-    const Module *Mod = CurrentCommand->getCommand().getPipeline()->getModule();
+    const Module *Mod = CurrentShader->getCommand().getPipeline()->getModule();
     uint32_t EntryPointId =
-        CurrentCommand->getCommand().getPipeline()->getFunction()->getId();
+        CurrentShader->getCommand().getPipeline()->getFunction()->getId();
     std::cerr << "    Entry point:";
     std::cerr << " %" << EntryPointId;
     std::cerr << " " << Mod->getEntryPointName(EntryPointId);
     std::cerr << std::endl;
 
     // Show current invocation and group.
-    const Invocation *Inv = CurrentCommand->getCurrentInvocation();
-    const Workgroup *Group = CurrentCommand->getCurrentWorkgroup();
+    const Invocation *Inv = CurrentShader->getCurrentInvocation();
+    const Workgroup *Group = CurrentShader->getCurrentWorkgroup();
     std::cerr << "    Invocation:";
     std::cerr << " Global" << Inv->getGlobalId();
     std::cerr << " Local" << Inv->getLocalId();
@@ -167,8 +167,8 @@ void Device::reportError(const std::string &Error, bool Fatal)
 
   std::cerr << std::endl;
 
-  if (CurrentCommand)
-    CurrentCommand->signalError();
+  if (CurrentShader)
+    CurrentShader->signalError();
 
   if (Fatal)
     abort();
@@ -209,11 +209,11 @@ void Device::reportInvocationComplete(const Invocation *Invoc)
 void Device::reportMemoryLoad(const Memory *Mem, uint64_t Address,
                               uint64_t NumBytes)
 {
-  if (CurrentCommand && CurrentCommand->isWorkerThread())
+  if (CurrentShader && CurrentShader->isWorkerThread())
   {
     // TODO: Workgroup/subgroup level accesses?
     // TODO: Workgroup/Invocation scope initialization is not covered.
-    if (auto *I = CurrentCommand->getCurrentInvocation())
+    if (auto *I = CurrentShader->getCurrentInvocation())
       REPORT(memoryLoad, Mem, Address, NumBytes, I);
   }
   else
@@ -233,11 +233,11 @@ void Device::reportMemoryMap(const Memory *Memory, uint64_t Base,
 void Device::reportMemoryStore(const Memory *Mem, uint64_t Address,
                                uint64_t NumBytes, const uint8_t *Data)
 {
-  if (CurrentCommand && CurrentCommand->isWorkerThread())
+  if (CurrentShader && CurrentShader->isWorkerThread())
   {
     // TODO: Workgroup/subgroup level accesses?
     // TODO: Workgroup/Invocation scope initialization is not covered.
-    if (auto *I = CurrentCommand->getCurrentInvocation())
+    if (auto *I = CurrentShader->getCurrentInvocation())
       REPORT(memoryStore, Mem, Address, NumBytes, Data, I);
   }
   else
@@ -273,15 +273,15 @@ void Device::reportWorkgroupComplete(const Workgroup *Group)
 void Device::run(const Command &Cmd)
 {
   // TODO: Mutex instead?
-  assert(CurrentCommand == nullptr);
+  assert(CurrentShader == nullptr);
 
   reportCommandBegin(&Cmd);
 
-  CurrentCommand = new CommandInvocation(*this, (const DispatchCommand &)Cmd);
-  CurrentCommand->run();
+  CurrentShader = new ShaderExecution(*this, (const DispatchCommand &)Cmd);
+  CurrentShader->run();
 
-  delete CurrentCommand;
-  CurrentCommand = nullptr;
+  delete CurrentShader;
+  CurrentShader = nullptr;
 
   reportCommandComplete(&Cmd);
 }

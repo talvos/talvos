@@ -84,8 +84,6 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
 set(TALVOS_SOURCES
     Block.cpp
-    CommandInvocation.cpp
-    CommandInvocation.h
     Commands.cpp
     Device.cpp
     Dim3.cpp
@@ -96,6 +94,8 @@ set(TALVOS_SOURCES
     Module.cpp
     Object.cpp
     Pipeline.cpp
+    ShaderExecution.cpp
+    ShaderExecution.h
     Type.cpp
     Workgroup.cpp
     Utils.cpp

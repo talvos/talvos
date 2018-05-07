@@ -16,11 +16,11 @@ namespace talvos
 {
 
 class Command;
-class CommandInvocation;
 class Instruction;
 class Invocation;
 class Memory;
 class Plugin;
+class ShaderExecution;
 class Workgroup;
 
 /// A Device instance encapsulates properties and state for the virtual device.
@@ -75,8 +75,8 @@ private:
   /// List of plugins that are currently loaded.
   std::vector<std::pair<void *, Plugin *>> Plugins;
 
-  /// The command currently being executed.
-  CommandInvocation *CurrentCommand;
+  /// The current shader execution instance.
+  ShaderExecution *CurrentShader;
 };
 
 } // namespace talvos

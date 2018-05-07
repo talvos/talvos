@@ -3,8 +3,8 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-/// \file CommandInvocation.cpp
-/// This file defines the CommandInvocation class.
+/// \file ShaderExecution.cpp
+/// This file defines the ShaderExecution class.
 
 #include "config.h"
 
@@ -33,7 +33,7 @@
 
 #include <spirv/unified1/spirv.h>
 
-#include "CommandInvocation.h"
+#include "ShaderExecution.h"
 #include "Utils.h"
 #include "talvos/Commands.h"
 #include "talvos/Device.h"
@@ -54,27 +54,26 @@ static thread_local bool IsWorkerThread = false;
 static thread_local Workgroup *CurrentGroup;
 static thread_local Invocation *CurrentInvocation;
 
-uint32_t CommandInvocation::NextBreakpoint = 1;
-std::map<uint32_t, uint32_t> CommandInvocation::Breakpoints;
+uint32_t ShaderExecution::NextBreakpoint = 1;
+std::map<uint32_t, uint32_t> ShaderExecution::Breakpoints;
 
-CommandInvocation::CommandInvocation(Device &Dev,
-                                     const DispatchCommand &Command)
+ShaderExecution::ShaderExecution(Device &Dev, const DispatchCommand &Command)
     : Dev(Dev), Command(Command)
 {}
 
-const Invocation *CommandInvocation::getCurrentInvocation() const
+const Invocation *ShaderExecution::getCurrentInvocation() const
 {
   return CurrentInvocation;
 }
 
-const Workgroup *CommandInvocation::getCurrentWorkgroup() const
+const Workgroup *ShaderExecution::getCurrentWorkgroup() const
 {
   return CurrentGroup;
 }
 
-bool CommandInvocation::isWorkerThread() const { return IsWorkerThread; }
+bool ShaderExecution::isWorkerThread() const { return IsWorkerThread; }
 
-void CommandInvocation::run()
+void ShaderExecution::run()
 {
   assert(PendingGroups.empty());
   assert(RunningGroups.empty());
@@ -99,7 +98,7 @@ void CommandInvocation::run()
         getEnvUInt("TALVOS_NUM_WORKERS", std::thread::hardware_concurrency());
   std::vector<std::thread> Threads;
   for (unsigned i = 0; i < NumThreads; i++)
-    Threads.push_back(std::thread(&CommandInvocation::runWorker, this));
+    Threads.push_back(std::thread(&ShaderExecution::runWorker, this));
 
   // Wait for workers to complete
   for (unsigned i = 0; i < NumThreads; i++)
@@ -108,7 +107,7 @@ void CommandInvocation::run()
   PendingGroups.clear();
 }
 
-void CommandInvocation::runWorker()
+void ShaderExecution::runWorker()
 {
   IsWorkerThread = true;
   CurrentInvocation = nullptr;
@@ -205,7 +204,7 @@ void CommandInvocation::runWorker()
   }
 }
 
-void CommandInvocation::signalError()
+void ShaderExecution::signalError()
 {
   // Drop to interactive prompt.
   Continue = false;
@@ -214,7 +213,7 @@ void CommandInvocation::signalError()
 
 // Private functions for interactive execution and debugging.
 
-void CommandInvocation::interact()
+void ShaderExecution::interact()
 {
   if (!Interactive)
     return;
@@ -321,7 +320,7 @@ void CommandInvocation::interact()
   }
 }
 
-void CommandInvocation::printContext() const
+void ShaderExecution::printContext() const
 {
   assert(CurrentInvocation);
   if (CurrentInvocation->getState() == Invocation::FINISHED)
@@ -361,7 +360,7 @@ void CommandInvocation::printContext() const
   }
 }
 
-bool CommandInvocation::brk(const std::vector<std::string> &Args)
+bool ShaderExecution::brk(const std::vector<std::string> &Args)
 {
   if (Args.size() != 2)
   {
@@ -387,7 +386,7 @@ bool CommandInvocation::brk(const std::vector<std::string> &Args)
   return false;
 }
 
-bool CommandInvocation::breakpoint(const std::vector<std::string> &Args)
+bool ShaderExecution::breakpoint(const std::vector<std::string> &Args)
 {
   if (Args.size() < 2)
   {
@@ -437,13 +436,13 @@ bool CommandInvocation::breakpoint(const std::vector<std::string> &Args)
   return false;
 }
 
-bool CommandInvocation::cont(const std::vector<std::string> &Args)
+bool ShaderExecution::cont(const std::vector<std::string> &Args)
 {
   Continue = true;
   return true;
 }
 
-bool CommandInvocation::help(const std::vector<std::string> &Args)
+bool ShaderExecution::help(const std::vector<std::string> &Args)
 {
   std::cout << "Command list:" << std::endl;
   std::cout << "  break        (b)" << std::endl;
@@ -460,7 +459,7 @@ bool CommandInvocation::help(const std::vector<std::string> &Args)
   return false;
 }
 
-bool CommandInvocation::print(const std::vector<std::string> &Args)
+bool ShaderExecution::print(const std::vector<std::string> &Args)
 {
   if (Args.size() != 2)
   {
@@ -492,9 +491,9 @@ bool CommandInvocation::print(const std::vector<std::string> &Args)
   return false;
 }
 
-bool CommandInvocation::quit(const std::vector<std::string> &Args) { exit(0); }
+bool ShaderExecution::quit(const std::vector<std::string> &Args) { exit(0); }
 
-bool CommandInvocation::step(const std::vector<std::string> &Args)
+bool ShaderExecution::step(const std::vector<std::string> &Args)
 {
   if (CurrentInvocation->getState() == Invocation::FINISHED)
   {
@@ -510,7 +509,7 @@ bool CommandInvocation::step(const std::vector<std::string> &Args)
   return true;
 }
 
-bool CommandInvocation::swtch(const std::vector<std::string> &Args)
+bool ShaderExecution::swtch(const std::vector<std::string> &Args)
 {
   // TODO: Allow `select group X Y Z` or `select local X Y Z` as well?
   if (Args.size() < 2 || Args.size() > 4)
