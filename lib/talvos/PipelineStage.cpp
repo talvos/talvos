@@ -3,10 +3,10 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-/// \file Pipeline.cpp
-/// This file defines the Pipeline class.
+/// \file PipelineStage.cpp
+/// This file defines the PipelineStage class.
 
-#include "talvos/Pipeline.h"
+#include "talvos/PipelineStage.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
@@ -17,8 +17,8 @@
 namespace talvos
 {
 
-Pipeline::Pipeline(Device &D, const Module *M, const Function *F,
-                   const SpecConstantMap &SM)
+PipelineStage::PipelineStage(Device &D, const Module *M, const Function *F,
+                             const SpecConstantMap &SM)
 {
   Mod = M;
   Func = F;

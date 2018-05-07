@@ -14,14 +14,16 @@
 #include <mutex>
 #include <vector>
 
+#include "talvos/DescriptorSet.h"
 #include "talvos/Dim3.h"
 
 namespace talvos
 {
 
 class Device;
-class DispatchCommand;
 class Invocation;
+class Object;
+class PipelineStage;
 class Workgroup;
 
 /// An internal class that handles shader execution, including the interactive
@@ -30,7 +32,8 @@ class ShaderExecution
 {
 public:
   /// Create a shader execution for \p Command on \p Dev.
-  ShaderExecution(Device &Dev, const DispatchCommand &Command);
+  ShaderExecution(Device &Dev, const PipelineStage &Stage,
+                  const DescriptorSetMap &DSM, Dim3 NumGroups);
 
   // Do not allow ShaderExecution objects to be copied.
   ///\{
@@ -38,14 +41,21 @@ public:
   ShaderExecution &operator=(const ShaderExecution &) = delete;
   ///\}
 
-  /// Returns the command that is being executed.
-  const DispatchCommand &getCommand() const { return Command; }
-
   /// Returns the current invocation being executed.
   const Invocation *getCurrentInvocation() const;
 
   /// Returns the current workgroup being executed.
   const Workgroup *getCurrentWorkgroup() const;
+
+  /// Returns the initial object values for each shader invocation.
+  const std::vector<Object> &getInitialObjects() const { return Objects; }
+
+  /// Returns the number of groups in this shader execution.
+  /// This is only valid for compute shaders.
+  Dim3 getNumGroups() const { return NumGroups; }
+
+  /// Returns the pipeline stage that is being executed.
+  const PipelineStage &getPipelineStage() const { return Stage; }
 
   /// Returns true if the calling thread is a ShaderExecution worker thread.
   bool isWorkerThread() const;
@@ -63,8 +73,14 @@ private:
   /// The device this shader is executing on.
   Device &Dev;
 
-  /// The command being executed.
-  const DispatchCommand &Command;
+  /// The pipeline stage being executed.
+  const PipelineStage &Stage;
+
+  /// The initial object values for each invocation.
+  std::vector<Object> Objects;
+
+  /// The number of groups in this shader execution.
+  Dim3 NumGroups;
 
   /// The number of worker threads currently executing.
   unsigned NumThreads;

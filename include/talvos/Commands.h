@@ -9,29 +9,33 @@
 #ifndef TALVOS_COMMANDS_H
 #define TALVOS_COMMANDS_H
 
-#include <vector>
-
 #include "talvos/DescriptorSet.h"
 #include "talvos/Dim3.h"
 
 namespace talvos
 {
 
+class ComputePipeline;
 class Object;
-class Pipeline;
 
 /// This class is a base class for all commands.
 class Command
 {
 public:
-  Command(){};
-  virtual ~Command(){};
+  /// Identifies different Command subclasses.
+  enum Type
+  {
+    DISPATCH,
+  };
 
-  // Do not allow Command objects to be copied.
-  ///\{
-  Command(const Command &) = delete;
-  Command &operator=(const Command &) = delete;
-  ///\}
+  /// Returns the type of this command.
+  Type getType() const { return Ty; }
+
+protected:
+  /// Used by subclasses to initialize the command type.
+  Command(Type Ty) : Ty(Ty){};
+
+  Type Ty; ///< The type of this command.
 };
 
 /// This class encapsulates information about a compute kernel launch.
@@ -45,24 +49,26 @@ public:
   /// \param PL The compute pipeline to invoke.
   /// \param NumGroups The number of groups to launch.
   /// \param DSM The descriptor set mapping to use.
-  DispatchCommand(const Pipeline *PL, Dim3 NumGroups,
-                  const DescriptorSetMap &DSM);
+  DispatchCommand(const ComputePipeline *PL, Dim3 NumGroups,
+                  const DescriptorSetMap &DSM)
+      : Command(DISPATCH), Pipeline(PL), NumGroups(NumGroups), DSM(DSM)
+  {}
 
-  /// Return the number of workgroups.
+  /// Returns the descriptor set map used by the command.
+  const DescriptorSetMap &getDescriptorSetMap() const { return DSM; }
+
+  /// Returns the number of workgroups this command launches.
   Dim3 getNumGroups() const { return NumGroups; }
 
   /// Returns the pipeline this command is invoking.
-  const Pipeline *getPipeline() const { return PL; }
-
-  /// Returns the initial object values for this command.
-  const std::vector<Object> &getObjects() const { return Objects; };
+  const ComputePipeline *getPipeline() const { return Pipeline; }
 
 private:
-  const Pipeline *PL; ///< The pipeline to use.
+  const ComputePipeline *Pipeline; ///< The pipeline to use.
 
-  Dim3 NumGroups; ///< The number of workgroups.
+  Dim3 NumGroups; ///< The number of workgroups to launch.
 
-  std::vector<Object> Objects; ///< Initial object values.
+  DescriptorSetMap DSM; ///< The descriptor set map to use.
 };
 
 } // namespace talvos

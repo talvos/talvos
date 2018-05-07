@@ -69,6 +69,7 @@ configure_file("config.h.in" "config.h")
 set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Block.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Commands.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/ComputePipeline.h
     ${CMAKE_SOURCE_DIR}/include/talvos/DescriptorSet.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Dim3.h
@@ -78,13 +79,13 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Pipeline.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/PipelineStage.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Plugin.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Type.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
 set(TALVOS_SOURCES
     Block.cpp
-    Commands.cpp
+    ComputePipeline.cpp
     Device.cpp
     Dim3.cpp
     Function.cpp
@@ -93,7 +94,7 @@ set(TALVOS_SOURCES
     Memory.cpp
     Module.cpp
     Object.cpp
-    Pipeline.cpp
+    PipelineStage.cpp
     ShaderExecution.cpp
     ShaderExecution.h
     Type.cpp

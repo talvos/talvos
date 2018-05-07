@@ -35,12 +35,11 @@
 
 #include "ShaderExecution.h"
 #include "Utils.h"
-#include "talvos/Commands.h"
 #include "talvos/Device.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Module.h"
-#include "talvos/Pipeline.h"
+#include "talvos/PipelineStage.h"
 #include "talvos/Workgroup.h"
 
 /// The number of lines before and after the current instruction to print.
@@ -57,9 +56,26 @@ static thread_local Invocation *CurrentInvocation;
 uint32_t ShaderExecution::NextBreakpoint = 1;
 std::map<uint32_t, uint32_t> ShaderExecution::Breakpoints;
 
-ShaderExecution::ShaderExecution(Device &Dev, const DispatchCommand &Command)
-    : Dev(Dev), Command(Command)
-{}
+ShaderExecution::ShaderExecution(Device &Dev, const PipelineStage &Stage,
+                                 const DescriptorSetMap &DSM, Dim3 NumGroups)
+    : Dev(Dev), Stage(Stage), NumGroups(NumGroups)
+{
+  Objects = Stage.getObjects();
+
+  // Resolve buffer variables.
+  for (BufferVariableMap::value_type V :
+       Stage.getModule()->getBufferVariables())
+  {
+    // Look up variable in descriptor set and set pointer value if present.
+    uint32_t Set = V.second.DescriptorSet;
+    uint32_t Binding = V.second.Binding;
+    if (!DSM.count(Set))
+      continue;
+    if (!DSM.at(Set).count(Binding))
+      continue;
+    Objects[V.first] = Object(V.second.Ty, DSM.at(Set).at(Binding));
+  }
+}
 
 const Invocation *ShaderExecution::getCurrentInvocation() const
 {
@@ -83,7 +99,6 @@ void ShaderExecution::run()
   // TODO: Print info about current command (entry name, dispatch size, etc).
 
   // Build list of pending group IDs.
-  Dim3 NumGroups = Command.getNumGroups();
   for (uint32_t GZ = 0; GZ < NumGroups.Z; GZ++)
     for (uint32_t GY = 0; GY < NumGroups.Y; GY++)
       for (uint32_t GX = 0; GX < NumGroups.X; GX++)
@@ -130,7 +145,7 @@ void ShaderExecution::runWorker()
       size_t GroupIndex = NextGroupIndex++;
       if (GroupIndex >= PendingGroups.size())
         break;
-      CurrentGroup = new Workgroup(Dev, Command, PendingGroups[GroupIndex]);
+      CurrentGroup = new Workgroup(Dev, *this, PendingGroups[GroupIndex]);
       Dev.reportWorkgroupBegin(CurrentGroup);
     }
     else
@@ -479,7 +494,7 @@ bool ShaderExecution::print(const std::vector<std::string> &Args)
   std::cout << "  %" << std::dec << Id << " = ";
 
   // Handle types.
-  if (const Type *Ty = Command.getPipeline()->getModule()->getType(Id))
+  if (const Type *Ty = Stage.getModule()->getType(Id))
   {
     std::cout << Ty << std::endl;
     return false;
@@ -532,8 +547,7 @@ bool ShaderExecution::swtch(const std::vector<std::string> &Args)
   }
 
   // Check global index is within global bounds.
-  Dim3 GroupSize = Command.getPipeline()->getGroupSize();
-  Dim3 NumGroups = Command.getNumGroups();
+  Dim3 GroupSize = Stage.getGroupSize();
   if (Id.X >= GroupSize.X * NumGroups.X || Id.Y >= GroupSize.Y * NumGroups.Y ||
       Id.Z >= GroupSize.Z * NumGroups.Z)
   {
@@ -578,7 +592,7 @@ bool ShaderExecution::swtch(const std::vector<std::string> &Args)
     if (PG != PendingGroups.end())
     {
       // Remove from pending groups and create the new workgroup.
-      Group = new Workgroup(Dev, Command, *PG);
+      Group = new Workgroup(Dev, *this, *PG);
       Dev.reportWorkgroupBegin(Group);
       PendingGroups.erase(PG);
     }

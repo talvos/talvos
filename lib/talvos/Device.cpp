@@ -22,13 +22,14 @@
 #include "ShaderExecution.h"
 #include "Utils.h"
 #include "talvos/Commands.h"
+#include "talvos/ComputePipeline.h"
 #include "talvos/Device.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
-#include "talvos/Pipeline.h"
+#include "talvos/PipelineStage.h"
 #include "talvos/Plugin.h"
 #include "talvos/Workgroup.h"
 
@@ -42,7 +43,7 @@ Device::Device()
 {
   GlobalMemory = new Memory(*this, MemoryScope::Device);
 
-  CurrentShader = nullptr;
+  Execution = nullptr;
 
   // Load plugins from dynamic libraries.
   const char *PluginList = getenv("TALVOS_PLUGINS");
@@ -135,20 +136,20 @@ void Device::reportError(const std::string &Error, bool Fatal)
   std::cerr << std::endl;
   std::cerr << Error << std::endl;
 
-  if (CurrentShader && CurrentShader->isWorkerThread())
+  if (Execution && Execution->isWorkerThread())
   {
     // Show current entry point.
-    const Module *Mod = CurrentShader->getCommand().getPipeline()->getModule();
+    const Module *Mod = Execution->getPipelineStage().getModule();
     uint32_t EntryPointId =
-        CurrentShader->getCommand().getPipeline()->getFunction()->getId();
+        Execution->getPipelineStage().getFunction()->getId();
     std::cerr << "    Entry point:";
     std::cerr << " %" << EntryPointId;
     std::cerr << " " << Mod->getEntryPointName(EntryPointId);
     std::cerr << std::endl;
 
     // Show current invocation and group.
-    const Invocation *Inv = CurrentShader->getCurrentInvocation();
-    const Workgroup *Group = CurrentShader->getCurrentWorkgroup();
+    const Invocation *Inv = Execution->getCurrentInvocation();
+    const Workgroup *Group = Execution->getCurrentWorkgroup();
     std::cerr << "    Invocation:";
     std::cerr << " Global" << Inv->getGlobalId();
     std::cerr << " Local" << Inv->getLocalId();
@@ -167,8 +168,8 @@ void Device::reportError(const std::string &Error, bool Fatal)
 
   std::cerr << std::endl;
 
-  if (CurrentShader)
-    CurrentShader->signalError();
+  if (Execution)
+    Execution->signalError();
 
   if (Fatal)
     abort();
@@ -209,11 +210,11 @@ void Device::reportInvocationComplete(const Invocation *Invoc)
 void Device::reportMemoryLoad(const Memory *Mem, uint64_t Address,
                               uint64_t NumBytes)
 {
-  if (CurrentShader && CurrentShader->isWorkerThread())
+  if (Execution && Execution->isWorkerThread())
   {
     // TODO: Workgroup/subgroup level accesses?
     // TODO: Workgroup/Invocation scope initialization is not covered.
-    if (auto *I = CurrentShader->getCurrentInvocation())
+    if (auto *I = Execution->getCurrentInvocation())
       REPORT(memoryLoad, Mem, Address, NumBytes, I);
   }
   else
@@ -233,11 +234,11 @@ void Device::reportMemoryMap(const Memory *Memory, uint64_t Base,
 void Device::reportMemoryStore(const Memory *Mem, uint64_t Address,
                                uint64_t NumBytes, const uint8_t *Data)
 {
-  if (CurrentShader && CurrentShader->isWorkerThread())
+  if (Execution && Execution->isWorkerThread())
   {
     // TODO: Workgroup/subgroup level accesses?
     // TODO: Workgroup/Invocation scope initialization is not covered.
-    if (auto *I = CurrentShader->getCurrentInvocation())
+    if (auto *I = Execution->getCurrentInvocation())
       REPORT(memoryStore, Mem, Address, NumBytes, Data, I);
   }
   else
@@ -273,15 +274,18 @@ void Device::reportWorkgroupComplete(const Workgroup *Group)
 void Device::run(const Command &Cmd)
 {
   // TODO: Mutex instead?
-  assert(CurrentShader == nullptr);
+  assert(Execution == nullptr);
 
   reportCommandBegin(&Cmd);
 
-  CurrentShader = new ShaderExecution(*this, (const DispatchCommand &)Cmd);
-  CurrentShader->run();
+  assert(Cmd.getType() == Command::DISPATCH);
+  const DispatchCommand &DC = (const DispatchCommand &)Cmd;
+  Execution = new ShaderExecution(*this, *DC.getPipeline()->getStage(),
+                                  DC.getDescriptorSetMap(), DC.getNumGroups());
+  Execution->run();
 
-  delete CurrentShader;
-  CurrentShader = nullptr;
+  delete Execution;
+  Execution = nullptr;
 
   reportCommandComplete(&Cmd);
 }

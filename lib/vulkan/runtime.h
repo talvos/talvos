@@ -16,10 +16,10 @@
 namespace talvos
 {
 class Command;
+class ComputePipeline;
 class Device;
 class Function;
 class Module;
-class Pipeline;
 }; // namespace talvos
 
 // TODO: Remove this when all functions have implementations.
@@ -124,7 +124,7 @@ struct VkPhysicalDevice_T
 
 struct VkPipeline_T
 {
-  const talvos::Pipeline *Pipeline;
+  const talvos::ComputePipeline *Pipeline;
 };
 
 struct VkPipelineLayout_T

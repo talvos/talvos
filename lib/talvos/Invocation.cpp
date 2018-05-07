@@ -15,15 +15,15 @@
 #include <spirv/unified1/GLSL.std.450.h>
 #include <spirv/unified1/spirv.h>
 
+#include "ShaderExecution.h"
 #include "talvos/Block.h"
-#include "talvos/Commands.h"
 #include "talvos/Device.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
-#include "talvos/Pipeline.h"
+#include "talvos/PipelineStage.h"
 #include "talvos/Type.h"
 #include "talvos/Workgroup.h"
 
@@ -42,7 +42,7 @@ Invocation::Invocation(Device &Dev, const std::vector<Object> &InitialObjects)
   Objects = InitialObjects;
 }
 
-Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
+Invocation::Invocation(Device &Dev, const ShaderExecution &Execution,
                        Workgroup *Group, Dim3 LocalId)
     : Dev(Dev)
 {
@@ -50,19 +50,18 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
   this->Group = Group;
 
   AtBarrier = false;
-  CurrentModule = Command.getPipeline()->getModule();
-  CurrentFunction = Command.getPipeline()->getFunction();
+  CurrentModule = Execution.getPipelineStage().getModule();
+  CurrentFunction = Execution.getPipelineStage().getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
 
   // Set up the local and global ID.
-  Dim3 GroupSize = Command.getPipeline()->getGroupSize();
-  Dim3 NumGroups = Command.getNumGroups();
+  Dim3 GroupSize = Execution.getPipelineStage().getGroupSize();
   this->LocalId = LocalId;
   GroupId = Group->getGroupId();
   GlobalId = LocalId + GroupId * GroupSize;
 
   // Clone initial object values.
-  Objects = Command.getObjects();
+  Objects = Execution.getInitialObjects();
 
   // Copy workgroup variable pointer values.
   for (auto V : Group->getVariables())
@@ -85,9 +84,12 @@ Invocation::Invocation(Device &Dev, const DispatchCommand &Command,
       Data = (uint8_t *)LocalId.Data;
       break;
     case SpvBuiltInNumWorkgroups:
+    {
+      Dim3 NumGroups = Execution.getNumGroups();
       Sz = sizeof(NumGroups);
       Data = (uint8_t *)NumGroups.Data;
       break;
+    }
     case SpvBuiltInWorkgroupId:
       Sz = sizeof(GroupId);
       Data = (uint8_t *)GroupId.Data;

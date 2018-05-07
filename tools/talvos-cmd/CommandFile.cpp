@@ -7,10 +7,10 @@
 
 #include "CommandFile.h"
 #include "talvos/Commands.h"
+#include "talvos/ComputePipeline.h"
 #include "talvos/Device.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
-#include "talvos/Pipeline.h"
 
 using namespace std;
 
@@ -209,7 +209,9 @@ void CommandFile::parseDispatch()
   GroupCount.Y = get<uint32_t>("group count Y");
   GroupCount.Z = get<uint32_t>("group count Z");
 
-  talvos::Pipeline Pipeline(*Device, Module.get(), Function, SpecConstMap);
+  talvos::PipelineStage *Stage =
+      new talvos::PipelineStage(*Device, Module.get(), Function, SpecConstMap);
+  talvos::ComputePipeline Pipeline(Stage);
   talvos::DispatchCommand Command(&Pipeline, GroupCount, DescriptorSets);
   Device->run(Command);
 }

@@ -76,7 +76,7 @@ private:
   std::vector<std::pair<void *, Plugin *>> Plugins;
 
   /// The current shader execution instance.
-  ShaderExecution *CurrentShader;
+  ShaderExecution *Execution;
 };
 
 } // namespace talvos

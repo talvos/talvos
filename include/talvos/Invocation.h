@@ -18,11 +18,11 @@ namespace talvos
 {
 
 class Device;
-class DispatchCommand;
 class Function;
 class Instruction;
 class Memory;
 class Module;
+class ShaderExecution;
 class Workgroup;
 
 /// This class represents a single execution of a SPIR-V entry point.
@@ -50,7 +50,7 @@ public:
   /// Create an invocation for \p Command on \p Dev, with specific group and
   /// local IDs. Global variables with their resolved pointer values are listed
   /// in \p Variables.
-  Invocation(Device &Dev, const DispatchCommand &Command, Workgroup *Group,
+  Invocation(Device &Dev, const ShaderExecution &Execution, Workgroup *Group,
              Dim3 LocalId);
 
   /// Destroy this invocation.

@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "talvos/DescriptorSet.h"
-#include "talvos/Pipeline.h"
+#include "talvos/PipelineStage.h"
 
 namespace talvos
 {
