@@ -19,6 +19,7 @@ class Command;
 class ComputePipeline;
 class Device;
 class Function;
+class GraphicsPipeline;
 class Module;
 }; // namespace talvos
 
@@ -124,7 +125,8 @@ struct VkPhysicalDevice_T
 
 struct VkPipeline_T
 {
-  const talvos::ComputePipeline *Pipeline;
+  const talvos::ComputePipeline *ComputePipeline = nullptr;
+  const talvos::GraphicsPipeline *GraphicsPipeline = nullptr;
 };
 
 struct VkPipelineLayout_T

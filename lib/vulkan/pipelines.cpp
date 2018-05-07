@@ -6,6 +6,7 @@
 #include "runtime.h"
 
 #include "talvos/ComputePipeline.h"
+#include "talvos/GraphicsPipeline.h"
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
 
@@ -26,6 +27,37 @@ vkCmdBindPipeline(VkCommandBuffer commandBuffer,
   }
 }
 
+// Helper to generate a specialization constant map for a pipeline stage.
+void genSpecConstantMap(const talvos::Module *Mod,
+                        const VkSpecializationInfo *SpecInfo,
+                        talvos::SpecConstantMap &SM)
+{
+  if (!SpecInfo)
+    return;
+
+  const uint8_t *Data = (const uint8_t *)SpecInfo->pData;
+  for (uint32_t s = 0; s < SpecInfo->mapEntryCount; s++)
+  {
+    const VkSpecializationMapEntry &Entry = SpecInfo->pMapEntries[s];
+
+    uint32_t ResultId = Mod->getSpecConstant(Entry.constantID);
+    if (!ResultId)
+      continue;
+
+    const talvos::Type *Ty = Mod->getObject(ResultId).getType();
+    if (Ty->isBool())
+    {
+      bool Value = *(VkBool32 *)(Data + Entry.offset) ? true : false;
+      SM[Entry.constantID] = talvos::Object(Ty, Value);
+    }
+    else
+    {
+      assert(Ty->getSize() == Entry.size);
+      SM[Entry.constantID] = talvos::Object(Ty, Data + Entry.offset);
+    }
+  }
+}
+
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
     VkDevice device, VkPipelineCache pipelineCache, uint32_t createInfoCount,
     const VkComputePipelineCreateInfo *pCreateInfos,
@@ -36,39 +68,15 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
     const VkPipelineShaderStageCreateInfo &StageInfo = pCreateInfos[i].stage;
     const talvos::Module *Mod = StageInfo.module->Module.get();
 
-    // Build specialization constant map if necessary.
+    // Build specialization constant map.
     talvos::SpecConstantMap SM;
-    if (StageInfo.pSpecializationInfo)
-    {
-      const VkSpecializationInfo *SpecInfo = StageInfo.pSpecializationInfo;
-      const uint8_t *Data = (const uint8_t *)SpecInfo->pData;
-      for (uint32_t s = 0; s < SpecInfo->mapEntryCount; s++)
-      {
-        const VkSpecializationMapEntry &Entry = SpecInfo->pMapEntries[s];
-
-        uint32_t ResultId = Mod->getSpecConstant(Entry.constantID);
-        if (!ResultId)
-          continue;
-
-        const talvos::Type *Ty = Mod->getObject(ResultId).getType();
-        if (Ty->isBool())
-        {
-          bool Value = *(VkBool32 *)(Data + Entry.offset) ? true : false;
-          SM[Entry.constantID] = talvos::Object(Ty, Value);
-        }
-        else
-        {
-          assert(Ty->getSize() == Entry.size);
-          SM[Entry.constantID] = talvos::Object(Ty, Data + Entry.offset);
-        }
-      }
-    }
+    genSpecConstantMap(Mod, StageInfo.pSpecializationInfo, SM);
 
     // Create pipeline.
     pPipelines[i] = new VkPipeline_T;
     talvos::PipelineStage *Stage = new talvos::PipelineStage(
         *device->Device, Mod, Mod->getEntryPoint(StageInfo.pName), SM);
-    pPipelines[i]->Pipeline = new talvos::ComputePipeline(Stage);
+    pPipelines[i]->ComputePipeline = new talvos::ComputePipeline(Stage);
   }
   return VK_SUCCESS;
 }
@@ -78,7 +86,43 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
     const VkGraphicsPipelineCreateInfo *pCreateInfos,
     const VkAllocationCallbacks *pAllocator, VkPipeline *pPipelines)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (uint32_t i = 0; i < createInfoCount; i++)
+  {
+    talvos::PipelineStage *VertexStage = nullptr;
+    talvos::PipelineStage *FragmentStage = nullptr;
+    for (uint32_t s = 0; s < pCreateInfos[i].stageCount; s++)
+    {
+      const VkPipelineShaderStageCreateInfo &StageInfo =
+          pCreateInfos[i].pStages[s];
+      const talvos::Module *Mod = StageInfo.module->Module.get();
+
+      // Build specialization constant map.
+      talvos::SpecConstantMap SM;
+      genSpecConstantMap(Mod, StageInfo.pSpecializationInfo, SM);
+
+      // Create pipeline stage.
+      talvos::PipelineStage *Stage = new talvos::PipelineStage(
+          *device->Device, Mod, Mod->getEntryPoint(StageInfo.pName), SM);
+      switch (StageInfo.stage)
+      {
+      case VK_SHADER_STAGE_VERTEX_BIT:
+        VertexStage = Stage;
+        break;
+      case VK_SHADER_STAGE_FRAGMENT_BIT:
+        FragmentStage = Stage;
+        break;
+      default:
+        assert(false && "Unhandled pipeline stage");
+        break;
+      }
+    }
+
+    // Create pipeline.
+    pPipelines[i] = new VkPipeline_T;
+    pPipelines[i]->GraphicsPipeline =
+        new talvos::GraphicsPipeline(VertexStage, FragmentStage);
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineCache(
@@ -92,7 +136,10 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyPipeline(VkDevice device, VkPipeline pipeline,
                   const VkAllocationCallbacks *pAllocator)
 {
-  delete pipeline->Pipeline;
+  if (pipeline->ComputePipeline)
+    delete pipeline->ComputePipeline;
+  if (pipeline->GraphicsPipeline)
+    delete pipeline->GraphicsPipeline;
   delete pipeline;
 }
 
