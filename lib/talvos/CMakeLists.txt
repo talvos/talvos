@@ -74,6 +74,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Dim3.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Function.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/GraphicsPipeline.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Instruction.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
@@ -89,6 +90,7 @@ set(TALVOS_SOURCES
     Device.cpp
     Dim3.cpp
     Function.cpp
+    GraphicsPipeline.cpp
     Instruction.cpp
     Invocation.cpp
     Memory.cpp
