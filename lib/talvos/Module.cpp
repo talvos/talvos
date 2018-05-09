@@ -222,10 +222,13 @@ public:
         uint32_t ExecutionModel = Inst->words[Inst->operands[0].offset];
         uint32_t Id = Inst->words[Inst->operands[1].offset];
         char *Name = (char *)(Inst->words + Inst->operands[2].offset);
-        if (ExecutionModel != SpvExecutionModelGLCompute)
+        if (ExecutionModel != SpvExecutionModelGLCompute &&
+            ExecutionModel != SpvExecutionModelVertex &&
+            ExecutionModel != SpvExecutionModelFragment)
         {
-          std::cerr << "WARNING: Unrecognized execution model "
-                    << ExecutionModel << std::endl;
+          std::cerr << "Unimplemented execution model: " << ExecutionModel
+                    << std::endl;
+          abort();
         }
         Mod->addEntryPoint(Name, Id);
         break;
