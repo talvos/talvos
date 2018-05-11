@@ -21,7 +21,7 @@ class Device;
 class Invocation;
 class Memory;
 class Object;
-class ShaderExecution;
+class PipelineExecutor;
 
 /// This class represents a workgroup executing a compute command.
 class Workgroup
@@ -34,7 +34,7 @@ public:
   typedef std::vector<std::pair<uint32_t, Object>> VariableList;
 
   /// Create a workgroup.
-  Workgroup(Device &Dev, const ShaderExecution &Execution, Dim3 GroupId);
+  Workgroup(Device &Dev, const PipelineExecutor &Executor, Dim3 GroupId);
 
   /// Destroy this workgroup.
   ~Workgroup();

@@ -19,8 +19,8 @@ class Command;
 class Instruction;
 class Invocation;
 class Memory;
+class PipelineExecutor;
 class Plugin;
-class ShaderExecution;
 class Workgroup;
 
 /// A Device instance encapsulates properties and state for the virtual device.
@@ -75,8 +75,8 @@ private:
   /// List of plugins that are currently loaded.
   std::vector<std::pair<void *, Plugin *>> Plugins;
 
-  /// The current shader execution instance.
-  ShaderExecution *Execution;
+  /// The current pipeline executor instance.
+  PipelineExecutor *Executor;
 };
 
 } // namespace talvos

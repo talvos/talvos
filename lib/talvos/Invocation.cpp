@@ -15,7 +15,7 @@
 #include <spirv/unified1/GLSL.std.450.h>
 #include <spirv/unified1/spirv.h>
 
-#include "ShaderExecution.h"
+#include "PipelineExecutor.h"
 #include "talvos/Block.h"
 #include "talvos/Device.h"
 #include "talvos/Function.h"
@@ -42,7 +42,7 @@ Invocation::Invocation(Device &Dev, const std::vector<Object> &InitialObjects)
   Objects = InitialObjects;
 }
 
-Invocation::Invocation(Device &Dev, const ShaderExecution &Execution,
+Invocation::Invocation(Device &Dev, const PipelineExecutor &Executor,
                        Workgroup *Group, Dim3 LocalId)
     : Dev(Dev)
 {
@@ -50,18 +50,18 @@ Invocation::Invocation(Device &Dev, const ShaderExecution &Execution,
   this->Group = Group;
 
   AtBarrier = false;
-  CurrentModule = Execution.getPipelineStage().getModule();
-  CurrentFunction = Execution.getPipelineStage().getFunction();
+  CurrentModule = Executor.getPipelineStage().getModule();
+  CurrentFunction = Executor.getPipelineStage().getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
 
   // Set up the local and global ID.
-  Dim3 GroupSize = Execution.getPipelineStage().getGroupSize();
+  Dim3 GroupSize = Executor.getPipelineStage().getGroupSize();
   this->LocalId = LocalId;
   GroupId = Group->getGroupId();
   GlobalId = LocalId + GroupId * GroupSize;
 
   // Clone initial object values.
-  Objects = Execution.getInitialObjects();
+  Objects = Executor.getInitialObjects();
 
   // Copy workgroup variable pointer values.
   for (auto V : Group->getVariables())
@@ -85,7 +85,7 @@ Invocation::Invocation(Device &Dev, const ShaderExecution &Execution,
       break;
     case SpvBuiltInNumWorkgroups:
     {
-      Dim3 NumGroups = Execution.getNumGroups();
+      Dim3 NumGroups = Executor.getNumGroups();
       Sz = sizeof(NumGroups);
       Data = (uint8_t *)NumGroups.Data;
       break;

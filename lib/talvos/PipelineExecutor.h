@@ -3,11 +3,11 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-/// \file ShaderExecution.h
-/// This file declares the ShaderExecution class.
+/// \file PipelineExecutor.h
+/// This file declares the PipelineExecutor class.
 
-#ifndef TALVOS_SHADEREXECUTION_H
-#define TALVOS_SHADEREXECUTION_H
+#ifndef TALVOS_PIPELINEEXECUTOR_H
+#define TALVOS_PIPELINEEXECUTOR_H
 
 #include <atomic>
 #include <map>
@@ -26,19 +26,19 @@ class Object;
 class PipelineStage;
 class Workgroup;
 
-/// An internal class that handles shader execution, including the interactive
+/// An internal class that handles pipeline execution, including the interactive
 /// debugger.
-class ShaderExecution
+class PipelineExecutor
 {
 public:
   /// Create a shader execution for \p Command on \p Dev.
-  ShaderExecution(Device &Dev, const PipelineStage &Stage,
-                  const DescriptorSetMap &DSM, Dim3 NumGroups);
+  PipelineExecutor(Device &Dev, const PipelineStage &Stage,
+                   const DescriptorSetMap &DSM, Dim3 NumGroups);
 
-  // Do not allow ShaderExecution objects to be copied.
+  // Do not allow PipelineExecutor objects to be copied.
   ///\{
-  ShaderExecution(const ShaderExecution &) = delete;
-  ShaderExecution &operator=(const ShaderExecution &) = delete;
+  PipelineExecutor(const PipelineExecutor &) = delete;
+  PipelineExecutor &operator=(const PipelineExecutor &) = delete;
   ///\}
 
   /// Returns the current invocation being executed.
@@ -57,7 +57,7 @@ public:
   /// Returns the pipeline stage that is being executed.
   const PipelineStage &getPipelineStage() const { return Stage; }
 
-  /// Returns true if the calling thread is a ShaderExecution worker thread.
+  /// Returns true if the calling thread is a PipelineExecutor worker thread.
   bool isWorkerThread() const;
 
   /// Run the shader to completion.

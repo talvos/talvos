@@ -19,7 +19,7 @@
 #include <dlfcn.h>
 #endif
 
-#include "ShaderExecution.h"
+#include "PipelineExecutor.h"
 #include "Utils.h"
 #include "talvos/Commands.h"
 #include "talvos/ComputePipeline.h"
@@ -43,7 +43,7 @@ Device::Device()
 {
   GlobalMemory = new Memory(*this, MemoryScope::Device);
 
-  Execution = nullptr;
+  Executor = nullptr;
 
   // Load plugins from dynamic libraries.
   const char *PluginList = getenv("TALVOS_PLUGINS");
@@ -136,20 +136,19 @@ void Device::reportError(const std::string &Error, bool Fatal)
   std::cerr << std::endl;
   std::cerr << Error << std::endl;
 
-  if (Execution && Execution->isWorkerThread())
+  if (Executor && Executor->isWorkerThread())
   {
     // Show current entry point.
-    const Module *Mod = Execution->getPipelineStage().getModule();
-    uint32_t EntryPointId =
-        Execution->getPipelineStage().getFunction()->getId();
+    const Module *Mod = Executor->getPipelineStage().getModule();
+    uint32_t EntryPointId = Executor->getPipelineStage().getFunction()->getId();
     std::cerr << "    Entry point:";
     std::cerr << " %" << EntryPointId;
     std::cerr << " " << Mod->getEntryPointName(EntryPointId);
     std::cerr << std::endl;
 
     // Show current invocation and group.
-    const Invocation *Inv = Execution->getCurrentInvocation();
-    const Workgroup *Group = Execution->getCurrentWorkgroup();
+    const Invocation *Inv = Executor->getCurrentInvocation();
+    const Workgroup *Group = Executor->getCurrentWorkgroup();
     std::cerr << "    Invocation:";
     std::cerr << " Global" << Inv->getGlobalId();
     std::cerr << " Local" << Inv->getLocalId();
@@ -168,8 +167,8 @@ void Device::reportError(const std::string &Error, bool Fatal)
 
   std::cerr << std::endl;
 
-  if (Execution)
-    Execution->signalError();
+  if (Executor)
+    Executor->signalError();
 
   if (Fatal)
     abort();
@@ -210,11 +209,11 @@ void Device::reportInvocationComplete(const Invocation *Invoc)
 void Device::reportMemoryLoad(const Memory *Mem, uint64_t Address,
                               uint64_t NumBytes)
 {
-  if (Execution && Execution->isWorkerThread())
+  if (Executor && Executor->isWorkerThread())
   {
     // TODO: Workgroup/subgroup level accesses?
     // TODO: Workgroup/Invocation scope initialization is not covered.
-    if (auto *I = Execution->getCurrentInvocation())
+    if (auto *I = Executor->getCurrentInvocation())
       REPORT(memoryLoad, Mem, Address, NumBytes, I);
   }
   else
@@ -234,11 +233,11 @@ void Device::reportMemoryMap(const Memory *Memory, uint64_t Base,
 void Device::reportMemoryStore(const Memory *Mem, uint64_t Address,
                                uint64_t NumBytes, const uint8_t *Data)
 {
-  if (Execution && Execution->isWorkerThread())
+  if (Executor && Executor->isWorkerThread())
   {
     // TODO: Workgroup/subgroup level accesses?
     // TODO: Workgroup/Invocation scope initialization is not covered.
-    if (auto *I = Execution->getCurrentInvocation())
+    if (auto *I = Executor->getCurrentInvocation())
       REPORT(memoryStore, Mem, Address, NumBytes, Data, I);
   }
   else
@@ -274,18 +273,17 @@ void Device::reportWorkgroupComplete(const Workgroup *Group)
 void Device::run(const Command &Cmd)
 {
   // TODO: Mutex instead?
-  assert(Execution == nullptr);
+  assert(Executor == nullptr);
 
   reportCommandBegin(&Cmd);
 
   assert(Cmd.getType() == Command::DISPATCH);
   const DispatchCommand &DC = (const DispatchCommand &)Cmd;
-  Execution = new ShaderExecution(*this, *DC.getPipeline()->getStage(),
+  Executor = new PipelineExecutor(*this, *DC.getPipeline()->getStage(),
                                   DC.getDescriptorSetMap(), DC.getNumGroups());
-  Execution->run();
-
-  delete Execution;
-  Execution = nullptr;
+  Executor->run();
+  delete Executor;
+  Executor = nullptr;
 
   reportCommandComplete(&Cmd);
 }

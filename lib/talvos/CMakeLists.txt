@@ -96,9 +96,9 @@ set(TALVOS_SOURCES
     Memory.cpp
     Module.cpp
     Object.cpp
+    PipelineExecutor.cpp
+    PipelineExecutor.h
     PipelineStage.cpp
-    ShaderExecution.cpp
-    ShaderExecution.h
     Type.cpp
     Workgroup.cpp
     Utils.cpp

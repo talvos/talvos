@@ -7,7 +7,7 @@
 /// This file defines the Workgroup class.
 
 #include "talvos/Workgroup.h"
-#include "ShaderExecution.h"
+#include "PipelineExecutor.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
@@ -16,13 +16,13 @@
 namespace talvos
 {
 
-Workgroup::Workgroup(Device &Dev, const ShaderExecution &Execution,
+Workgroup::Workgroup(Device &Dev, const PipelineExecutor &Executor,
                      Dim3 GroupId)
 {
   this->GroupId = GroupId;
   LocalMemory = new Memory(Dev, MemoryScope::Workgroup);
 
-  const PipelineStage &Stage = Execution.getPipelineStage();
+  const PipelineStage &Stage = Executor.getPipelineStage();
 
   // Allocate workgroup variables.
   for (auto V : Stage.getModule()->getWorkgroupVariables())
@@ -37,7 +37,7 @@ Workgroup::Workgroup(Device &Dev, const ShaderExecution &Execution,
   for (uint32_t LZ = 0; LZ < GroupSize.Z; LZ++)
     for (uint32_t LY = 0; LY < GroupSize.Y; LY++)
       for (uint32_t LX = 0; LX < GroupSize.X; LX++)
-        WorkItems.push_back(std::make_unique<Invocation>(Dev, Execution, this,
+        WorkItems.push_back(std::make_unique<Invocation>(Dev, Executor, this,
                                                          Dim3(LX, LY, LZ)));
 }
 

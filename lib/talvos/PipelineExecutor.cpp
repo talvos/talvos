@@ -3,8 +3,8 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-/// \file ShaderExecution.cpp
-/// This file defines the ShaderExecution class.
+/// \file PipelineExecutor.cpp
+/// This file defines the PipelineExecutor class.
 
 #include "config.h"
 
@@ -33,7 +33,7 @@
 
 #include <spirv/unified1/spirv.h>
 
-#include "ShaderExecution.h"
+#include "PipelineExecutor.h"
 #include "Utils.h"
 #include "talvos/Device.h"
 #include "talvos/Instruction.h"
@@ -53,11 +53,11 @@ static thread_local bool IsWorkerThread = false;
 static thread_local Workgroup *CurrentGroup;
 static thread_local Invocation *CurrentInvocation;
 
-uint32_t ShaderExecution::NextBreakpoint = 1;
-std::map<uint32_t, uint32_t> ShaderExecution::Breakpoints;
+uint32_t PipelineExecutor::NextBreakpoint = 1;
+std::map<uint32_t, uint32_t> PipelineExecutor::Breakpoints;
 
-ShaderExecution::ShaderExecution(Device &Dev, const PipelineStage &Stage,
-                                 const DescriptorSetMap &DSM, Dim3 NumGroups)
+PipelineExecutor::PipelineExecutor(Device &Dev, const PipelineStage &Stage,
+                                   const DescriptorSetMap &DSM, Dim3 NumGroups)
     : Dev(Dev), Stage(Stage), NumGroups(NumGroups)
 {
   Objects = Stage.getObjects();
@@ -77,19 +77,19 @@ ShaderExecution::ShaderExecution(Device &Dev, const PipelineStage &Stage,
   }
 }
 
-const Invocation *ShaderExecution::getCurrentInvocation() const
+const Invocation *PipelineExecutor::getCurrentInvocation() const
 {
   return CurrentInvocation;
 }
 
-const Workgroup *ShaderExecution::getCurrentWorkgroup() const
+const Workgroup *PipelineExecutor::getCurrentWorkgroup() const
 {
   return CurrentGroup;
 }
 
-bool ShaderExecution::isWorkerThread() const { return IsWorkerThread; }
+bool PipelineExecutor::isWorkerThread() const { return IsWorkerThread; }
 
-void ShaderExecution::run()
+void PipelineExecutor::run()
 {
   assert(PendingGroups.empty());
   assert(RunningGroups.empty());
@@ -113,7 +113,7 @@ void ShaderExecution::run()
         getEnvUInt("TALVOS_NUM_WORKERS", std::thread::hardware_concurrency());
   std::vector<std::thread> Threads;
   for (unsigned i = 0; i < NumThreads; i++)
-    Threads.push_back(std::thread(&ShaderExecution::runWorker, this));
+    Threads.push_back(std::thread(&PipelineExecutor::runWorker, this));
 
   // Wait for workers to complete
   for (unsigned i = 0; i < NumThreads; i++)
@@ -122,7 +122,7 @@ void ShaderExecution::run()
   PendingGroups.clear();
 }
 
-void ShaderExecution::runWorker()
+void PipelineExecutor::runWorker()
 {
   IsWorkerThread = true;
   CurrentInvocation = nullptr;
@@ -219,7 +219,7 @@ void ShaderExecution::runWorker()
   }
 }
 
-void ShaderExecution::signalError()
+void PipelineExecutor::signalError()
 {
   // Drop to interactive prompt.
   Continue = false;
@@ -228,7 +228,7 @@ void ShaderExecution::signalError()
 
 // Private functions for interactive execution and debugging.
 
-void ShaderExecution::interact()
+void PipelineExecutor::interact()
 {
   if (!Interactive)
     return;
@@ -335,7 +335,7 @@ void ShaderExecution::interact()
   }
 }
 
-void ShaderExecution::printContext() const
+void PipelineExecutor::printContext() const
 {
   assert(CurrentInvocation);
   if (CurrentInvocation->getState() == Invocation::FINISHED)
@@ -375,7 +375,7 @@ void ShaderExecution::printContext() const
   }
 }
 
-bool ShaderExecution::brk(const std::vector<std::string> &Args)
+bool PipelineExecutor::brk(const std::vector<std::string> &Args)
 {
   if (Args.size() != 2)
   {
@@ -401,7 +401,7 @@ bool ShaderExecution::brk(const std::vector<std::string> &Args)
   return false;
 }
 
-bool ShaderExecution::breakpoint(const std::vector<std::string> &Args)
+bool PipelineExecutor::breakpoint(const std::vector<std::string> &Args)
 {
   if (Args.size() < 2)
   {
@@ -451,13 +451,13 @@ bool ShaderExecution::breakpoint(const std::vector<std::string> &Args)
   return false;
 }
 
-bool ShaderExecution::cont(const std::vector<std::string> &Args)
+bool PipelineExecutor::cont(const std::vector<std::string> &Args)
 {
   Continue = true;
   return true;
 }
 
-bool ShaderExecution::help(const std::vector<std::string> &Args)
+bool PipelineExecutor::help(const std::vector<std::string> &Args)
 {
   std::cout << "Command list:" << std::endl;
   std::cout << "  break        (b)" << std::endl;
@@ -474,7 +474,7 @@ bool ShaderExecution::help(const std::vector<std::string> &Args)
   return false;
 }
 
-bool ShaderExecution::print(const std::vector<std::string> &Args)
+bool PipelineExecutor::print(const std::vector<std::string> &Args)
 {
   if (Args.size() != 2)
   {
@@ -506,9 +506,9 @@ bool ShaderExecution::print(const std::vector<std::string> &Args)
   return false;
 }
 
-bool ShaderExecution::quit(const std::vector<std::string> &Args) { exit(0); }
+bool PipelineExecutor::quit(const std::vector<std::string> &Args) { exit(0); }
 
-bool ShaderExecution::step(const std::vector<std::string> &Args)
+bool PipelineExecutor::step(const std::vector<std::string> &Args)
 {
   if (CurrentInvocation->getState() == Invocation::FINISHED)
   {
@@ -524,7 +524,7 @@ bool ShaderExecution::step(const std::vector<std::string> &Args)
   return true;
 }
 
-bool ShaderExecution::swtch(const std::vector<std::string> &Args)
+bool PipelineExecutor::swtch(const std::vector<std::string> &Args)
 {
   // TODO: Allow `select group X Y Z` or `select local X Y Z` as well?
   if (Args.size() < 2 || Args.size() > 4)
