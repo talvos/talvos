@@ -94,6 +94,9 @@ private:
   /// Pool of groups that have begun execution and been suspended.
   std::vector<Workgroup *> RunningGroups;
 
+  /// Create a compute shader workgroup and its work-item invocations.
+  Workgroup *createWorkgroup(Dim3 GroupId) const;
+
   // Interactive debugging functionality.
   bool Continue;    ///< True when the user has used \p continue command.
   bool Interactive; ///< True when interactive mode is enabled.

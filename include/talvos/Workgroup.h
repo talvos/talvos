@@ -45,6 +45,9 @@ public:
   Workgroup &operator=(const Workgroup &) = delete;
   ///\}
 
+  /// Add a work-item invocation to this group, transferring ownership.
+  void addWorkItem(std::unique_ptr<Invocation> WorkItem);
+
   /// Returns the group ID of this workgroup.
   Dim3 getGroupId() const { return GroupId; }
 

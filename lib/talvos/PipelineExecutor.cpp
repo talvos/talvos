@@ -77,6 +77,21 @@ PipelineExecutor::PipelineExecutor(Device &Dev, const PipelineStage &Stage,
   }
 }
 
+Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
+{
+  Workgroup *Group = new Workgroup(Dev, *this, GroupId);
+
+  // Create invocations for this group.
+  Dim3 GroupSize = Stage.getGroupSize();
+  for (uint32_t LZ = 0; LZ < GroupSize.Z; LZ++)
+    for (uint32_t LY = 0; LY < GroupSize.Y; LY++)
+      for (uint32_t LX = 0; LX < GroupSize.X; LX++)
+        Group->addWorkItem(
+            std::make_unique<Invocation>(Dev, *this, Group, Dim3(LX, LY, LZ)));
+
+  return Group;
+}
+
 const Invocation *PipelineExecutor::getCurrentInvocation() const
 {
   return CurrentInvocation;
@@ -145,7 +160,7 @@ void PipelineExecutor::runWorker()
       size_t GroupIndex = NextGroupIndex++;
       if (GroupIndex >= PendingGroups.size())
         break;
-      CurrentGroup = new Workgroup(Dev, *this, PendingGroups[GroupIndex]);
+      CurrentGroup = createWorkgroup(PendingGroups[GroupIndex]);
       Dev.reportWorkgroupBegin(CurrentGroup);
     }
     else
@@ -592,7 +607,7 @@ bool PipelineExecutor::swtch(const std::vector<std::string> &Args)
     if (PG != PendingGroups.end())
     {
       // Remove from pending groups and create the new workgroup.
-      Group = new Workgroup(Dev, *this, *PG);
+      Group = createWorkgroup(*PG);
       Dev.reportWorkgroupBegin(Group);
       PendingGroups.erase(PG);
     }
