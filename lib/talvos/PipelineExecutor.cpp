@@ -35,6 +35,8 @@
 
 #include "PipelineExecutor.h"
 #include "Utils.h"
+#include "talvos/Commands.h"
+#include "talvos/ComputePipeline.h"
 #include "talvos/Device.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
@@ -56,33 +58,16 @@ static thread_local Invocation *CurrentInvocation;
 uint32_t PipelineExecutor::NextBreakpoint = 1;
 std::map<uint32_t, uint32_t> PipelineExecutor::Breakpoints;
 
-PipelineExecutor::PipelineExecutor(Device &Dev, const PipelineStage &Stage,
-                                   const DescriptorSetMap &DSM, Dim3 NumGroups)
-    : Dev(Dev), Stage(Stage), NumGroups(NumGroups)
-{
-  Objects = Stage.getObjects();
-
-  // Resolve buffer variables.
-  for (BufferVariableMap::value_type V :
-       Stage.getModule()->getBufferVariables())
-  {
-    // Look up variable in descriptor set and set pointer value if present.
-    uint32_t Set = V.second.DescriptorSet;
-    uint32_t Binding = V.second.Binding;
-    if (!DSM.count(Set))
-      continue;
-    if (!DSM.at(Set).count(Binding))
-      continue;
-    Objects[V.first] = Object(V.second.Ty, DSM.at(Set).at(Binding));
-  }
-}
+PipelineExecutor::PipelineExecutor(Device &Dev)
+    : Dev(Dev), CurrentStage(nullptr)
+{}
 
 Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
 {
   Workgroup *Group = new Workgroup(Dev, *this, GroupId);
 
   // Create invocations for this group.
-  Dim3 GroupSize = Stage.getGroupSize();
+  Dim3 GroupSize = CurrentStage->getGroupSize();
   for (uint32_t LZ = 0; LZ < GroupSize.Z; LZ++)
     for (uint32_t LY = 0; LY < GroupSize.Y; LY++)
       for (uint32_t LX = 0; LX < GroupSize.X; LX++)
@@ -104,8 +89,30 @@ const Workgroup *PipelineExecutor::getCurrentWorkgroup() const
 
 bool PipelineExecutor::isWorkerThread() const { return IsWorkerThread; }
 
-void PipelineExecutor::run()
+void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
 {
+  assert(CurrentStage == nullptr);
+
+  CurrentStage = Cmd.getPipeline()->getStage();
+  NumGroups = Cmd.getNumGroups();
+
+  Objects = CurrentStage->getObjects();
+
+  // Resolve buffer variables.
+  const DescriptorSetMap &DSM = Cmd.getDescriptorSetMap();
+  for (BufferVariableMap::value_type V :
+       CurrentStage->getModule()->getBufferVariables())
+  {
+    // Look up variable in descriptor set and set pointer value if present.
+    uint32_t Set = V.second.DescriptorSet;
+    uint32_t Binding = V.second.Binding;
+    if (!DSM.count(Set))
+      continue;
+    if (!DSM.at(Set).count(Binding))
+      continue;
+    Objects[V.first] = Object(V.second.Ty, DSM.at(Set).at(Binding));
+  }
+
   assert(PendingGroups.empty());
   assert(RunningGroups.empty());
 
@@ -509,7 +516,7 @@ bool PipelineExecutor::print(const std::vector<std::string> &Args)
   std::cout << "  %" << std::dec << Id << " = ";
 
   // Handle types.
-  if (const Type *Ty = Stage.getModule()->getType(Id))
+  if (const Type *Ty = CurrentStage->getModule()->getType(Id))
   {
     std::cout << Ty << std::endl;
     return false;
@@ -562,7 +569,7 @@ bool PipelineExecutor::swtch(const std::vector<std::string> &Args)
   }
 
   // Check global index is within global bounds.
-  Dim3 GroupSize = Stage.getGroupSize();
+  Dim3 GroupSize = CurrentStage->getGroupSize();
   if (Id.X >= GroupSize.X * NumGroups.X || Id.Y >= GroupSize.Y * NumGroups.Y ||
       Id.Z >= GroupSize.Z * NumGroups.Z)
   {

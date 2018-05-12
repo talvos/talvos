@@ -21,6 +21,7 @@ namespace talvos
 {
 
 class Device;
+class DispatchCommand;
 class Invocation;
 class Object;
 class PipelineStage;
@@ -31,9 +32,8 @@ class Workgroup;
 class PipelineExecutor
 {
 public:
-  /// Create a shader execution for \p Command on \p Dev.
-  PipelineExecutor(Device &Dev, const PipelineStage &Stage,
-                   const DescriptorSetMap &DSM, Dim3 NumGroups);
+  /// Create a pipeline executor on \p Dev.
+  PipelineExecutor(Device &Dev);
 
   // Do not allow PipelineExecutor objects to be copied.
   ///\{
@@ -54,14 +54,14 @@ public:
   /// This is only valid for compute shaders.
   Dim3 getNumGroups() const { return NumGroups; }
 
-  /// Returns the pipeline stage that is being executed.
-  const PipelineStage &getPipelineStage() const { return Stage; }
+  /// Returns the pipeline stage that is currently being executed.
+  const PipelineStage &getCurrentStage() const { return *CurrentStage; }
 
   /// Returns true if the calling thread is a PipelineExecutor worker thread.
   bool isWorkerThread() const;
 
-  /// Run the shader to completion.
-  void run();
+  /// Run a compute dispatch command to completion.
+  void run(const DispatchCommand &Cmd);
 
   /// Signal that an error has occurred, breaking the interactive debugger.
   void signalError();
@@ -73,8 +73,8 @@ private:
   /// The device this shader is executing on.
   Device &Dev;
 
-  /// The pipeline stage being executed.
-  const PipelineStage &Stage;
+  /// The pipeline stage currently being executed.
+  const PipelineStage *CurrentStage;
 
   /// The initial object values for each invocation.
   std::vector<Object> Objects;

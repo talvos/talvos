@@ -50,12 +50,12 @@ Invocation::Invocation(Device &Dev, const PipelineExecutor &Executor,
   this->Group = Group;
 
   AtBarrier = false;
-  CurrentModule = Executor.getPipelineStage().getModule();
-  CurrentFunction = Executor.getPipelineStage().getFunction();
+  CurrentModule = Executor.getCurrentStage().getModule();
+  CurrentFunction = Executor.getCurrentStage().getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
 
   // Set up the local and global ID.
-  Dim3 GroupSize = Executor.getPipelineStage().getGroupSize();
+  Dim3 GroupSize = Executor.getCurrentStage().getGroupSize();
   this->LocalId = LocalId;
   GroupId = Group->getGroupId();
   GlobalId = LocalId + GroupId * GroupSize;

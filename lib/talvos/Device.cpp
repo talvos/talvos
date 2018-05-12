@@ -139,8 +139,8 @@ void Device::reportError(const std::string &Error, bool Fatal)
   if (Executor && Executor->isWorkerThread())
   {
     // Show current entry point.
-    const Module *Mod = Executor->getPipelineStage().getModule();
-    uint32_t EntryPointId = Executor->getPipelineStage().getFunction()->getId();
+    const Module *Mod = Executor->getCurrentStage().getModule();
+    uint32_t EntryPointId = Executor->getCurrentStage().getFunction()->getId();
     std::cerr << "    Entry point:";
     std::cerr << " %" << EntryPointId;
     std::cerr << " " << Mod->getEntryPointName(EntryPointId);
@@ -278,10 +278,8 @@ void Device::run(const Command &Cmd)
   reportCommandBegin(&Cmd);
 
   assert(Cmd.getType() == Command::DISPATCH);
-  const DispatchCommand &DC = (const DispatchCommand &)Cmd;
-  Executor = new PipelineExecutor(*this, *DC.getPipeline()->getStage(),
-                                  DC.getDescriptorSetMap(), DC.getNumGroups());
-  Executor->run();
+  Executor = new PipelineExecutor(*this);
+  Executor->run((const DispatchCommand &)Cmd);
   delete Executor;
   Executor = nullptr;
 

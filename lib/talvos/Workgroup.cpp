@@ -22,7 +22,7 @@ Workgroup::Workgroup(Device &Dev, const PipelineExecutor &Executor,
   this->GroupId = GroupId;
   LocalMemory = new Memory(Dev, MemoryScope::Workgroup);
 
-  const PipelineStage &Stage = Executor.getPipelineStage();
+  const PipelineStage &Stage = Executor.getCurrentStage();
 
   // Allocate workgroup variables.
   for (auto V : Stage.getModule()->getWorkgroupVariables())
