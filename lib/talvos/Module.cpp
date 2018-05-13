@@ -199,6 +199,7 @@ public:
           break;
         case SpvDecorationBinding:
         case SpvDecorationDescriptorSet:
+        case SpvDecorationLocation:
           ObjectDecorations[Target].push_back(
               {Decoration, Inst->words[Inst->operands[2].offset]});
           break;
