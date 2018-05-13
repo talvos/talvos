@@ -134,8 +134,8 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   // Create worker threads.
   NumThreads = 1;
   if (!Interactive && Dev.isThreadSafe())
-    NumThreads =
-        getEnvUInt("TALVOS_NUM_WORKERS", std::thread::hardware_concurrency());
+    NumThreads = (uint32_t)getEnvUInt("TALVOS_NUM_WORKERS",
+                                      std::thread::hardware_concurrency());
   std::vector<std::thread> Threads;
   for (unsigned i = 0; i < NumThreads; i++)
     Threads.push_back(std::thread(&PipelineExecutor::runWorker, this));
@@ -410,7 +410,7 @@ bool PipelineExecutor::brk(const std::vector<std::string> &Args)
 
   // Parse target result ID.
   char *Next;
-  uint32_t Id = strtoul(Args[1].c_str() + 1, &Next, 10);
+  uint32_t Id = (uint32_t)strtoul(Args[1].c_str() + 1, &Next, 10);
   if (Args[1][0] != '%' || strlen(Next))
   {
     std::cerr << "Invalid result ID '" << Args[1] << "'" << std::endl;
@@ -449,7 +449,7 @@ bool PipelineExecutor::breakpoint(const std::vector<std::string> &Args)
 
     // Parse breakpoint ID.
     char *Next;
-    uint32_t Id = strtoul(Args[2].c_str(), &Next, 10);
+    uint32_t Id = (uint32_t)strtoul(Args[2].c_str(), &Next, 10);
     if (strlen(Next) || !Breakpoints.count(Id))
     {
       std::cerr << "Invalid breakpoint ID '" << Args[2] << "'" << std::endl;
@@ -509,7 +509,7 @@ bool PipelineExecutor::print(const std::vector<std::string> &Args)
 
   // Parse result ID.
   char *Next;
-  uint32_t Id = strtoul(Args[1].c_str() + 1, &Next, 10);
+  uint32_t Id = (uint32_t)strtoul(Args[1].c_str() + 1, &Next, 10);
   if (Args[1][0] != '%' || strlen(Next))
   {
     std::cerr << "Invalid result ID" << std::endl;
@@ -563,7 +563,7 @@ bool PipelineExecutor::swtch(const std::vector<std::string> &Args)
   for (unsigned i = 1; i < Args.size(); i++)
   {
     char *Next;
-    Id[i - 1] = strtoul(Args[i].c_str(), &Next, 10);
+    Id[i - 1] = (uint32_t)strtoul(Args[i].c_str(), &Next, 10);
     if (strlen(Next))
     {
       std::cerr << "Invalid global ID '" << Args[i] << "'" << std::endl;
