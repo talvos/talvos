@@ -11,11 +11,11 @@
 #include <unordered_set>
 #include <vector>
 
+#include "talvos/Commands.h"
 #include "talvos/DescriptorSet.h"
 
 namespace talvos
 {
-class Command;
 class ComputePipeline;
 class Device;
 class Function;
@@ -51,6 +51,7 @@ struct VkCommandBuffer_T
   VkPipeline PipelineCompute;
   talvos::DescriptorSetMap DescriptorSetsGraphics;
   talvos::DescriptorSetMap DescriptorSetsCompute;
+  talvos::VertexBindingMap VertexBindings;
 
   // TODO: Move this into libtalvos?
   std::vector<talvos::Command *> Commands;

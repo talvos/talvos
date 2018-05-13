@@ -19,6 +19,9 @@ class ComputePipeline;
 class GraphicsPipeline;
 class Object;
 
+/// Mapping from binding indexes to device memory addresses for vertex buffers.
+typedef std::map<uint32_t, uint64_t> VertexBindingMap;
+
 /// This class is a base class for all commands.
 class Command
 {
@@ -89,10 +92,12 @@ public:
   /// \param DSM The descriptor set mapping to use.
   DrawCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
               uint32_t VertexOffset, uint32_t NumInstances,
-              uint32_t InstanceOffset, const DescriptorSetMap &DSM)
+              uint32_t InstanceOffset, const DescriptorSetMap &DSM,
+              const VertexBindingMap &VertexBindings)
       : Command(DRAW), Pipeline(PL), NumVertices(NumVertices),
         VertexOffset(VertexOffset), NumInstances(NumInstances),
-        InstanceOffset(InstanceOffset), DSM(DSM){};
+        InstanceOffset(InstanceOffset), DSM(DSM),
+        VertexBindings(VertexBindings){};
 
   /// Returns the descriptor set map used by the command.
   const DescriptorSetMap &getDescriptorSetMap() const { return DSM; }
@@ -109,6 +114,9 @@ public:
   /// Returns the pipeline this command is invoking.
   const GraphicsPipeline *getPipeline() const { return Pipeline; }
 
+  /// Returns the vertex binding map used by the comand.
+  const VertexBindingMap &getVertexBindings() const { return VertexBindings; }
+
   /// Returns the offset of the first vertex.
   uint32_t getVertexOffset() const { return VertexOffset; }
 
@@ -121,6 +129,8 @@ private:
   uint32_t InstanceOffset; ///< Offset of first instance.
 
   DescriptorSetMap DSM; ///< The descriptor set map to use.
+
+  VertexBindingMap VertexBindings; ///< The vertex buffer bindings to use.
 };
 
 } // namespace talvos

@@ -115,6 +115,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandPool(VkDevice device,
     Cmd->PipelineCompute = nullptr;
     Cmd->DescriptorSetsGraphics.clear();
     Cmd->DescriptorSetsCompute.clear();
+    Cmd->VertexBindings.clear();
     Cmd->Commands.clear();
   }
   return VK_SUCCESS;
