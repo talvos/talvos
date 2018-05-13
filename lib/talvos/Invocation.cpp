@@ -58,15 +58,20 @@ Invocation::Invocation(Device &Dev, const PipelineExecutor &Executor,
   // Set up the local and global ID.
   Dim3 GroupSize = Executor.getCurrentStage().getGroupSize();
   this->LocalId = LocalId;
-  GroupId = Group->getGroupId();
-  GlobalId = LocalId + GroupId * GroupSize;
+  if (Group)
+    GlobalId = LocalId + Group->getGroupId() * GroupSize;
+  else
+    GlobalId = LocalId;
 
   // Clone initial object values.
   Objects = Executor.getInitialObjects();
 
   // Copy workgroup variable pointer values.
-  for (auto V : Group->getVariables())
-    Objects[V.first] = V.second;
+  if (Group)
+  {
+    for (auto V : Group->getVariables())
+      Objects[V.first] = V.second;
+  }
 
   // Set up input variables.
   for (auto V : CurrentModule->getVariables())
@@ -97,9 +102,12 @@ Invocation::Invocation(Device &Dev, const PipelineExecutor &Executor,
       break;
     }
     case SpvBuiltInWorkgroupId:
+    {
+      Dim3 GroupId = Group->getGroupId();
       Sz = sizeof(GroupId);
       Data = (uint8_t *)GroupId.Data;
       break;
+    }
     default:
       std::cerr << "Unimplemented input variable builtin: "
                 << V->getDecoration(SpvDecorationBuiltIn) << std::endl;

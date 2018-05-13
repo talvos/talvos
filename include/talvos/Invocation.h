@@ -207,7 +207,6 @@ private:
 
   Device &Dev;           ///< The device this invocation is executing on.
   Workgroup *Group;      ///< The workgroup this invocation belongs to.
-  Dim3 GroupId;          ///< The WorkgroupId.
   Dim3 LocalId;          ///< The LocalInvocationID.
   Dim3 GlobalId;         ///< The GlobalInvocationID.
   Memory *PrivateMemory; ///< The private memory instance.
