@@ -42,6 +42,7 @@
 #include "talvos/Invocation.h"
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
+#include "talvos/Variable.h"
 #include "talvos/Workgroup.h"
 
 /// The number of lines before and after the current instruction to print.
@@ -100,17 +101,19 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
 
   // Resolve buffer variables.
   const DescriptorSetMap &DSM = Cmd.getDescriptorSetMap();
-  for (BufferVariableMap::value_type V :
-       CurrentStage->getModule()->getBufferVariables())
+  for (auto V : CurrentStage->getModule()->getVariables())
   {
+    if (!V->isBufferVariable())
+      continue;
+
     // Look up variable in descriptor set and set pointer value if present.
-    uint32_t Set = V.second.DescriptorSet;
-    uint32_t Binding = V.second.Binding;
+    uint32_t Set = V->getDecoration(SpvDecorationDescriptorSet);
+    uint32_t Binding = V->getDecoration(SpvDecorationBinding);
     if (!DSM.count(Set))
       continue;
     if (!DSM.at(Set).count(Binding))
       continue;
-    Objects[V.first] = Object(V.second.Ty, DSM.at(Set).at(Binding));
+    Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at(Binding));
   }
 
   assert(PendingGroups.empty());

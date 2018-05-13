@@ -18,6 +18,7 @@
 #include "talvos/Instruction.h"
 #include "talvos/Module.h"
 #include "talvos/Type.h"
+#include "talvos/Variable.h"
 
 namespace talvos
 {
@@ -197,18 +198,28 @@ public:
           ArrayStrides[Target] = Inst->words[Inst->operands[2].offset];
           break;
         case SpvDecorationBinding:
-          Mod->setBinding(Target, Inst->words[Inst->operands[2].offset]);
+        case SpvDecorationDescriptorSet:
+          ObjectDecorations[Target].push_back(
+              {Decoration, Inst->words[Inst->operands[2].offset]});
           break;
         case SpvDecorationBlock:
         case SpvDecorationBufferBlock:
           // TODO: Need to handle these?
           break;
-        case SpvDecorationDescriptorSet:
-          Mod->setDescriptorSet(Target, Inst->words[Inst->operands[2].offset]);
-          break;
         case SpvDecorationBuiltIn:
-          Mod->setBuiltin(Target, Inst->words[Inst->operands[2].offset]);
+        {
+          switch (Inst->words[Inst->operands[2].offset])
+          {
+          case SpvBuiltInWorkgroupSize:
+            Mod->setWorkgroupSizeId(Target);
+            break;
+          default:
+            ObjectDecorations[Target].push_back(
+                {Decoration, Inst->words[Inst->operands[2].offset]});
+            break;
+          }
           break;
+        }
         case SpvDecorationSpecId:
           Mod->addSpecConstant(Inst->words[Inst->operands[2].offset], Target);
           break;
@@ -508,11 +519,24 @@ public:
         Mod->addObject(Inst->result_id, Object(Mod->getType(Inst->type_id)));
         break;
       case SpvOpVariable:
-        Mod->addVariable(Inst->result_id, Mod->getType(Inst->type_id),
-                         ((Inst->num_operands > 3)
-                              ? Inst->words[Inst->operands[3].offset]
-                              : 0));
+      {
+        // Create variable.
+        uint32_t Initializer =
+            ((Inst->num_operands > 3) ? Inst->words[Inst->operands[3].offset]
+                                      : 0);
+        Variable *Var = new Variable(Inst->result_id,
+                                     Mod->getType(Inst->type_id), Initializer);
+
+        // Add decorations if present.
+        if (ObjectDecorations.count(Inst->result_id))
+        {
+          for (auto &VD : ObjectDecorations[Inst->result_id])
+            Var->addDecoration(VD.first, VD.second);
+        }
+
+        Mod->addVariable(Var);
         break;
+      }
       default:
         std::cerr << "Unhandled instruction: "
                   << Instruction::opcodeToString(Inst->opcode) << " ("
@@ -538,6 +562,8 @@ private:
   Instruction *PreviousInstruction;
   std::map<uint32_t, uint32_t> ArrayStrides;
   std::map<std::pair<uint32_t, uint32_t>, uint32_t> MemberOffsets;
+  std::map<uint32_t, std::vector<std::pair<uint32_t, uint32_t>>>
+      ObjectDecorations;
   ///\}
 };
 
@@ -571,6 +597,9 @@ Module::~Module()
 {
   for (auto Op : SpecConstantOps)
     delete Op;
+
+  for (auto Var : Variables)
+    delete Var;
 }
 
 void Module::addEntryPoint(std::string Name, uint32_t Id)
@@ -615,58 +644,6 @@ void Module::addType(uint32_t Id, std::unique_ptr<Type> Ty)
   Types[Id] = std::move(Ty);
 }
 
-void Module::addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer)
-{
-  switch (Ty->getStorageClass())
-  {
-  case SpvStorageClassStorageBuffer:
-  case SpvStorageClassUniform:
-  {
-    BufferVariable V;
-
-    // Variable may already have been created by decorations
-    if (BufferVariables.count(Id))
-      V = BufferVariables[Id];
-
-    V.Ty = Ty;
-
-    BufferVariables[Id] = V;
-    break;
-  }
-  case SpvStorageClassInput:
-  {
-    InputVariable V;
-
-    // Variable must have already been created by a builtin decoration.
-    assert(InputVariables.count(Id));
-    V = InputVariables[Id];
-
-    V.Ty = Ty;
-
-    InputVariables[Id] = V;
-    break;
-  }
-  case SpvStorageClassPrivate:
-  {
-    assert(!PrivateVariables.count(Id));
-    PrivateVariable V;
-    V.Ty = Ty;
-    V.Initializer = Initializer;
-    PrivateVariables[Id] = V;
-    break;
-  }
-  case SpvStorageClassWorkgroup:
-  {
-    assert(!WorkgroupVariables.count(Id));
-    WorkgroupVariables[Id] = Ty;
-    break;
-  }
-  default:
-    std::cout << "Unhandled storage class " << Ty->getStorageClass()
-              << std::endl;
-  }
-}
-
 const Function *Module::getEntryPoint(const std::string &Name) const
 {
   if (!EntryPoints.count(Name))
@@ -689,21 +666,6 @@ const Function *Module::getFunction(uint32_t Id) const
   if (!Functions.count(Id))
     return nullptr;
   return Functions.at(Id).get();
-}
-
-const BufferVariableMap &Module::getBufferVariables() const
-{
-  return BufferVariables;
-}
-
-const InputVariableMap &Module::getInputVariables() const
-{
-  return InputVariables;
-}
-
-const PrivateVariableMap &Module::getPrivateVariables() const
-{
-  return PrivateVariables;
 }
 
 Dim3 Module::getLocalSize(uint32_t Entry) const
@@ -735,11 +697,6 @@ const Type *Module::getType(uint32_t Id) const
   if (Types.count(Id) == 0)
     return nullptr;
   return Types.at(Id).get();
-}
-
-const WorkgroupVariableMap &Module::getWorkgroupVariables() const
-{
-  return WorkgroupVariables;
 }
 
 std::unique_ptr<Module> Module::load(const uint32_t *Words, size_t NumWords)
@@ -808,35 +765,6 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
   std::unique_ptr<Module> M = load(Binary->code, Binary->wordCount);
   spvBinaryDestroy(Binary);
   return M;
-}
-
-void Module::setBinding(uint32_t Variable, uint32_t Binding)
-{
-  BufferVariables[Variable].Binding = Binding;
-}
-
-void Module::setBuiltin(uint32_t Id, uint32_t Builtin)
-{
-  switch (Builtin)
-  {
-  case SpvBuiltInGlobalInvocationId:
-  case SpvBuiltInLocalInvocationId:
-  case SpvBuiltInNumWorkgroups:
-  case SpvBuiltInWorkgroupId:
-    assert(!InputVariables.count(Id));
-    InputVariables[Id].Builtin = Builtin;
-    break;
-  case SpvBuiltInWorkgroupSize:
-    WorkgroupSizeId = Id;
-    break;
-  default:
-    std::cout << "Unhandled builtin decoration: " << Builtin << std::endl;
-  }
-}
-
-void Module::setDescriptorSet(uint32_t Variable, uint32_t DescriptorSet)
-{
-  BufferVariables[Variable].DescriptorSet = DescriptorSet;
 }
 
 } // namespace talvos

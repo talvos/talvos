@@ -25,6 +25,7 @@
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
 #include "talvos/Type.h"
+#include "talvos/Variable.h"
 #include "talvos/Workgroup.h"
 
 /// Get scalar operand at index \p Index with type \p Type.
@@ -68,12 +69,17 @@ Invocation::Invocation(Device &Dev, const PipelineExecutor &Executor,
     Objects[V.first] = V.second;
 
   // Set up input variables.
-  for (InputVariableMap::value_type V : CurrentModule->getInputVariables())
+  for (auto V : CurrentModule->getVariables())
   {
+    const Type *Ty = V->getType();
+    if (Ty->getStorageClass() != SpvStorageClassInput)
+      continue;
+
     // Get initialization data.
     size_t Sz;
     uint8_t *Data;
-    switch (V.second.Builtin)
+    assert(V->hasDecoration(SpvDecorationBuiltIn));
+    switch (V->getDecoration(SpvDecorationBuiltIn))
     {
     case SpvBuiltInGlobalInvocationId:
       Sz = sizeof(GlobalId);
@@ -95,26 +101,30 @@ Invocation::Invocation(Device &Dev, const PipelineExecutor &Executor,
       Data = (uint8_t *)GroupId.Data;
       break;
     default:
-      std::cerr << "Unimplemented input variable builtin: " << V.second.Builtin
-                << std::endl;
+      std::cerr << "Unimplemented input variable builtin: "
+                << V->getDecoration(SpvDecorationBuiltIn) << std::endl;
       abort();
     }
 
     // Perform allocation and initialize it.
     uint64_t Address = PrivateMemory->allocate(Sz);
     PrivateMemory->store(Address, Sz, Data);
-    Objects[V.first] = Object(V.second.Ty, Address);
+    Objects[V->getId()] = Object(Ty, Address);
   }
 
   // Set up private variables.
-  for (PrivateVariableMap::value_type V : CurrentModule->getPrivateVariables())
+  for (auto V : CurrentModule->getVariables())
   {
+    const Type *Ty = V->getType();
+    if (Ty->getStorageClass() != SpvStorageClassPrivate)
+      continue;
+
     // Allocate and initialize variable in private memory.
-    uint64_t NumBytes = V.second.Ty->getElementType()->getSize();
+    uint64_t NumBytes = Ty->getElementType()->getSize();
     uint64_t Address = PrivateMemory->allocate(NumBytes);
-    Objects[V.first] = Object(V.second.Ty, Address);
-    if (V.second.Initializer)
-      Objects[V.second.Initializer].store(*PrivateMemory, Address);
+    Objects[V->getId()] = Object(Ty, Address);
+    if (V->getInitializer())
+      Objects[V->getInitializer()].store(*PrivateMemory, Address);
   }
 
   Dev.reportInvocationBegin(this);
@@ -250,15 +260,23 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   if (!Base)
   {
     // Check for buffer variable matching base pointer ID.
-    for (BufferVariableMap::value_type V : CurrentModule->getBufferVariables())
+    for (auto V : CurrentModule->getVariables())
     {
-      if (V.first == Inst->getOperand(2))
+      if (V->getId() == Inst->getOperand(2))
       {
         // Report error for missing descriptor set entry.
-        std::stringstream Err;
-        Err << "Invalid base pointer for descriptor set entry ("
-            << V.second.DescriptorSet << "," << V.second.Binding << ")";
-        Dev.reportError(Err.str());
+        if (V->isBufferVariable())
+        {
+          std::stringstream Err;
+          Err << "Invalid base pointer for descriptor set entry ("
+              << V->getDecoration(SpvDecorationDescriptorSet) << ","
+              << V->getDecoration(SpvDecorationBinding) << ")";
+          Dev.reportError(Err.str());
+        }
+        else
+        {
+          Dev.reportError("Unresolved OpVariable pointer", true);
+        }
 
         // Set result pointer to null.
         Objects[Id] = Object(Inst->getResultType(), (uint64_t)0);
@@ -845,15 +863,23 @@ void Invocation::executePtrAccessChain(const Instruction *Inst)
   if (!Base)
   {
     // Check for buffer variable matching base pointer ID.
-    for (BufferVariableMap::value_type V : CurrentModule->getBufferVariables())
+    for (auto V : CurrentModule->getVariables())
     {
-      if (V.first == Inst->getOperand(2))
+      if (V->getId() == Inst->getOperand(2))
       {
         // Report error for missing descriptor set entry.
-        std::stringstream Err;
-        Err << "Invalid base pointer for descriptor set entry ("
-            << V.second.DescriptorSet << "," << V.second.Binding << ")";
-        Dev.reportError(Err.str());
+        if (V->isBufferVariable())
+        {
+          std::stringstream Err;
+          Err << "Invalid base pointer for descriptor set entry ("
+              << V->getDecoration(SpvDecorationDescriptorSet) << ","
+              << V->getDecoration(SpvDecorationBinding) << ")";
+          Dev.reportError(Err.str());
+        }
+        else
+        {
+          Dev.reportError("Unresolved OpVariable pointer", true);
+        }
 
         // Set result pointer to null.
         Objects[Id] = Object(Inst->getResultType(), (uint64_t)0);

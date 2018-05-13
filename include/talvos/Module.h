@@ -23,36 +23,10 @@ namespace talvos
 class Function;
 class Instruction;
 class Type;
+class Variable;
 
-/// A variable that represents a global buffer object.
-struct BufferVariable
-{
-  const Type *Ty;         ///< Type of the variable.
-  uint32_t DescriptorSet; ///< Descriptor set for the variable.
-  uint32_t Binding;       ///< Binding for the variable.
-};
-
-/// A variable that represents a pipeline input.
-struct InputVariable
-{
-  const Type *Ty;   ///< Type of the variable.
-  uint32_t Builtin; ///< Builtin identifier.
-};
-
-/// A variable that represents a private memory allocation.
-struct PrivateVariable
-{
-  const Type *Ty;       ///< Type of the variable.
-  uint32_t Initializer; ///< SPIR-V result ID of the variable initializer.
-};
-
-/// Variable mapping types.
-///@{
-typedef std::map<uint32_t, BufferVariable> BufferVariableMap;
-typedef std::map<uint32_t, InputVariable> InputVariableMap;
-typedef std::map<uint32_t, PrivateVariable> PrivateVariableMap;
-typedef std::map<uint32_t, const Type *> WorkgroupVariableMap;
-///@}
+/// A list of module scope variables.
+typedef std::vector<Variable *> VariableList;
 
 /// This class represents a SPIR-V module.
 ///
@@ -96,12 +70,8 @@ public:
   /// Add a type to this module.
   void addType(uint32_t Id, std::unique_ptr<Type> Ty);
 
-  /// Add a variable to this module.
-  /// Set \p Initializer to 0 to leave the variable uninitialized.
-  void addVariable(uint32_t Id, const Type *Ty, uint32_t Initializer);
-
-  /// Returns the buffer variable map.
-  const BufferVariableMap &getBufferVariables() const;
+  /// Add a variable to this module, transferring ownership to the module.
+  void addVariable(Variable *Var) { Variables.push_back(Var); }
 
   /// Get the entry point with the specified name.
   /// Returns nullptr if no entry point called \p Name is found.
@@ -117,9 +87,6 @@ public:
   /// Returns the ID bound of the results in this module.
   uint32_t getIdBound() const { return IdBound; }
 
-  /// Returns the input variable map.
-  const InputVariableMap &getInputVariables() const;
-
   /// Returns the LocalSize execution mode for an entry point.
   /// This will return (1,1,1) if it has not been explicitly set for \p Entry.
   Dim3 getLocalSize(uint32_t Entry) const;
@@ -131,9 +98,6 @@ public:
   /// Returns a list of all result objects in this module.
   const std::vector<Object> &getObjects() const;
 
-  /// Returns the private variable map.
-  const PrivateVariableMap &getPrivateVariables() const;
-
   /// Returns the result ID for the given specialization constant ID.
   /// Returns 0 if no specialization constants with this ID are present.
   uint32_t getSpecConstant(uint32_t SpecId) const;
@@ -144,21 +108,15 @@ public:
   /// Returns the type with the specified ID.
   const Type *getType(uint32_t Id) const;
 
+  /// Returns the list of module scope variables.
+  const VariableList &getVariables() const { return Variables; }
+
   /// Returns the ID of the object decorated with WorkgroupSize.
   /// Returns 0 if no object has been decorated with WorkgroupSize.
   uint32_t getWorkgroupSizeId() const { return WorkgroupSizeId; }
 
-  /// Returns the workgroup variable map.
-  const WorkgroupVariableMap &getWorkgroupVariables() const;
-
-  /// Set the binding decoration of the specified variable ID.
-  void setBinding(uint32_t Variable, uint32_t Binding);
-
-  /// Set the builtin decoration for the specified variable ID.
-  void setBuiltin(uint32_t Id, uint32_t Builtin);
-
-  /// Set the descriptor set decoration for the specified variable ID.
-  void setDescriptorSet(uint32_t Variable, uint32_t DescriptorSet);
+  /// Set the ID of the object decorated with WorkgroupSize.
+  void setWorkgroupSizeId(uint32_t Id) { WorkgroupSizeId = Id; }
 
   /// Create a new module from the supplied SPIR-V binary data.
   /// Returns nullptr on failure.
@@ -194,10 +152,8 @@ private:
   /// The ID of the object decorated with WorkgroupSize.
   uint32_t WorkgroupSizeId;
 
-  BufferVariableMap BufferVariables;       ///< Buffer variables.
-  InputVariableMap InputVariables;         ///< Input variables.
-  PrivateVariableMap PrivateVariables;     ///< Private variables.
-  WorkgroupVariableMap WorkgroupVariables; ///< Workgroup variables.
+  /// Module scope variables.
+  VariableList Variables;
 };
 
 } // namespace talvos

@@ -6,12 +6,15 @@
 /// \file Workgroup.cpp
 /// This file defines the Workgroup class.
 
-#include "talvos/Workgroup.h"
+#include <spirv/unified1/spirv.h>
+
 #include "PipelineExecutor.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
+#include "talvos/Variable.h"
+#include "talvos/Workgroup.h"
 
 namespace talvos
 {
@@ -25,11 +28,15 @@ Workgroup::Workgroup(Device &Dev, const PipelineExecutor &Executor,
   const PipelineStage &Stage = Executor.getCurrentStage();
 
   // Allocate workgroup variables.
-  for (auto V : Stage.getModule()->getWorkgroupVariables())
+  for (auto V : Stage.getModule()->getVariables())
   {
-    size_t NumBytes = V.second->getElementType()->getSize();
+    const Type *Ty = V->getType();
+    if (Ty->getStorageClass() != SpvStorageClassWorkgroup)
+      continue;
+
+    size_t NumBytes = Ty->getElementType()->getSize();
     uint64_t Address = LocalMemory->allocate(NumBytes);
-    Variables.push_back({V.first, Object(V.second, Address)});
+    Variables.push_back({V->getId(), Object(Ty, Address)});
   }
 }
 

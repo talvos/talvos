@@ -83,6 +83,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/PipelineStage.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Plugin.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Type.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Variable.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
 set(TALVOS_SOURCES
     Block.cpp
@@ -100,6 +101,7 @@ set(TALVOS_SOURCES
     PipelineExecutor.h
     PipelineStage.cpp
     Type.cpp
+    Variable.cpp
     Workgroup.cpp
     Utils.cpp
     Utils.h)
