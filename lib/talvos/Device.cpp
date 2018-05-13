@@ -139,8 +139,9 @@ void Device::reportError(const std::string &Error, bool Fatal)
   if (Executor && Executor->isWorkerThread())
   {
     // Show current entry point.
-    const Module *Mod = Executor->getCurrentStage().getModule();
-    uint32_t EntryPointId = Executor->getCurrentStage().getFunction()->getId();
+    const PipelineStage &Stage = Executor->getCurrentStage();
+    const Module *Mod = Stage.getModule();
+    uint32_t EntryPointId = Stage.getFunction()->getId();
     std::cerr << "    Entry point:";
     std::cerr << " %" << EntryPointId;
     std::cerr << " " << Mod->getEntryPointName(EntryPointId);
@@ -151,8 +152,11 @@ void Device::reportError(const std::string &Error, bool Fatal)
     const Workgroup *Group = Executor->getCurrentWorkgroup();
     std::cerr << "    Invocation:";
     std::cerr << " Global" << Inv->getGlobalId();
-    std::cerr << " Local" << Inv->getLocalId();
-    std::cerr << " Group" << Group->getGroupId();
+    if (Group)
+    {
+      std::cerr << " Local" << Inv->getGlobalId() % Stage.getGroupSize();
+      std::cerr << " Group" << Group->getGroupId();
+    }
     std::cerr << std::endl;
 
     // Show current instruction.

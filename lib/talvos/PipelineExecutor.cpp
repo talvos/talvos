@@ -40,6 +40,7 @@
 #include "talvos/Device.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
+#include "talvos/Memory.h"
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
 #include "talvos/Variable.h"
@@ -70,10 +71,57 @@ Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
   // Create invocations for this group.
   Dim3 GroupSize = CurrentStage->getGroupSize();
   for (uint32_t LZ = 0; LZ < GroupSize.Z; LZ++)
+  {
     for (uint32_t LY = 0; LY < GroupSize.Y; LY++)
+    {
       for (uint32_t LX = 0; LX < GroupSize.X; LX++)
+      {
+        Dim3 LocalId(LX, LY, LZ);
+        Dim3 GlobalId = LocalId + GroupId * GroupSize;
+        std::vector<Object> InitialObjects = Objects;
+
+        // Create pipeline memory and populate with builtin variables.
+        std::shared_ptr<Memory> PipelineMemory =
+            std::make_shared<Memory>(Dev, MemoryScope::Invocation);
+        for (auto Var : CurrentStage->getModule()->getVariables())
+        {
+          const Type *Ty = Var->getType();
+          if (Ty->getStorageClass() != SpvStorageClassInput)
+            continue;
+
+          size_t Sz = Ty->getElementType()->getSize();
+          uint64_t Address = PipelineMemory->allocate(Sz);
+          switch (Var->getDecoration(SpvDecorationBuiltIn))
+          {
+          case SpvBuiltInGlobalInvocationId:
+            PipelineMemory->store(Address, Sz, (uint8_t *)GlobalId.Data);
+            break;
+          case SpvBuiltInLocalInvocationId:
+            PipelineMemory->store(Address, Sz, (uint8_t *)LocalId.Data);
+            break;
+          case SpvBuiltInNumWorkgroups:
+            PipelineMemory->store(Address, Sz, (uint8_t *)NumGroups.Data);
+            break;
+          case SpvBuiltInWorkgroupId:
+            PipelineMemory->store(Address, Sz, (uint8_t *)GroupId.Data);
+            break;
+          default:
+            std::cerr << "Unimplemented input variable builtin: "
+                      << Var->getDecoration(SpvDecorationBuiltIn) << std::endl;
+            abort();
+          }
+
+          // Set pointer value.
+          InitialObjects[Var->getId()] = Object(Ty, Address);
+        }
+
+        // Create invocation and add to group.
         Group->addWorkItem(
-            std::make_unique<Invocation>(Dev, *this, Group, Dim3(LX, LY, LZ)));
+            std::make_unique<Invocation>(Dev, *CurrentStage, InitialObjects,
+                                         PipelineMemory, Group, GlobalId));
+      }
+    }
+  }
 
   return Group;
 }

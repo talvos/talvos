@@ -12,7 +12,7 @@ DISPATCH 1 1 1
 
 DUMP INT32 output
 
-# CHECK: Invalid store of 4 bytes to address 0x3000000000010 (Invocation scope)
+# CHECK: Invalid store of 4 bytes to address 0x2000000000010 (Invocation scope)
 # CHECK: Entry point: %1 invocation_store_invalid
 # CHECK: Invocation: Global(0,0,0) Local(0,0,0) Group(0,0,0)
 # CHECK: OpStore

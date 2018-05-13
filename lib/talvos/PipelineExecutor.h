@@ -47,13 +47,6 @@ public:
   /// Returns the current workgroup being executed.
   const Workgroup *getCurrentWorkgroup() const;
 
-  /// Returns the initial object values for each shader invocation.
-  const std::vector<Object> &getInitialObjects() const { return Objects; }
-
-  /// Returns the number of groups in this shader execution.
-  /// This is only valid for compute shaders.
-  Dim3 getNumGroups() const { return NumGroups; }
-
   /// Returns the pipeline stage that is currently being executed.
   const PipelineStage &getCurrentStage() const { return *CurrentStage; }
 

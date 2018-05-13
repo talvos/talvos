@@ -15,7 +15,6 @@
 #include <spirv/unified1/GLSL.std.450.h>
 #include <spirv/unified1/spirv.h>
 
-#include "PipelineExecutor.h"
 #include "talvos/Block.h"
 #include "talvos/Device.h"
 #include "talvos/Function.h"
@@ -40,84 +39,31 @@ Invocation::Invocation(Device &Dev, const std::vector<Object> &InitialObjects)
   CurrentModule = nullptr;
   CurrentInstruction = nullptr;
   PrivateMemory = nullptr;
+  PipelineMemory = nullptr;
   Objects = InitialObjects;
 }
 
-Invocation::Invocation(Device &Dev, const PipelineExecutor &Executor,
-                       Workgroup *Group, Dim3 LocalId)
-    : Dev(Dev)
+Invocation::Invocation(Device &Dev, const PipelineStage &Stage,
+                       const std::vector<Object> &InitialObjects,
+                       std::shared_ptr<Memory> PipelineMemory, Workgroup *Group,
+                       Dim3 GlobalId)
+    : Dev(Dev), Group(Group), GlobalId(GlobalId), PipelineMemory(PipelineMemory)
 {
   PrivateMemory = new Memory(Dev, MemoryScope::Invocation);
-  this->Group = Group;
 
   AtBarrier = false;
-  CurrentModule = Executor.getCurrentStage().getModule();
-  CurrentFunction = Executor.getCurrentStage().getFunction();
+  CurrentModule = Stage.getModule();
+  CurrentFunction = Stage.getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
 
-  // Set up the local and global ID.
-  Dim3 GroupSize = Executor.getCurrentStage().getGroupSize();
-  this->LocalId = LocalId;
-  if (Group)
-    GlobalId = LocalId + Group->getGroupId() * GroupSize;
-  else
-    GlobalId = LocalId;
-
   // Clone initial object values.
-  Objects = Executor.getInitialObjects();
+  Objects = InitialObjects;
 
   // Copy workgroup variable pointer values.
   if (Group)
   {
     for (auto V : Group->getVariables())
       Objects[V.first] = V.second;
-  }
-
-  // Set up input variables.
-  for (auto V : CurrentModule->getVariables())
-  {
-    const Type *Ty = V->getType();
-    if (Ty->getStorageClass() != SpvStorageClassInput)
-      continue;
-
-    // Get initialization data.
-    size_t Sz;
-    uint8_t *Data;
-    assert(V->hasDecoration(SpvDecorationBuiltIn));
-    switch (V->getDecoration(SpvDecorationBuiltIn))
-    {
-    case SpvBuiltInGlobalInvocationId:
-      Sz = sizeof(GlobalId);
-      Data = (uint8_t *)GlobalId.Data;
-      break;
-    case SpvBuiltInLocalInvocationId:
-      Sz = sizeof(LocalId);
-      Data = (uint8_t *)LocalId.Data;
-      break;
-    case SpvBuiltInNumWorkgroups:
-    {
-      Dim3 NumGroups = Executor.getNumGroups();
-      Sz = sizeof(NumGroups);
-      Data = (uint8_t *)NumGroups.Data;
-      break;
-    }
-    case SpvBuiltInWorkgroupId:
-    {
-      Dim3 GroupId = Group->getGroupId();
-      Sz = sizeof(GroupId);
-      Data = (uint8_t *)GroupId.Data;
-      break;
-    }
-    default:
-      std::cerr << "Unimplemented input variable builtin: "
-                << V->getDecoration(SpvDecorationBuiltIn) << std::endl;
-      abort();
-    }
-
-    // Perform allocation and initialize it.
-    uint64_t Address = PrivateMemory->allocate(Sz);
-    PrivateMemory->store(Address, Sz, Data);
-    Objects[V->getId()] = Object(Ty, Address);
   }
 
   // Set up private variables.
@@ -1264,6 +1210,8 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
     assert(Group && "Not executing within a workgroup.");
     return Group->getLocalMemory();
   case SpvStorageClassInput:
+  case SpvStorageClassOutput:
+    return *PipelineMemory;
   case SpvStorageClassFunction:
   case SpvStorageClassPrivate:
     return *PrivateMemory;

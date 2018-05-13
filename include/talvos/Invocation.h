@@ -22,7 +22,7 @@ class Function;
 class Instruction;
 class Memory;
 class Module;
-class PipelineExecutor;
+class PipelineStage;
 class Workgroup;
 
 /// This class represents a single execution of a SPIR-V entry point.
@@ -47,11 +47,13 @@ public:
   /// result objects.
   Invocation(Device &Dev, const std::vector<Object> &InitialObjects);
 
-  /// Create an invocation for \p Command on \p Dev, with specific group and
-  /// local IDs. Global variables with their resolved pointer values are listed
-  /// in \p Variables.
-  Invocation(Device &Dev, const PipelineExecutor &Executor, Workgroup *Group,
-             Dim3 LocalId);
+  /// Create an invocation for \p Stage on \p Dev. Initial result object values
+  /// are provided in \p InitialObjects, and \p PipelineMemory provides storage
+  /// for input and output memory accesses.
+  Invocation(Device &Dev, const PipelineStage &Stage,
+             const std::vector<Object> &InitialObjects,
+             std::shared_ptr<Memory> PipelineMemory, Workgroup *Group,
+             Dim3 GlobalId);
 
   /// Destroy this invocation.
   ~Invocation();
@@ -76,9 +78,6 @@ public:
 
   /// Returns the global invocation ID.
   Dim3 getGlobalId() const { return GlobalId; }
-
-  /// Returns the local invocation ID.
-  Dim3 getLocalId() const { return LocalId; }
 
   /// Returns the object with the specified ID.
   /// Returns a null object if no object with this ID has been defined.
@@ -207,9 +206,11 @@ private:
 
   Device &Dev;           ///< The device this invocation is executing on.
   Workgroup *Group;      ///< The workgroup this invocation belongs to.
-  Dim3 LocalId;          ///< The LocalInvocationID.
   Dim3 GlobalId;         ///< The GlobalInvocationID.
   Memory *PrivateMemory; ///< The private memory instance.
+
+  /// Memory used for input and output storage classes.
+  std::shared_ptr<Memory> PipelineMemory;
 
   /// Temporary OpPhi results to be applied when we reach first non-OpPhi.
   std::vector<std::pair<uint32_t, Object>> PhiTemps;
