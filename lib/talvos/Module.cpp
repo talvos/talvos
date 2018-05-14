@@ -221,6 +221,8 @@ public:
           }
           break;
         }
+        case SpvDecorationRelaxedPrecision:
+          break;
         case SpvDecorationSpecId:
           Mod->addSpecConstant(Inst->words[Inst->operands[2].offset], Target);
           break;
