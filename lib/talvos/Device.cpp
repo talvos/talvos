@@ -220,10 +220,8 @@ void Device::reportMemoryLoad(const Memory *Mem, uint64_t Address,
     if (auto *I = Executor->getCurrentInvocation())
       REPORT(memoryLoad, Mem, Address, NumBytes, I);
   }
-  else
+  else if (Mem->getScope() == MemoryScope::Device)
   {
-    // Must be host accessing device memory.
-    assert(Mem->getScope() == MemoryScope::Device);
     REPORT(hostMemoryLoad, Mem, Address, NumBytes);
   }
 }
@@ -244,10 +242,8 @@ void Device::reportMemoryStore(const Memory *Mem, uint64_t Address,
     if (auto *I = Executor->getCurrentInvocation())
       REPORT(memoryStore, Mem, Address, NumBytes, Data, I);
   }
-  else
+  else if (Mem->getScope() == MemoryScope::Device)
   {
-    // Must be host accessing device memory.
-    assert(Mem->getScope() == MemoryScope::Device);
     REPORT(hostMemoryStore, Mem, Address, NumBytes, Data);
   }
 }
