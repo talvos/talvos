@@ -9,6 +9,8 @@
 #ifndef TALVOS_COMMANDS_H
 #define TALVOS_COMMANDS_H
 
+#include <memory>
+
 #include "talvos/DescriptorSet.h"
 #include "talvos/Dim3.h"
 
