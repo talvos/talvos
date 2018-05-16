@@ -9,6 +9,7 @@
 #include "talvos/Commands.h"
 #include "PipelineExecutor.h"
 #include "talvos/Device.h"
+#include "talvos/RenderPass.h"
 
 namespace talvos
 {
@@ -20,9 +21,13 @@ void Command::run(Device &Dev) const
   Dev.reportCommandComplete(this);
 }
 
+void BeginRenderPassCommand::runImpl(Device &Dev) const { RPI->begin(); }
+
 void DispatchCommand::runImpl(Device &Dev) const
 {
   Dev.getPipelineExecutor().run(*this);
 }
+
+void EndRenderPassCommand::runImpl(Device &Dev) const { RPI->end(); }
 
 } // namespace talvos

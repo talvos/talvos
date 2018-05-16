@@ -19,6 +19,7 @@ class Device;
 class ComputePipeline;
 class GraphicsPipeline;
 class Object;
+class RenderPassInstance;
 
 /// Mapping from binding indexes to device memory addresses for vertex buffers.
 typedef std::map<uint32_t, uint64_t> VertexBindingMap;
@@ -30,8 +31,10 @@ public:
   /// Identifies different Command subclasses.
   enum Type
   {
+    BEGIN_RENDER_PASS,
     DISPATCH,
     DRAW,
+    END_RENDER_PASS,
   };
 
   /// Returns the type of this command.
@@ -48,6 +51,24 @@ protected:
 
   /// Command execution method for subclasses.
   virtual void runImpl(Device &Dev) const = 0;
+};
+
+/// This class encapsulates information about a begin render pass command.
+class BeginRenderPassCommand : public Command
+{
+public:
+  /// Create a new BeginRenderPassCommand for a RenderPassInstance.
+  BeginRenderPassCommand(std::shared_ptr<RenderPassInstance> RPI)
+      : Command(BEGIN_RENDER_PASS), RPI(RPI)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  /// The render pass instance.
+  std::shared_ptr<RenderPassInstance> RPI;
 };
 
 /// This class encapsulates information about a compute kernel launch.
@@ -146,6 +167,24 @@ private:
   DescriptorSetMap DSM; ///< The descriptor set map to use.
 
   VertexBindingMap VertexBindings; ///< The vertex buffer bindings to use.
+};
+
+/// This class encapsulates information about an end render pass command.
+class EndRenderPassCommand : public Command
+{
+public:
+  /// Create a new EndRenderPassCommand for a RenderPassInstance.
+  EndRenderPassCommand(std::shared_ptr<RenderPassInstance> RPI)
+      : Command(END_RENDER_PASS), RPI(RPI)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  /// The render pass instance.
+  std::shared_ptr<RenderPassInstance> RPI;
 };
 
 } // namespace talvos

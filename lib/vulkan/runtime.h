@@ -23,6 +23,7 @@ class Function;
 class GraphicsPipeline;
 class Module;
 class RenderPass;
+class RenderPassInstance;
 }; // namespace talvos
 
 // TODO: Remove this when all functions have implementations.
@@ -54,6 +55,8 @@ struct VkCommandBuffer_T
   talvos::DescriptorSetMap DescriptorSetsGraphics;
   talvos::DescriptorSetMap DescriptorSetsCompute;
   talvos::VertexBindingMap VertexBindings;
+
+  std::shared_ptr<talvos::RenderPassInstance> RenderPassInstance;
 
   // TODO: Move this into libtalvos?
   std::vector<talvos::Command *> Commands;

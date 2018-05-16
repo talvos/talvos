@@ -11,12 +11,35 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBeginRenderPass(
     VkCommandBuffer commandBuffer,
     const VkRenderPassBeginInfo *pRenderPassBegin, VkSubpassContents contents)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  assert(pRenderPassBegin->renderArea.offset.x == 0 &&
+         pRenderPassBegin->renderArea.offset.y == 0 &&
+         pRenderPassBegin->renderArea.extent.width ==
+             pRenderPassBegin->framebuffer->Framebuffer->getWidth() &&
+         pRenderPassBegin->renderArea.extent.height ==
+             pRenderPassBegin->framebuffer->Framebuffer->getHeight() &&
+         "using render area smaller than framebuffer not implemented");
+
+  std::vector<VkClearValue> ClearValues(pRenderPassBegin->pClearValues,
+                                        pRenderPassBegin->pClearValues +
+                                            pRenderPassBegin->clearValueCount);
+
+  // Create the render pass instance object.
+  commandBuffer->RenderPassInstance =
+      std::make_shared<talvos::RenderPassInstance>(
+          *pRenderPassBegin->renderPass->RenderPass,
+          *pRenderPassBegin->framebuffer->Framebuffer, ClearValues);
+
+  // Create the render pass begin command.
+  commandBuffer->Commands.push_back(
+      new talvos::BeginRenderPassCommand(commandBuffer->RenderPassInstance));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdEndRenderPass(VkCommandBuffer commandBuffer)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->Commands.push_back(
+      new talvos::EndRenderPassCommand(commandBuffer->RenderPassInstance));
+
+  commandBuffer->RenderPassInstance.reset();
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdNextSubpass(VkCommandBuffer commandBuffer,
