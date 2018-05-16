@@ -213,7 +213,7 @@ void CommandFile::parseDispatch()
       new talvos::PipelineStage(*Device, Module.get(), Function, SpecConstMap);
   talvos::ComputePipeline Pipeline(Stage);
   talvos::DispatchCommand Command(&Pipeline, GroupCount, DescriptorSets);
-  Device->run(Command);
+  Command.run(*Device);
 }
 
 void CommandFile::parseDump()

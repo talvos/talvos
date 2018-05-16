@@ -27,13 +27,20 @@ class Object;
 class PipelineStage;
 class Workgroup;
 
+/// Only allow Device objects to create PipelineExecutor instances.
+class PipelineExecutorKey
+{
+  friend class Device;
+  PipelineExecutorKey(){};
+};
+
 /// An internal class that handles pipeline execution, including the interactive
 /// debugger.
 class PipelineExecutor
 {
 public:
   /// Create a pipeline executor on \p Dev.
-  PipelineExecutor(Device &Dev);
+  PipelineExecutor(PipelineExecutorKey Key, Device &Dev);
 
   // Do not allow PipelineExecutor objects to be copied.
   ///\{

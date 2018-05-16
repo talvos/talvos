@@ -15,6 +15,7 @@
 namespace talvos
 {
 
+class Device;
 class ComputePipeline;
 class GraphicsPipeline;
 class Object;
@@ -36,11 +37,17 @@ public:
   /// Returns the type of this command.
   Type getType() const { return Ty; }
 
+  /// Run this command on \p Dev.
+  void run(Device &Dev) const;
+
 protected:
   /// Used by subclasses to initialize the command type.
   Command(Type Ty) : Ty(Ty){};
 
   Type Ty; ///< The type of this command.
+
+  /// Command execution method for subclasses.
+  virtual void runImpl(Device &Dev) const = 0;
 };
 
 /// This class encapsulates information about a compute kernel launch.
@@ -67,6 +74,10 @@ public:
 
   /// Returns the pipeline this command is invoking.
   const ComputePipeline *getPipeline() const { return Pipeline; }
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
 
 private:
   const ComputePipeline *Pipeline; ///< The pipeline to use.
@@ -119,6 +130,10 @@ public:
 
   /// Returns the offset of the first vertex.
   uint32_t getVertexOffset() const { return VertexOffset; }
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
 
 private:
   const GraphicsPipeline *Pipeline; ///< The pipeline to use.

@@ -43,8 +43,6 @@ Device::Device()
 {
   GlobalMemory = new Memory(*this, MemoryScope::Device);
 
-  Executor = nullptr;
-
   // Load plugins from dynamic libraries.
   const char *PluginList = getenv("TALVOS_PLUGINS");
   if (PluginList)
@@ -96,6 +94,8 @@ Device::Device()
       Plugins.push_back({Library, P});
     }
   }
+
+  Executor = new PipelineExecutor(PipelineExecutorKey(), *this);
 }
 
 Device::~Device()
@@ -116,6 +116,7 @@ Device::~Device()
 #endif
   }
 
+  delete Executor;
   delete GlobalMemory;
 }
 
@@ -136,7 +137,7 @@ void Device::reportError(const std::string &Error, bool Fatal)
   std::cerr << std::endl;
   std::cerr << Error << std::endl;
 
-  if (Executor && Executor->isWorkerThread())
+  if (Executor->isWorkerThread())
   {
     // Show current entry point.
     const PipelineStage &Stage = Executor->getCurrentStage();
@@ -171,8 +172,7 @@ void Device::reportError(const std::string &Error, bool Fatal)
 
   std::cerr << std::endl;
 
-  if (Executor)
-    Executor->signalError();
+  Executor->signalError();
 
   if (Fatal)
     abort();
@@ -213,7 +213,7 @@ void Device::reportInvocationComplete(const Invocation *Invoc)
 void Device::reportMemoryLoad(const Memory *Mem, uint64_t Address,
                               uint64_t NumBytes)
 {
-  if (Executor && Executor->isWorkerThread())
+  if (Executor->isWorkerThread())
   {
     // TODO: Workgroup/subgroup level accesses?
     // TODO: Workgroup/Invocation scope initialization is not covered.
@@ -237,7 +237,7 @@ void Device::reportMemoryMap(const Memory *Memory, uint64_t Base,
 void Device::reportMemoryStore(const Memory *Mem, uint64_t Address,
                                uint64_t NumBytes, const uint8_t *Data)
 {
-  if (Executor && Executor->isWorkerThread())
+  if (Executor->isWorkerThread())
   {
     // TODO: Workgroup/subgroup level accesses?
     // TODO: Workgroup/Invocation scope initialization is not covered.
@@ -273,21 +273,5 @@ void Device::reportWorkgroupComplete(const Workgroup *Group)
 }
 
 #undef REPORT
-
-void Device::run(const Command &Cmd)
-{
-  // TODO: Mutex instead?
-  assert(Executor == nullptr);
-
-  reportCommandBegin(&Cmd);
-
-  assert(Cmd.getType() == Command::DISPATCH);
-  Executor = new PipelineExecutor(*this);
-  Executor->run((const DispatchCommand &)Cmd);
-  delete Executor;
-  Executor = nullptr;
-
-  reportCommandComplete(&Cmd);
-}
 
 } // namespace talvos

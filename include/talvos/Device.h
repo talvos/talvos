@@ -39,6 +39,9 @@ public:
   /// Get the global memory instance associated with this device.
   Memory &getGlobalMemory() { return *GlobalMemory; }
 
+  /// Returns the PipelineExecutor for this device.
+  PipelineExecutor &getPipelineExecutor() { return *Executor; }
+
   /// Returns true if all of the loaded plugins are thread-safe.
   bool isThreadSafe() const;
 
@@ -66,16 +69,13 @@ public:
   void reportWorkgroupComplete(const Workgroup *Group);
   ///@}
 
-  /// Run \p Cmd to completion.
-  void run(const Command &Cmd);
-
 private:
   Memory *GlobalMemory; ///< The global memory of this device.
 
   /// List of plugins that are currently loaded.
   std::vector<std::pair<void *, Plugin *>> Plugins;
 
-  /// The current pipeline executor instance.
+  /// The pipeline executor instance.
   PipelineExecutor *Executor;
 };
 

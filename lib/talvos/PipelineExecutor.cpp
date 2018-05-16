@@ -60,7 +60,7 @@ static thread_local Invocation *CurrentInvocation;
 uint32_t PipelineExecutor::NextBreakpoint = 1;
 std::map<uint32_t, uint32_t> PipelineExecutor::Breakpoints;
 
-PipelineExecutor::PipelineExecutor(Device &Dev)
+PipelineExecutor::PipelineExecutor(PipelineExecutorKey Key, Device &Dev)
     : Dev(Dev), CurrentStage(nullptr)
 {}
 
@@ -193,6 +193,7 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
     Threads[i].join();
 
   PendingGroups.clear();
+  CurrentStage = nullptr;
 }
 
 void PipelineExecutor::runWorker()

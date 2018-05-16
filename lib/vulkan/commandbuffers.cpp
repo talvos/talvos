@@ -90,7 +90,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
     {
       for (auto Command : pSubmits[s].pCommandBuffers[c]->Commands)
       {
-        queue->Device->Device->run(*Command);
+        Command->run(*queue->Device->Device);
       }
     }
   }

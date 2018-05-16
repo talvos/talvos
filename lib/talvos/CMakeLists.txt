@@ -87,6 +87,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
 set(TALVOS_SOURCES
     Block.cpp
+    Commands.cpp
     ComputePipeline.cpp
     Device.cpp
     Dim3.cpp
