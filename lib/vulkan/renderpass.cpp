@@ -45,7 +45,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdEndRenderPass(VkCommandBuffer commandBuffer)
 VKAPI_ATTR void VKAPI_CALL vkCmdNextSubpass(VkCommandBuffer commandBuffer,
                                             VkSubpassContents contents)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->Commands.push_back(
+      new talvos::NextSubpassCommand(commandBuffer->RenderPassInstance));
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateFramebuffer(

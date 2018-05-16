@@ -35,6 +35,7 @@ public:
     DISPATCH,
     DRAW,
     END_RENDER_PASS,
+    NEXT_SUBPASS,
   };
 
   /// Returns the type of this command.
@@ -176,6 +177,24 @@ public:
   /// Create a new EndRenderPassCommand for a RenderPassInstance.
   EndRenderPassCommand(std::shared_ptr<RenderPassInstance> RPI)
       : Command(END_RENDER_PASS), RPI(RPI)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  /// The render pass instance.
+  std::shared_ptr<RenderPassInstance> RPI;
+};
+
+/// This class encapsulates information about a next subpass command.
+class NextSubpassCommand : public Command
+{
+public:
+  /// Create a new NextSubpassCommand for a RenderPassInstance.
+  NextSubpassCommand(std::shared_ptr<RenderPassInstance> RPI)
+      : Command(NEXT_SUBPASS), RPI(RPI)
   {}
 
 protected:
