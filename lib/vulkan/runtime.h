@@ -21,6 +21,7 @@ class Device;
 class Function;
 class GraphicsPipeline;
 class Module;
+class RenderPass;
 }; // namespace talvos
 
 // TODO: Remove this when all functions have implementations.
@@ -137,6 +138,11 @@ struct VkPipelineLayout_T
 struct VkQueue_T
 {
   VkDevice Device;
+};
+
+struct VkRenderPass_T
+{
+  talvos::RenderPass *RenderPass;
 };
 
 struct VkSemaphore_T
