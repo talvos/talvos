@@ -15,6 +15,38 @@
 
 namespace talvos
 {
+class Device;
+
+/// This class represents a framebuffer that can be used for rendering.
+class Framebuffer
+{
+public:
+  /// Create a framebuffer.
+  Framebuffer(Device &Dev, uint32_t Width, uint32_t Height,
+              const std::vector<uint64_t> &Attachments)
+      : Dev(Dev), Width(Width), Height(Height), Attachments(Attachments){};
+
+  /// Returns the list of attachment memory addresses backing this framebuffer.
+  const std::vector<uint64_t> &getAttachments() const { return Attachments; }
+
+  /// Returns the device that this framebuffer is associated with.
+  Device &getDevice() const { return Dev; }
+
+  /// Returns the height of this framebuffer in pixels.
+  uint32_t getHeight() const { return Height; }
+
+  /// Returns the width of this framebuffer in pixels.
+  uint32_t getWidth() const { return Width; }
+
+private:
+  Device &Dev; ///< The device this framebuffer belongs to.
+
+  uint32_t Width;  ///< The width of the framebuffer in pixels.
+  uint32_t Height; ///< The height of the framebuffer in pixels.
+
+  /// The memory addresses of the framebuffer attachments.
+  std::vector<uint64_t> Attachments;
+};
 
 /// This structure describes the attachments used by a subpass.
 struct Subpass

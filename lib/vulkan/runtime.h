@@ -18,6 +18,7 @@ namespace talvos
 {
 class ComputePipeline;
 class Device;
+class Framebuffer;
 class Function;
 class GraphicsPipeline;
 class Module;
@@ -95,6 +96,11 @@ struct VkEvent_T
 struct VkFence_T
 {
   bool Signaled;
+};
+
+struct VkFramebuffer_T
+{
+  talvos::Framebuffer *Framebuffer;
 };
 
 struct VkImage_T

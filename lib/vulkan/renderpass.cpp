@@ -29,7 +29,17 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateFramebuffer(
     VkDevice device, const VkFramebufferCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkFramebuffer *pFramebuffer)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // Build list of attachment memory addresses.
+  std::vector<uint64_t> Attachments;
+  for (uint32_t i = 0; i < pCreateInfo->attachmentCount; i++)
+    Attachments.push_back(pCreateInfo->pAttachments[i]->Image->Address);
+
+  // Create framebuffer.
+  *pFramebuffer = new VkFramebuffer_T;
+  (*pFramebuffer)->Framebuffer = new talvos::Framebuffer(
+      *device->Device, pCreateInfo->width, pCreateInfo->height, Attachments);
+
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateRenderPass(
@@ -83,7 +93,8 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyFramebuffer(VkDevice device, VkFramebuffer framebuffer,
                      const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete framebuffer->Framebuffer;
+  delete framebuffer;
 }
 
 VKAPI_ATTR void VKAPI_CALL
