@@ -113,7 +113,6 @@ struct VkImage_T
   VkExtent3D Extent;
   uint32_t MipLevels;
   uint32_t ArrayLayers;
-  //VkDeviceSize NumBytes;
   uint64_t Address;
 };
 
