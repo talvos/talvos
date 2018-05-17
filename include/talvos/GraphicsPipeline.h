@@ -9,6 +9,8 @@
 #ifndef TALVOS_GRAPHICSPIPELINE_H
 #define TALVOS_GRAPHICSPIPELINE_H
 
+#include "vulkan/vulkan_core.h"
+
 namespace talvos
 {
 
@@ -20,8 +22,10 @@ class GraphicsPipeline
 public:
   /// Create a graphics pipeline.
   /// Ownership of any non-null stages is transferred to the pipeline.
-  GraphicsPipeline(PipelineStage *VertexStage, PipelineStage *FragmentStage)
-      : VertexStage(VertexStage), FragmentStage(FragmentStage){};
+  GraphicsPipeline(VkPrimitiveTopology Topology, PipelineStage *VertexStage,
+                   PipelineStage *FragmentStage)
+      : Topology(Topology), VertexStage(VertexStage),
+        FragmentStage(FragmentStage){};
 
   /// Destroy the pipeline.
   ~GraphicsPipeline();
@@ -35,10 +39,16 @@ public:
   /// Returns the fragment pipeline stage.
   const PipelineStage *getFragmentStage() const { return FragmentStage; }
 
+  /// Returns the primitive topology used by this pipeline.
+  VkPrimitiveTopology getTopology() const { return Topology; }
+
   /// Returns the vertex pipeline stage.
   const PipelineStage *getVertexStage() const { return VertexStage; }
 
 private:
+  /// The primitive topology used by this pipeline.
+  VkPrimitiveTopology Topology;
+
   /// The vertex pipeline stage in this pipeline.
   PipelineStage *VertexStage;
 

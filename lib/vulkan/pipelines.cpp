@@ -119,8 +119,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
 
     // Create pipeline.
     pPipelines[i] = new VkPipeline_T;
-    pPipelines[i]->GraphicsPipeline =
-        new talvos::GraphicsPipeline(VertexStage, FragmentStage);
+    pPipelines[i]->GraphicsPipeline = new talvos::GraphicsPipeline(
+        pCreateInfos[i].pInputAssemblyState->topology, VertexStage,
+        FragmentStage);
   }
   return VK_SUCCESS;
 }
