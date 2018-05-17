@@ -10,6 +10,9 @@
 #define TALVOS_COMMANDS_H
 
 #include <memory>
+#include <vector>
+
+#include "vulkan/vulkan_core.h"
 
 #include "talvos/DescriptorSet.h"
 #include "talvos/Dim3.h"
@@ -34,6 +37,7 @@ public:
   enum Type
   {
     BEGIN_RENDER_PASS,
+    COPY_IMAGE_TO_BUFFER,
     DISPATCH,
     DRAW,
     END_RENDER_PASS,
@@ -72,6 +76,39 @@ protected:
 private:
   /// The render pass instance.
   std::shared_ptr<RenderPassInstance> RPI;
+};
+
+/// This class encapsulates information about a copy image to buffer command.
+class CopyImageToBufferCommand : public Command
+{
+public:
+  /// Create a new CopyImageToBufferCommand.
+  CopyImageToBufferCommand(uint64_t SrcAddr, uint64_t DstAddr,
+                           VkFormat SrcFormat, VkExtent3D SrcSize,
+                           const std::vector<VkBufferImageCopy> &Regions)
+      : Command(COPY_IMAGE_TO_BUFFER), SrcAddr(SrcAddr), DstAddr(DstAddr),
+        SrcFormat(SrcFormat), SrcSize(SrcSize), Regions(Regions)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  // The memory address of the source image.
+  uint64_t SrcAddr;
+
+  /// The memory address of the destination buffer.
+  uint64_t DstAddr;
+
+  /// The format of the source image.
+  VkFormat SrcFormat;
+
+  /// The dimensions of the source image.
+  VkExtent3D SrcSize;
+
+  /// The regions to copy.
+  std::vector<VkBufferImageCopy> Regions;
 };
 
 /// This class encapsulates information about a compute kernel launch.
