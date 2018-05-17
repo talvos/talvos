@@ -6,6 +6,8 @@
 /// \file Commands.cpp
 /// This file defines the Command base class and its subclasses.
 
+#include <cassert>
+
 #include "talvos/Commands.h"
 #include "PipelineExecutor.h"
 #include "talvos/Device.h"
