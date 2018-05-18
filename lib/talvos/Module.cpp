@@ -298,8 +298,9 @@ public:
         uint32_t Offset = Inst->operands[3].offset;
         switch (Decoration)
         {
+        case SpvDecorationBuiltIn:
         case SpvDecorationOffset:
-          MemberOffsets[{Target, Member}] = Inst->words[Offset];
+          MemberDecorations[{Target, Member}][Decoration] = Inst->words[Offset];
           break;
         default:
           std::cout << "Unhandled decoration " << Decoration << std::endl;
@@ -492,15 +493,16 @@ public:
       case SpvOpTypeStruct:
       {
         StructElementTypeList ElemTypes;
-        uint64_t ElemOffset = 0;
         for (int i = 1; i < Inst->num_operands; i++)
         {
+          // Get member type and decorations if present.
           uint32_t ElemTypeId = Inst->words[Inst->operands[i].offset];
           const Type *ElemType = Mod->getType(ElemTypeId);
-          if (MemberOffsets.count({Inst->result_id, i - 1}))
-            ElemOffset = MemberOffsets.at({Inst->result_id, i - 1});
-          ElemTypes.push_back({ElemType, ElemOffset});
-          ElemOffset += ElemType->getSize();
+          if (MemberDecorations.count({Inst->result_id, i - 1}))
+            ElemTypes.push_back(
+                {ElemType, MemberDecorations[{Inst->result_id, i - 1}]});
+          else
+            ElemTypes.push_back({ElemType, {}});
         }
         Mod->addType(Inst->result_id, Type::getStruct(ElemTypes));
         break;
@@ -564,7 +566,8 @@ private:
   std::unique_ptr<Block> CurrentBlock;
   Instruction *PreviousInstruction;
   std::map<uint32_t, uint32_t> ArrayStrides;
-  std::map<std::pair<uint32_t, uint32_t>, uint32_t> MemberOffsets;
+  std::map<std::pair<uint32_t, uint32_t>, std::map<uint32_t, uint32_t>>
+      MemberDecorations;
   std::map<uint32_t, std::vector<std::pair<uint32_t, uint32_t>>>
       ObjectDecorations;
   ///\}

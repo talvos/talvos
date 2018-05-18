@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iosfwd>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -21,8 +22,9 @@ namespace talvos
 class Type;
 
 /// A list of types used for structure members.
-/// The second element of each pair is the byte offset of the member.
-typedef std::vector<std::pair<const Type *, uint64_t>> StructElementTypeList;
+/// The second value for each entry is a map of decorations for the member.
+typedef std::vector<std::pair<const Type *, std::map<uint32_t, uint32_t>>>
+    StructElementTypeList;
 
 /// This class represents a SPIR-V type.
 ///
@@ -78,6 +80,10 @@ public:
   /// Returns the storage class of this type.
   /// Valid for pointer types.
   uint32_t getStorageClass() const;
+
+  /// Returns the decoration map for the structure member at \p Index.
+  const std::map<uint32_t, uint32_t> &
+  getStructMemberDecorations(uint32_t Index) const;
 
   /// Returns the type ID of this type.
   TypeId getTypeId() const { return Id; }
@@ -181,7 +187,9 @@ private:
   const Type *ElementType; ///< Valid for pointer and composite types.
   uint32_t ElementCount;   ///< Valid for composite types.
   uint32_t ArrayStride;    ///< Valid for array and pointer types.
+
   StructElementTypeList ElementTypes; ///< Valid for struct types.
+  std::vector<size_t> ElementOffsets; ///< Valid for struct types.
 
   const Type *ReturnType;                  ///< Valid for function types.
   std::vector<const Type *> ArgumentTypes; ///< Valid for function types.

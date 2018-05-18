@@ -6,6 +6,8 @@
 /// \file Type.cpp
 /// This file defines the Type class.
 
+#include <spirv/unified1/spirv.h>
+
 #include "talvos/Type.h"
 
 #include <cassert>
@@ -23,7 +25,7 @@ uint32_t Type::getBitWidth() const
 size_t Type::getElementOffset(uint64_t Index) const
 {
   if (Id == STRUCT)
-    return ElementTypes[Index].second;
+    return ElementOffsets[Index];
   else if (Id == VECTOR || Id == MATRIX)
     return ElementType->getSize() * Index;
   else if (Id == ARRAY || Id == POINTER || Id == RUNTIME_ARRAY)
@@ -58,6 +60,12 @@ uint32_t Type::getStorageClass() const
 {
   assert(Id == POINTER);
   return StorageClass;
+}
+
+const std::map<uint32_t, uint32_t> &
+Type::getStructMemberDecorations(uint32_t Index) const
+{
+  return ElementTypes[Index].second;
 }
 
 bool Type::isComposite() const
@@ -231,10 +239,21 @@ std::unique_ptr<Type> Type::getSampler()
 
 std::unique_ptr<Type> Type::getStruct(const StructElementTypeList &ElemTypes)
 {
-  size_t ByteSize = ElemTypes[ElemTypes.size() - 1].second +
-                    ElemTypes[ElemTypes.size() - 1].first->getSize();
-  std::unique_ptr<Type> T(new Type(STRUCT, ByteSize));
+  // Build list of member offsets, using Offset decoration if supplied.
+  size_t CurrentOffset = 0;
+  std::vector<size_t> Offsets(ElemTypes.size());
+  for (size_t i = 0; i < ElemTypes.size(); i++)
+  {
+    if (ElemTypes[i].second.count(SpvDecorationOffset))
+      Offsets[i] = ElemTypes[i].second.at(SpvDecorationOffset);
+    else
+      Offsets[i] = CurrentOffset;
+    CurrentOffset = Offsets[i] + ElemTypes[i].first->getSize();
+  }
+
+  std::unique_ptr<Type> T(new Type(STRUCT, CurrentOffset));
   T->ElementTypes = ElemTypes;
+  T->ElementOffsets = Offsets;
   T->ElementCount = (uint32_t)ElemTypes.size();
   return T;
 }
