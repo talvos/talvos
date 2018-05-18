@@ -102,6 +102,9 @@ public:
   /// Returns the framebuffer associated with this render pass instance.
   const Framebuffer &getFramebuffer() const { return FB; }
 
+  /// Returns the render pass.
+  const RenderPass &getRenderPass() const { return RP; }
+
   /// Returns the index of the current subpass.
   uint32_t getSubpassIndex() const { return SubpassIndex; }
 
