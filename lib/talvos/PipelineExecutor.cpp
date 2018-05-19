@@ -389,11 +389,18 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
           const Object &OutputData =
               Object::load(Output.first->getType()->getElementType(),
                            *PipelineMemory, Output.second.Address);
-          uint8_t Pixel[4] = {
-              (uint8_t)std::round(OutputData.get<float>(0) * 255),
-              (uint8_t)std::round(OutputData.get<float>(1) * 255),
-              (uint8_t)std::round(OutputData.get<float>(2) * 255),
-              (uint8_t)std::round(OutputData.get<float>(3) * 255)};
+          auto convert = [](float v) -> uint8_t {
+            if (v < 0.f)
+              return 0;
+            else if (v >= 1.f)
+              return 255;
+            else
+              return std::round(v * 255);
+          };
+          uint8_t Pixel[4] = {convert(OutputData.get<float>(0)),
+                              convert(OutputData.get<float>(1)),
+                              convert(OutputData.get<float>(2)),
+                              convert(OutputData.get<float>(3))};
 
           // Write pixel color to attachment.
           uint64_t Address = FB.getAttachments()[Ref];
