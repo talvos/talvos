@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <iterator>
 #include <sstream>
@@ -38,11 +39,13 @@
 #include "talvos/Commands.h"
 #include "talvos/ComputePipeline.h"
 #include "talvos/Device.h"
+#include "talvos/GraphicsPipeline.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
+#include "talvos/RenderPass.h"
 #include "talvos/Variable.h"
 #include "talvos/Workgroup.h"
 
@@ -60,12 +63,31 @@ static thread_local Invocation *CurrentInvocation;
 uint32_t PipelineExecutor::NextBreakpoint = 1;
 std::map<uint32_t, uint32_t> PipelineExecutor::Breakpoints;
 
+/// State to be carried through the execution of a render pipeline.
+struct RenderPipelineState
+{
+  /// Built-in objects output by the vertex shading stage.
+  std::vector<std::map<SpvBuiltIn, Object>> BuiltInOutputs;
+
+  /// Location objects output by the vertex shading stage.
+  std::vector<std::map<uint32_t, Object>> LocationOutputs;
+};
+
+// TODO: Define proper Vec2/Vec3/Vec3/Vec<N> classes?
+struct Vec2
+{
+  float X, Y;
+};
+
 PipelineExecutor::PipelineExecutor(PipelineExecutorKey Key, Device &Dev)
-    : Dev(Dev), CurrentStage(nullptr)
+    : Dev(Dev), CurrentCommand(nullptr), CurrentStage(nullptr)
 {}
 
 Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
 {
+  const DispatchCommand *DC = (const DispatchCommand *)CurrentCommand;
+
+  // Create workgroup.
   Workgroup *Group = new Workgroup(Dev, *this, GroupId);
 
   // Create invocations for this group.
@@ -100,7 +122,8 @@ Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
             PipelineMemory->store(Address, Sz, (uint8_t *)LocalId.Data);
             break;
           case SpvBuiltInNumWorkgroups:
-            PipelineMemory->store(Address, Sz, (uint8_t *)NumGroups.Data);
+            PipelineMemory->store(Address, Sz,
+                                  (uint8_t *)DC->getNumGroups().Data);
             break;
           case SpvBuiltInWorkgroupId:
             PipelineMemory->store(Address, Sz, (uint8_t *)GroupId.Data);
@@ -140,10 +163,10 @@ bool PipelineExecutor::isWorkerThread() const { return IsWorkerThread; }
 
 void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
 {
-  assert(CurrentStage == nullptr);
+  assert(CurrentCommand == nullptr);
+  CurrentCommand = &Cmd;
 
   CurrentStage = Cmd.getPipeline()->getStage();
-  NumGroups = Cmd.getNumGroups();
 
   Objects = CurrentStage->getObjects();
 
@@ -172,12 +195,12 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   // TODO: Print info about current command (entry name, dispatch size, etc).
 
   // Build list of pending group IDs.
-  for (uint32_t GZ = 0; GZ < NumGroups.Z; GZ++)
-    for (uint32_t GY = 0; GY < NumGroups.Y; GY++)
-      for (uint32_t GX = 0; GX < NumGroups.X; GX++)
+  for (uint32_t GZ = 0; GZ < Cmd.getNumGroups().Z; GZ++)
+    for (uint32_t GY = 0; GY < Cmd.getNumGroups().Y; GY++)
+      for (uint32_t GX = 0; GX < Cmd.getNumGroups().X; GX++)
         PendingGroups.push_back({GX, GY, GZ});
 
-  NextGroupIndex = 0;
+  NextWorkIndex = 0;
 
   // Create worker threads.
   NumThreads = 1;
@@ -186,17 +209,129 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
                                       std::thread::hardware_concurrency());
   std::vector<std::thread> Threads;
   for (unsigned i = 0; i < NumThreads; i++)
-    Threads.push_back(std::thread(&PipelineExecutor::runWorker, this));
+    Threads.push_back(std::thread(&PipelineExecutor::runComputeWorker, this));
 
   // Wait for workers to complete
   for (unsigned i = 0; i < NumThreads; i++)
     Threads[i].join();
 
   PendingGroups.clear();
-  CurrentStage = nullptr;
+  CurrentCommand = nullptr;
 }
 
-void PipelineExecutor::runWorker()
+void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
+{
+  assert(CurrentCommand == nullptr);
+  CurrentCommand = &Cmd;
+
+  CurrentStage = Cmd.getPipeline()->getVertexStage();
+
+  Objects = CurrentStage->getObjects();
+  // TODO: Handle DescriptorSetMap
+
+  Continue = false;
+  Interactive = checkEnv("TALVOS_INTERACTIVE", false);
+
+  NumThreads = 1;
+  if (!Interactive && Dev.isThreadSafe())
+    NumThreads = (uint32_t)getEnvUInt("TALVOS_NUM_WORKERS",
+                                      std::thread::hardware_concurrency());
+
+  // Set up vertex shader stage pipeline memories.
+  RenderPipelineState State;
+  State.BuiltInOutputs.resize(Cmd.getNumVertices());
+  State.LocationOutputs.resize(Cmd.getNumVertices());
+
+  // Create worker threads for vertex shader.
+  NextWorkIndex = 0;
+  std::vector<std::thread> Threads;
+  for (unsigned i = 0; i < NumThreads; i++)
+    Threads.push_back(
+        std::thread(&PipelineExecutor::runVertexWorker, this, &State));
+
+  // Wait for vertex shader workers to complete.
+  for (unsigned i = 0; i < NumThreads; i++)
+    Threads[i].join();
+
+  CurrentStage = nullptr;
+
+  // TODO: Handle other topologies
+  assert(Cmd.getPipeline()->getTopology() ==
+         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+
+  // TODO: Handle more than one primitive
+  assert(Cmd.getNumVertices() == 3);
+
+  // TODO: Handle instancing
+  assert(Cmd.getNumInstances() == 1);
+
+  // Gather vertex positions for the primitive.
+  Vec2 A, B, C;
+  auto getPosition = [&State](uint32_t v, Vec2 &Pos) {
+    assert(State.BuiltInOutputs[v].count(SpvBuiltInPosition));
+
+    const Object &Position = State.BuiltInOutputs[v][SpvBuiltInPosition];
+    assert(Position.getType()->isVector() &&
+           Position.getType()->getElementType()->isFloat() &&
+           Position.getType()->getElementType()->getBitWidth() == 32 &&
+           "Position built-in type must be float4");
+
+    memcpy(&Pos, Position.getData(), sizeof(Vec2));
+  };
+  getPosition(0, A);
+  getPosition(1, B);
+  getPosition(2, C);
+
+  // Compute axis-aligned bounding box.
+  float XMin = std::fmin(A.X, std::fmin(B.X, C.X));
+  float YMin = std::fmin(A.Y, std::fmin(B.Y, C.Y));
+  float XMax = std::fmax(A.X, std::fmax(B.X, C.X));
+  float YMax = std::fmax(A.Y, std::fmax(B.Y, C.Y));
+
+  const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
+  const Framebuffer &FB = RPI.getFramebuffer();
+
+  // Compute pixel increment values in normalized device coordinates.
+  float XInc = 2.f / FB.getWidth();
+  float YInc = 2.f / FB.getHeight();
+
+  // Loop over pixels in axis-aligned bounding box.
+  for (float y = YMin; y < YMax; y += YInc)
+  {
+    for (float x = XMin; x < XMax; x += XInc)
+    {
+      // Compute barycentric coordinates.
+      float Div = (B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y);
+      float a = (((B.Y - C.Y) * (x - C.X)) + ((C.X - B.X) * (y - C.Y))) / Div;
+      float b = (((C.Y - A.Y) * (x - C.X)) + ((A.X - C.X) * (y - C.Y))) / Div;
+      float c = 1.f - a - b;
+
+      // Check if pixel is inside triangle.
+      if (a >= 0 && b >= 0 && c >= 0)
+      {
+        // TODO: Launch fragment shader to generate actual pixel color
+        uint8_t Pixel[4] = {255, 0, 255, 255};
+
+        // Convert pixel coordinates to framebuffer space.
+        int XF = std::round((FB.getWidth() / 2) * x + (FB.getWidth() / 2));
+        int YF = std::round((FB.getHeight() / 2) * y + (FB.getHeight() / 2));
+
+        // Write pixel color to attachment.
+        // TODO: Handle multiple attachments, and other types of attachment
+        assert(FB.getAttachments().size() == 1);
+        assert(RPI.getRenderPass().getNumAttachments() == 1);
+        assert(RPI.getRenderPass().getSubpass(0).ColorAttachments.size() == 1);
+        uint64_t Address = FB.getAttachments()[0];
+        Address += (XF + YF * FB.getWidth()) * 4;
+        Dev.getGlobalMemory().store(Address, 4, Pixel);
+      }
+    }
+  }
+
+  CurrentCommand = nullptr;
+}
+
+void PipelineExecutor::runComputeWorker()
 {
   IsWorkerThread = true;
   CurrentInvocation = nullptr;
@@ -214,9 +349,9 @@ void PipelineExecutor::runWorker()
       CurrentGroup = RunningGroups.back();
       RunningGroups.pop_back();
     }
-    else if (NextGroupIndex < PendingGroups.size())
+    else if (NextWorkIndex < PendingGroups.size())
     {
-      size_t GroupIndex = NextGroupIndex++;
+      size_t GroupIndex = NextWorkIndex++;
       if (GroupIndex >= PendingGroups.size())
         break;
       CurrentGroup = createWorkgroup(PendingGroups[GroupIndex]);
@@ -288,6 +423,149 @@ void PipelineExecutor::runWorker()
         delete CurrentGroup;
         CurrentGroup = nullptr;
         break;
+      }
+    }
+  }
+}
+
+void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
+{
+  IsWorkerThread = true;
+  CurrentInvocation = nullptr;
+
+  const DrawCommand *DC = (const DrawCommand *)CurrentCommand;
+  const GraphicsPipeline *Pipeline = DC->getPipeline();
+
+  // Loop until all vertices are finished.
+  while (true)
+  {
+    // Get next vertex index.
+    uint32_t VertexIndex = (uint32_t)NextWorkIndex++;
+    if (VertexIndex >= DC->getNumVertices())
+      break;
+
+    std::vector<Object> InitialObjects = Objects;
+
+    // Create pipeline memory and populate with input/output variables.
+    std::shared_ptr<Memory> PipelineMemory =
+        std::make_shared<Memory>(Dev, MemoryScope::Invocation);
+    std::map<const Variable *, uint64_t> OutputAddresses;
+    // TODO: Just consider variables listed in OpEntryPoint
+    for (auto Var : CurrentStage->getModule()->getVariables())
+    {
+      const Type *Ty = Var->getType();
+      if (Ty->getStorageClass() == SpvStorageClassInput)
+      {
+        // Allocate storage for input variable.
+        size_t ElemSize = Ty->getElementType()->getSize();
+        uint64_t Address = PipelineMemory->allocate(ElemSize);
+        InitialObjects[Var->getId()] = Object(Ty, Address);
+
+        // Initialize input variable data.
+        if (Var->hasDecoration(SpvDecorationLocation))
+        {
+          uint32_t Location = Var->getDecoration(SpvDecorationLocation);
+
+          // Get vertex attribute description.
+          auto &Attributes = Pipeline->getVertexAttributeDescriptions();
+          auto Attr = std::find_if(
+              Attributes.begin(), Attributes.end(),
+              [Location](auto Elem) { return Elem.location == Location; });
+          assert(Attr != Attributes.end() && "invalid attribute location");
+
+          // Get vertex binding description.
+          auto &Bindings = Pipeline->getVertexBindingDescriptions();
+          auto Binding =
+              std::find_if(Bindings.begin(), Bindings.end(), [Attr](auto Elem) {
+                return Elem.binding == Attr->binding;
+              });
+          assert(Binding != Bindings.end() && "invalid binding number");
+
+          // TODO: Handle VK_VERTEX_INPUT_RATE_INSTANCE
+          assert(Binding->inputRate == VK_VERTEX_INPUT_RATE_VERTEX);
+
+          // TODO: Handle other formats
+          assert(Attr->format == VK_FORMAT_R32G32B32A32_SFLOAT);
+
+          // Calculate variable address in vertex buffer memory.
+          uint64_t ElemAddr = DC->getVertexBindings().at(Attr->binding);
+          ElemAddr += VertexIndex * Binding->stride;
+          ElemAddr += Attr->offset;
+
+          // Copy variable data to pipeline memory.
+          Memory::copy(Address, *PipelineMemory, ElemAddr,
+                       Dev.getGlobalMemory(), ElemSize);
+        }
+        else
+        {
+          assert(false && "Unhandled input variable type");
+        }
+      }
+      else if (Ty->getStorageClass() == SpvStorageClassOutput)
+      {
+        // Allocate storage for output variable and store address.
+        uint64_t Address =
+            PipelineMemory->allocate(Ty->getElementType()->getSize());
+        InitialObjects[Var->getId()] = Object(Ty, Address);
+        OutputAddresses[Var] = Address;
+      }
+    }
+
+    // Create shader invocation.
+    CurrentInvocation =
+        new Invocation(Dev, *CurrentStage, InitialObjects, PipelineMemory,
+                       nullptr, Dim3(VertexIndex, 0, 0));
+
+    // Run shader invocation to completion.
+    interact();
+    while (CurrentInvocation->getState() == Invocation::READY)
+    {
+      CurrentInvocation->step();
+      interact();
+    }
+
+    delete CurrentInvocation;
+    CurrentInvocation = nullptr;
+
+    // Gather output variables.
+    for (auto Var : CurrentStage->getModule()->getVariables())
+    {
+      if (Var->getType()->getStorageClass() != SpvStorageClassOutput)
+        continue;
+
+      uint64_t BaseAddress = OutputAddresses[Var];
+      const Type *Ty = Var->getType()->getElementType();
+
+      if (Var->hasDecoration(SpvDecorationBuiltIn))
+      {
+        SpvBuiltIn BuiltIn =
+            (SpvBuiltIn)Var->getDecoration(SpvDecorationBuiltIn);
+        State->BuiltInOutputs[VertexIndex][BuiltIn] =
+            Object::load(Ty, *PipelineMemory, BaseAddress);
+      }
+      else if (Var->hasDecoration(SpvDecorationLocation))
+      {
+        // TODO: Handle output variables decorated with Location.
+        std::cerr << "Unimplemented: Output variable with Location decoration"
+                  << std::endl;
+        abort();
+      }
+      else if (Ty->getTypeId() == Type::STRUCT &&
+               Ty->getStructMemberDecorations(0).count(SpvDecorationBuiltIn))
+      {
+        // Load builtin from each structure member.
+        for (uint32_t i = 0; i < Ty->getElementCount(); i++)
+        {
+          uint64_t Address = BaseAddress + Ty->getElementOffset(i);
+          SpvBuiltIn BuiltIn = (SpvBuiltIn)Ty->getStructMemberDecorations(i).at(
+              SpvDecorationBuiltIn);
+          State->BuiltInOutputs[VertexIndex][BuiltIn] =
+              Object::load(Ty->getElementType(i), *PipelineMemory, Address);
+        }
+      }
+      else
+      {
+        assert(false && "Unhandled output variable type");
       }
     }
   }
@@ -600,6 +878,13 @@ bool PipelineExecutor::step(const std::vector<std::string> &Args)
 
 bool PipelineExecutor::swtch(const std::vector<std::string> &Args)
 {
+  // TODO: Implement switch for vertex/fragment shaders.
+  if (CurrentCommand->getType() != Command::DISPATCH)
+  {
+    std::cerr << "switch not implemented for this command." << std::endl;
+    return false;
+  }
+
   // TODO: Allow `select group X Y Z` or `select local X Y Z` as well?
   if (Args.size() < 2 || Args.size() > 4)
   {
@@ -622,6 +907,7 @@ bool PipelineExecutor::swtch(const std::vector<std::string> &Args)
 
   // Check global index is within global bounds.
   Dim3 GroupSize = CurrentStage->getGroupSize();
+  Dim3 NumGroups = ((const DispatchCommand *)CurrentCommand)->getNumGroups();
   if (Id.X >= GroupSize.X * NumGroups.X || Id.Y >= GroupSize.Y * NumGroups.Y ||
       Id.Z >= GroupSize.Z * NumGroups.Z)
   {
@@ -661,7 +947,7 @@ bool PipelineExecutor::swtch(const std::vector<std::string> &Args)
   if (!Group)
   {
     // Check pending groups list.
-    auto PG = std::find(PendingGroups.begin() + NextGroupIndex,
+    auto PG = std::find(PendingGroups.begin() + NextWorkIndex,
                         PendingGroups.end(), GroupId);
     if (PG != PendingGroups.end())
     {

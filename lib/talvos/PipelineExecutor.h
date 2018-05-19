@@ -20,8 +20,10 @@
 namespace talvos
 {
 
+class Command;
 class Device;
 class DispatchCommand;
+class DrawCommand;
 class Invocation;
 class Object;
 class PipelineStage;
@@ -63,15 +65,24 @@ public:
   /// Run a compute dispatch command to completion.
   void run(const DispatchCommand &Cmd);
 
+  /// Run a draw command to completion.
+  void run(const DrawCommand &Cmd);
+
   /// Signal that an error has occurred, breaking the interactive debugger.
   void signalError();
 
 private:
-  /// Worker thread entry point.
-  void runWorker();
+  /// Worker thread entry point for compute shaders.
+  void runComputeWorker();
+
+  /// Worker thread entry point for vertex shaders.
+  void runVertexWorker(struct RenderPipelineState *State);
 
   /// The device this shader is executing on.
   Device &Dev;
+
+  /// The command currently being executed.
+  const Command *CurrentCommand;
 
   /// The pipeline stage currently being executed.
   const PipelineStage *CurrentStage;
@@ -79,14 +90,11 @@ private:
   /// The initial object values for each invocation.
   std::vector<Object> Objects;
 
-  /// The number of groups in this shader execution.
-  Dim3 NumGroups;
-
   /// The number of worker threads currently executing.
   unsigned NumThreads;
 
-  /// Index of next group to run in PendingGroups.
-  std::atomic<size_t> NextGroupIndex;
+  /// Index of next item of work to execute.
+  std::atomic<size_t> NextWorkIndex;
 
   /// Pool of group IDs pending creation and execution.
   std::vector<Dim3> PendingGroups;
