@@ -14,7 +14,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPipelineBarrier(
     uint32_t imageMemoryBarrierCount,
     const VkImageMemoryBarrier *pImageMemoryBarriers)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Need to handle this properly?
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdResetEvent(VkCommandBuffer commandBuffer,
