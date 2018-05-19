@@ -162,14 +162,16 @@ public:
   /// \param NumInstances The number of instances to draw.
   /// \param InstanceOffset The offset of the first instance.
   /// \param DSM The descriptor set mapping to use.
+  /// \param RPI The render pass instance to use;
   DrawCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
               uint32_t VertexOffset, uint32_t NumInstances,
               uint32_t InstanceOffset, const DescriptorSetMap &DSM,
-              const VertexBindingMap &VertexBindings)
+              const VertexBindingMap &VertexBindings,
+              const std::shared_ptr<RenderPassInstance> RPI)
       : Command(DRAW), Pipeline(PL), NumVertices(NumVertices),
         VertexOffset(VertexOffset), NumInstances(NumInstances),
         InstanceOffset(InstanceOffset), DSM(DSM),
-        VertexBindings(VertexBindings){};
+        VertexBindings(VertexBindings), RPI(RPI){};
 
   /// Returns the descriptor set map used by the command.
   const DescriptorSetMap &getDescriptorSetMap() const { return DSM; }
@@ -186,7 +188,10 @@ public:
   /// Returns the pipeline this command is invoking.
   const GraphicsPipeline *getPipeline() const { return Pipeline; }
 
-  /// Returns the vertex binding map used by the comand.
+  /// Returns the render pass instance used by this command.
+  const RenderPassInstance &getRenderPassInstance() const { return *RPI; }
+
+  /// Returns the vertex binding map used by the command.
   const VertexBindingMap &getVertexBindings() const { return VertexBindings; }
 
   /// Returns the offset of the first vertex.
@@ -207,6 +212,8 @@ private:
   DescriptorSetMap DSM; ///< The descriptor set map to use.
 
   VertexBindingMap VertexBindings; ///< The vertex buffer bindings to use.
+
+  const std::shared_ptr<RenderPassInstance> RPI; ///< The render pass instance.
 };
 
 /// This class encapsulates information about an end render pass command.
