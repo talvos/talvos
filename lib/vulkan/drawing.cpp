@@ -5,6 +5,8 @@
 
 #include "runtime.h"
 
+#include "talvos/Commands.h"
+
 VKAPI_ATTR void VKAPI_CALL vkCmdBindIndexBuffer(VkCommandBuffer commandBuffer,
                                                 VkBuffer buffer,
                                                 VkDeviceSize offset,
@@ -19,7 +21,11 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDraw(VkCommandBuffer commandBuffer,
                                      uint32_t firstVertex,
                                      uint32_t firstInstance)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->Commands.push_back(new talvos::DrawCommand(
+      commandBuffer->PipelineGraphics->GraphicsPipeline, vertexCount,
+      firstVertex, instanceCount, firstInstance,
+      commandBuffer->DescriptorSetsGraphics, commandBuffer->VertexBindings,
+      commandBuffer->RenderPassInstance));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexed(
