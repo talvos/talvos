@@ -219,6 +219,7 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   CurrentCommand = nullptr;
 }
 
+// TODO: Refactor this function
 void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
 {
   assert(CurrentCommand == nullptr);
@@ -253,7 +254,10 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   for (unsigned i = 0; i < NumThreads; i++)
     Threads[i].join();
 
-  CurrentStage = nullptr;
+  // Switch to fragment shader for rasterization.
+  CurrentStage = Cmd.getPipeline()->getFragmentStage();
+  assert(CurrentStage && "rendering without fragment shader not implemented");
+  Objects = CurrentStage->getObjects();
 
   // TODO: Handle other topologies
   assert(Cmd.getPipeline()->getTopology() ==
@@ -309,21 +313,93 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
       // Check if pixel is inside triangle.
       if (a >= 0 && b >= 0 && c >= 0)
       {
-        // TODO: Launch fragment shader to generate actual pixel color
-        uint8_t Pixel[4] = {255, 0, 255, 255};
+        struct FragmentOutput
+        {
+          uint64_t Address;
+          uint32_t Location;
+          uint32_t Component;
+        };
+
+        // Create pipeline memory and populate with input/output variables.
+        std::vector<Object> InitialObjects = Objects;
+        std::shared_ptr<Memory> PipelineMemory =
+            std::make_shared<Memory>(Dev, MemoryScope::Invocation);
+        std::map<const Variable *, FragmentOutput> Outputs;
+        // TODO: Just consider variables listed in OpEntryPoint
+        for (auto Var : CurrentStage->getModule()->getVariables())
+        {
+          const Type *Ty = Var->getType();
+          if (Ty->getStorageClass() == SpvStorageClassInput)
+          {
+            assert(false && "fragment shader input variables not implemented");
+          }
+          else if (Ty->getStorageClass() == SpvStorageClassOutput)
+          {
+            // Allocate storage for output variable.
+            uint64_t Address =
+                PipelineMemory->allocate(Ty->getElementType()->getSize());
+            InitialObjects[Var->getId()] = Object(Ty, Address);
+
+            // Store output variable information.
+            assert(Var->hasDecoration(SpvDecorationLocation));
+            uint32_t Location = Var->getDecoration(SpvDecorationLocation);
+            uint32_t Component = 0;
+            if (Var->hasDecoration(SpvDecorationComponent))
+              Var->getDecoration(SpvDecorationComponent);
+            Outputs[Var] = {Address, Location, Component};
+          }
+        }
+
+        // Create fragment shader invocation.
+        CurrentInvocation =
+            new Invocation(Dev, *CurrentStage, InitialObjects, PipelineMemory,
+                           nullptr, Dim3(0, 0, 0));
+
+        // Run shader invocation to completion.
+        interact();
+        while (CurrentInvocation->getState() == Invocation::READY)
+        {
+          CurrentInvocation->step();
+          interact();
+        }
+
+        delete CurrentInvocation;
+        CurrentInvocation = nullptr;
 
         // Convert pixel coordinates to framebuffer space.
         int XF = std::round((FB.getWidth() / 2) * x + (FB.getWidth() / 2));
         int YF = std::round((FB.getHeight() / 2) * y + (FB.getHeight() / 2));
 
-        // Write pixel color to attachment.
-        // TODO: Handle multiple attachments, and other types of attachment
-        assert(FB.getAttachments().size() == 1);
-        assert(RPI.getRenderPass().getNumAttachments() == 1);
-        assert(RPI.getRenderPass().getSubpass(0).ColorAttachments.size() == 1);
-        uint64_t Address = FB.getAttachments()[0];
-        Address += (XF + YF * FB.getWidth()) * 4;
-        Dev.getGlobalMemory().store(Address, 4, Pixel);
+        // Write fragment outputs to color attachments.
+        const RenderPass &RP = RPI.getRenderPass();
+        std::vector<uint32_t> ColorAttachments =
+            RP.getSubpass(0).ColorAttachments;
+        for (auto Output : Outputs)
+        {
+          uint32_t Location = Output.second.Location;
+          assert(Location < ColorAttachments.size());
+
+          uint32_t Ref = ColorAttachments[Location];
+          assert(Ref < RP.getNumAttachments());
+          assert(Ref < FB.getAttachments().size());
+
+          // Get output variable data.
+          // TODO: Handle other formats
+          assert(RP.getAttachment(Ref).format == VK_FORMAT_R8G8B8A8_UNORM);
+          const Object &OutputData =
+              Object::load(Output.first->getType()->getElementType(),
+                           *PipelineMemory, Output.second.Address);
+          uint8_t Pixel[4] = {
+              (uint8_t)std::round(OutputData.get<float>(0) * 255),
+              (uint8_t)std::round(OutputData.get<float>(1) * 255),
+              (uint8_t)std::round(OutputData.get<float>(2) * 255),
+              (uint8_t)std::round(OutputData.get<float>(3) * 255)};
+
+          // Write pixel color to attachment.
+          uint64_t Address = FB.getAttachments()[Ref];
+          Address += (XF + YF * FB.getWidth()) * 4;
+          Dev.getGlobalMemory().store(Address, 4, Pixel);
+        }
       }
     }
   }
