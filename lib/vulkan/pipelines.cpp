@@ -117,11 +117,23 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
       }
     }
 
+    // Set up vertex binding/attribute description lists.
+    const VkPipelineVertexInputStateCreateInfo &VertexInfo =
+        *pCreateInfos[i].pVertexInputState;
+    talvos::VertexBindingDescriptionList VertexBindingDescriptions(
+        VertexInfo.pVertexBindingDescriptions,
+        VertexInfo.pVertexBindingDescriptions +
+            VertexInfo.vertexBindingDescriptionCount);
+    talvos::VertexAttributeDescriptionList VertexAttributeDescriptions(
+        VertexInfo.pVertexAttributeDescriptions,
+        VertexInfo.pVertexAttributeDescriptions +
+            VertexInfo.vertexAttributeDescriptionCount);
+
     // Create pipeline.
     pPipelines[i] = new VkPipeline_T;
     pPipelines[i]->GraphicsPipeline = new talvos::GraphicsPipeline(
         pCreateInfos[i].pInputAssemblyState->topology, VertexStage,
-        FragmentStage);
+        FragmentStage, VertexBindingDescriptions, VertexAttributeDescriptions);
   }
   return VK_SUCCESS;
 }

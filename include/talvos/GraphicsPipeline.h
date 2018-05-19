@@ -9,6 +9,8 @@
 #ifndef TALVOS_GRAPHICSPIPELINE_H
 #define TALVOS_GRAPHICSPIPELINE_H
 
+#include <vector>
+
 #include "vulkan/vulkan_core.h"
 
 namespace talvos
@@ -16,16 +18,29 @@ namespace talvos
 
 class PipelineStage;
 
+/// A list of vertex attribute descriptions.
+typedef std::vector<VkVertexInputAttributeDescription>
+    VertexAttributeDescriptionList;
+
+/// A list of vertex binding descriptions.
+typedef std::vector<VkVertexInputBindingDescription>
+    VertexBindingDescriptionList;
+
 /// This class encapsulates a graphics pipeline.
 class GraphicsPipeline
 {
 public:
   /// Create a graphics pipeline.
   /// Ownership of any non-null stages is transferred to the pipeline.
-  GraphicsPipeline(VkPrimitiveTopology Topology, PipelineStage *VertexStage,
-                   PipelineStage *FragmentStage)
+  GraphicsPipeline(
+      VkPrimitiveTopology Topology, PipelineStage *VertexStage,
+      PipelineStage *FragmentStage,
+      const VertexBindingDescriptionList &VertexBindingDescriptions,
+      const VertexAttributeDescriptionList &VertexAttributeDescriptions)
       : Topology(Topology), VertexStage(VertexStage),
-        FragmentStage(FragmentStage){};
+        FragmentStage(FragmentStage),
+        VertexBindingDescriptions(VertexBindingDescriptions),
+        VertexAttributeDescriptions(VertexAttributeDescriptions){};
 
   /// Destroy the pipeline.
   ~GraphicsPipeline();
@@ -45,6 +60,18 @@ public:
   /// Returns the vertex pipeline stage.
   const PipelineStage *getVertexStage() const { return VertexStage; }
 
+  /// Returns the list of vertex attribute descriptions.
+  const VertexAttributeDescriptionList &getVertexAttributeDescriptions() const
+  {
+    return VertexAttributeDescriptions;
+  }
+
+  /// Returns the list of vertex binding descriptions.
+  const VertexBindingDescriptionList &getVertexBindingDescriptions() const
+  {
+    return VertexBindingDescriptions;
+  }
+
 private:
   /// The primitive topology used by this pipeline.
   VkPrimitiveTopology Topology;
@@ -54,6 +81,12 @@ private:
 
   /// The fragment pipeline stage in this pipeline.
   PipelineStage *FragmentStage;
+
+  /// The vertex binding descriptions.
+  VertexBindingDescriptionList VertexBindingDescriptions;
+
+  /// The vertex attribute descriptions.
+  VertexAttributeDescriptionList VertexAttributeDescriptions;
 };
 
 } // namespace talvos
