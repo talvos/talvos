@@ -257,6 +257,9 @@ public:
           Mod->addLocalSize(Entry,
                             Dim3(Inst->words + Inst->operands[2].offset));
           break;
+        case SpvExecutionModeOriginUpperLeft:
+          // TODO: Store this for later use?
+          break;
         default:
           std::cerr << "Unimplemented execution mode: " << Mode << std::endl;
           abort();
