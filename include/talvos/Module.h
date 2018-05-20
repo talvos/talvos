@@ -26,7 +26,7 @@ class Type;
 class Variable;
 
 /// A list of module scope variables.
-typedef std::vector<Variable *> VariableList;
+typedef std::vector<const Variable *> VariableList;
 
 /// This class represents a SPIR-V module.
 ///
