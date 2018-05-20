@@ -244,7 +244,7 @@ public:
                     << std::endl;
           abort();
         }
-        Mod->addEntryPoint(Name, Id);
+        Mod->addEntryPoint(Name, ExecutionModel, Id);
         break;
       }
       case SpvOpExecutionMode:
@@ -611,10 +611,11 @@ Module::~Module()
     delete Var;
 }
 
-void Module::addEntryPoint(std::string Name, uint32_t Id)
+void Module::addEntryPoint(std::string Name, uint32_t ExecutionModel,
+                           uint32_t Id)
 {
-  assert(EntryPoints.count(Name) == 0);
-  EntryPoints[Name] = Id;
+  assert(EntryPoints.count({Name, ExecutionModel}) == 0);
+  EntryPoints[{Name, ExecutionModel}] = Id;
 }
 
 void Module::addFunction(std::unique_ptr<Function> Func)
@@ -653,11 +654,12 @@ void Module::addType(uint32_t Id, std::unique_ptr<Type> Ty)
   Types[Id] = std::move(Ty);
 }
 
-const Function *Module::getEntryPoint(const std::string &Name) const
+const Function *Module::getEntryPoint(const std::string &Name,
+                                      uint32_t ExecutionModel) const
 {
-  if (!EntryPoints.count(Name))
+  if (!EntryPoints.count({Name, ExecutionModel}))
     return nullptr;
-  return Functions.at(EntryPoints.at(Name)).get();
+  return Functions.at(EntryPoints.at({Name, ExecutionModel})).get();
 }
 
 std::string Module::getEntryPointName(uint32_t Id) const
@@ -665,7 +667,7 @@ std::string Module::getEntryPointName(uint32_t Id) const
   for (auto &E : EntryPoints)
   {
     if (E.second == Id)
-      return E.first;
+      return E.first.first;
   }
   return "";
 }

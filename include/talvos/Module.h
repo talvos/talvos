@@ -48,8 +48,8 @@ public:
   Module &operator=(const Module &) = delete;
   ///\}
 
-  /// Add an entry point with the specified name and function ID.
-  void addEntryPoint(std::string Name, uint32_t Id);
+  /// Add an entry point with the specified name, execution model and result ID.
+  void addEntryPoint(std::string Name, uint32_t ExecutionModel, uint32_t Id);
 
   /// Add a function to this module.
   void addFunction(std::unique_ptr<Function> Func);
@@ -73,9 +73,11 @@ public:
   /// Add a variable to this module, transferring ownership to the module.
   void addVariable(Variable *Var) { Variables.push_back(Var); }
 
-  /// Get the entry point with the specified name.
-  /// Returns nullptr if no entry point called \p Name is found.
-  const Function *getEntryPoint(const std::string &Name) const;
+  /// Get the entry point with the specified name and SPIR-V execution model.
+  /// Returns nullptr if no entry point called \p Name with a matching execution
+  /// model is found.
+  const Function *getEntryPoint(const std::string &Name,
+                                uint32_t ExecutionModel) const;
 
   /// Get the entry point name for the specified function ID.
   /// Returns an empty string if no entry point matching \p Id is found.
@@ -133,8 +135,8 @@ private:
   /// Map from SPIR-V result ID to talvos::Function.
   typedef std::map<uint32_t, std::unique_ptr<Function>> FunctionMap;
 
-  /// Map entry point name to SPIR-V result ID for each function.
-  typedef std::map<std::string, uint32_t> EntryPointMap;
+  /// Map entry point name and execution model to SPIR-V function result ID.
+  typedef std::map<std::pair<std::string, uint32_t>, uint32_t> EntryPointMap;
 
   uint32_t IdBound;                    ///< The ID bound of the module.
   std::vector<Object> Objects;         ///< Constant instruction results.

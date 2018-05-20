@@ -10,6 +10,11 @@
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
 
+// Values match SPIR-V spec.
+#define EXEC_MODEL_VERTEX 0
+#define EXEC_MODEL_FRAGMENT 4
+#define EXEC_MODEL_GLCOMPUTE 5
+
 VKAPI_ATTR void VKAPI_CALL
 vkCmdBindPipeline(VkCommandBuffer commandBuffer,
                   VkPipelineBindPoint pipelineBindPoint, VkPipeline pipeline)
@@ -75,7 +80,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
     // Create pipeline.
     pPipelines[i] = new VkPipeline_T;
     talvos::PipelineStage *Stage = new talvos::PipelineStage(
-        *device->Device, Mod, Mod->getEntryPoint(StageInfo.pName), SM);
+        *device->Device, Mod,
+        Mod->getEntryPoint(StageInfo.pName, EXEC_MODEL_GLCOMPUTE), SM);
     pPipelines[i]->ComputePipeline = new talvos::ComputePipeline(Stage);
   }
   return VK_SUCCESS;
@@ -101,15 +107,17 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
       genSpecConstantMap(Mod, StageInfo.pSpecializationInfo, SM);
 
       // Create pipeline stage.
-      talvos::PipelineStage *Stage = new talvos::PipelineStage(
-          *device->Device, Mod, Mod->getEntryPoint(StageInfo.pName), SM);
       switch (StageInfo.stage)
       {
       case VK_SHADER_STAGE_VERTEX_BIT:
-        VertexStage = Stage;
+        VertexStage = new talvos::PipelineStage(
+            *device->Device, Mod,
+            Mod->getEntryPoint(StageInfo.pName, EXEC_MODEL_VERTEX), SM);
         break;
       case VK_SHADER_STAGE_FRAGMENT_BIT:
-        FragmentStage = Stage;
+        FragmentStage = new talvos::PipelineStage(
+            *device->Device, Mod,
+            Mod->getEntryPoint(StageInfo.pName, EXEC_MODEL_FRAGMENT), SM);
         break;
       default:
         assert(false && "Unhandled pipeline stage");

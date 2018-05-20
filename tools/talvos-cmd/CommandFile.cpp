@@ -14,6 +14,9 @@
 
 using namespace std;
 
+// Values match SPIR-V spec.
+#define EXEC_MODEL_GLCOMPUTE 5
+
 class NotRecognizedException : exception
 {
 };
@@ -278,7 +281,7 @@ void CommandFile::parseEndLoop()
 void CommandFile::parseEntry()
 {
   string Name = get<string>("entry name");
-  Function = Module->getEntryPoint(Name);
+  Function = Module->getEntryPoint(Name, EXEC_MODEL_GLCOMPUTE);
   if (!Function)
     throw "invalid entry point";
 }
