@@ -162,6 +162,7 @@ public:
   /// \param NumInstances The number of instances to draw.
   /// \param InstanceOffset The offset of the first instance.
   /// \param DSM The descriptor set mapping to use.
+  /// \param VertexBindings The vertex buffer bindings to use.
   /// \param RPI The render pass instance to use;
   DrawCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
               uint32_t VertexOffset, uint32_t NumInstances,
