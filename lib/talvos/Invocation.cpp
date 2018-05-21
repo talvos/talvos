@@ -17,6 +17,7 @@
 
 #include "talvos/Block.h"
 #include "talvos/Device.h"
+#include "talvos/EntryPoint.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
@@ -53,7 +54,7 @@ Invocation::Invocation(Device &Dev, const PipelineStage &Stage,
 
   AtBarrier = false;
   CurrentModule = Stage.getModule();
-  CurrentFunction = Stage.getFunction();
+  CurrentFunction = Stage.getEntryPoint()->getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
 
   // Clone initial object values.

@@ -6,6 +6,7 @@
 /// \file Module.cpp
 /// This file defines the Module class.
 
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <iostream>
@@ -14,6 +15,7 @@
 #include <spirv/unified1/spirv.h>
 
 #include "talvos/Block.h"
+#include "talvos/EntryPoint.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Module.h"
@@ -48,6 +50,29 @@ public:
       const Type *FuncType =
           Mod->getType(Inst->words[Inst->operands[3].offset]);
       CurrentFunction = std::make_unique<Function>(Inst->result_id, FuncType);
+
+      // Check if this is an entry point.
+      if (EntryPoints.count(Inst->result_id))
+      {
+        EntryPointSpec EPS = EntryPoints.at(Inst->result_id);
+
+        // Gather the list of input/output variables used by the entry point.
+        VariableList Variables;
+        for (auto V : EPS.Variables)
+        {
+          auto ModVars = Mod->getVariables();
+          auto VarItr =
+              std::find_if(ModVars.begin(), ModVars.end(),
+                           [V](auto Var) { return Var->getId() == V; });
+          assert(VarItr != ModVars.end());
+          Variables.push_back(*VarItr);
+        }
+
+        // Create the entry point and add it to the module.
+        Mod->addEntryPoint(new EntryPoint(Inst->result_id, EPS.Name,
+                                          EPS.ExecutionModel,
+                                          CurrentFunction.get(), Variables));
+      }
     }
     else if (Inst->opcode == SpvOpFunctionEnd)
     {
@@ -244,7 +269,12 @@ public:
                     << std::endl;
           abort();
         }
-        Mod->addEntryPoint(Name, ExecutionModel, Id);
+
+        // Save entry point specification for creation later.
+        std::vector<uint32_t> Variables(Inst->words + Inst->operands[3].offset,
+                                        Inst->words + Inst->operands[3].offset +
+                                            Inst->num_operands - 3);
+        EntryPoints[Id] = {Name, ExecutionModel, Variables};
         break;
       }
       case SpvOpExecutionMode:
@@ -573,6 +603,14 @@ private:
       MemberDecorations;
   std::map<uint32_t, std::vector<std::pair<uint32_t, uint32_t>>>
       ObjectDecorations;
+
+  struct EntryPointSpec
+  {
+    std::string Name;
+    uint32_t ExecutionModel;
+    std::vector<uint32_t> Variables;
+  };
+  std::map<uint32_t, EntryPointSpec> EntryPoints;
   ///\}
 };
 
@@ -607,15 +645,17 @@ Module::~Module()
   for (auto Op : SpecConstantOps)
     delete Op;
 
+  for (auto EP : EntryPoints)
+    delete EP;
+
   for (auto Var : Variables)
     delete Var;
 }
 
-void Module::addEntryPoint(std::string Name, uint32_t ExecutionModel,
-                           uint32_t Id)
+void Module::addEntryPoint(EntryPoint *EP)
 {
-  assert(EntryPoints.count({Name, ExecutionModel}) == 0);
-  EntryPoints[{Name, ExecutionModel}] = Id;
+  assert(getEntryPoint(EP->getName(), EP->getExecutionModel()) == nullptr);
+  EntryPoints.push_back(EP);
 }
 
 void Module::addFunction(std::unique_ptr<Function> Func)
@@ -654,22 +694,15 @@ void Module::addType(uint32_t Id, std::unique_ptr<Type> Ty)
   Types[Id] = std::move(Ty);
 }
 
-const Function *Module::getEntryPoint(const std::string &Name,
-                                      uint32_t ExecutionModel) const
+const EntryPoint *Module::getEntryPoint(const std::string &Name,
+                                        uint32_t ExecutionModel) const
 {
-  if (!EntryPoints.count({Name, ExecutionModel}))
+  auto Itr = std::find_if(EntryPoints.begin(), EntryPoints.end(), [&](auto EP) {
+    return EP->getName() == Name && EP->getExecutionModel() == ExecutionModel;
+  });
+  if (Itr == EntryPoints.end())
     return nullptr;
-  return Functions.at(EntryPoints.at({Name, ExecutionModel})).get();
-}
-
-std::string Module::getEntryPointName(uint32_t Id) const
-{
-  for (auto &E : EntryPoints)
-  {
-    if (E.second == Id)
-      return E.first.first;
-  }
-  return "";
+  return *Itr;
 }
 
 const Function *Module::getFunction(uint32_t Id) const

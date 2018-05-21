@@ -24,6 +24,7 @@
 #include "talvos/Commands.h"
 #include "talvos/ComputePipeline.h"
 #include "talvos/Device.h"
+#include "talvos/EntryPoint.h"
 #include "talvos/Function.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
@@ -141,11 +142,10 @@ void Device::reportError(const std::string &Error, bool Fatal)
   {
     // Show current entry point.
     const PipelineStage &Stage = Executor->getCurrentStage();
-    const Module *Mod = Stage.getModule();
-    uint32_t EntryPointId = Stage.getFunction()->getId();
+    const EntryPoint *EP = Stage.getEntryPoint();
     std::cerr << "    Entry point:";
-    std::cerr << " %" << EntryPointId;
-    std::cerr << " " << Mod->getEntryPointName(EntryPointId);
+    std::cerr << " %" << EP->getId();
+    std::cerr << " " << EP->getName();
     std::cerr << std::endl;
 
     // Show current invocation and group.

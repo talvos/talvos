@@ -204,7 +204,7 @@ void CommandFile::parseDispatch()
 {
   if (!Module)
     throw "DISPATCH reached with no prior MODULE command";
-  if (!Function)
+  if (!Entry)
     throw "DISPATCH reached with no prior ENTRY command";
 
   talvos::Dim3 GroupCount;
@@ -213,7 +213,7 @@ void CommandFile::parseDispatch()
   GroupCount.Z = get<uint32_t>("group count Z");
 
   talvos::PipelineStage *Stage =
-      new talvos::PipelineStage(*Device, Module.get(), Function, SpecConstMap);
+      new talvos::PipelineStage(*Device, Module.get(), Entry, SpecConstMap);
   talvos::ComputePipeline Pipeline(Stage);
   talvos::DispatchCommand Command(&Pipeline, GroupCount, DescriptorSets);
   Command.run(*Device);
@@ -281,8 +281,8 @@ void CommandFile::parseEndLoop()
 void CommandFile::parseEntry()
 {
   string Name = get<string>("entry name");
-  Function = Module->getEntryPoint(Name, EXEC_MODEL_GLCOMPUTE);
-  if (!Function)
+  Entry = Module->getEntryPoint(Name, EXEC_MODEL_GLCOMPUTE);
+  if (!Entry)
     throw "invalid entry point";
 }
 

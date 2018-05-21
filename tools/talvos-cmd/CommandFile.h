@@ -14,7 +14,7 @@
 namespace talvos
 {
 class Device;
-class Function;
+class EntryPoint;
 class Module;
 } // namespace talvos
 
@@ -47,7 +47,7 @@ private:
   std::istream &Stream;
   talvos::Device *Device;
   std::unique_ptr<talvos::Module> Module;
-  const talvos::Function *Function;
+  const talvos::EntryPoint *Entry;
   std::map<std::string, std::pair<uint64_t, uint64_t>> Buffers;
   talvos::SpecConstantMap SpecConstMap;
   talvos::DescriptorSetMap DescriptorSets;

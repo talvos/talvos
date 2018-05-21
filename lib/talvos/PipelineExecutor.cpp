@@ -39,6 +39,7 @@
 #include "talvos/Commands.h"
 #include "talvos/ComputePipeline.h"
 #include "talvos/Device.h"
+#include "talvos/EntryPoint.h"
 #include "talvos/GraphicsPipeline.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
@@ -105,7 +106,7 @@ Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
         // Create pipeline memory and populate with builtin variables.
         std::shared_ptr<Memory> PipelineMemory =
             std::make_shared<Memory>(Dev, MemoryScope::Invocation);
-        for (auto Var : CurrentStage->getModule()->getVariables())
+        for (auto Var : CurrentStage->getEntryPoint()->getVariables())
         {
           const Type *Ty = Var->getType();
           if (Ty->getStorageClass() != SpvStorageClassInput)
@@ -325,8 +326,7 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
         std::shared_ptr<Memory> PipelineMemory =
             std::make_shared<Memory>(Dev, MemoryScope::Invocation);
         std::map<const Variable *, FragmentOutput> Outputs;
-        // TODO: Just consider variables listed in OpEntryPoint
-        for (auto Var : CurrentStage->getModule()->getVariables())
+        for (auto Var : CurrentStage->getEntryPoint()->getVariables())
         {
           const Type *Ty = Var->getType();
           if (Ty->getStorageClass() == SpvStorageClassInput)
@@ -533,8 +533,7 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
     std::shared_ptr<Memory> PipelineMemory =
         std::make_shared<Memory>(Dev, MemoryScope::Invocation);
     std::map<const Variable *, uint64_t> OutputAddresses;
-    // TODO: Just consider variables listed in OpEntryPoint
-    for (auto Var : CurrentStage->getModule()->getVariables())
+    for (auto Var : CurrentStage->getEntryPoint()->getVariables())
     {
       const Type *Ty = Var->getType();
       if (Ty->getStorageClass() == SpvStorageClassInput)

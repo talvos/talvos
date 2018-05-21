@@ -7,22 +7,18 @@
 /// This file defines the PipelineStage class.
 
 #include "talvos/PipelineStage.h"
-#include "talvos/Function.h"
+#include "talvos/EntryPoint.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Module.h"
 
-#include <iostream>
-
 namespace talvos
 {
 
-PipelineStage::PipelineStage(Device &D, const Module *M, const Function *F,
+PipelineStage::PipelineStage(Device &D, const Module *M, const EntryPoint *EP,
                              const SpecConstantMap &SM)
+    : Mod(M), EP(EP)
 {
-  Mod = M;
-  Func = F;
-
   Objects = M->getObjects();
 
   // Update objects with specialization constant values.
@@ -44,7 +40,7 @@ PipelineStage::PipelineStage(Device &D, const Module *M, const Function *F,
 
   // Get local size from execution mode, but override with WorkgroupSize
   // decoration if present.
-  this->GroupSize = M->getLocalSize(F->getId());
+  this->GroupSize = M->getLocalSize(EP->getId());
   if (uint32_t WorkgroupSizeId = M->getWorkgroupSizeId())
   {
     const Object &WorkgroupSize = Objects[WorkgroupSizeId];

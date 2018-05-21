@@ -19,7 +19,7 @@ namespace talvos
 {
 
 class Device;
-class Function;
+class EntryPoint;
 class Module;
 
 /// Mapping from specialization constant ID to Object values.
@@ -35,9 +35,9 @@ public:
   ///
   /// \param D The device on which to create the pipeline stage.
   /// \param M The module containing the entry point to invoke.
-  /// \param F The entry point to invoke.
+  /// \param EP The entry point to invoke.
   /// \param SM A map of specialization constant values.
-  PipelineStage(Device &D, const Module *M, const Function *F,
+  PipelineStage(Device &D, const Module *M, const EntryPoint *EP,
                 const SpecConstantMap &SM = {});
 
   // Do not allow PipelineStage objects to be copied.
@@ -46,8 +46,8 @@ public:
   PipelineStage &operator=(const PipelineStage &) = delete;
   ///\}
 
-  /// Return the function this pipeline stage will invoke.
-  const Function *getFunction() const { return Func; }
+  /// Return the entry point this pipeline stage will invoke.
+  const EntryPoint *getEntryPoint() const { return EP; }
 
   /// Return the workgroup size.
   Dim3 getGroupSize() const { return GroupSize; }
@@ -60,7 +60,7 @@ public:
 
 private:
   const Module *Mod;    ///< The module containing the entry point to invoke.
-  const Function *Func; ///< The entry point to invoke.
+  const EntryPoint *EP; ///< The entry point to invoke.
   Dim3 GroupSize;       ///< The size of each workgroup.
 
   /// The result objects in this pipeline stage, after specialization.

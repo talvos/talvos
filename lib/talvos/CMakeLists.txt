@@ -73,6 +73,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/DescriptorSet.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Dim3.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/EntryPoint.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Function.h
     ${CMAKE_SOURCE_DIR}/include/talvos/GraphicsPipeline.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Instruction.h

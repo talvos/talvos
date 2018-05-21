@@ -20,6 +20,7 @@
 namespace talvos
 {
 
+class EntryPoint;
 class Function;
 class Instruction;
 class Type;
@@ -48,8 +49,10 @@ public:
   Module &operator=(const Module &) = delete;
   ///\}
 
-  /// Add an entry point with the specified name, execution model and result ID.
-  void addEntryPoint(std::string Name, uint32_t ExecutionModel, uint32_t Id);
+  /// Add an entry point to the module.
+  /// The function and input/output variables must all exist in this module.
+  /// Transfers ownership of \p EP to the module.
+  void addEntryPoint(EntryPoint *EP);
 
   /// Add a function to this module.
   void addFunction(std::unique_ptr<Function> Func);
@@ -76,12 +79,8 @@ public:
   /// Get the entry point with the specified name and SPIR-V execution model.
   /// Returns nullptr if no entry point called \p Name with a matching execution
   /// model is found.
-  const Function *getEntryPoint(const std::string &Name,
-                                uint32_t ExecutionModel) const;
-
-  /// Get the entry point name for the specified function ID.
-  /// Returns an empty string if no entry point matching \p Id is found.
-  std::string getEntryPointName(uint32_t Id) const;
+  const EntryPoint *getEntryPoint(const std::string &Name,
+                                  uint32_t ExecutionModel) const;
 
   /// Returns the function with the specified ID.
   const Function *getFunction(uint32_t Id) const;
@@ -135,15 +134,13 @@ private:
   /// Map from SPIR-V result ID to talvos::Function.
   typedef std::map<uint32_t, std::unique_ptr<Function>> FunctionMap;
 
-  /// Map entry point name and execution model to SPIR-V function result ID.
-  typedef std::map<std::pair<std::string, uint32_t>, uint32_t> EntryPointMap;
+  uint32_t IdBound;            ///< The ID bound of the module.
+  std::vector<Object> Objects; ///< Constant instruction results.
+  TypeMap Types;               ///< Type mapping.
 
-  uint32_t IdBound;                    ///< The ID bound of the module.
-  std::vector<Object> Objects;         ///< Constant instruction results.
-  TypeMap Types;                       ///< Type mapping.
-  FunctionMap Functions;               ///< Function mapping.
-  EntryPointMap EntryPoints;           ///< Entry point mapping.
-  std::map<uint32_t, Dim3> LocalSizes; ///< LocalSize execution modes.
+  FunctionMap Functions;                 ///< Function mapping.
+  std::vector<EntryPoint *> EntryPoints; ///< List of entry points.
+  std::map<uint32_t, Dim3> LocalSizes;   ///< LocalSize execution modes.
 
   /// Map specialization constant IDs to result IDs.
   std::map<uint32_t, uint32_t> SpecConstants;
