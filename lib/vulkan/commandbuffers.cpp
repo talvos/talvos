@@ -22,7 +22,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
 VKAPI_ATTR VkResult VKAPI_CALL vkBeginCommandBuffer(
     VkCommandBuffer commandBuffer, const VkCommandBufferBeginInfo *pBeginInfo)
 {
-  // TODO: Implement?
+  commandBuffer->PipelineGraphics = nullptr;
+  commandBuffer->PipelineCompute = nullptr;
+  commandBuffer->DescriptorSetsGraphics.clear();
+  commandBuffer->DescriptorSetsCompute.clear();
+  commandBuffer->VertexBindings.clear();
+  commandBuffer->Commands.clear();
   return VK_SUCCESS;
 }
 
