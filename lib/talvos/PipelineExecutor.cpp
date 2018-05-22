@@ -262,22 +262,28 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   assert(CurrentStage && "rendering without fragment shader not implemented");
   Objects = CurrentStage->getObjects();
 
-  // TODO: Handle other topologies
-  assert(Cmd.getPipeline()->getTopology() ==
-         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-
-  // TODO: Handle more than one primitive
-  assert(Cmd.getNumVertices() == 3);
-
-  // TODO: Handle instancing
-  assert(Cmd.getNumInstances() == 1);
-
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
   const RenderPass &RP = RPI.getRenderPass();
   const Framebuffer &FB = RPI.getFramebuffer();
 
-  rasterizeTriangle(RP, FB, State.VertexOutputs[0], State.VertexOutputs[1],
-                    State.VertexOutputs[2]);
+  // TODO: Handle instancing
+  assert(Cmd.getNumInstances() == 1);
+
+  // TODO: Handle other topologies
+  VkPrimitiveTopology Topology = Cmd.getPipeline()->getTopology();
+  switch (Topology)
+  {
+  case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
+  {
+    for (uint32_t v = 0; v < Cmd.getNumVertices(); v += 3)
+      rasterizeTriangle(RP, FB, State.VertexOutputs[v],
+                        State.VertexOutputs[v + 1], State.VertexOutputs[v + 2]);
+    break;
+  }
+  default:
+    std::cerr << "Unimplemented primitive topology: " << Topology << std::endl;
+    abort();
+  }
 
   CurrentStage = nullptr;
   CurrentCommand = nullptr;
