@@ -280,6 +280,24 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
                         State.VertexOutputs[v + 1], State.VertexOutputs[v + 2]);
     break;
   }
+  case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP:
+  {
+    for (uint32_t v = 2; v < Cmd.getNumVertices(); v++)
+    {
+      const VertexOutput &A = State.VertexOutputs[v - 2];
+      const VertexOutput &B = State.VertexOutputs[v - 1];
+
+      const VertexOutput &C = State.VertexOutputs[v];
+      rasterizeTriangle(RP, FB, A, B, C);
+
+      if (++v >= Cmd.getNumVertices())
+        break;
+
+      const VertexOutput &D = State.VertexOutputs[v];
+      rasterizeTriangle(RP, FB, B, D, C);
+    }
+    break;
+  }
   default:
     std::cerr << "Unimplemented primitive topology: " << Topology << std::endl;
     abort();
