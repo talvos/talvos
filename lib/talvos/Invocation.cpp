@@ -366,7 +366,7 @@ void Invocation::executeControlBarrier(const Instruction *Inst)
 
 void Invocation::executeConvertFToS(const Instruction *Inst)
 {
-  switch (Inst->getResultType()->getBitWidth())
+  switch (Inst->getResultType()->getScalarType()->getBitWidth())
   {
   case 16:
     executeOpFP<1>(Inst, [](auto A) -> int16_t { return (int16_t)A; });
@@ -384,7 +384,7 @@ void Invocation::executeConvertFToS(const Instruction *Inst)
 
 void Invocation::executeConvertFToU(const Instruction *Inst)
 {
-  switch (Inst->getResultType()->getBitWidth())
+  switch (Inst->getResultType()->getScalarType()->getBitWidth())
   {
   case 16:
     executeOpFP<1>(Inst, [](auto A) -> uint16_t { return (uint16_t)A; });
@@ -402,7 +402,7 @@ void Invocation::executeConvertFToU(const Instruction *Inst)
 
 void Invocation::executeConvertSToF(const Instruction *Inst)
 {
-  switch (Inst->getResultType()->getBitWidth())
+  switch (Inst->getResultType()->getScalarType()->getBitWidth())
   {
   case 32:
     executeOpSInt<1>(Inst, [](auto A) -> float { return (float)A; });
@@ -417,7 +417,7 @@ void Invocation::executeConvertSToF(const Instruction *Inst)
 
 void Invocation::executeConvertUToF(const Instruction *Inst)
 {
-  switch (Inst->getResultType()->getBitWidth())
+  switch (Inst->getResultType()->getScalarType()->getBitWidth())
   {
   case 32:
     executeOpUInt<1>(Inst, [](auto A) -> float { return (float)A; });
