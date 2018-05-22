@@ -520,10 +520,9 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
       }
       else if (Var->hasDecoration(SpvDecorationLocation))
       {
-        // TODO: Handle output variables decorated with Location.
-        std::cerr << "Unimplemented: Output variable with Location decoration"
-                  << std::endl;
-        abort();
+        uint32_t Location = Var->getDecoration(SpvDecorationLocation);
+        State->VertexOutputs[VertexIndex].Locations[Location] =
+            Object::load(Ty, *PipelineMemory, BaseAddress);
       }
       else if (Ty->getTypeId() == Type::STRUCT &&
                Ty->getStructMemberDecorations(0).count(SpvDecorationBuiltIn))
