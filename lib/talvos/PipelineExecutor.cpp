@@ -534,6 +534,9 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
                                          const VertexOutput &VB,
                                          const VertexOutput &VC)
 {
+  // TODO: Parallelize rasterization?
+  IsWorkerThread = true;
+
   // Gather vertex positions for the primitive.
   Vec2 A, B, C;
   auto getPosition = [](const VertexOutput &V, Vec2 &Pos) {
