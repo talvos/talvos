@@ -103,6 +103,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
 
     DISPATCH(SpvOpAccessChain, AccessChain);
     DISPATCH(SpvOpAll, All);
+    DISPATCH(SpvOpAny, Any);
     DISPATCH(SpvOpBitcast, Bitcast);
     DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);
     DISPATCH(SpvOpBitwiseOr, BitwiseOr);
@@ -281,6 +282,22 @@ void Invocation::executeAll(const Instruction *Inst)
     if (!Vector.get<bool>(i))
     {
       Result.set(false);
+      break;
+    }
+  }
+  Objects[Id] = Result;
+}
+
+void Invocation::executeAny(const Instruction *Inst)
+{
+  uint32_t Id = Inst->getOperand(1);
+  Object Result(Inst->getResultType(), false);
+  const Object &Vector = Objects[Inst->getOperand(2)];
+  for (uint32_t i = 0; i < Vector.getType()->getElementCount(); i++)
+  {
+    if (Vector.get<bool>(i))
+    {
+      Result.set(true);
       break;
     }
   }

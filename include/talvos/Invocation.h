@@ -93,6 +93,7 @@ public:
   ///@{
   void executeAccessChain(const Instruction *Inst);
   void executeAll(const Instruction *Inst);
+  void executeAny(const Instruction *Inst);
   void executeBitcast(const Instruction *Inst);
   void executeBitwiseAnd(const Instruction *Inst);
   void executeBitwiseOr(const Instruction *Inst);
