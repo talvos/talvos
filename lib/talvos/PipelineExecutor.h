@@ -24,9 +24,11 @@ class Command;
 class Device;
 class DispatchCommand;
 class DrawCommand;
+class Framebuffer;
 class Invocation;
 class Object;
 class PipelineStage;
+class RenderPass;
 class Workgroup;
 
 /// Only allow Device objects to create PipelineExecutor instances.
@@ -72,11 +74,22 @@ public:
   void signalError();
 
 private:
+  /// Internal structure to hold the state of a render pipeline.
+  struct RenderPipelineState;
+
+  /// Internal structure to hold vertex shader output variables.
+  struct VertexOutput;
+
   /// Worker thread entry point for compute shaders.
   void runComputeWorker();
 
   /// Worker thread entry point for vertex shaders.
-  void runVertexWorker(struct RenderPipelineState *State);
+  void runVertexWorker(RenderPipelineState *State);
+
+  /// Helper function to rasterize a triangle primitive.
+  void rasterizeTriangle(const RenderPass &RP, const Framebuffer &FB,
+                         const VertexOutput &VA, const VertexOutput &VB,
+                         const VertexOutput &VC);
 
   /// The device this shader is executing on.
   Device &Dev;

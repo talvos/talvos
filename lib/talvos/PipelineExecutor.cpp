@@ -65,13 +65,17 @@ uint32_t PipelineExecutor::NextBreakpoint = 1;
 std::map<uint32_t, uint32_t> PipelineExecutor::Breakpoints;
 
 /// State to be carried through the execution of a render pipeline.
-struct RenderPipelineState
+struct PipelineExecutor::RenderPipelineState
 {
-  /// Built-in objects output by the vertex shading stage.
-  std::vector<std::map<SpvBuiltIn, Object>> BuiltInOutputs;
+  /// The outputs from the vertex shading stage.
+  std::vector<VertexOutput> VertexOutputs;
+};
 
-  /// Location objects output by the vertex shading stage.
-  std::vector<std::map<uint32_t, Object>> LocationOutputs;
+/// Outputs from a vertex shading stage.
+struct PipelineExecutor::VertexOutput
+{
+  std::map<SpvBuiltIn, Object> BuiltIns; ///< BuiltIn variables.
+  std::map<uint32_t, Object> Locations;  ///< Location variables.
 };
 
 // TODO: Define proper Vec2/Vec3/Vec3/Vec<N> classes?
@@ -220,7 +224,6 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   CurrentCommand = nullptr;
 }
 
-// TODO: Refactor this function
 void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
 {
   assert(CurrentCommand == nullptr);
@@ -241,8 +244,7 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
 
   // Set up vertex shader stage pipeline memories.
   RenderPipelineState State;
-  State.BuiltInOutputs.resize(Cmd.getNumVertices());
-  State.LocationOutputs.resize(Cmd.getNumVertices());
+  State.VertexOutputs.resize(Cmd.getNumVertices());
 
   // Create worker threads for vertex shader.
   NextWorkIndex = 0;
@@ -270,147 +272,14 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   // TODO: Handle instancing
   assert(Cmd.getNumInstances() == 1);
 
-  // Gather vertex positions for the primitive.
-  Vec2 A, B, C;
-  auto getPosition = [&State](uint32_t v, Vec2 &Pos) {
-    assert(State.BuiltInOutputs[v].count(SpvBuiltInPosition));
-
-    const Object &Position = State.BuiltInOutputs[v][SpvBuiltInPosition];
-    assert(Position.getType()->isVector() &&
-           Position.getType()->getElementType()->isFloat() &&
-           Position.getType()->getElementType()->getBitWidth() == 32 &&
-           "Position built-in type must be float4");
-
-    memcpy(&Pos, Position.getData(), sizeof(Vec2));
-  };
-  getPosition(0, A);
-  getPosition(1, B);
-  getPosition(2, C);
-
-  // Compute axis-aligned bounding box.
-  float XMin = std::fmin(A.X, std::fmin(B.X, C.X));
-  float YMin = std::fmin(A.Y, std::fmin(B.Y, C.Y));
-  float XMax = std::fmax(A.X, std::fmax(B.X, C.X));
-  float YMax = std::fmax(A.Y, std::fmax(B.Y, C.Y));
-
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
+  const RenderPass &RP = RPI.getRenderPass();
   const Framebuffer &FB = RPI.getFramebuffer();
 
-  // Compute pixel increment values in normalized device coordinates.
-  float XInc = 2.f / FB.getWidth();
-  float YInc = 2.f / FB.getHeight();
+  rasterizeTriangle(RP, FB, State.VertexOutputs[0], State.VertexOutputs[1],
+                    State.VertexOutputs[2]);
 
-  // Loop over pixels in axis-aligned bounding box.
-  for (float y = YMin; y < YMax; y += YInc)
-  {
-    for (float x = XMin; x < XMax; x += XInc)
-    {
-      // Compute barycentric coordinates.
-      float Div = (B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y);
-      float a = (((B.Y - C.Y) * (x - C.X)) + ((C.X - B.X) * (y - C.Y))) / Div;
-      float b = (((C.Y - A.Y) * (x - C.X)) + ((A.X - C.X) * (y - C.Y))) / Div;
-      float c = 1.f - a - b;
-
-      // Check if pixel is inside triangle.
-      if (a >= 0 && b >= 0 && c >= 0)
-      {
-        struct FragmentOutput
-        {
-          uint64_t Address;
-          uint32_t Location;
-          uint32_t Component;
-        };
-
-        // Create pipeline memory and populate with input/output variables.
-        std::vector<Object> InitialObjects = Objects;
-        std::shared_ptr<Memory> PipelineMemory =
-            std::make_shared<Memory>(Dev, MemoryScope::Invocation);
-        std::map<const Variable *, FragmentOutput> Outputs;
-        for (auto Var : CurrentStage->getEntryPoint()->getVariables())
-        {
-          const Type *Ty = Var->getType();
-          if (Ty->getStorageClass() == SpvStorageClassInput)
-          {
-            assert(false && "fragment shader input variables not implemented");
-          }
-          else if (Ty->getStorageClass() == SpvStorageClassOutput)
-          {
-            // Allocate storage for output variable.
-            uint64_t Address =
-                PipelineMemory->allocate(Ty->getElementType()->getSize());
-            InitialObjects[Var->getId()] = Object(Ty, Address);
-
-            // Store output variable information.
-            assert(Var->hasDecoration(SpvDecorationLocation));
-            uint32_t Location = Var->getDecoration(SpvDecorationLocation);
-            uint32_t Component = 0;
-            if (Var->hasDecoration(SpvDecorationComponent))
-              Var->getDecoration(SpvDecorationComponent);
-            Outputs[Var] = {Address, Location, Component};
-          }
-        }
-
-        // Create fragment shader invocation.
-        CurrentInvocation =
-            new Invocation(Dev, *CurrentStage, InitialObjects, PipelineMemory,
-                           nullptr, Dim3(0, 0, 0));
-
-        // Run shader invocation to completion.
-        interact();
-        while (CurrentInvocation->getState() == Invocation::READY)
-        {
-          CurrentInvocation->step();
-          interact();
-        }
-
-        delete CurrentInvocation;
-        CurrentInvocation = nullptr;
-
-        // Convert pixel coordinates to framebuffer space.
-        int XF = std::round((FB.getWidth() / 2) * x + (FB.getWidth() / 2));
-        int YF = std::round((FB.getHeight() / 2) * y + (FB.getHeight() / 2));
-
-        // Write fragment outputs to color attachments.
-        const RenderPass &RP = RPI.getRenderPass();
-        std::vector<uint32_t> ColorAttachments =
-            RP.getSubpass(0).ColorAttachments;
-        for (auto Output : Outputs)
-        {
-          uint32_t Location = Output.second.Location;
-          assert(Location < ColorAttachments.size());
-
-          uint32_t Ref = ColorAttachments[Location];
-          assert(Ref < RP.getNumAttachments());
-          assert(Ref < FB.getAttachments().size());
-
-          // Get output variable data.
-          // TODO: Handle other formats
-          assert(RP.getAttachment(Ref).format == VK_FORMAT_R8G8B8A8_UNORM);
-          const Object &OutputData =
-              Object::load(Output.first->getType()->getElementType(),
-                           *PipelineMemory, Output.second.Address);
-          auto convert = [](float v) -> uint8_t {
-            if (v < 0.f)
-              return 0;
-            else if (v >= 1.f)
-              return 255;
-            else
-              return std::round(v * 255);
-          };
-          uint8_t Pixel[4] = {convert(OutputData.get<float>(0)),
-                              convert(OutputData.get<float>(1)),
-                              convert(OutputData.get<float>(2)),
-                              convert(OutputData.get<float>(3))};
-
-          // Write pixel color to attachment.
-          uint64_t Address = FB.getAttachments()[Ref];
-          Address += (XF + YF * FB.getWidth()) * 4;
-          Dev.getGlobalMemory().store(Address, 4, Pixel);
-        }
-      }
-    }
-  }
-
+  CurrentStage = nullptr;
   CurrentCommand = nullptr;
 }
 
@@ -622,7 +491,7 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
       {
         SpvBuiltIn BuiltIn =
             (SpvBuiltIn)Var->getDecoration(SpvDecorationBuiltIn);
-        State->BuiltInOutputs[VertexIndex][BuiltIn] =
+        State->VertexOutputs[VertexIndex].BuiltIns[BuiltIn] =
             Object::load(Ty, *PipelineMemory, BaseAddress);
       }
       else if (Var->hasDecoration(SpvDecorationLocation))
@@ -641,13 +510,157 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
           uint64_t Address = BaseAddress + Ty->getElementOffset(i);
           SpvBuiltIn BuiltIn = (SpvBuiltIn)Ty->getStructMemberDecorations(i).at(
               SpvDecorationBuiltIn);
-          State->BuiltInOutputs[VertexIndex][BuiltIn] =
+          State->VertexOutputs[VertexIndex].BuiltIns[BuiltIn] =
               Object::load(Ty->getElementType(i), *PipelineMemory, Address);
         }
       }
       else
       {
         assert(false && "Unhandled output variable type");
+      }
+    }
+  }
+}
+
+void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
+                                         const Framebuffer &FB,
+                                         const VertexOutput &VA,
+                                         const VertexOutput &VB,
+                                         const VertexOutput &VC)
+{
+  // Gather vertex positions for the primitive.
+  Vec2 A, B, C;
+  auto getPosition = [](const VertexOutput &V, Vec2 &Pos) {
+    assert(V.BuiltIns.count(SpvBuiltInPosition));
+
+    const Object &Position = V.BuiltIns.at(SpvBuiltInPosition);
+    assert(Position.getType()->isVector() &&
+           Position.getType()->getElementType()->isFloat() &&
+           Position.getType()->getElementType()->getBitWidth() == 32 &&
+           "Position built-in type must be float4");
+
+    memcpy(&Pos, Position.getData(), sizeof(Vec2));
+  };
+  getPosition(VA, A);
+  getPosition(VB, B);
+  getPosition(VC, C);
+
+  // Compute axis-aligned bounding box.
+  float XMin = std::fmin(A.X, std::fmin(B.X, C.X));
+  float YMin = std::fmin(A.Y, std::fmin(B.Y, C.Y));
+  float XMax = std::fmax(A.X, std::fmax(B.X, C.X));
+  float YMax = std::fmax(A.Y, std::fmax(B.Y, C.Y));
+
+  // Compute pixel increment values in normalized device coordinates.
+  float XInc = 2.f / FB.getWidth();
+  float YInc = 2.f / FB.getHeight();
+
+  // Loop over pixels in axis-aligned bounding box.
+  for (float y = YMin; y < YMax; y += YInc)
+  {
+    for (float x = XMin; x < XMax; x += XInc)
+    {
+      // Compute barycentric coordinates.
+      float Div = (B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y);
+      float a = (((B.Y - C.Y) * (x - C.X)) + ((C.X - B.X) * (y - C.Y))) / Div;
+      float b = (((C.Y - A.Y) * (x - C.X)) + ((A.X - C.X) * (y - C.Y))) / Div;
+      float c = 1.f - a - b;
+
+      // Check if pixel is inside triangle.
+      if (a >= 0 && b >= 0 && c >= 0)
+      {
+        struct FragmentOutput
+        {
+          uint64_t Address;
+          uint32_t Location;
+          uint32_t Component;
+        };
+
+        // Create pipeline memory and populate with input/output variables.
+        std::vector<Object> InitialObjects = Objects;
+        std::shared_ptr<Memory> PipelineMemory =
+            std::make_shared<Memory>(Dev, MemoryScope::Invocation);
+        std::map<const Variable *, FragmentOutput> Outputs;
+        for (auto Var : CurrentStage->getEntryPoint()->getVariables())
+        {
+          const Type *Ty = Var->getType();
+          if (Ty->getStorageClass() == SpvStorageClassInput)
+          {
+            assert(false && "fragment shader input variables not implemented");
+          }
+          else if (Ty->getStorageClass() == SpvStorageClassOutput)
+          {
+            // Allocate storage for output variable.
+            uint64_t Address =
+                PipelineMemory->allocate(Ty->getElementType()->getSize());
+            InitialObjects[Var->getId()] = Object(Ty, Address);
+
+            // Store output variable information.
+            assert(Var->hasDecoration(SpvDecorationLocation));
+            uint32_t Location = Var->getDecoration(SpvDecorationLocation);
+            uint32_t Component = 0;
+            if (Var->hasDecoration(SpvDecorationComponent))
+              Var->getDecoration(SpvDecorationComponent);
+            Outputs[Var] = {Address, Location, Component};
+          }
+        }
+
+        // Create fragment shader invocation.
+        CurrentInvocation =
+            new Invocation(Dev, *CurrentStage, InitialObjects, PipelineMemory,
+                           nullptr, Dim3(0, 0, 0));
+
+        // Run shader invocation to completion.
+        interact();
+        while (CurrentInvocation->getState() == Invocation::READY)
+        {
+          CurrentInvocation->step();
+          interact();
+        }
+
+        delete CurrentInvocation;
+        CurrentInvocation = nullptr;
+
+        // Convert pixel coordinates to framebuffer space.
+        int XF = std::round((FB.getWidth() / 2) * x + (FB.getWidth() / 2));
+        int YF = std::round((FB.getHeight() / 2) * y + (FB.getHeight() / 2));
+
+        // Write fragment outputs to color attachments.
+        std::vector<uint32_t> ColorAttachments =
+            RP.getSubpass(0).ColorAttachments;
+        for (auto Output : Outputs)
+        {
+          uint32_t Location = Output.second.Location;
+          assert(Location < ColorAttachments.size());
+
+          uint32_t Ref = ColorAttachments[Location];
+          assert(Ref < RP.getNumAttachments());
+          assert(Ref < FB.getAttachments().size());
+
+          // Get output variable data.
+          // TODO: Handle other formats
+          assert(RP.getAttachment(Ref).format == VK_FORMAT_R8G8B8A8_UNORM);
+          const Object &OutputData =
+              Object::load(Output.first->getType()->getElementType(),
+                           *PipelineMemory, Output.second.Address);
+          auto convert = [](float v) -> uint8_t {
+            if (v < 0.f)
+              return 0;
+            else if (v >= 1.f)
+              return 255;
+            else
+              return std::round(v * 255);
+          };
+          uint8_t Pixel[4] = {convert(OutputData.get<float>(0)),
+                              convert(OutputData.get<float>(1)),
+                              convert(OutputData.get<float>(2)),
+                              convert(OutputData.get<float>(3))};
+
+          // Write pixel color to attachment.
+          uint64_t Address = FB.getAttachments()[Ref];
+          Address += (XF + YF * FB.getWidth()) * 4;
+          Dev.getGlobalMemory().store(Address, 4, Pixel);
+        }
       }
     }
   }
