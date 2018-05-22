@@ -228,6 +228,9 @@ public:
           ObjectDecorations[Target].push_back(
               {Decoration, Inst->words[Inst->operands[2].offset]});
           break;
+        case SpvDecorationFlat:
+          ObjectDecorations[Target].push_back({Decoration, 0});
+          break;
         case SpvDecorationBlock:
         case SpvDecorationBufferBlock:
           // TODO: Need to handle these?
