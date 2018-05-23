@@ -609,17 +609,57 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
         std::map<const Variable *, FragmentOutput> Outputs;
         for (auto Var : CurrentStage->getEntryPoint()->getVariables())
         {
-          const Type *Ty = Var->getType();
-          if (Ty->getStorageClass() == SpvStorageClassInput)
+          const Type *PtrTy = Var->getType();
+          const Type *VarTy = PtrTy->getElementType();
+          if (PtrTy->getStorageClass() == SpvStorageClassInput)
           {
-            assert(false && "fragment shader input variables not implemented");
+            // Allocate storage for input variable.
+            uint64_t Address = PipelineMemory->allocate(VarTy->getSize());
+            InitialObjects[Var->getId()] = Object(PtrTy, Address);
+
+            // Initialize input variable data.
+            if (Var->hasDecoration(SpvDecorationLocation))
+            {
+              uint32_t Location = Var->getDecoration(SpvDecorationLocation);
+
+              if (Var->hasDecoration(SpvDecorationFlat))
+              {
+                // Use output data from provoking vertex.
+                VA.Locations.at(Location).store(*PipelineMemory, Address);
+              }
+              else
+              {
+                assert(VarTy->isVector() || VarTy->isScalar());
+
+                const Type *ElemTy = VarTy->getScalarType();
+                assert(ElemTy->isFloat() && ElemTy->getBitWidth() == 32);
+
+                // Gather output data from each vertex.
+                const Object &FA = VA.Locations.at(Location);
+                const Object &FB = VB.Locations.at(Location);
+                const Object &FC = VC.Locations.at(Location);
+
+                // Interpolate each element of variable between vertices.
+                for (uint32_t i = 0; i < FA.getType()->getElementCount(); i++)
+                {
+                  // TODO: Handle perspective interpolation if NoPerspective
+                  // decoration is not present
+                  float F = a * FA.get<float>(i) + b * FB.get<float>(i) +
+                            c * FC.get<float>(i);
+                  PipelineMemory->store(Address + i * 4, 4, (uint8_t *)&F);
+                }
+              }
+            }
+            else
+            {
+              assert(false && "Unhandled input variable type");
+            }
           }
-          else if (Ty->getStorageClass() == SpvStorageClassOutput)
+          else if (PtrTy->getStorageClass() == SpvStorageClassOutput)
           {
             // Allocate storage for output variable.
-            uint64_t Address =
-                PipelineMemory->allocate(Ty->getElementType()->getSize());
-            InitialObjects[Var->getId()] = Object(Ty, Address);
+            uint64_t Address = PipelineMemory->allocate(VarTy->getSize());
+            InitialObjects[Var->getId()] = Object(PtrTy, Address);
 
             // Store output variable information.
             assert(Var->hasDecoration(SpvDecorationLocation));
