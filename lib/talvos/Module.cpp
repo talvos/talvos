@@ -229,6 +229,7 @@ public:
               {Decoration, Inst->words[Inst->operands[2].offset]});
           break;
         case SpvDecorationFlat:
+        case SpvDecorationNoPerspective:
           ObjectDecorations[Target].push_back({Decoration, 0});
           break;
         case SpvDecorationBlock:
