@@ -37,6 +37,7 @@ public:
   enum Type
   {
     BEGIN_RENDER_PASS,
+    COPY_BUFFER_TO_IMAGE,
     COPY_IMAGE_TO_BUFFER,
     DISPATCH,
     DRAW,
@@ -76,6 +77,39 @@ protected:
 private:
   /// The render pass instance.
   std::shared_ptr<RenderPassInstance> RPI;
+};
+
+/// This class encapsulates information about a copy buffer to image command.
+class CopyBufferToImageCommand : public Command
+{
+public:
+  /// Create a new CopyBufferToImageCommand.
+  CopyBufferToImageCommand(uint64_t SrcAddr, uint64_t DstAddr,
+                           VkFormat DstFormat, VkExtent3D DstSize,
+                           const std::vector<VkBufferImageCopy> &Regions)
+      : Command(COPY_BUFFER_TO_IMAGE), SrcAddr(SrcAddr), DstAddr(DstAddr),
+        DstFormat(DstFormat), DstSize(DstSize), Regions(Regions)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  // The memory address of the source buffer.
+  uint64_t SrcAddr;
+
+  /// The memory address of the destination image.
+  uint64_t DstAddr;
+
+  /// The format of the destination image.
+  VkFormat DstFormat;
+
+  /// The dimensions of the destination image.
+  VkExtent3D DstSize;
+
+  /// The regions to copy.
+  std::vector<VkBufferImageCopy> Regions;
 };
 
 /// This class encapsulates information about a copy image to buffer command.

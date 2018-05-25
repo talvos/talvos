@@ -28,7 +28,10 @@ vkCmdCopyBufferToImage(VkCommandBuffer commandBuffer, VkBuffer srcBuffer,
                        VkImage dstImage, VkImageLayout dstImageLayout,
                        uint32_t regionCount, const VkBufferImageCopy *pRegions)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  std::vector<VkBufferImageCopy> Regions(pRegions, pRegions + regionCount);
+  commandBuffer->Commands.push_back(new talvos::CopyBufferToImageCommand(
+      srcBuffer->Address, dstImage->Address, dstImage->Format, dstImage->Extent,
+      Regions));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdCopyImage(VkCommandBuffer commandBuffer,
