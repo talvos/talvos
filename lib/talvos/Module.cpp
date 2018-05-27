@@ -340,6 +340,8 @@ public:
         case SpvDecorationOffset:
           MemberDecorations[{Target, Member}][Decoration] = Inst->words[Offset];
           break;
+        case SpvDecorationRelaxedPrecision:
+          break;
         default:
           std::cout << "Unhandled decoration " << Decoration << std::endl;
         }
