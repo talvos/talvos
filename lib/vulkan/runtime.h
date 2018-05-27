@@ -139,6 +139,10 @@ struct VkPipeline_T
   const talvos::GraphicsPipeline *GraphicsPipeline = nullptr;
 };
 
+struct VkPipelineCache_T
+{
+};
+
 struct VkPipelineLayout_T
 {
 };

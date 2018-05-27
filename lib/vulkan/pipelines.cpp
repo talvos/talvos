@@ -150,6 +150,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineCache(
     VkDevice device, const VkPipelineCacheCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkPipelineCache *pPipelineCache)
 {
+  *pPipelineCache = new VkPipelineCache_T;
   return VK_SUCCESS;
 }
 
@@ -168,7 +169,7 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyPipelineCache(VkDevice device, VkPipelineCache pipelineCache,
                        const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  delete pipelineCache;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
