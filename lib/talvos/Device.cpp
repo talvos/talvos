@@ -167,7 +167,7 @@ void Device::reportError(const std::string &Error, bool Fatal)
   }
   else
   {
-    std::cerr << "    <origin unknown>";
+    std::cerr << "    <origin unknown>" << std::endl;
   }
 
   std::cerr << std::endl;
