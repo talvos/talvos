@@ -734,6 +734,9 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
 
 void PipelineExecutor::signalError()
 {
+  if (!IsWorkerThread)
+    return;
+
   // Drop to interactive prompt.
   Continue = false;
   interact();
