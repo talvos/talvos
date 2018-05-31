@@ -38,6 +38,7 @@ struct VkBuffer_T
 {
   VkDeviceSize NumBytes;
   uint64_t Address;
+  VkBufferUsageFlags UsageFlags;
 };
 
 struct VkBufferView_T

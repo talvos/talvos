@@ -57,6 +57,7 @@ vkCreateBuffer(VkDevice device, const VkBufferCreateInfo *pCreateInfo,
   *pBuffer = new VkBuffer_T;
   (*pBuffer)->NumBytes = pCreateInfo->size;
   (*pBuffer)->Address = 0;
+  (*pBuffer)->UsageFlags = pCreateInfo->usage;
   return VK_SUCCESS;
 }
 
@@ -132,8 +133,15 @@ VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements(
     VkDevice device, VkBuffer buffer, VkMemoryRequirements *pMemoryRequirements)
 {
   pMemoryRequirements->size = buffer->NumBytes;
-  pMemoryRequirements->alignment = 1;
   pMemoryRequirements->memoryTypeBits = 0b1;
+
+  if (buffer->UsageFlags &
+      (VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT |
+       VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT |
+       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT))
+    pMemoryRequirements->alignment = 256;
+  else
+    pMemoryRequirements->alignment = 1;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2(
