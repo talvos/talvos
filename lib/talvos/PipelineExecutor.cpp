@@ -471,6 +471,18 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
           Memory::copy(Address, *PipelineMemory, ElemAddr,
                        Dev.getGlobalMemory(), ElemSize);
         }
+        else if (Var->hasDecoration(SpvDecorationBuiltIn))
+        {
+          switch (Var->getDecoration(SpvDecorationBuiltIn))
+          {
+          case SpvBuiltInVertexIndex:
+            assert(ElemSize == 4);
+            PipelineMemory->store(Address, 4, (const uint8_t *)&VertexIndex);
+            break;
+          default:
+            assert(false && "Unhandled vertex input builtin");
+          }
+        }
         else
         {
           assert(false && "Unhandled input variable type");
