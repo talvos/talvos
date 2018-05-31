@@ -121,11 +121,11 @@ public:
 
   /// Create a new module from the supplied SPIR-V binary data.
   /// Returns nullptr on failure.
-  static std::unique_ptr<Module> load(const uint32_t *Words, size_t NumWords);
+  static std::shared_ptr<Module> load(const uint32_t *Words, size_t NumWords);
 
   /// Create a new module from the given SPIR-V binary filename.
   /// Returns nullptr on failure.
-  static std::unique_ptr<Module> load(const std::string &FileName);
+  static std::shared_ptr<Module> load(const std::string &FileName);
 
 private:
   /// Map from SPIR-V result ID to talvos::Type.

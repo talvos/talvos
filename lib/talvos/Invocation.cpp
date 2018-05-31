@@ -37,7 +37,6 @@ namespace talvos
 Invocation::Invocation(Device &Dev, const std::vector<Object> &InitialObjects)
     : Dev(Dev)
 {
-  CurrentModule = nullptr;
   CurrentInstruction = nullptr;
   PrivateMemory = nullptr;
   PipelineMemory = nullptr;

@@ -71,11 +71,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateComputePipelines(
   for (uint32_t i = 0; i < createInfoCount; i++)
   {
     const VkPipelineShaderStageCreateInfo &StageInfo = pCreateInfos[i].stage;
-    const talvos::Module *Mod = StageInfo.module->Module.get();
+    std::shared_ptr<talvos::Module> Mod = StageInfo.module->Module;
 
     // Build specialization constant map.
     talvos::SpecConstantMap SM;
-    genSpecConstantMap(Mod, StageInfo.pSpecializationInfo, SM);
+    genSpecConstantMap(Mod.get(), StageInfo.pSpecializationInfo, SM);
 
     // Create pipeline.
     pPipelines[i] = new VkPipeline_T;
@@ -100,11 +100,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
     {
       const VkPipelineShaderStageCreateInfo &StageInfo =
           pCreateInfos[i].pStages[s];
-      const talvos::Module *Mod = StageInfo.module->Module.get();
+      std::shared_ptr<const talvos::Module> Mod = StageInfo.module->Module;
 
       // Build specialization constant map.
       talvos::SpecConstantMap SM;
-      genSpecConstantMap(Mod, StageInfo.pSpecializationInfo, SM);
+      genSpecConstantMap(Mod.get(), StageInfo.pSpecializationInfo, SM);
 
       // Create pipeline stage.
       switch (StageInfo.stage)

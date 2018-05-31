@@ -182,7 +182,9 @@ public:
   ///@}
 
 private:
-  const Module *CurrentModule;           ///< The current module.
+  /// The current module.
+  std::shared_ptr<const Module> CurrentModule;
+
   const Function *CurrentFunction;       ///< The current function.
   const Instruction *CurrentInstruction; ///< The current instruction.
   uint32_t CurrentBlock;                 ///< The current block.

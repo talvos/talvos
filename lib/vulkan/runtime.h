@@ -164,5 +164,5 @@ struct VkSemaphore_T
 
 struct VkShaderModule_T
 {
-  std::unique_ptr<talvos::Module> Module;
+  std::shared_ptr<talvos::Module> Module;
 };

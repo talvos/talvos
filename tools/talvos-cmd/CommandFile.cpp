@@ -213,7 +213,7 @@ void CommandFile::parseDispatch()
   GroupCount.Z = get<uint32_t>("group count Z");
 
   talvos::PipelineStage *Stage =
-      new talvos::PipelineStage(*Device, Module.get(), Entry, SpecConstMap);
+      new talvos::PipelineStage(*Device, Module, Entry, SpecConstMap);
   talvos::ComputePipeline Pipeline(Stage);
   talvos::DispatchCommand Command(&Pipeline, GroupCount, DescriptorSets);
   Command.run(*Device);

@@ -592,16 +592,15 @@ public:
   };
 
   /// Returns the Module that has been built.
-  std::unique_ptr<Module> takeModule()
+  std::shared_ptr<Module> getModule()
   {
-    assert(Mod);
-    return std::move(Mod);
+    return Mod;
   }
 
 private:
   /// Internal ModuleBuilder variables.
   ///\{
-  std::unique_ptr<Module> Mod;
+  std::shared_ptr<Module> Mod;
   std::unique_ptr<Function> CurrentFunction;
   std::unique_ptr<Block> CurrentBlock;
   Instruction *PreviousInstruction;
@@ -750,7 +749,7 @@ const Type *Module::getType(uint32_t Id) const
   return Types.at(Id).get();
 }
 
-std::unique_ptr<Module> Module::load(const uint32_t *Words, size_t NumWords)
+std::shared_ptr<Module> Module::load(const uint32_t *Words, size_t NumWords)
 {
   spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
   spv_diagnostic Diagnostic = nullptr;
@@ -772,10 +771,10 @@ std::unique_ptr<Module> Module::load(const uint32_t *Words, size_t NumWords)
     return nullptr;
   }
 
-  return MB.takeModule();
+  return MB.getModule();
 }
 
-std::unique_ptr<Module> Module::load(const std::string &FileName)
+std::shared_ptr<Module> Module::load(const std::string &FileName)
 {
   // Open file.
   FILE *SPVFile = fopen(FileName.c_str(), "rb");
@@ -813,7 +812,7 @@ std::unique_ptr<Module> Module::load(const std::string &FileName)
   }
 
   // Load and return Module.
-  std::unique_ptr<Module> M = load(Binary->code, Binary->wordCount);
+  std::shared_ptr<Module> M = load(Binary->code, Binary->wordCount);
   spvBinaryDestroy(Binary);
   return M;
 }

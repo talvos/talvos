@@ -15,8 +15,8 @@
 namespace talvos
 {
 
-PipelineStage::PipelineStage(Device &D, const Module *M, const EntryPoint *EP,
-                             const SpecConstantMap &SM)
+PipelineStage::PipelineStage(Device &D, std::shared_ptr<const Module> M,
+                             const EntryPoint *EP, const SpecConstantMap &SM)
     : Mod(M), EP(EP)
 {
   Objects = M->getObjects();

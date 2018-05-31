@@ -37,8 +37,8 @@ public:
   /// \param M The module containing the entry point to invoke.
   /// \param EP The entry point to invoke.
   /// \param SM A map of specialization constant values.
-  PipelineStage(Device &D, const Module *M, const EntryPoint *EP,
-                const SpecConstantMap &SM = {});
+  PipelineStage(Device &D, std::shared_ptr<const Module> M,
+                const EntryPoint *EP, const SpecConstantMap &SM = {});
 
   // Do not allow PipelineStage objects to be copied.
   ///\{
@@ -53,13 +53,15 @@ public:
   Dim3 getGroupSize() const { return GroupSize; }
 
   /// Return the module this pipeline stage is using.
-  const Module *getModule() const { return Mod; }
+  std::shared_ptr<const Module> getModule() const { return Mod; }
 
   /// Returns a list of all result objects in this pipeline stage.
   const std::vector<Object> &getObjects() const { return Objects; };
 
 private:
-  const Module *Mod;    ///< The module containing the entry point to invoke.
+  /// The module containing the entry point to invoke.
+  std::shared_ptr<const Module> Mod;
+
   const EntryPoint *EP; ///< The entry point to invoke.
   Dim3 GroupSize;       ///< The size of each workgroup.
 

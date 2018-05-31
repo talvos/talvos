@@ -46,7 +46,7 @@ private:
 
   std::istream &Stream;
   talvos::Device *Device;
-  std::unique_ptr<talvos::Module> Module;
+  std::shared_ptr<talvos::Module> Module;
   const talvos::EntryPoint *Entry;
   std::map<std::string, std::pair<uint64_t, uint64_t>> Buffers;
   talvos::SpecConstantMap SpecConstMap;
