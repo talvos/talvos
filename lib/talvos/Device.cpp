@@ -151,18 +151,37 @@ void Device::reportError(const std::string &Error, bool Fatal)
     // Show current invocation and group.
     const Invocation *Inv = Executor->getCurrentInvocation();
     const Workgroup *Group = Executor->getCurrentWorkgroup();
-    std::cerr << "    Invocation:";
-    std::cerr << " Global" << Inv->getGlobalId();
-    if (Group)
+    if (Inv)
     {
-      std::cerr << " Local" << Inv->getGlobalId() % Stage.getGroupSize();
-      std::cerr << " Group" << Group->getGroupId();
+      std::cerr << "    Invocation:";
+      std::cerr << " Global" << Inv->getGlobalId();
+      if (Group)
+      {
+        std::cerr << " Local" << Inv->getGlobalId() % Stage.getGroupSize();
+        std::cerr << " Group" << Group->getGroupId();
+      }
+    }
+    else if (Group)
+    {
+      std::cerr << "    Group: " << Group->getGroupId();
+    }
+    else
+    {
+      std::cerr << "    <entity unknown>";
     }
     std::cerr << std::endl;
 
-    // Show current instruction.
-    std::cerr << "      ";
-    Inv->getCurrentInstruction()->print(std::cerr, false);
+    if (Inv)
+    {
+      // Show current instruction.
+      std::cerr << "      ";
+      Inv->getCurrentInstruction()->print(std::cerr, false);
+    }
+    else
+    {
+      std::cerr << "    <location unknown>";
+    }
+
     std::cerr << std::endl;
   }
   else
