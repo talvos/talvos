@@ -110,9 +110,6 @@ private:
   /// The initial object values for each invocation.
   std::vector<Object> Objects;
 
-  /// Map of buffer variable array allocations for the current pipeline.
-  std::map<const Variable *, uint64_t> ArrayVariables;
-
   /// The number of worker threads currently executing.
   unsigned NumThreads;
 

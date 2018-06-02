@@ -174,7 +174,6 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   CurrentStage = Cmd.getPipeline()->getStage();
 
   Objects = CurrentStage->getObjects();
-  // TODO: Do this separately for fragment shader
   initialiseBufferVariables(Cmd.getDescriptorSetMap());
 
   assert(PendingGroups.empty());
@@ -244,10 +243,13 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   for (unsigned i = 0; i < NumThreads; i++)
     Threads[i].join();
 
+  finaliseBufferVariables(Cmd.getDescriptorSetMap());
+
   // Switch to fragment shader for rasterization.
   CurrentStage = Cmd.getPipeline()->getFragmentStage();
   assert(CurrentStage && "rendering without fragment shader not implemented");
   Objects = CurrentStage->getObjects();
+  initialiseBufferVariables(Cmd.getDescriptorSetMap());
 
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
   const RenderPass &RP = RPI.getRenderPass();
@@ -548,21 +550,27 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
 
 void PipelineExecutor::finaliseBufferVariables(const DescriptorSetMap &DSM)
 {
-  // TODO: Skip constant variables
-  for (auto VA : ArrayVariables)
+  // Copy array variable data back to original buffers.
+  for (auto V : CurrentStage->getModule()->getVariables())
   {
-    assert(VA.first->getType()->getElementType()->getTypeId() == Type::ARRAY);
+    // TODO: Skip constant variables too
+    if (!V->isBufferVariable())
+      continue;
+    if (V->getType()->getElementType()->getTypeId() != Type::ARRAY)
+      continue;
+
+    assert(V->getType()->getElementType()->getTypeId() == Type::ARRAY);
 
     // Get descriptor set and binding.
-    uint32_t Set = VA.first->getDecoration(SpvDecorationDescriptorSet);
-    uint32_t Binding = VA.first->getDecoration(SpvDecorationBinding);
+    uint32_t Set = V->getDecoration(SpvDecorationDescriptorSet);
+    uint32_t Binding = V->getDecoration(SpvDecorationBinding);
     assert(DSM.count(Set));
     assert(DSM.at(Set).count(Binding));
 
-    const Type *ArrayType = VA.first->getType()->getElementType();
+    const Type *ArrayType = V->getType()->getElementType();
     size_t ElemSize = ArrayType->getElementType()->getSize();
 
-    uint64_t Address = VA.second;
+    uint64_t Address = Objects[V->getId()].get<uint64_t>();
 
     // Copy array element values to original buffers.
     for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
@@ -574,7 +582,6 @@ void PipelineExecutor::finaliseBufferVariables(const DescriptorSetMap &DSM)
     // Release allocation.
     Dev.getGlobalMemory().release(Address);
   }
-  ArrayVariables.clear();
 }
 
 void PipelineExecutor::initialiseBufferVariables(
@@ -601,7 +608,6 @@ void PipelineExecutor::initialiseBufferVariables(
       // Create new allocation to store whole array.
       uint64_t Address = Dev.getGlobalMemory().allocate(ArrayType->getSize());
       Objects[V->getId()] = Object(V->getType(), Address);
-      ArrayVariables[V] = Address;
 
       // Copy array element values into new allocation.
       for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
