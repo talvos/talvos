@@ -592,10 +592,7 @@ public:
   };
 
   /// Returns the Module that has been built.
-  std::shared_ptr<Module> getModule()
-  {
-    return Mod;
-  }
+  std::shared_ptr<Module> getModule() { return Mod; }
 
 private:
   /// Internal ModuleBuilder variables.
