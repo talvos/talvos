@@ -174,23 +174,7 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   CurrentStage = Cmd.getPipeline()->getStage();
 
   Objects = CurrentStage->getObjects();
-
-  // Resolve buffer variables.
-  const DescriptorSetMap &DSM = Cmd.getDescriptorSetMap();
-  for (auto V : CurrentStage->getModule()->getVariables())
-  {
-    if (!V->isBufferVariable())
-      continue;
-
-    // Look up variable in descriptor set and set pointer value if present.
-    uint32_t Set = V->getDecoration(SpvDecorationDescriptorSet);
-    uint32_t Binding = V->getDecoration(SpvDecorationBinding);
-    if (!DSM.count(Set))
-      continue;
-    if (!DSM.at(Set).count(Binding))
-      continue;
-    Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at(Binding));
-  }
+  resolveBufferVariables(Cmd.getDescriptorSetMap());
 
   assert(PendingGroups.empty());
   assert(RunningGroups.empty());
@@ -232,7 +216,7 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   CurrentStage = Cmd.getPipeline()->getVertexStage();
 
   Objects = CurrentStage->getObjects();
-  // TODO: Handle DescriptorSetMap
+  resolveBufferVariables(Cmd.getDescriptorSetMap());
 
   Continue = false;
   Interactive = checkEnv("TALVOS_INTERACTIVE", false);
@@ -741,6 +725,25 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
         }
       }
     }
+  }
+}
+
+void PipelineExecutor::resolveBufferVariables(
+    const talvos::DescriptorSetMap &DSM)
+{
+  for (auto V : CurrentStage->getModule()->getVariables())
+  {
+    if (!V->isBufferVariable())
+      continue;
+
+    // Look up variable in descriptor set and set pointer value if present.
+    uint32_t Set = V->getDecoration(SpvDecorationDescriptorSet);
+    uint32_t Binding = V->getDecoration(SpvDecorationBinding);
+    if (!DSM.count(Set))
+      continue;
+    if (!DSM.at(Set).count(Binding))
+      continue;
+    Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at(Binding));
   }
 }
 

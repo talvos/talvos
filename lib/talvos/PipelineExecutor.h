@@ -91,6 +91,9 @@ private:
                          const VertexOutput &VA, const VertexOutput &VB,
                          const VertexOutput &VC);
 
+  /// Helper function to resolve buffer variables.
+  void resolveBufferVariables(const DescriptorSetMap &DSM);
+
   /// The device this shader is executing on.
   Device &Dev;
 
