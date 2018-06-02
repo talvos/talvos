@@ -204,6 +204,8 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   for (unsigned i = 0; i < NumThreads; i++)
     Threads[i].join();
 
+  deallocateUniforms();
+
   PendingGroups.clear();
   CurrentCommand = nullptr;
 }
@@ -286,6 +288,8 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
     std::cerr << "Unimplemented primitive topology: " << Topology << std::endl;
     abort();
   }
+
+  deallocateUniforms();
 
   CurrentStage = nullptr;
   CurrentCommand = nullptr;
@@ -541,6 +545,13 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
   }
 }
 
+void PipelineExecutor::deallocateUniforms()
+{
+  for (uint64_t Address : UniformAllocations)
+    Dev.getGlobalMemory().release(Address);
+  UniformAllocations.clear();
+}
+
 void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
                                          const Framebuffer &FB,
                                          const VertexOutput &VA,
@@ -743,7 +754,29 @@ void PipelineExecutor::resolveBufferVariables(
       continue;
     if (!DSM.at(Set).count(Binding))
       continue;
-    Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at(Binding));
+
+    if (V->getType()->getElementType()->getTypeId() == Type::ARRAY)
+    {
+      const Type *ArrayType = V->getType()->getElementType();
+      size_t ElemSize = ArrayType->getElementType()->getSize();
+
+      // Create new allocation to store whole array.
+      uint64_t Address = Dev.getGlobalMemory().allocate(ArrayType->getSize());
+      Objects[V->getId()] = Object(V->getType(), Address);
+      UniformAllocations.push_back(Address);
+
+      // Copy array element values into new allocation.
+      for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
+      {
+        Memory::copy(Address + i * ElemSize, Dev.getGlobalMemory(),
+                     DSM.at(Set).at(Binding + i), Dev.getGlobalMemory(),
+                     ElemSize);
+      }
+    }
+    else
+    {
+      Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at(Binding));
+    }
   }
 }
 

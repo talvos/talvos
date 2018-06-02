@@ -86,6 +86,9 @@ private:
   /// Worker thread entry point for vertex shaders.
   void runVertexWorker(RenderPipelineState *State);
 
+  /// Deallocate uniform allocations.
+  void deallocateUniforms();
+
   /// Helper function to rasterize a triangle primitive.
   void rasterizeTriangle(const RenderPass &RP, const Framebuffer &FB,
                          const VertexOutput &VA, const VertexOutput &VB,
@@ -105,6 +108,9 @@ private:
 
   /// The initial object values for each invocation.
   std::vector<Object> Objects;
+
+  /// List of uniform array allocations for the current pipeline.
+  std::vector<uint64_t> UniformAllocations;
 
   /// The number of worker threads currently executing.
   unsigned NumThreads;
