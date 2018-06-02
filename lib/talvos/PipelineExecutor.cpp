@@ -174,7 +174,8 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   CurrentStage = Cmd.getPipeline()->getStage();
 
   Objects = CurrentStage->getObjects();
-  resolveBufferVariables(Cmd.getDescriptorSetMap());
+  // TODO: Do this separately for fragment shader
+  initialiseBufferVariables(Cmd.getDescriptorSetMap());
 
   assert(PendingGroups.empty());
   assert(RunningGroups.empty());
@@ -204,7 +205,7 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   for (unsigned i = 0; i < NumThreads; i++)
     Threads[i].join();
 
-  deallocateUniforms();
+  finaliseBufferVariables(Cmd.getDescriptorSetMap());
 
   PendingGroups.clear();
   CurrentCommand = nullptr;
@@ -218,7 +219,7 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   CurrentStage = Cmd.getPipeline()->getVertexStage();
 
   Objects = CurrentStage->getObjects();
-  resolveBufferVariables(Cmd.getDescriptorSetMap());
+  initialiseBufferVariables(Cmd.getDescriptorSetMap());
 
   Continue = false;
   Interactive = checkEnv("TALVOS_INTERACTIVE", false);
@@ -289,7 +290,7 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
     abort();
   }
 
-  deallocateUniforms();
+  finaliseBufferVariables(Cmd.getDescriptorSetMap());
 
   CurrentStage = nullptr;
   CurrentCommand = nullptr;
@@ -545,11 +546,76 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
   }
 }
 
-void PipelineExecutor::deallocateUniforms()
+void PipelineExecutor::finaliseBufferVariables(const DescriptorSetMap &DSM)
 {
-  for (uint64_t Address : UniformAllocations)
+  // TODO: Skip constant variables
+  for (auto VA : ArrayVariables)
+  {
+    assert(VA.first->getType()->getElementType()->getTypeId() == Type::ARRAY);
+
+    // Get descriptor set and binding.
+    uint32_t Set = VA.first->getDecoration(SpvDecorationDescriptorSet);
+    uint32_t Binding = VA.first->getDecoration(SpvDecorationBinding);
+    assert(DSM.count(Set));
+    assert(DSM.at(Set).count(Binding));
+
+    const Type *ArrayType = VA.first->getType()->getElementType();
+    size_t ElemSize = ArrayType->getElementType()->getSize();
+
+    uint64_t Address = VA.second;
+
+    // Copy array element values to original buffers.
+    for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
+    {
+      Memory::copy(DSM.at(Set).at(Binding + i), Dev.getGlobalMemory(),
+                   Address + i * ElemSize, Dev.getGlobalMemory(), ElemSize);
+    }
+
+    // Release allocation.
     Dev.getGlobalMemory().release(Address);
-  UniformAllocations.clear();
+  }
+  ArrayVariables.clear();
+}
+
+void PipelineExecutor::initialiseBufferVariables(
+    const talvos::DescriptorSetMap &DSM)
+{
+  for (auto V : CurrentStage->getModule()->getVariables())
+  {
+    if (!V->isBufferVariable())
+      continue;
+
+    // Look up variable in descriptor set and set pointer value if present.
+    uint32_t Set = V->getDecoration(SpvDecorationDescriptorSet);
+    uint32_t Binding = V->getDecoration(SpvDecorationBinding);
+    if (!DSM.count(Set))
+      continue;
+    if (!DSM.at(Set).count(Binding))
+      continue;
+
+    if (V->getType()->getElementType()->getTypeId() == Type::ARRAY)
+    {
+      const Type *ArrayType = V->getType()->getElementType();
+      size_t ElemSize = ArrayType->getElementType()->getSize();
+
+      // Create new allocation to store whole array.
+      uint64_t Address = Dev.getGlobalMemory().allocate(ArrayType->getSize());
+      Objects[V->getId()] = Object(V->getType(), Address);
+      ArrayVariables[V] = Address;
+
+      // Copy array element values into new allocation.
+      for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
+      {
+        Memory::copy(Address + i * ElemSize, Dev.getGlobalMemory(),
+                     DSM.at(Set).at(Binding + i), Dev.getGlobalMemory(),
+                     ElemSize);
+      }
+    }
+    else
+    {
+      Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at(Binding));
+    }
+  }
 }
 
 void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
@@ -735,47 +801,6 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
           Dev.getGlobalMemory().store(Address, 4, Pixel);
         }
       }
-    }
-  }
-}
-
-void PipelineExecutor::resolveBufferVariables(
-    const talvos::DescriptorSetMap &DSM)
-{
-  for (auto V : CurrentStage->getModule()->getVariables())
-  {
-    if (!V->isBufferVariable())
-      continue;
-
-    // Look up variable in descriptor set and set pointer value if present.
-    uint32_t Set = V->getDecoration(SpvDecorationDescriptorSet);
-    uint32_t Binding = V->getDecoration(SpvDecorationBinding);
-    if (!DSM.count(Set))
-      continue;
-    if (!DSM.at(Set).count(Binding))
-      continue;
-
-    if (V->getType()->getElementType()->getTypeId() == Type::ARRAY)
-    {
-      const Type *ArrayType = V->getType()->getElementType();
-      size_t ElemSize = ArrayType->getElementType()->getSize();
-
-      // Create new allocation to store whole array.
-      uint64_t Address = Dev.getGlobalMemory().allocate(ArrayType->getSize());
-      Objects[V->getId()] = Object(V->getType(), Address);
-      UniformAllocations.push_back(Address);
-
-      // Copy array element values into new allocation.
-      for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
-      {
-        Memory::copy(Address + i * ElemSize, Dev.getGlobalMemory(),
-                     DSM.at(Set).at(Binding + i), Dev.getGlobalMemory(),
-                     ElemSize);
-      }
-    }
-    else
-    {
-      Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at(Binding));
     }
   }
 }

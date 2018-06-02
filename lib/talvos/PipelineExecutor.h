@@ -29,6 +29,7 @@ class Invocation;
 class Object;
 class PipelineStage;
 class RenderPass;
+class Variable;
 class Workgroup;
 
 /// Only allow Device objects to create PipelineExecutor instances.
@@ -86,16 +87,16 @@ private:
   /// Worker thread entry point for vertex shaders.
   void runVertexWorker(RenderPipelineState *State);
 
-  /// Deallocate uniform allocations.
-  void deallocateUniforms();
+  /// Finalise buffer variables.
+  void finaliseBufferVariables(const DescriptorSetMap &DSM);
+
+  /// Initialise buffer variables.
+  void initialiseBufferVariables(const DescriptorSetMap &DSM);
 
   /// Helper function to rasterize a triangle primitive.
   void rasterizeTriangle(const RenderPass &RP, const Framebuffer &FB,
                          const VertexOutput &VA, const VertexOutput &VB,
                          const VertexOutput &VC);
-
-  /// Helper function to resolve buffer variables.
-  void resolveBufferVariables(const DescriptorSetMap &DSM);
 
   /// The device this shader is executing on.
   Device &Dev;
@@ -109,8 +110,8 @@ private:
   /// The initial object values for each invocation.
   std::vector<Object> Objects;
 
-  /// List of uniform array allocations for the current pipeline.
-  std::vector<uint64_t> UniformAllocations;
+  /// Map of buffer variable array allocations for the current pipeline.
+  std::map<const Variable *, uint64_t> ArrayVariables;
 
   /// The number of worker threads currently executing.
   unsigned NumThreads;
