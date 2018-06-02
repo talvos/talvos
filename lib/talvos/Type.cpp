@@ -97,6 +97,10 @@ std::ostream &operator<<(std::ostream &Stream, const Type *Ty)
   case Type::VECTOR:
     Stream << Ty->ElementType << "v" << Ty->ElementCount;
     break;
+  case Type::MATRIX:
+    Stream << Ty->ElementType->ElementType << " mat" << Ty->ElementCount << "x"
+           << Ty->ElementType->ElementCount;
+    break;
   case Type::ARRAY:
     Stream << Ty->ElementType << "[" << Ty->ElementCount << "]";
     break;
