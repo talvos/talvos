@@ -6,6 +6,7 @@
 /// \file Device.cpp
 /// This file defines the Device class.
 
+#include <atomic>
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
@@ -39,6 +40,9 @@ namespace talvos
 
 typedef Plugin *(*CreatePluginFunc)(const Device *);
 typedef void (*DestroyPluginFunc)(Plugin *);
+
+// Counter for the number of errors reported.
+static std::atomic<size_t> NumErrors;
 
 Device::Device()
 {
@@ -97,6 +101,9 @@ Device::Device()
   }
 
   Executor = new PipelineExecutor(PipelineExecutorKey(), *this);
+
+  NumErrors = 0;
+  MaxErrors = getEnvUInt("TALVOS_MAX_ERRORS", 100);
 }
 
 Device::~Device()
@@ -131,6 +138,11 @@ bool Device::isThreadSafe() const
 
 void Device::reportError(const std::string &Error, bool Fatal)
 {
+  // Increment error count, exit early if we have hit the limit.
+  size_t ErrorIdx = NumErrors++;
+  if (ErrorIdx >= MaxErrors)
+    return;
+
   // Guard output to avoid mangling error messages from multiple threads.
   static std::mutex ErrorMutex;
   std::lock_guard<std::mutex> Lock(ErrorMutex);
@@ -190,6 +202,15 @@ void Device::reportError(const std::string &Error, bool Fatal)
   }
 
   std::cerr << std::endl;
+
+  // Display warning if maximum number of errors reached.
+  if (ErrorIdx == MaxErrors - 1)
+  {
+    std::cerr << "WARNING: " << MaxErrors << " errors reported - "
+              << "suppressing further errors" << std::endl;
+    std::cerr << "(configure this limit with TALVOS_MAX_ERRORS)" << std::endl;
+    std::cerr << std::endl;
+  }
 
   Executor->signalError();
 

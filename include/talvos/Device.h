@@ -77,6 +77,9 @@ private:
 
   /// The pipeline executor instance.
   PipelineExecutor *Executor;
+
+  /// The maximum number of errors to report.
+  size_t MaxErrors;
 };
 
 } // namespace talvos
