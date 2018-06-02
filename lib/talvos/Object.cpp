@@ -171,6 +171,7 @@ void print(std::ostream &Stream, uint8_t *Data, const Type *Ty)
   case Type::ARRAY:
   case Type::STRUCT:
   case Type::VECTOR:
+  case Type::MATRIX:
   {
     Stream << "{";
     for (unsigned i = 0; i < Ty->getElementCount(); i++)
