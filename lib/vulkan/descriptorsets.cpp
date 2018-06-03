@@ -12,6 +12,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
   for (uint32_t i = 0; i < pAllocateInfo->descriptorSetCount; i++)
   {
     pDescriptorSets[i] = new VkDescriptorSet_T;
+    pDescriptorSets[i]->Layout = pAllocateInfo->pSetLayouts[i];
     pAllocateInfo->descriptorPool->Pool.insert(pDescriptorSets[i]);
   }
   return VK_SUCCESS;
@@ -81,8 +82,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorSetLayout(
     VkDevice device, const VkDescriptorSetLayoutCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkDescriptorSetLayout *pSetLayout)
 {
-  // TODO: Implement?
   *pSetLayout = new VkDescriptorSetLayout_T;
+  for (uint32_t i = 0; i < pCreateInfo->bindingCount; i++)
+  {
+    const VkDescriptorSetLayoutBinding &Binding = pCreateInfo->pBindings[i];
+    (*pSetLayout)->Bindings[Binding.binding] = Binding.descriptorCount;
+  }
   return VK_SUCCESS;
 }
 
@@ -211,14 +216,28 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
            pDescriptorWrites[i].descriptorType ==
                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 
+    VkDescriptorSet Set = pDescriptorWrites[i].dstSet;
+    uint32_t Binding = pDescriptorWrites[i].dstBinding;
+    uint32_t ArrayElement = pDescriptorWrites[i].dstArrayElement;
     for (uint32_t b = 0; b < pDescriptorWrites[i].descriptorCount; b++)
     {
-      assert(pDescriptorWrites[i].dstArrayElement == 0 &&
-             "dstArrayElement not handled");
-      uint32_t Binding = pDescriptorWrites[i].dstBinding + b;
+      // Check if current binding is complete.
+      assert(Set->Layout->Bindings.count(Binding));
+      if (ArrayElement >= Set->Layout->Bindings.at(Binding))
+      {
+        ArrayElement = 0;
+
+        // Increment binding, skipping any that have a descriptor count of 0.
+        while (Set->Layout->Bindings.at(++Binding) == 0)
+          ;
+      }
+
+      // Set address for target binding and array element.
       uint64_t Address = pDescriptorWrites[i].pBufferInfo[b].buffer->Address;
       Address += pDescriptorWrites[i].pBufferInfo[b].offset;
-      pDescriptorWrites->dstSet->DescriptorSet[Binding] = Address;
+      Set->DescriptorSet[{Binding, ArrayElement}] = Address;
+
+      ++ArrayElement;
     }
   }
 }

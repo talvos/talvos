@@ -565,7 +565,6 @@ void PipelineExecutor::finaliseBufferVariables(const DescriptorSetMap &DSM)
     uint32_t Set = V->getDecoration(SpvDecorationDescriptorSet);
     uint32_t Binding = V->getDecoration(SpvDecorationBinding);
     assert(DSM.count(Set));
-    assert(DSM.at(Set).count(Binding));
 
     const Type *ArrayType = V->getType()->getElementType();
     size_t ElemSize = ArrayType->getElementType()->getSize();
@@ -575,7 +574,10 @@ void PipelineExecutor::finaliseBufferVariables(const DescriptorSetMap &DSM)
     // Copy array element values to original buffers.
     for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
     {
-      Memory::copy(DSM.at(Set).at(Binding + i), Dev.getGlobalMemory(),
+      if (!DSM.at(Set).count({Binding, i}))
+        continue;
+
+      Memory::copy(DSM.at(Set).at({Binding, i}), Dev.getGlobalMemory(),
                    Address + i * ElemSize, Dev.getGlobalMemory(), ElemSize);
     }
 
@@ -597,8 +599,6 @@ void PipelineExecutor::initialiseBufferVariables(
     uint32_t Binding = V->getDecoration(SpvDecorationBinding);
     if (!DSM.count(Set))
       continue;
-    if (!DSM.at(Set).count(Binding))
-      continue;
 
     if (V->getType()->getElementType()->getTypeId() == Type::ARRAY)
     {
@@ -612,14 +612,20 @@ void PipelineExecutor::initialiseBufferVariables(
       // Copy array element values into new allocation.
       for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
       {
+        if (!DSM.at(Set).count({Binding, i}))
+          continue;
+
         Memory::copy(Address + i * ElemSize, Dev.getGlobalMemory(),
-                     DSM.at(Set).at(Binding + i), Dev.getGlobalMemory(),
+                     DSM.at(Set).at({Binding, i}), Dev.getGlobalMemory(),
                      ElemSize);
       }
     }
     else
     {
-      Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at(Binding));
+      if (!DSM.at(Set).count({Binding, 0}))
+        continue;
+
+      Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at({Binding, 0}));
     }
   }
 }

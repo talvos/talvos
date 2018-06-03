@@ -197,7 +197,7 @@ void CommandFile::parseDescriptorSet()
   if (!Buffers.count(Name))
     throw "invalid resource identifier";
 
-  DescriptorSets[Set][Binding] = Buffers[Name].first;
+  DescriptorSets[Set][{Binding, 0}] = Buffers[Name].first;
 }
 
 void CommandFile::parseDispatch()

@@ -75,11 +75,14 @@ struct VkDescriptorPool_T
 
 struct VkDescriptorSet_T
 {
+  VkDescriptorSetLayout Layout;
   talvos::DescriptorSet DescriptorSet;
 };
 
 struct VkDescriptorSetLayout_T
 {
+  /// Map from binding number to descriptor count.
+  std::map<uint32_t, uint32_t> Bindings;
 };
 
 struct VkDevice_T
