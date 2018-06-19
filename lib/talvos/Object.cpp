@@ -11,8 +11,8 @@
 #include <iostream>
 #include <vector>
 
-#include "talvos/Object.h"
 #include "talvos/Memory.h"
+#include "talvos/Object.h"
 
 namespace talvos
 {
@@ -43,6 +43,7 @@ Object::Object(const Object &Src)
     Ty = Src.Ty;
     Data = new uint8_t[Ty->getSize()];
     memcpy(Data, Src.Data, Ty->getSize());
+    MatrixLayout = Src.MatrixLayout;
   }
 }
 
@@ -53,6 +54,7 @@ Object &Object::operator=(const Object &Src)
     Object Tmp(Src);
     std::swap(Data, Tmp.Data);
     std::swap(Ty, Tmp.Ty);
+    std::swap(MatrixLayout, Tmp.MatrixLayout);
   }
   return *this;
 }
@@ -61,6 +63,7 @@ Object::Object(Object &&Src) noexcept
 {
   Ty = Src.Ty;
   Data = Src.Data;
+  MatrixLayout = Src.MatrixLayout;
   Src.Data = nullptr;
 }
 
@@ -95,6 +98,13 @@ template <typename T> T Object::get(uint32_t Element) const
   return ((T *)Data)[Element];
 }
 
+const PtrMatrixLayout &Object::getMatrixLayout() const
+{
+  assert(Ty->isPointer() && (Ty->getElementType()->isVector() ||
+                             Ty->getElementType()->isMatrix()));
+  return MatrixLayout;
+}
+
 void Object::insert(const std::vector<uint32_t> &Indices, const Object &Element)
 {
   assert(Data);
@@ -120,6 +130,54 @@ Object Object::load(const Type *Ty, const Memory &Mem, uint64_t Address)
   Result.Ty = Ty;
   Result.Data = new uint8_t[Ty->getSize()];
   Mem.load(Result.Data, Address, Ty->getSize());
+  return Result;
+}
+
+Object Object::load(const Type *Ty, const Memory &Mem, const Object &Pointer)
+{
+  Object Result;
+  Result.Ty = Ty;
+  Result.Data = new uint8_t[Ty->getSize()];
+
+  // Special case for loading matrices from memory with non-default layouts.
+  if (Pointer.MatrixLayout)
+  {
+    assert(Ty->getTypeId() == Type::VECTOR || Ty->getTypeId() == Type::MATRIX);
+
+    const Type *VecTy = Ty->isMatrix() ? Ty->getElementType() : Ty;
+    const Type *ElemTy = VecTy->getElementType();
+
+    // Loop over columns (vectors).
+    uint32_t NumCols = Ty->isMatrix() ? Ty->getElementCount() : 1;
+    for (uint32_t Col = 0; Col < NumCols; Col++)
+    {
+      // Calculate offsets into source and destination pointers.
+      uint8_t *DstPtr = Result.Data + Ty->getElementOffset(Col);
+      uint64_t SrcPtr = Pointer.get<uint64_t>();
+      if (Pointer.MatrixLayout.Order == PtrMatrixLayout::COL_MAJOR)
+        SrcPtr += Col * Pointer.MatrixLayout.Stride;
+      else
+        SrcPtr += Col * ElemTy->getSize();
+
+      // Loop over elements in column and load them to result object.
+      for (uint32_t Row = 0; Row < VecTy->getElementCount(); Row++)
+      {
+        Mem.load(DstPtr, SrcPtr, ElemTy->getSize());
+
+        // Increment pointers.
+        DstPtr += ElemTy->getSize();
+        if (Pointer.MatrixLayout.Order == PtrMatrixLayout::COL_MAJOR)
+          SrcPtr += ElemTy->getSize();
+        else
+          SrcPtr += Pointer.MatrixLayout.Stride;
+      }
+    }
+  }
+  else
+  {
+    Mem.load(Result.Data, Pointer.get<uint64_t>(), Ty->getSize());
+  }
+
   return Result;
 }
 
@@ -215,10 +273,61 @@ template <typename T> void Object::set(T Value, uint32_t Element)
   ((T *)Data)[Element] = Value;
 }
 
+void Object::setMatrixLayout(const PtrMatrixLayout &ML)
+{
+  assert(Ty->isPointer() && (Ty->getElementType()->isVector() ||
+                             Ty->getElementType()->isMatrix()));
+  MatrixLayout = ML;
+}
+
 void Object::store(Memory &Mem, uint64_t Address) const
 {
   assert(Data);
   Mem.store(Address, Ty->getSize(), Data);
+}
+
+void Object::store(Memory &Mem, const Object &Pointer) const
+{
+  assert(Data);
+
+  // Special case for loading matrices from memory with non-default layouts.
+  if (Pointer.MatrixLayout)
+  {
+    assert(Ty->getTypeId() == Type::VECTOR || Ty->getTypeId() == Type::MATRIX);
+
+    const Type *VecTy = Ty->isMatrix() ? Ty->getElementType() : Ty;
+    const Type *ElemTy = VecTy->getElementType();
+
+    // Loop over columns (vectors).
+    uint32_t NumCols = Ty->isMatrix() ? Ty->getElementCount() : 1;
+    for (uint32_t Col = 0; Col < NumCols; Col++)
+    {
+      // Calculate offsets into source and destination pointers.
+      uint8_t *SrcPtr = Data + Ty->getElementOffset(Col);
+      uint64_t DstPtr = Pointer.get<uint64_t>();
+      if (Pointer.MatrixLayout.Order == PtrMatrixLayout::COL_MAJOR)
+        DstPtr += Col * Pointer.MatrixLayout.Stride;
+      else
+        DstPtr += Col * ElemTy->getSize();
+
+      // Loop over elements in column and load them to result object.
+      for (uint32_t Row = 0; Row < VecTy->getElementCount(); Row++)
+      {
+        Mem.store(DstPtr, ElemTy->getSize(), SrcPtr);
+
+        // Increment pointers.
+        SrcPtr += ElemTy->getSize();
+        if (Pointer.MatrixLayout.Order == PtrMatrixLayout::COL_MAJOR)
+          DstPtr += ElemTy->getSize();
+        else
+          DstPtr += Pointer.MatrixLayout.Stride;
+      }
+    }
+  }
+  else
+  {
+    Mem.store(Pointer.get<uint64_t>(), Ty->getSize(), Data);
+  }
 }
 
 void Object::zero() { memset(Data, 0, Ty->getSize()); }

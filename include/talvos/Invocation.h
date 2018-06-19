@@ -148,7 +148,6 @@ public:
   void executeLogicalOr(const Instruction *Inst);
   void executeNot(const Instruction *Inst);
   void executePhi(const Instruction *Inst);
-  void executePtrAccessChain(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeReturnValue(const Instruction *Inst);
   void executeSConvert(const Instruction *Inst);

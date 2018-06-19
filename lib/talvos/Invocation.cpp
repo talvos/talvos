@@ -158,7 +158,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpLogicalNot, LogicalNot);
     DISPATCH(SpvOpNot, Not);
     DISPATCH(SpvOpPhi, Phi);
-    DISPATCH(SpvOpPtrAccessChain, PtrAccessChain);
+    DISPATCH(SpvOpPtrAccessChain, AccessChain);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpReturnValue, ReturnValue);
     DISPATCH(SpvOpSConvert, SConvert);
@@ -238,14 +238,43 @@ void Invocation::executeAccessChain(const Instruction *Inst)
         return;
       }
     }
-    assert(false && "Invalid base pointer for OpAccessChain");
+    assert(false && "Invalid base pointer for AccessChain");
   }
 
   uint64_t Result = Base.get<uint64_t>();
-  const Type *ElemType = Base.getType()->getElementType(0);
+  const Type *Ty = Base.getType()->getElementType();
+
+  // Initialize matrix layout.
+  PtrMatrixLayout MatrixLayout;
+  if (Ty->isMatrix() || Ty->isVector())
+    MatrixLayout = Base.getMatrixLayout();
+
+  // Offset of the first index operand.
+  uint32_t FirstIndexOperand = 3;
+
+  // Perform initial dereference for element index for OpPtrAccessChain.
+  if (Inst->getOpcode() == SpvOpPtrAccessChain)
+  {
+    FirstIndexOperand = 4;
+    switch (Objects[Inst->getOperand(3)].getType()->getSize())
+    {
+    case 2:
+      Result += Base.getType()->getElementOffset(OP(3, uint16_t));
+      break;
+    case 4:
+      Result += Base.getType()->getElementOffset(OP(3, uint32_t));
+      break;
+    case 8:
+      Result += Base.getType()->getElementOffset(OP(3, uint64_t));
+      break;
+    default:
+      Dev.reportError("Unhandled index size", true);
+      return;
+    }
+  }
 
   // Loop over indices.
-  for (int i = 3; i < Inst->getNumOperands(); i++)
+  for (uint32_t i = FirstIndexOperand; i < Inst->getNumOperands(); i++)
   {
     uint64_t Index;
     const Object &IndexObj = Objects[Inst->getOperand(i)];
@@ -264,11 +293,55 @@ void Invocation::executeAccessChain(const Instruction *Inst)
       Dev.reportError("Unhandled index size", true);
       return;
     }
-    Result += ElemType->getElementOffset(Index);
-    ElemType = ElemType->getElementType(Index);
+
+    // Special case for indexing into matrix pointers with non-default layouts.
+    if (Ty->isMatrix() && MatrixLayout)
+    {
+      if (MatrixLayout.Order == PtrMatrixLayout::COL_MAJOR)
+        Result += Index * MatrixLayout.Stride;
+      else
+        Result += Index * Ty->getElementType()->getElementType()->getSize();
+    }
+    else if (Ty->isVector() && MatrixLayout)
+    {
+      if (MatrixLayout.Order == PtrMatrixLayout::COL_MAJOR)
+        Result += Index * Ty->getElementType()->getSize();
+      else
+        Result += Index * MatrixLayout.Stride;
+    }
+    else
+    {
+      Result += Ty->getElementOffset(Index);
+    }
+
+    // Check for structure member decorations that affect memory layout.
+    if (Ty->getTypeId() == Type::STRUCT)
+    {
+      auto &Decorations = Ty->getStructMemberDecorations((uint32_t)Index);
+      if (Decorations.count(SpvDecorationMatrixStride))
+      {
+        // Track matrix layout.
+        MatrixLayout.Stride = Decorations.at(SpvDecorationMatrixStride);
+        if (Decorations.count(SpvDecorationColMajor))
+        {
+          MatrixLayout.Order = PtrMatrixLayout::COL_MAJOR;
+        }
+        else
+        {
+          assert(Decorations.count(SpvDecorationRowMajor));
+          MatrixLayout.Order = PtrMatrixLayout::ROW_MAJOR;
+        }
+      }
+    }
+
+    Ty = Ty->getElementType(Index);
   }
 
   Objects[Id] = Object(Inst->getResultType(), Result);
+
+  // Set matrix layout for result pointer if necessary.
+  if (MatrixLayout && (Ty->isVector() || Ty->isMatrix()))
+    Objects[Id].setMatrixLayout(MatrixLayout);
 }
 
 void Invocation::executeAll(const Instruction *Inst)
@@ -774,7 +847,7 @@ void Invocation::executeLoad(const Instruction *Inst)
   uint32_t Id = Inst->getOperand(1);
   const Object &Src = Objects[Inst->getOperand(2)];
   Memory &Mem = getMemory(Src.getType()->getStorageClass());
-  Objects[Id] = Object::load(Inst->getResultType(), Mem, Src.get<uint64_t>());
+  Objects[Id] = Object::load(Inst->getResultType(), Mem, Src);
 }
 
 void Invocation::executeLogicalAnd(const Instruction *Inst)
@@ -822,89 +895,6 @@ void Invocation::executePhi(const Instruction *Inst)
     }
   }
   assert(false && "no matching predecessor block for OpPhi");
-}
-
-void Invocation::executePtrAccessChain(const Instruction *Inst)
-{
-  // Base pointer.
-  uint32_t Id = Inst->getOperand(1);
-  Object &Base = Objects[Inst->getOperand(2)];
-
-  // Ensure base pointer is valid.
-  if (!Base)
-  {
-    // Check for buffer variable matching base pointer ID.
-    for (auto V : CurrentModule->getVariables())
-    {
-      if (V->getId() == Inst->getOperand(2))
-      {
-        // Report error for missing descriptor set entry.
-        if (V->isBufferVariable())
-        {
-          std::stringstream Err;
-          Err << "Invalid base pointer for descriptor set entry ("
-              << V->getDecoration(SpvDecorationDescriptorSet) << ","
-              << V->getDecoration(SpvDecorationBinding) << ")";
-          Dev.reportError(Err.str());
-        }
-        else
-        {
-          Dev.reportError("Unresolved OpVariable pointer", true);
-        }
-
-        // Set result pointer to null.
-        Objects[Id] = Object(Inst->getResultType(), (uint64_t)0);
-        return;
-      }
-    }
-    assert(false && "Invalid base pointer for OpPtrAccessChain");
-  }
-
-  uint64_t Result = Base.get<uint64_t>();
-  const Type *ElemType = Base.getType()->getElementType();
-
-  // Perform initial deference for element index.
-  switch (Objects[Inst->getOperand(3)].getType()->getSize())
-  {
-  case 2:
-    Result += Base.getType()->getElementOffset(OP(3, uint16_t));
-    break;
-  case 4:
-    Result += Base.getType()->getElementOffset(OP(3, uint32_t));
-    break;
-  case 8:
-    Result += Base.getType()->getElementOffset(OP(3, uint64_t));
-    break;
-  default:
-    Dev.reportError("Unhandled index size", true);
-    return;
-  }
-
-  // Loop over indices.
-  for (int i = 4; i < Inst->getNumOperands(); i++)
-  {
-    uint64_t Index;
-    const Object &IndexObj = Objects[Inst->getOperand(i)];
-    switch (IndexObj.getType()->getSize())
-    {
-    case 2:
-      Index = IndexObj.get<uint16_t>();
-      break;
-    case 4:
-      Index = IndexObj.get<uint32_t>();
-      break;
-    case 8:
-      Index = IndexObj.get<uint64_t>();
-      break;
-    default:
-      Dev.reportError("Unhandled index size", true);
-      return;
-    }
-    Result += ElemType->getElementOffset(Index);
-    ElemType = ElemType->getElementType(Index);
-  }
-
-  Objects[Id] = Object(Inst->getResultType(), Result);
 }
 
 void Invocation::executeReturn(const Instruction *Inst)
@@ -1049,7 +1039,7 @@ void Invocation::executeStore(const Instruction *Inst)
   uint32_t Id = Inst->getOperand(1);
   const Object &Dest = Objects[Inst->getOperand(0)];
   Memory &Mem = getMemory(Dest.getType()->getStorageClass());
-  Objects[Id].store(Mem, Dest.get<uint64_t>());
+  Objects[Id].store(Mem, Dest);
 }
 
 void Invocation::executeSwitch(const Instruction *Inst)

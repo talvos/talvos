@@ -337,8 +337,13 @@ public:
         switch (Decoration)
         {
         case SpvDecorationBuiltIn:
+        case SpvDecorationMatrixStride:
         case SpvDecorationOffset:
           MemberDecorations[{Target, Member}][Decoration] = Inst->words[Offset];
+          break;
+        case SpvDecorationColMajor:
+        case SpvDecorationRowMajor:
+          MemberDecorations[{Target, Member}][Decoration] = 1;
           break;
         case SpvDecorationRelaxedPrecision:
           break;
