@@ -663,8 +663,10 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
   float YMax = std::fmax(A.Y, std::fmax(B.Y, C.Y));
 
   // Compute pixel increment values in normalized device coordinates.
-  float XInc = 2.f / FB.getWidth();
-  float YInc = 2.f / FB.getHeight();
+  uint32_t FBWidth = FB.getWidth();
+  uint32_t FBHeight = FB.getHeight();
+  float XInc = 2.f / FBWidth;
+  float YInc = 2.f / FBHeight;
 
   // Loop over pixels in axis-aligned bounding box.
   for (float y = YMin; y < YMax; y += YInc)
@@ -773,8 +775,8 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
         CurrentInvocation = nullptr;
 
         // Convert pixel coordinates to framebuffer space.
-        int XF = std::round((FB.getWidth() / 2) * x + (FB.getWidth() / 2));
-        int YF = std::round((FB.getHeight() / 2) * y + (FB.getHeight() / 2));
+        int XF = (int)std::round((FBWidth / 2) * x + (FBWidth / 2));
+        int YF = (int)std::round((FBHeight / 2) * y + (FBHeight / 2));
 
         // Write fragment outputs to color attachments.
         std::vector<uint32_t> ColorAttachments =
@@ -800,7 +802,7 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
             else if (v >= 1.f)
               return 255;
             else
-              return std::round(v * 255);
+              return (uint8_t)std::round(v * 255);
           };
           uint8_t Pixel[4] = {convert(OutputData.get<float>(0)),
                               convert(OutputData.get<float>(1)),
@@ -809,7 +811,7 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
 
           // Write pixel color to attachment.
           uint64_t Address = FB.getAttachments()[Ref];
-          Address += (XF + YF * FB.getWidth()) * 4;
+          Address += (XF + YF * FBWidth) * 4;
           Dev.getGlobalMemory().store(Address, 4, Pixel);
         }
       }
