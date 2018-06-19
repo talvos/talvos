@@ -100,6 +100,9 @@ public:
   /// Returns \p true if this is an integer type.
   bool isInt() const { return Id == INT; }
 
+  /// Returns \p true if this is a matrix type.
+  bool isMatrix() const { return Id == MATRIX; }
+
   /// Returns \p true if this is a pointer type.
   bool isPointer() const { return Id == POINTER; }
 
