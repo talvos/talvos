@@ -17,6 +17,7 @@
 #include <thread>
 
 #if defined(_WIN32) && !defined(__MINGW32__)
+#define NOMINMAX
 #include <io.h>
 #include <windows.h>
 #define isatty _isatty
