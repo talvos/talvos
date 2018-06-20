@@ -656,27 +656,45 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
   getPosition(VB, B);
   getPosition(VC, C);
 
-  // Compute axis-aligned bounding box.
-  float XMin = std::fmin(A.X, std::fmin(B.X, C.X));
-  float YMin = std::fmin(A.Y, std::fmin(B.Y, C.Y));
-  float XMax = std::fmax(A.X, std::fmax(B.X, C.X));
-  float YMax = std::fmax(A.Y, std::fmax(B.Y, C.Y));
-
-  // Compute pixel increment values in normalized device coordinates.
+  // Define some convenience lambdas for converting between framebuffer
+  // coordinates and normalised device coordinates.
   uint32_t FBWidth = FB.getWidth();
   uint32_t FBHeight = FB.getHeight();
-  float XInc = 2.f / FBWidth;
-  float YInc = 2.f / FBHeight;
+  auto xDevToFB = [FBWidth](float XDev) -> float {
+    return (FBWidth / 2.f) * XDev + (FBWidth / 2.f);
+  };
+  auto yDevToFB = [FBHeight](float YDev) -> float {
+    return (FBHeight / 2.f) * YDev + (FBHeight / 2.f);
+  };
+  auto xFBToDev = [FBWidth](float XFB) -> float {
+    return (XFB - (FBWidth / 2.f)) / (FBWidth / 2.f);
+  };
+  auto yFBToDev = [FBHeight](float YFB) -> float {
+    return (YFB - (FBHeight / 2.f)) / (FBHeight / 2.f);
+  };
 
-  // Loop over pixels in axis-aligned bounding box.
-  for (float y = YMin; y < YMax; y += YInc)
+  // Compute an axis-aligned bounding box for the primitive.
+  float XMinDev = std::fmin(A.X, std::fmin(B.X, C.X));
+  float YMinDev = std::fmin(A.Y, std::fmin(B.Y, C.Y));
+  float XMaxDev = std::fmax(A.X, std::fmax(B.X, C.X));
+  float YMaxDev = std::fmax(A.Y, std::fmax(B.Y, C.Y));
+  int XMinFB = (int)std::floor(xDevToFB(XMinDev));
+  int XMaxFB = (int)std::ceil(xDevToFB(XMaxDev));
+  int YMinFB = (int)std::floor(yDevToFB(YMinDev));
+  int YMaxFB = (int)std::ceil(yDevToFB(YMaxDev));
+
+  // TODO: Clip bounding box to within framebuffer/viewport.
+  // Loop over framebuffer coordinates in the axis-aligned bounding box.
+  for (int YFB = YMinFB; YFB <= YMaxFB; YFB++)
   {
-    for (float x = XMin; x < XMax; x += XInc)
+    for (int XFB = XMinFB; XFB <= XMaxFB; XFB++)
     {
-      // Compute barycentric coordinates.
+      // Compute barycentric coordinates using normalized device coordinates.
+      float XD = xFBToDev(XFB + 0.5f);
+      float YD = yFBToDev(YFB + 0.5f);
       float Div = (B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y);
-      float a = (((B.Y - C.Y) * (x - C.X)) + ((C.X - B.X) * (y - C.Y))) / Div;
-      float b = (((C.Y - A.Y) * (x - C.X)) + ((A.X - C.X) * (y - C.Y))) / Div;
+      float a = (((B.Y - C.Y) * (XD - C.X)) + ((C.X - B.X) * (YD - C.Y))) / Div;
+      float b = (((C.Y - A.Y) * (XD - C.X)) + ((A.X - C.X) * (YD - C.Y))) / Div;
       float c = 1.f - a - b;
 
       // Check if pixel is inside triangle.
@@ -774,10 +792,6 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
         delete CurrentInvocation;
         CurrentInvocation = nullptr;
 
-        // Convert pixel coordinates to framebuffer space.
-        int XF = (int)std::round((FBWidth / 2) * x + (FBWidth / 2));
-        int YF = (int)std::round((FBHeight / 2) * y + (FBHeight / 2));
-
         // Write fragment outputs to color attachments.
         std::vector<uint32_t> ColorAttachments =
             RP.getSubpass(0).ColorAttachments;
@@ -811,7 +825,7 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
 
           // Write pixel color to attachment.
           uint64_t Address = FB.getAttachments()[Ref];
-          Address += (XF + YF * FBWidth) * 4;
+          Address += (XFB + YFB * FBWidth) * 4;
           Dev.getGlobalMemory().store(Address, 4, Pixel);
         }
       }
