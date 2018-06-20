@@ -252,7 +252,26 @@ std::unique_ptr<Type> Type::getStruct(const StructElementTypeList &ElemTypes)
       Offsets[i] = ElemTypes[i].second.at(SpvDecorationOffset);
     else
       Offsets[i] = CurrentOffset;
-    CurrentOffset = Offsets[i] + ElemTypes[i].first->getSize();
+
+    // Special case for size of a matrix with an explicit layout.
+    if (ElemTypes[i].first->isMatrix() &&
+        ElemTypes[i].second.count(SpvDecorationMatrixStride))
+    {
+      const Type *MatrixType = ElemTypes[i].first;
+      const Type *VectorType = MatrixType->getElementType();
+      uint32_t MatrixStride = ElemTypes[i].second.at(SpvDecorationMatrixStride);
+
+      // Calculate size of matrix based on stride and layout.
+      size_t MatrixSize;
+      if (ElemTypes[i].second.count(SpvDecorationColMajor))
+        MatrixSize = MatrixType->getElementCount() * MatrixStride;
+      else
+        MatrixSize = VectorType->getElementCount() * MatrixStride;
+
+      CurrentOffset = Offsets[i] + MatrixSize;
+    }
+    else
+      CurrentOffset = Offsets[i] + ElemTypes[i].first->getSize();
   }
 
   std::unique_ptr<Type> T(new Type(STRUCT, CurrentOffset));
