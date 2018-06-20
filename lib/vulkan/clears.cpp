@@ -18,7 +18,9 @@ VKAPI_ATTR void VKAPI_CALL vkCmdClearColorImage(
     const VkClearColorValue *pColor, uint32_t rangeCount,
     const VkImageSubresourceRange *pRanges)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  std::vector<VkImageSubresourceRange> Ranges(pRanges, pRanges + rangeCount);
+  commandBuffer->Commands.push_back(new talvos::ClearColorImageCommand(
+      image->Address, image->Format, image->Extent, *pColor, Ranges));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdClearDepthStencilImage(

@@ -37,6 +37,7 @@ public:
   enum Type
   {
     BEGIN_RENDER_PASS,
+    CLEAR_COLOR_IMAGE,
     COPY_BUFFER_TO_IMAGE,
     COPY_IMAGE_TO_BUFFER,
     DISPATCH,
@@ -77,6 +78,39 @@ protected:
 private:
   /// The render pass instance.
   std::shared_ptr<RenderPassInstance> RPI;
+};
+
+/// This class encapsulates information about a clear color image command.
+class ClearColorImageCommand : public Command
+{
+public:
+  /// Create a new ClearColorImageCommand.
+  ClearColorImageCommand(uint64_t Address, VkFormat Format, VkExtent3D Extent,
+                         VkClearColorValue Color,
+                         const std::vector<VkImageSubresourceRange> &Ranges)
+      : Command(CLEAR_COLOR_IMAGE), Address(Address), Format(Format),
+        Extent(Extent), Color(Color), Ranges(Ranges)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  // The memory address of the image allocation.
+  uint64_t Address;
+
+  /// The format of the image.
+  VkFormat Format;
+
+  /// The dimensions of the image.
+  VkExtent3D Extent;
+
+  /// The clear color to use.
+  VkClearColorValue Color;
+
+  /// The image subranges to clear.
+  std::vector<VkImageSubresourceRange> Ranges;
 };
 
 /// This class encapsulates information about a copy buffer to image command.

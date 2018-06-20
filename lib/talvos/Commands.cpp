@@ -7,9 +7,10 @@
 /// This file defines the Command base class and its subclasses.
 
 #include <cassert>
+#include <cmath>
 
-#include "talvos/Commands.h"
 #include "PipelineExecutor.h"
+#include "talvos/Commands.h"
 #include "talvos/Device.h"
 #include "talvos/Memory.h"
 #include "talvos/RenderPass.h"
@@ -25,6 +26,34 @@ void Command::run(Device &Dev) const
 }
 
 void BeginRenderPassCommand::runImpl(Device &Dev) const { RPI->begin(); }
+
+void ClearColorImageCommand::runImpl(Device &Dev) const
+{
+  // TODO: Handle multiple ranges, mip levels, array layers, and other formats.
+  assert(Ranges.size() == 1);
+  assert(Ranges[0].baseMipLevel == 0 && Ranges[0].levelCount == 1);
+  assert(Ranges[0].baseArrayLayer == 0 && Ranges[0].layerCount == 1);
+  assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
+
+  // Generate pixel data.
+  uint8_t PixelValue[4];
+  for (uint32_t i = 0; i < 4; i++)
+    PixelValue[i] = (uint8_t)std::round(Color.float32[i] * 255);
+
+  // Store pixel data to each pixel in image.
+  for (uint32_t Z = 0; Z < Extent.depth; Z++)
+  {
+    for (uint32_t Y = 0; Y < Extent.height; Y++)
+    {
+      for (uint32_t X = 0; X < Extent.width; X++)
+      {
+        Dev.getGlobalMemory().store(
+            Address + (X + ((Y + (Z * Extent.height)) * Extent.width)) * 4, 4,
+            PixelValue);
+      }
+    }
+  }
+}
 
 void CopyImageToBufferCommand::runImpl(Device &Dev) const
 {
