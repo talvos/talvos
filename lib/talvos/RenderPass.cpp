@@ -59,15 +59,15 @@ void RenderPassInstance::beginSubpass()
     if (AttachmentsInitialized[AttachRef])
       continue;
 
-    const VkAttachmentDescription &Attachment = RP.getAttachment(AttachRef);
+    const VkAttachmentDescription &AttachDesc = RP.getAttachment(AttachRef);
     AttachmentsInitialized[AttachRef] = true;
 
     // Skip attachments if not clearing them.
-    if (Attachment.loadOp != VK_ATTACHMENT_LOAD_OP_CLEAR)
+    if (AttachDesc.loadOp != VK_ATTACHMENT_LOAD_OP_CLEAR)
       continue;
 
     // TODO: Handle other image formats.
-    assert(Attachment.format == VK_FORMAT_R8G8B8A8_UNORM);
+    assert(AttachDesc.format == VK_FORMAT_R8G8B8A8_UNORM);
 
     // Generate integer clear value.
     assert(AttachRef < ClearValues.size());
@@ -78,12 +78,13 @@ void RenderPassInstance::beginSubpass()
                         (uint8_t)std::round(Clear[3] * 255)};
 
     // Store clear value to each pixel in attachment.
+    const Attachment &Attach = FB.getAttachments()[AttachIndex];
     for (uint32_t y = 0; y < FB.getHeight(); y++)
     {
       for (uint32_t x = 0; x < FB.getWidth(); x++)
       {
-        uint64_t Address = FB.getAttachments()[AttachIndex];
-        Address += (x + (y * FB.getWidth())) * 4;
+        uint64_t Address = Attach.Address;
+        Address += (x + (y * Attach.XStride)) * 4;
         FB.getDevice().getGlobalMemory().store(Address, 4, Pixel);
       }
     }

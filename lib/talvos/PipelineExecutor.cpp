@@ -824,8 +824,9 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
                               convert(OutputData.get<float>(3))};
 
           // Write pixel color to attachment.
-          uint64_t Address = FB.getAttachments()[Ref];
-          Address += (XFB + YFB * FBWidth) * 4;
+          Attachment Attach = FB.getAttachments()[Ref];
+          uint64_t Address = Attach.Address;
+          Address += (XFB + YFB * Attach.XStride) * 4;
           Dev.getGlobalMemory().store(Address, 4, Pixel);
         }
       }

@@ -53,10 +53,15 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateFramebuffer(
     VkDevice device, const VkFramebufferCreateInfo *pCreateInfo,
     const VkAllocationCallbacks *pAllocator, VkFramebuffer *pFramebuffer)
 {
-  // Build list of attachment memory addresses.
-  std::vector<uint64_t> Attachments;
+  // Build list of attachments.
+  std::vector<talvos::Attachment> Attachments;
   for (uint32_t i = 0; i < pCreateInfo->attachmentCount; i++)
-    Attachments.push_back(pCreateInfo->pAttachments[i]->Image->Address);
+  {
+    talvos::Attachment Attach;
+    Attach.Address = pCreateInfo->pAttachments[i]->Image->Address;
+    Attach.XStride = pCreateInfo->pAttachments[i]->Image->Extent.width;
+    Attachments.push_back(Attach);
+  }
 
   // Create framebuffer.
   *pFramebuffer = new VkFramebuffer_T;

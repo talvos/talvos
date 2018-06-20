@@ -17,17 +17,27 @@ namespace talvos
 {
 class Device;
 
+/// Structure to describe a framebuffer attachment.
+struct Attachment
+{
+  /// The base memory address for the attachment.
+  uint64_t Address;
+
+  /// The stride in pixels between rows of the attachment.
+  uint64_t XStride;
+};
+
 /// This class represents a framebuffer that can be used for rendering.
 class Framebuffer
 {
 public:
   /// Create a framebuffer.
   Framebuffer(Device &Dev, uint32_t Width, uint32_t Height,
-              const std::vector<uint64_t> &Attachments)
+              const std::vector<Attachment> &Attachments)
       : Dev(Dev), Width(Width), Height(Height), Attachments(Attachments){};
 
   /// Returns the list of attachment memory addresses backing this framebuffer.
-  const std::vector<uint64_t> &getAttachments() const { return Attachments; }
+  const std::vector<Attachment> &getAttachments() const { return Attachments; }
 
   /// Returns the device that this framebuffer is associated with.
   Device &getDevice() const { return Dev; }
@@ -45,7 +55,7 @@ private:
   uint32_t Height; ///< The height of the framebuffer in pixels.
 
   /// The memory addresses of the framebuffer attachments.
-  std::vector<uint64_t> Attachments;
+  std::vector<Attachment> Attachments;
 };
 
 /// This structure describes the attachments used by a subpass.
