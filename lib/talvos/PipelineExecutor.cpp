@@ -683,7 +683,12 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
   int YMinFB = (int)std::floor(yDevToFB(YMinDev));
   int YMaxFB = (int)std::ceil(yDevToFB(YMaxDev));
 
-  // TODO: Clip bounding box to within framebuffer/viewport.
+  // Clamp the bounding box to be within the framebuffer.
+  XMinFB = std::max(std::min(XMinFB, (int)(FBWidth - 1)), 0);
+  XMaxFB = std::max(std::min(XMaxFB, (int)(FBWidth - 1)), 0);
+  YMinFB = std::max(std::min(YMinFB, (int)(FBHeight - 1)), 0);
+  YMaxFB = std::max(std::min(YMaxFB, (int)(FBHeight - 1)), 0);
+
   // Loop over framebuffer coordinates in the axis-aligned bounding box.
   for (int YFB = YMinFB; YFB <= YMaxFB; YFB++)
   {
