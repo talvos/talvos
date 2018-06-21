@@ -80,11 +80,9 @@ void CopyImageToBufferCommand::runImpl(Device &Dev) const
             ElementSize;
 
     // Copy region one scanline at a time.
-    for (uint32_t z = Region.imageOffset.z;
-         z < Region.imageOffset.z + Region.imageExtent.depth; z++)
+    for (uint32_t z = 0; z < Region.imageExtent.depth; z++)
     {
-      for (uint32_t y = Region.imageOffset.y;
-           y < Region.imageOffset.y + Region.imageExtent.height; y++)
+      for (uint32_t y = 0; y < Region.imageExtent.height; y++)
       {
         Memory::copy(
             DstBase + (((z * BufferHeight) + y) * BufferWidth) * ElementSize,
@@ -121,11 +119,9 @@ void CopyBufferToImageCommand::runImpl(Device &Dev) const
             ElementSize;
 
     // Copy region one scanline at a time.
-    for (uint32_t z = Region.imageOffset.z;
-         z < Region.imageOffset.z + Region.imageExtent.depth; z++)
+    for (uint32_t z = 0; z < Region.imageExtent.depth; z++)
     {
-      for (uint32_t y = Region.imageOffset.y;
-           y < Region.imageOffset.y + Region.imageExtent.height; y++)
+      for (uint32_t y = 0; y < Region.imageExtent.height; y++)
       {
         Memory::copy(
             DstBase + (((z * ImageHeight) + y) * ImageWidth) * ElementSize,
