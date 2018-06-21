@@ -125,6 +125,10 @@ void Memory::load(uint8_t *Data, uint64_t Address, uint64_t NumBytes) const
         << " from address 0x" << std::hex << Address << " ("
         << scopeToString(Scope) << " scope) ";
     Dev.reportError(Err.str());
+
+    // Zero output data to conform to robust buffer access feature.
+    memset(Data, 0, NumBytes);
+
     return;
   }
 
