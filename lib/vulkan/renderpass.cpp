@@ -58,7 +58,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateFramebuffer(
   for (uint32_t i = 0; i < pCreateInfo->attachmentCount; i++)
   {
     talvos::Attachment Attach;
-    Attach.Address = pCreateInfo->pAttachments[i]->Image->Address;
+    Attach.Address = pCreateInfo->pAttachments[i]->Address;
     Attach.XStride = pCreateInfo->pAttachments[i]->Image->Extent.width;
     Attachments.push_back(Attach);
   }

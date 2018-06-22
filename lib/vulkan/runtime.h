@@ -125,6 +125,7 @@ struct VkImageView_T
   VkImage Image;
   VkImageViewType Type;
   VkFormat Format;
+  uint64_t Address;
 };
 
 struct VkInstance_T
