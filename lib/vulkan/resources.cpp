@@ -158,6 +158,21 @@ VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2(
 {
   vkGetBufferMemoryRequirements(device, pInfo->buffer,
                                 &pMemoryRequirements->memoryRequirements);
+
+  // Walk through extensions.
+  void *Ext = pMemoryRequirements->pNext;
+  while (Ext)
+  {
+    if (*(VkStructureType *)Ext ==
+        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS)
+    {
+      VkMemoryDedicatedRequirements *Requirements =
+          (VkMemoryDedicatedRequirements *)Ext;
+      Requirements->prefersDedicatedAllocation = VK_FALSE;
+      Requirements->requiresDedicatedAllocation = VK_FALSE;
+    }
+    Ext = ((void **)Ext)[1];
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2KHR(
