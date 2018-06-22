@@ -78,7 +78,7 @@ void RenderPassInstance::beginSubpass()
                         (uint8_t)std::round(Clear[3] * 255)};
 
     // Store clear value to each pixel in attachment.
-    const Attachment &Attach = FB.getAttachments()[AttachIndex];
+    const Attachment &Attach = FB.getAttachments()[AttachRef];
     for (uint32_t y = 0; y < FB.getHeight(); y++)
     {
       for (uint32_t x = 0; x < FB.getWidth(); x++)
