@@ -253,7 +253,6 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   initialiseBufferVariables(Cmd.getDescriptorSetMap());
 
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
-  const RenderPass &RP = RPI.getRenderPass();
   const Framebuffer &FB = RPI.getFramebuffer();
 
   // TODO: Handle instancing
@@ -266,7 +265,7 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
   {
     for (uint32_t v = 0; v < Cmd.getNumVertices(); v += 3)
-      rasterizeTriangle(RP, FB, State.VertexOutputs[v],
+      rasterizeTriangle(RPI, FB, State.VertexOutputs[v],
                         State.VertexOutputs[v + 1], State.VertexOutputs[v + 2]);
     break;
   }
@@ -278,13 +277,13 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
       const VertexOutput &B = State.VertexOutputs[v - 1];
 
       const VertexOutput &C = State.VertexOutputs[v];
-      rasterizeTriangle(RP, FB, A, B, C);
+      rasterizeTriangle(RPI, FB, A, B, C);
 
       if (++v >= Cmd.getNumVertices())
         break;
 
       const VertexOutput &D = State.VertexOutputs[v];
-      rasterizeTriangle(RP, FB, B, D, C);
+      rasterizeTriangle(RPI, FB, B, D, C);
     }
     break;
   }
@@ -633,7 +632,7 @@ void PipelineExecutor::initialiseBufferVariables(
   }
 }
 
-void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
+void PipelineExecutor::rasterizeTriangle(const RenderPassInstance &RPI,
                                          const Framebuffer &FB,
                                          const VertexOutput &VA,
                                          const VertexOutput &VB,
@@ -641,6 +640,8 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
 {
   // TODO: Parallelize rasterization?
   IsWorkerThread = true;
+
+  const RenderPass &RP = RPI.getRenderPass();
 
   // Gather vertex positions for the primitive.
   Vec2 A, B, C;
@@ -802,7 +803,7 @@ void PipelineExecutor::rasterizeTriangle(const RenderPass &RP,
 
         // Write fragment outputs to color attachments.
         std::vector<uint32_t> ColorAttachments =
-            RP.getSubpass(0).ColorAttachments;
+            RP.getSubpass(RPI.getSubpassIndex()).ColorAttachments;
         for (auto Output : Outputs)
         {
           uint32_t Location = Output.second.Location;

@@ -28,7 +28,7 @@ class Framebuffer;
 class Invocation;
 class Object;
 class PipelineStage;
-class RenderPass;
+class RenderPassInstance;
 class Variable;
 class Workgroup;
 
@@ -94,7 +94,7 @@ private:
   void initialiseBufferVariables(const DescriptorSetMap &DSM);
 
   /// Helper function to rasterize a triangle primitive.
-  void rasterizeTriangle(const RenderPass &RP, const Framebuffer &FB,
+  void rasterizeTriangle(const RenderPassInstance &RPI, const Framebuffer &FB,
                          const VertexOutput &VA, const VertexOutput &VB,
                          const VertexOutput &VC);
 
