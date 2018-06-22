@@ -408,9 +408,11 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
   while (true)
   {
     // Get next vertex index.
-    uint32_t VertexIndex = (uint32_t)NextWorkIndex++;
-    if (VertexIndex >= DC->getNumVertices())
+    uint32_t WorkIndex = (uint32_t)NextWorkIndex++;
+    if (WorkIndex >= DC->getNumVertices())
       break;
+
+    uint32_t VertexIndex = WorkIndex + DC->getVertexOffset();
 
     std::vector<Object> InitialObjects = Objects;
 
@@ -519,13 +521,13 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
       {
         SpvBuiltIn BuiltIn =
             (SpvBuiltIn)Var->getDecoration(SpvDecorationBuiltIn);
-        State->VertexOutputs[VertexIndex].BuiltIns[BuiltIn] =
+        State->VertexOutputs[WorkIndex].BuiltIns[BuiltIn] =
             Object::load(Ty, *PipelineMemory, BaseAddress);
       }
       else if (Var->hasDecoration(SpvDecorationLocation))
       {
         uint32_t Location = Var->getDecoration(SpvDecorationLocation);
-        State->VertexOutputs[VertexIndex].Locations[Location] =
+        State->VertexOutputs[WorkIndex].Locations[Location] =
             Object::load(Ty, *PipelineMemory, BaseAddress);
       }
       else if (Ty->getTypeId() == Type::STRUCT &&
@@ -537,7 +539,7 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
           uint64_t Address = BaseAddress + Ty->getElementOffset(i);
           SpvBuiltIn BuiltIn = (SpvBuiltIn)Ty->getStructMemberDecorations(i).at(
               SpvDecorationBuiltIn);
-          State->VertexOutputs[VertexIndex].BuiltIns[BuiltIn] =
+          State->VertexOutputs[WorkIndex].BuiltIns[BuiltIn] =
               Object::load(Ty->getElementType(i), *PipelineMemory, Address);
         }
       }
