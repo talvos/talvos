@@ -841,6 +841,8 @@ void PipelineExecutor::rasterizeTriangle(const RenderPassInstance &RPI,
       }
     }
   }
+
+  IsWorkerThread = false;
 }
 
 void PipelineExecutor::signalError()
