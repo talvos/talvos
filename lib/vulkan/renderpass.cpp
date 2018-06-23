@@ -122,16 +122,22 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyFramebuffer(VkDevice device, VkFramebuffer framebuffer,
                      const VkAllocationCallbacks *pAllocator)
 {
-  delete framebuffer->Framebuffer;
-  delete framebuffer;
+  if (framebuffer)
+  {
+    delete framebuffer->Framebuffer;
+    delete framebuffer;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyRenderPass(VkDevice device, VkRenderPass renderPass,
                     const VkAllocationCallbacks *pAllocator)
 {
-  delete renderPass->RenderPass;
-  delete renderPass;
+  if (renderPass)
+  {
+    delete renderPass->RenderPass;
+    delete renderPass;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetRenderAreaGranularity(VkDevice device,

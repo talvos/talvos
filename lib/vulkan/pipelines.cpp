@@ -169,11 +169,12 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyPipeline(VkDevice device, VkPipeline pipeline,
                   const VkAllocationCallbacks *pAllocator)
 {
-  if (pipeline->ComputePipeline)
+  if (pipeline)
+  {
     delete pipeline->ComputePipeline;
-  if (pipeline->GraphicsPipeline)
     delete pipeline->GraphicsPipeline;
-  delete pipeline;
+    delete pipeline;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL

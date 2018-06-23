@@ -29,7 +29,8 @@ vkFlushMappedMemoryRanges(VkDevice device, uint32_t memoryRangeCount,
 VKAPI_ATTR void VKAPI_CALL vkFreeMemory(VkDevice device, VkDeviceMemory memory,
                                         const VkAllocationCallbacks *pAllocator)
 {
-  device->Device->getGlobalMemory().release(memory->Address);
+  if (memory)
+    device->Device->getGlobalMemory().release(memory->Address);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceGroupPeerMemoryFeatures(

@@ -40,8 +40,11 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator)
 {
-  delete device->Device;
-  delete device;
+  if (device)
+  {
+    delete device->Device;
+    delete device;
+  }
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(

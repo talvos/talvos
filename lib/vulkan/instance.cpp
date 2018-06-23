@@ -38,8 +38,11 @@ vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks *pAllocator)
 {
-  delete instance->Device;
-  delete instance;
+  if (instance)
+  {
+    delete instance->Device;
+    delete instance;
+  }
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceVersion(uint32_t *pApiVersion)

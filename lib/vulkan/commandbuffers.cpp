@@ -62,9 +62,12 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyCommandPool(VkDevice device, VkCommandPool commandPool,
                      const VkAllocationCallbacks *pAllocator)
 {
-  for (auto Cmd : commandPool->Pool)
-    delete Cmd;
-  delete commandPool;
+  if (commandPool)
+  {
+    for (auto Cmd : commandPool->Pool)
+      delete Cmd;
+    delete commandPool;
+  }
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEndCommandBuffer(VkCommandBuffer commandBuffer)

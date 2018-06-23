@@ -120,9 +120,12 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
                         const VkAllocationCallbacks *pAllocator)
 {
-  for (auto DS : descriptorPool->Pool)
-    delete DS;
-  delete descriptorPool;
+  if (descriptorPool)
+  {
+    for (auto DS : descriptorPool->Pool)
+      delete DS;
+    delete descriptorPool;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorSetLayout(
