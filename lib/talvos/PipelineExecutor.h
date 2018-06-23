@@ -94,9 +94,8 @@ private:
   void initialiseBufferVariables(const DescriptorSetMap &DSM);
 
   /// Helper function to rasterize a triangle primitive.
-  void rasterizeTriangle(const RenderPassInstance &RPI, const Framebuffer &FB,
-                         const VertexOutput &VA, const VertexOutput &VB,
-                         const VertexOutput &VC);
+  void rasterizeTriangle(const DrawCommand &Cmd, const VertexOutput &VA,
+                         const VertexOutput &VB, const VertexOutput &VC);
 
   /// The device this shader is executing on.
   Device &Dev;

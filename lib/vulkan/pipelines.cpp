@@ -23,6 +23,7 @@ vkCmdBindPipeline(VkCommandBuffer commandBuffer,
   {
   case VK_PIPELINE_BIND_POINT_GRAPHICS:
     commandBuffer->PipelineGraphics = pipeline;
+    commandBuffer->Scissors = pipeline->GraphicsPipeline->getScissors();
     break;
   case VK_PIPELINE_BIND_POINT_COMPUTE:
     commandBuffer->PipelineCompute = pipeline;
@@ -137,11 +138,21 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
         VertexInfo.pVertexAttributeDescriptions +
             VertexInfo.vertexAttributeDescriptionCount);
 
+    // Get list of static scissor rectangles.
+    // TODO: Implement multiple viewports
+    const VkPipelineViewportStateCreateInfo &ViewportInfo =
+        *pCreateInfos[i].pViewportState;
+    assert(ViewportInfo.viewportCount == 1);
+    std::vector<VkRect2D> Scissors(ViewportInfo.pScissors,
+                                   ViewportInfo.pScissors +
+                                       ViewportInfo.scissorCount);
+
     // Create pipeline.
     pPipelines[i] = new VkPipeline_T;
     pPipelines[i]->GraphicsPipeline = new talvos::GraphicsPipeline(
         pCreateInfos[i].pInputAssemblyState->topology, VertexStage,
-        FragmentStage, VertexBindingDescriptions, VertexAttributeDescriptions);
+        FragmentStage, VertexBindingDescriptions, VertexAttributeDescriptions,
+        Scissors);
   }
   return VK_SUCCESS;
 }

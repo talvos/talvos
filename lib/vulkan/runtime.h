@@ -57,6 +57,7 @@ struct VkCommandBuffer_T
   talvos::DescriptorSetMap DescriptorSetsCompute;
   talvos::VertexBindingMap VertexBindings;
 
+  std::vector<VkRect2D> Scissors;
   std::shared_ptr<talvos::RenderPassInstance> RenderPassInstance;
 
   // TODO: Move this into libtalvos?

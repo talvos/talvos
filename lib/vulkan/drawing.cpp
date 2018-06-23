@@ -25,7 +25,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDraw(VkCommandBuffer commandBuffer,
       commandBuffer->PipelineGraphics->GraphicsPipeline, vertexCount,
       firstVertex, instanceCount, firstInstance,
       commandBuffer->DescriptorSetsGraphics, commandBuffer->VertexBindings,
-      commandBuffer->RenderPassInstance));
+      commandBuffer->Scissors, commandBuffer->RenderPassInstance));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexed(

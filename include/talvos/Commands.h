@@ -236,11 +236,12 @@ public:
               uint32_t VertexOffset, uint32_t NumInstances,
               uint32_t InstanceOffset, const DescriptorSetMap &DSM,
               const VertexBindingMap &VertexBindings,
+              const std::vector<VkRect2D> &Scissors,
               const std::shared_ptr<RenderPassInstance> RPI)
       : Command(DRAW), Pipeline(PL), NumVertices(NumVertices),
         VertexOffset(VertexOffset), NumInstances(NumInstances),
         InstanceOffset(InstanceOffset), DSM(DSM),
-        VertexBindings(VertexBindings), RPI(RPI){};
+        VertexBindings(VertexBindings), Scissors(Scissors), RPI(RPI){};
 
   /// Returns the descriptor set map used by the command.
   const DescriptorSetMap &getDescriptorSetMap() const { return DSM; }
@@ -259,6 +260,9 @@ public:
 
   /// Returns the render pass instance used by this command.
   const RenderPassInstance &getRenderPassInstance() const { return *RPI; }
+
+  /// Returns the scissor rectangles used by this command.
+  const std::vector<VkRect2D> &getScissors() const { return Scissors; }
 
   /// Returns the vertex binding map used by the command.
   const VertexBindingMap &getVertexBindings() const { return VertexBindings; }
@@ -281,6 +285,8 @@ private:
   DescriptorSetMap DSM; ///< The descriptor set map to use.
 
   VertexBindingMap VertexBindings; ///< The vertex buffer bindings to use.
+
+  std::vector<VkRect2D> Scissors; ///< The scissor rectangles to use.
 
   const std::shared_ptr<RenderPassInstance> RPI; ///< The render pass instance.
 };

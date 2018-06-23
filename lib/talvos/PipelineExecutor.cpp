@@ -252,9 +252,6 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   Objects = CurrentStage->getObjects();
   initialiseBufferVariables(Cmd.getDescriptorSetMap());
 
-  const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
-  const Framebuffer &FB = RPI.getFramebuffer();
-
   // TODO: Handle instancing
   assert(Cmd.getNumInstances() == 1);
 
@@ -265,8 +262,8 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
   case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
   {
     for (uint32_t v = 0; v < Cmd.getNumVertices(); v += 3)
-      rasterizeTriangle(RPI, FB, State.VertexOutputs[v],
-                        State.VertexOutputs[v + 1], State.VertexOutputs[v + 2]);
+      rasterizeTriangle(Cmd, State.VertexOutputs[v], State.VertexOutputs[v + 1],
+                        State.VertexOutputs[v + 2]);
     break;
   }
   case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP:
@@ -277,13 +274,13 @@ void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
       const VertexOutput &B = State.VertexOutputs[v - 1];
 
       const VertexOutput &C = State.VertexOutputs[v];
-      rasterizeTriangle(RPI, FB, A, B, C);
+      rasterizeTriangle(Cmd, A, B, C);
 
       if (++v >= Cmd.getNumVertices())
         break;
 
       const VertexOutput &D = State.VertexOutputs[v];
-      rasterizeTriangle(RPI, FB, B, D, C);
+      rasterizeTriangle(Cmd, B, D, C);
     }
     break;
   }
@@ -632,8 +629,7 @@ void PipelineExecutor::initialiseBufferVariables(
   }
 }
 
-void PipelineExecutor::rasterizeTriangle(const RenderPassInstance &RPI,
-                                         const Framebuffer &FB,
+void PipelineExecutor::rasterizeTriangle(const DrawCommand &Cmd,
                                          const VertexOutput &VA,
                                          const VertexOutput &VB,
                                          const VertexOutput &VC)
@@ -641,7 +637,10 @@ void PipelineExecutor::rasterizeTriangle(const RenderPassInstance &RPI,
   // TODO: Parallelize rasterization?
   IsWorkerThread = true;
 
+  const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
+  const Framebuffer &FB = RPI.getFramebuffer();
   const RenderPass &RP = RPI.getRenderPass();
+  const std::vector<VkRect2D> &Scissors = Cmd.getScissors();
 
   // Gather vertex positions for the primitive.
   Vec2 A, B, C;
@@ -692,6 +691,14 @@ void PipelineExecutor::rasterizeTriangle(const RenderPassInstance &RPI,
   XMaxFB = std::max(std::min(XMaxFB, (int)(FBWidth - 1)), 0);
   YMinFB = std::max(std::min(YMinFB, (int)(FBHeight - 1)), 0);
   YMaxFB = std::max(std::min(YMaxFB, (int)(FBHeight - 1)), 0);
+
+  // Clamp the bounding box to be within the scissor rectangle.
+  // TODO: Select correct scissor for current viewport
+  VkRect2D Scissor = Scissors[0];
+  XMinFB = std::max<int>(XMinFB, Scissor.offset.x);
+  XMaxFB = std::min<int>(XMaxFB, Scissor.offset.x + Scissor.extent.width - 1);
+  YMinFB = std::max<int>(YMinFB, Scissor.offset.y);
+  YMaxFB = std::min<int>(YMaxFB, Scissor.offset.y + Scissor.extent.height - 1);
 
   // Loop over framebuffer coordinates in the axis-aligned bounding box.
   for (int YFB = YMinFB; YFB <= YMaxFB; YFB++)

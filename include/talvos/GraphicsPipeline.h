@@ -36,11 +36,13 @@ public:
       VkPrimitiveTopology Topology, PipelineStage *VertexStage,
       PipelineStage *FragmentStage,
       const VertexBindingDescriptionList &VertexBindingDescriptions,
-      const VertexAttributeDescriptionList &VertexAttributeDescriptions)
+      const VertexAttributeDescriptionList &VertexAttributeDescriptions,
+      const std::vector<VkRect2D> &Scissors)
       : Topology(Topology), VertexStage(VertexStage),
         FragmentStage(FragmentStage),
         VertexBindingDescriptions(VertexBindingDescriptions),
-        VertexAttributeDescriptions(VertexAttributeDescriptions){};
+        VertexAttributeDescriptions(VertexAttributeDescriptions),
+        Scissors(Scissors){};
 
   /// Destroy the pipeline.
   ~GraphicsPipeline();
@@ -53,6 +55,9 @@ public:
 
   /// Returns the fragment pipeline stage.
   const PipelineStage *getFragmentStage() const { return FragmentStage; }
+
+  /// Returns the static scissor rectangles used by this pipeline.
+  const std::vector<VkRect2D> &getScissors() const { return Scissors; }
 
   /// Returns the primitive topology used by this pipeline.
   VkPrimitiveTopology getTopology() const { return Topology; }
@@ -87,6 +92,9 @@ private:
 
   /// The vertex attribute descriptions.
   VertexAttributeDescriptionList VertexAttributeDescriptions;
+
+  /// The static scissor rectangles used by this pipeline.
+  std::vector<VkRect2D> Scissors;
 };
 
 } // namespace talvos
