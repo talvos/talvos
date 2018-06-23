@@ -186,7 +186,12 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkResetDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
                       VkDescriptorPoolResetFlags flags)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (auto &DS : descriptorPool->Pool)
+    delete DS;
+
+  descriptorPool->Pool.clear();
+
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSetWithTemplate(
