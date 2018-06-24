@@ -29,10 +29,8 @@ void BeginRenderPassCommand::runImpl(Device &Dev) const { RPI->begin(); }
 
 void ClearColorImageCommand::runImpl(Device &Dev) const
 {
-  // TODO: Handle multiple ranges, mip levels, array layers, and other formats.
-  assert(Ranges.size() == 1);
+  // TODO: Handle mip levels and other formats.
   assert(Ranges[0].baseMipLevel == 0 && Ranges[0].levelCount == 1);
-  assert(Ranges[0].baseArrayLayer == 0 && Ranges[0].layerCount == 1);
   assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
 
   // Generate pixel data.
@@ -40,16 +38,31 @@ void ClearColorImageCommand::runImpl(Device &Dev) const
   for (uint32_t i = 0; i < 4; i++)
     PixelValue[i] = (uint8_t)std::round(Color.float32[i] * 255);
 
-  // Store pixel data to each pixel in image.
-  for (uint32_t Z = 0; Z < Extent.depth; Z++)
+  // Loop over ranges in command.
+  for (auto &Range : Ranges)
   {
-    for (uint32_t Y = 0; Y < Extent.height; Y++)
+    // Loop over array layers in range.
+    for (uint32_t Layer = Range.baseArrayLayer;
+         Layer < Range.baseArrayLayer + Range.layerCount; Layer++)
     {
-      for (uint32_t X = 0; X < Extent.width; X++)
+      uint32_t ImageWidth = Extent.width;
+      uint32_t ImageHeight = Extent.height;
+      uint32_t ImageDepth = Extent.depth;
+      uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
+
+      // Store pixel data to each pixel in image.
+      for (uint32_t Z = 0; Z < Extent.depth; Z++)
       {
-        Dev.getGlobalMemory().store(
-            Address + (X + ((Y + (Z * Extent.height)) * Extent.width)) * 4, 4,
-            PixelValue);
+        for (uint32_t Y = 0; Y < Extent.height; Y++)
+        {
+          for (uint32_t X = 0; X < Extent.width; X++)
+          {
+            Dev.getGlobalMemory().store(
+                Address + (ImageLayerSize * Layer * 4) +
+                    (X + ((Y + (Z * Extent.height)) * Extent.width)) * 4,
+                4, PixelValue);
+          }
+        }
       }
     }
   }
