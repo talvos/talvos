@@ -18,7 +18,32 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkBindBufferMemory2(VkDevice device, uint32_t bindInfoCount,
                     const VkBindBufferMemoryInfo *pBindInfos)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (uint32_t i = 0; i < bindInfoCount; i++)
+  {
+    // Walk through extensions.
+    const void *Ext = pBindInfos[i].pNext;
+    while (Ext)
+    {
+      switch (*(VkStructureType *)Ext)
+      {
+      case VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_DEVICE_GROUP_INFO:
+      {
+        VkBindBufferMemoryDeviceGroupInfo *BindInfo =
+            (VkBindBufferMemoryDeviceGroupInfo *)Ext;
+        assert(BindInfo->deviceIndexCount == 0);
+        break;
+      }
+      default:
+        assert(false && "Unimplemented extension");
+      }
+
+      Ext = ((void **)Ext)[1];
+    }
+
+    vkBindBufferMemory(device, pBindInfos[i].buffer, pBindInfos[i].memory,
+                       pBindInfos[i].memoryOffset);
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
