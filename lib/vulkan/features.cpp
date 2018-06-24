@@ -70,8 +70,9 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2(
   void *Ext = pFeatures->pNext;
   while (Ext)
   {
-    if (*(VkStructureType *)Ext ==
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES)
+    switch (*(VkStructureType *)Ext)
+    {
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES:
     {
       VkPhysicalDevice16BitStorageFeatures *Features =
           (VkPhysicalDevice16BitStorageFeatures *)Ext;
@@ -79,38 +80,43 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2(
       Features->uniformAndStorageBuffer16BitAccess = VK_FALSE;
       Features->storagePushConstant16 = VK_FALSE;
       Features->storageInputOutput16 = VK_FALSE;
+      break;
     }
-    if (*(VkStructureType *)Ext ==
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES)
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES:
     {
       VkPhysicalDeviceMultiviewFeatures *Features =
           (VkPhysicalDeviceMultiviewFeatures *)Ext;
       Features->multiview = VK_FALSE;
       Features->multiviewGeometryShader = VK_FALSE;
       Features->multiviewTessellationShader = VK_FALSE;
+      break;
     }
-    if (*(VkStructureType *)Ext ==
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES)
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES:
     {
       VkPhysicalDeviceProtectedMemoryFeatures *Features =
           (VkPhysicalDeviceProtectedMemoryFeatures *)Ext;
       Features->protectedMemory = VK_FALSE;
+      break;
     }
-    if (*(VkStructureType *)Ext ==
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES)
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES:
     {
       VkPhysicalDeviceSamplerYcbcrConversionFeatures *Features =
           (VkPhysicalDeviceSamplerYcbcrConversionFeatures *)Ext;
       Features->samplerYcbcrConversion = VK_FALSE;
+      break;
     }
-    if (*(VkStructureType *)Ext ==
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES)
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES:
     {
       VkPhysicalDeviceVariablePointerFeatures *Features =
           (VkPhysicalDeviceVariablePointerFeatures *)Ext;
       Features->variablePointersStorageBuffer = VK_TRUE;
       Features->variablePointers = VK_TRUE;
+      break;
     }
+    default:
+      assert(false && "Unimplemented extension");
+    }
+
     Ext = ((void **)Ext)[1];
   }
 }

@@ -163,14 +163,20 @@ VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2(
   void *Ext = pMemoryRequirements->pNext;
   while (Ext)
   {
-    if (*(VkStructureType *)Ext ==
-        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS)
+    switch (*(VkStructureType *)Ext)
+    {
+    case VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS:
     {
       VkMemoryDedicatedRequirements *Requirements =
           (VkMemoryDedicatedRequirements *)Ext;
       Requirements->prefersDedicatedAllocation = VK_FALSE;
       Requirements->requiresDedicatedAllocation = VK_FALSE;
+      break;
     }
+    default:
+      assert(false && "Unimplemented extension");
+    }
+
     Ext = ((void **)Ext)[1];
   }
 }
