@@ -91,7 +91,8 @@ vkDestroySemaphore(VkDevice device, VkSemaphore semaphore,
 
 VKAPI_ATTR VkResult VKAPI_CALL vkDeviceWaitIdle(VkDevice device)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Implement? All work currently completes in vkQueueSubmit.
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetEventStatus(VkDevice device, VkEvent event)
