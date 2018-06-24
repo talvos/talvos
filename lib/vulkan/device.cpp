@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include "talvos/Device.h"
+#include "version.h"
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
     VkPhysicalDevice physicalDevice, const VkDeviceCreateInfo *pCreateInfo,
@@ -245,6 +246,80 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties2(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceProperties2 *pProperties)
 {
   vkGetPhysicalDeviceProperties(physicalDevice, &pProperties->properties);
+
+  // Walk through list of extensions.
+  void *Ext = pProperties->pNext;
+  while (Ext)
+  {
+    switch (*(VkStructureType *)Ext)
+    {
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES:
+    {
+      VkPhysicalDeviceIDProperties *Properties =
+          (VkPhysicalDeviceIDProperties *)Ext;
+
+      // Generate a nonsense UUID (12345...).
+      for (uint8_t i = 0; i < 16; i++)
+        Properties->deviceUUID[i] = i;
+
+      memset(Properties->driverUUID, 0, sizeof(Properties->driverUUID));
+      Properties->driverUUID[0] = {TALVOS_VERSION_MAJOR};
+      Properties->driverUUID[1] = {TALVOS_VERSION_MINOR};
+      Properties->driverUUID[2] = {TALVOS_VERSION_PATCH};
+
+      memset(Properties->deviceLUID, 0, sizeof(Properties->deviceLUID));
+      Properties->deviceNodeMask = 0;
+      Properties->deviceLUIDValid = VK_FALSE;
+
+      break;
+    }
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES:
+    {
+      VkPhysicalDeviceMaintenance3Properties *Properties =
+          (VkPhysicalDeviceMaintenance3Properties *)Ext;
+      Properties->maxPerSetDescriptors = 1024;
+      Properties->maxMemoryAllocationSize = (1 << 30);
+      break;
+    }
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES:
+    {
+      VkPhysicalDeviceMultiviewProperties *Properties =
+          (VkPhysicalDeviceMultiviewProperties *)Ext;
+      Properties->maxMultiviewViewCount = 6;
+      Properties->maxMultiviewInstanceIndex = (1 << 27) - 1;
+      break;
+    }
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_POINT_CLIPPING_PROPERTIES:
+    {
+      VkPhysicalDevicePointClippingProperties *Properties =
+          (VkPhysicalDevicePointClippingProperties *)Ext;
+      Properties->pointClippingBehavior =
+          VK_POINT_CLIPPING_BEHAVIOR_ALL_CLIP_PLANES;
+      break;
+    }
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_PROPERTIES:
+    {
+      VkPhysicalDeviceProtectedMemoryProperties *Properties =
+          (VkPhysicalDeviceProtectedMemoryProperties *)Ext;
+      Properties->protectedNoFault = VK_FALSE;
+      break;
+    }
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES:
+    {
+      VkPhysicalDeviceSubgroupProperties *Properties =
+          (VkPhysicalDeviceSubgroupProperties *)Ext;
+      Properties->subgroupSize = 1;
+      Properties->supportedStages = VK_SHADER_STAGE_COMPUTE_BIT;
+      Properties->supportedOperations = VK_SUBGROUP_FEATURE_BASIC_BIT;
+      Properties->quadOperationsInAllStages = VK_FALSE;
+      break;
+    }
+    default:
+      assert(false && "Unimplemented extension");
+    }
+
+    Ext = ((void **)Ext)[1];
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties2KHR(
