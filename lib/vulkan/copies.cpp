@@ -20,7 +20,9 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyBuffer(VkCommandBuffer commandBuffer,
                                            uint32_t regionCount,
                                            const VkBufferCopy *pRegions)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  std::vector<VkBufferCopy> Regions(pRegions, pRegions + regionCount);
+  commandBuffer->Commands.push_back(new talvos::CopyBufferCommand(
+      srcBuffer->Address, dstBuffer->Address, Regions));
 }
 
 VKAPI_ATTR void VKAPI_CALL

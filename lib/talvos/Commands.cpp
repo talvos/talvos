@@ -55,6 +55,16 @@ void ClearColorImageCommand::runImpl(Device &Dev) const
   }
 }
 
+void CopyBufferCommand::runImpl(Device &Dev) const
+{
+  for (const VkBufferCopy &Region : Regions)
+  {
+    Memory::copy(DstAddr + Region.dstOffset, Dev.getGlobalMemory(),
+                 SrcAddr + Region.srcOffset, Dev.getGlobalMemory(),
+                 Region.size);
+  }
+}
+
 void CopyImageToBufferCommand::runImpl(Device &Dev) const
 {
   for (const VkBufferImageCopy &Region : Regions)

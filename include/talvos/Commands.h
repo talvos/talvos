@@ -38,6 +38,7 @@ public:
   {
     BEGIN_RENDER_PASS,
     CLEAR_COLOR_IMAGE,
+    COPY_BUFFER,
     COPY_BUFFER_TO_IMAGE,
     COPY_IMAGE_TO_BUFFER,
     DISPATCH,
@@ -111,6 +112,32 @@ private:
 
   /// The image subranges to clear.
   std::vector<VkImageSubresourceRange> Ranges;
+};
+
+/// This class encapsulates information about a copy buffer command.
+class CopyBufferCommand : public Command
+{
+public:
+  /// Create a new CopyBufferCommand.
+  CopyBufferCommand(uint64_t SrcAddr, uint64_t DstAddr,
+                    const std::vector<VkBufferCopy> &Regions)
+      : Command(COPY_BUFFER), SrcAddr(SrcAddr), DstAddr(DstAddr),
+        Regions(Regions)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  // The memory address of the source buffer.
+  uint64_t SrcAddr;
+
+  /// The memory address of the destination image.
+  uint64_t DstAddr;
+
+  /// The regions to copy.
+  std::vector<VkBufferCopy> Regions;
 };
 
 /// This class encapsulates information about a copy buffer to image command.
