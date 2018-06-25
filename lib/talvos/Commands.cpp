@@ -12,6 +12,7 @@
 #include "PipelineExecutor.h"
 #include "talvos/Commands.h"
 #include "talvos/Device.h"
+#include "talvos/FormatUtils.h"
 #include "talvos/Memory.h"
 #include "talvos/RenderPass.h"
 
@@ -80,6 +81,8 @@ void CopyBufferCommand::runImpl(Device &Dev) const
 
 void CopyImageCommand::runImpl(Device &Dev) const
 {
+  uint32_t ElementSize = getElementSize(SrcFormat);
+  assert(ElementSize == getElementSize(DstFormat));
   for (const VkImageCopy &Region : Regions)
   {
     // TODO: Handle array layers.
@@ -87,11 +90,6 @@ void CopyImageCommand::runImpl(Device &Dev) const
            Region.srcSubresource.layerCount == 1);
     assert(Region.srcSubresource.baseArrayLayer == 0 &&
            Region.dstSubresource.layerCount == 1);
-
-    // TODO: Handle other formats/element sizes
-    assert(SrcFormat == VK_FORMAT_R8G8B8A8_UNORM);
-    assert(DstFormat == VK_FORMAT_R8G8B8A8_UNORM);
-    uint32_t ElementSize = 4;
 
     uint32_t DstImageWidth = DstSize.width;
     uint32_t DstImageHeight = DstSize.height;
@@ -129,15 +127,12 @@ void CopyImageCommand::runImpl(Device &Dev) const
 
 void CopyImageToBufferCommand::runImpl(Device &Dev) const
 {
+  uint32_t ElementSize = getElementSize(SrcFormat);
   for (const VkBufferImageCopy &Region : Regions)
   {
     for (uint32_t LayerOffset = 0;
          LayerOffset < Region.imageSubresource.layerCount; LayerOffset++)
     {
-      // TODO: Handle other formats/element sizes
-      assert(SrcFormat == VK_FORMAT_R8G8B8A8_UNORM);
-      uint32_t ElementSize = 4;
-
       uint32_t BufferWidth = Region.bufferRowLength ? Region.bufferRowLength
                                                     : Region.imageExtent.width;
       uint32_t BufferHeight = Region.bufferImageHeight
@@ -177,15 +172,12 @@ void CopyImageToBufferCommand::runImpl(Device &Dev) const
 
 void CopyBufferToImageCommand::runImpl(Device &Dev) const
 {
+  uint32_t ElementSize = getElementSize(DstFormat);
   for (const VkBufferImageCopy &Region : Regions)
   {
     for (uint32_t LayerOffset = 0;
          LayerOffset < Region.imageSubresource.layerCount; LayerOffset++)
     {
-      // TODO: Handle other formats/element sizes
-      assert(DstFormat == VK_FORMAT_R8G8B8A8_UNORM);
-      uint32_t ElementSize = 4;
-
       uint32_t BufferWidth = Region.bufferRowLength ? Region.bufferRowLength
                                                     : Region.imageExtent.width;
       uint32_t BufferHeight = Region.bufferImageHeight
