@@ -184,6 +184,11 @@ void DrawCommand::runImpl(Device &Dev) const
   Dev.getPipelineExecutor().run(*this);
 }
 
+void DrawIndexedCommand::runImpl(Device &Dev) const
+{
+  Dev.getPipelineExecutor().run(*this);
+}
+
 void EndRenderPassCommand::runImpl(Device &Dev) const { RPI->end(); }
 
 void NextSubpassCommand::runImpl(Device &Dev) const { RPI->nextSubpass(); }

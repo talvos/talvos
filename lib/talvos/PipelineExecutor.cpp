@@ -211,7 +211,7 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   CurrentCommand = nullptr;
 }
 
-void PipelineExecutor::run(const talvos::DrawCommand &Cmd)
+void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
 {
   assert(CurrentCommand == nullptr);
   CurrentCommand = &Cmd;
@@ -397,7 +397,7 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
   IsWorkerThread = true;
   CurrentInvocation = nullptr;
 
-  const DrawCommand *DC = (const DrawCommand *)CurrentCommand;
+  const DrawCommandBase *DC = (const DrawCommandBase *)CurrentCommand;
   const GraphicsPipeline *Pipeline = DC->getPipeline();
 
   // Loop until all vertices are finished.
@@ -408,7 +408,28 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
     if (WorkIndex >= DC->getNumVertices())
       break;
 
-    uint32_t VertexIndex = WorkIndex + DC->getVertexOffset();
+    // Generate vertex index from work index.
+    uint32_t VertexIndex;
+    switch (DC->getType())
+    {
+    case Command::DRAW:
+      VertexIndex = WorkIndex + DC->getVertexOffset();
+      break;
+    case Command::DRAW_INDEXED:
+    {
+      // TODO: Handle VK_INDEX_TYPE_UINT16.
+      const DrawIndexedCommand *DIC = (const DrawIndexedCommand *)DC;
+      assert(DIC->getIndexType() == VK_INDEX_TYPE_UINT32);
+      uint64_t BaseAddress = DIC->getIndexBaseAddress();
+      Dev.getGlobalMemory().load(
+          (uint8_t *)&VertexIndex,
+          BaseAddress + (WorkIndex + DIC->getIndexOffset()) * 4, 4);
+      VertexIndex += DC->getVertexOffset();
+      break;
+    }
+    default:
+      assert(false && "Unhandled draw type");
+    }
 
     std::vector<Object> InitialObjects = Objects;
 
@@ -629,7 +650,7 @@ void PipelineExecutor::initialiseBufferVariables(
   }
 }
 
-void PipelineExecutor::rasterizeTriangle(const DrawCommand &Cmd,
+void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
                                          const VertexOutput &VA,
                                          const VertexOutput &VB,
                                          const VertexOutput &VC)

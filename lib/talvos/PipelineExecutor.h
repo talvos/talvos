@@ -23,7 +23,7 @@ namespace talvos
 class Command;
 class Device;
 class DispatchCommand;
-class DrawCommand;
+class DrawCommandBase;
 class Framebuffer;
 class Invocation;
 class Object;
@@ -69,7 +69,7 @@ public:
   void run(const DispatchCommand &Cmd);
 
   /// Run a draw command to completion.
-  void run(const DrawCommand &Cmd);
+  void run(const DrawCommandBase &Cmd);
 
   /// Signal that an error has occurred, breaking the interactive debugger.
   void signalError();
@@ -94,7 +94,7 @@ private:
   void initialiseBufferVariables(const DescriptorSetMap &DSM);
 
   /// Helper function to rasterize a triangle primitive.
-  void rasterizeTriangle(const DrawCommand &Cmd, const VertexOutput &VA,
+  void rasterizeTriangle(const DrawCommandBase &Cmd, const VertexOutput &VA,
                          const VertexOutput &VB, const VertexOutput &VC);
 
   /// The device this shader is executing on.

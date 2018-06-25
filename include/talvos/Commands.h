@@ -43,6 +43,7 @@ public:
     COPY_IMAGE_TO_BUFFER,
     DISPATCH,
     DRAW,
+    DRAW_INDEXED,
     END_RENDER_PASS,
     NEXT_SUBPASS,
   };
@@ -243,11 +244,11 @@ private:
   DescriptorSetMap DSM; ///< The descriptor set map to use.
 };
 
-/// This class encapsulates information about a draw command.
-class DrawCommand : public Command
+/// This is an abstract base class for draw commands.
+class DrawCommandBase : public Command
 {
 public:
-  /// Create a new DrawCommand.
+  /// Create a new DrawCommandBase.
   ///
   /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
   ///
@@ -259,13 +260,13 @@ public:
   /// \param DSM The descriptor set mapping to use.
   /// \param VertexBindings The vertex buffer bindings to use.
   /// \param RPI The render pass instance to use;
-  DrawCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
-              uint32_t VertexOffset, uint32_t NumInstances,
-              uint32_t InstanceOffset, const DescriptorSetMap &DSM,
-              const VertexBindingMap &VertexBindings,
-              const std::vector<VkRect2D> &Scissors,
-              const std::shared_ptr<RenderPassInstance> RPI)
-      : Command(DRAW), Pipeline(PL), NumVertices(NumVertices),
+  DrawCommandBase(Type Ty, const GraphicsPipeline *PL, uint32_t NumVertices,
+                  uint32_t VertexOffset, uint32_t NumInstances,
+                  uint32_t InstanceOffset, const DescriptorSetMap &DSM,
+                  const VertexBindingMap &VertexBindings,
+                  const std::vector<VkRect2D> &Scissors,
+                  const std::shared_ptr<RenderPassInstance> RPI)
+      : Command(Ty), Pipeline(PL), NumVertices(NumVertices),
         VertexOffset(VertexOffset), NumInstances(NumInstances),
         InstanceOffset(InstanceOffset), DSM(DSM),
         VertexBindings(VertexBindings), Scissors(Scissors), RPI(RPI){};
@@ -299,7 +300,7 @@ public:
 
 protected:
   /// Command execution handler.
-  virtual void runImpl(Device &Dev) const override;
+  virtual void runImpl(Device &Dev) const override = 0;
 
 private:
   const GraphicsPipeline *Pipeline; ///< The pipeline to use.
@@ -316,6 +317,88 @@ private:
   std::vector<VkRect2D> Scissors; ///< The scissor rectangles to use.
 
   const std::shared_ptr<RenderPassInstance> RPI; ///< The render pass instance.
+};
+
+/// This class encapsulates information about a draw command.
+class DrawCommand : public DrawCommandBase
+{
+public:
+  /// Create a new DrawCommand.
+  ///
+  /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
+  ///
+  /// \param PL The graphics pipeline to invoke.
+  /// \param NumVertices The number of vertices to draw.
+  /// \param VertexOffset The offset of the first vertex.
+  /// \param NumInstances The number of instances to draw.
+  /// \param InstanceOffset The offset of the first instance.
+  /// \param DSM The descriptor set mapping to use.
+  /// \param VertexBindings The vertex buffer bindings to use.
+  /// \param RPI The render pass instance to use;
+  DrawCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
+              uint32_t VertexOffset, uint32_t NumInstances,
+              uint32_t InstanceOffset, const DescriptorSetMap &DSM,
+              const VertexBindingMap &VertexBindings,
+              const std::vector<VkRect2D> &Scissors,
+              const std::shared_ptr<RenderPassInstance> RPI)
+      : DrawCommandBase(DRAW, PL, NumVertices, VertexOffset, NumInstances,
+                        InstanceOffset, DSM, VertexBindings, Scissors, RPI){};
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+};
+
+/// This class encapsulates information about an indexed draw command.
+class DrawIndexedCommand : public DrawCommandBase
+{
+public:
+  /// Create a new DrawIndexedCommand.
+  ///
+  /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
+  ///
+  /// \param PL The graphics pipeline to invoke.
+  /// \param NumVertices The number of vertices to draw.
+  /// \param IndexOffset The offset of the first index.
+  /// \param VertexOffset The offset of the first vertex.
+  /// \param NumInstances The number of instances to draw.
+  /// \param InstanceOffset The offset of the first instance.
+  /// \param IndexBaseAddress The address in memory of the indices.
+  /// \param IndexType The type of the indices.
+  /// \param DSM The descriptor set mapping to use.
+  /// \param VertexBindings The vertex buffer bindings to use.
+  /// \param RPI The render pass instance to use;
+  DrawIndexedCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
+                     uint32_t IndexOffset, uint32_t VertexOffset,
+                     uint32_t NumInstances, uint32_t InstanceOffset,
+                     uint64_t IndexBaseAddress, VkIndexType IndexType,
+                     const DescriptorSetMap &DSM,
+                     const VertexBindingMap &VertexBindings,
+                     const std::vector<VkRect2D> &Scissors,
+                     const std::shared_ptr<RenderPassInstance> RPI)
+      : DrawCommandBase(DRAW_INDEXED, PL, NumVertices, VertexOffset,
+                        NumInstances, InstanceOffset, DSM, VertexBindings,
+                        Scissors, RPI),
+        IndexOffset(IndexOffset), IndexBaseAddress(IndexBaseAddress),
+        IndexType(IndexType){};
+
+  /// Returns the address in memory of the indices.
+  uint64_t getIndexBaseAddress() const { return IndexBaseAddress; }
+
+  /// Returns the offset of the first index.
+  uint32_t getIndexOffset() const { return IndexOffset; }
+
+  /// Returns the type of the indices.
+  VkIndexType getIndexType() const { return IndexType; }
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  uint32_t IndexOffset;      ///< Offset of the first index.
+  uint64_t IndexBaseAddress; ///< Address of the indices.
+  VkIndexType IndexType;     ///< Type of the indices;
 };
 
 /// This class encapsulates information about an end render pass command.

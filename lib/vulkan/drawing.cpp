@@ -33,7 +33,12 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexed(
     VkCommandBuffer commandBuffer, uint32_t indexCount, uint32_t instanceCount,
     uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->Commands.push_back(new talvos::DrawIndexedCommand(
+      commandBuffer->PipelineGraphics->GraphicsPipeline, indexCount, firstIndex,
+      vertexOffset, instanceCount, firstInstance,
+      commandBuffer->IndexBufferAddress, commandBuffer->IndexType,
+      commandBuffer->DescriptorSetsGraphics, commandBuffer->VertexBindings,
+      commandBuffer->Scissors, commandBuffer->RenderPassInstance));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexedIndirect(
