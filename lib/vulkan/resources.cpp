@@ -128,12 +128,11 @@ vkCreateImageView(VkDevice device, const VkImageViewCreateInfo *pCreateInfo,
   (*pView)->Type = pCreateInfo->viewType;
   (*pView)->Format = pCreateInfo->format;
 
-  // TODO: Support other formats (just need to know bytes per pixel).
-  assert(pCreateInfo->format == VK_FORMAT_R8G8B8A8_UNORM);
   VkExtent3D Extent = pCreateInfo->image->Extent;
   (*pView)->Address = pCreateInfo->image->Address +
                       pCreateInfo->subresourceRange.baseArrayLayer *
-                          (Extent.width * Extent.height * 4);
+                          (Extent.width * Extent.height *
+                           talvos::getElementSize(pCreateInfo->format));
 
   return VK_SUCCESS;
 }
