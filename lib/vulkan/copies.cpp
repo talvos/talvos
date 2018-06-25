@@ -44,7 +44,10 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyImage(VkCommandBuffer commandBuffer,
                                           uint32_t regionCount,
                                           const VkImageCopy *pRegions)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  std::vector<VkImageCopy> Regions(pRegions, pRegions + regionCount);
+  commandBuffer->Commands.push_back(new talvos::CopyImageCommand(
+      srcImage->Address, dstImage->Address, srcImage->Format, dstImage->Format,
+      srcImage->Extent, dstImage->Extent, Regions));
 }
 
 VKAPI_ATTR void VKAPI_CALL

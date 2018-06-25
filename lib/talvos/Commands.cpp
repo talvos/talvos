@@ -78,6 +78,55 @@ void CopyBufferCommand::runImpl(Device &Dev) const
   }
 }
 
+void CopyImageCommand::runImpl(Device &Dev) const
+{
+  for (const VkImageCopy &Region : Regions)
+  {
+    // TODO: Handle array layers.
+    assert(Region.srcSubresource.baseArrayLayer == 0 &&
+           Region.srcSubresource.layerCount == 1);
+    assert(Region.srcSubresource.baseArrayLayer == 0 &&
+           Region.dstSubresource.layerCount == 1);
+
+    // TODO: Handle other formats/element sizes
+    assert(SrcFormat == VK_FORMAT_R8G8B8A8_UNORM);
+    assert(DstFormat == VK_FORMAT_R8G8B8A8_UNORM);
+    uint32_t ElementSize = 4;
+
+    uint32_t DstImageWidth = DstSize.width;
+    uint32_t DstImageHeight = DstSize.height;
+    uint64_t DstBase =
+        DstAddr +
+        (Region.dstOffset.x +
+         (Region.dstOffset.y + (Region.dstOffset.z * DstImageHeight)) *
+             DstImageWidth) *
+            ElementSize;
+
+    uint32_t SrcImageWidth = SrcSize.width;
+    uint32_t SrcImageHeight = SrcSize.height;
+    uint64_t SrcBase =
+        SrcAddr +
+        (Region.srcOffset.x +
+         (Region.srcOffset.y + (Region.srcOffset.z * SrcImageHeight)) *
+             SrcImageWidth) *
+            ElementSize;
+
+    // Copy region one scanline at a time.
+    for (uint32_t z = 0; z < Region.extent.depth; z++)
+    {
+      for (uint32_t y = 0; y < Region.extent.height; y++)
+      {
+        Memory::copy(DstBase + (((z * DstImageHeight) + y) * DstImageWidth) *
+                                   ElementSize,
+                     Dev.getGlobalMemory(),
+                     SrcBase + (((z * SrcImageHeight) + y) * SrcImageWidth) *
+                                   ElementSize,
+                     Dev.getGlobalMemory(), Region.extent.width * ElementSize);
+      }
+    }
+  }
+}
+
 void CopyImageToBufferCommand::runImpl(Device &Dev) const
 {
   for (const VkBufferImageCopy &Region : Regions)

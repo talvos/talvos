@@ -40,6 +40,7 @@ public:
     CLEAR_COLOR_IMAGE,
     COPY_BUFFER,
     COPY_BUFFER_TO_IMAGE,
+    COPY_IMAGE,
     COPY_IMAGE_TO_BUFFER,
     DISPATCH,
     DRAW,
@@ -172,6 +173,46 @@ private:
 
   /// The regions to copy.
   std::vector<VkBufferImageCopy> Regions;
+};
+
+/// This class encapsulates information about a copy image command.
+class CopyImageCommand : public Command
+{
+public:
+  /// Create a new CopyImageCommand.
+  CopyImageCommand(uint64_t SrcAddr, uint64_t DstAddr, VkFormat SrcFormat,
+                   VkFormat DstFormat, VkExtent3D SrcSize, VkExtent3D DstSize,
+                   const std::vector<VkImageCopy> &Regions)
+      : Command(COPY_IMAGE), SrcAddr(SrcAddr), DstAddr(DstAddr),
+        SrcFormat(SrcFormat), DstFormat(DstFormat), SrcSize(SrcSize),
+        DstSize(DstSize), Regions(Regions)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  // The memory address of the source image.
+  uint64_t SrcAddr;
+
+  /// The memory address of the destination image.
+  uint64_t DstAddr;
+
+  /// The format of the source image.
+  VkFormat SrcFormat;
+
+  /// The format of the destination image.
+  VkFormat DstFormat;
+
+  /// The dimensions of the source image.
+  VkExtent3D SrcSize;
+
+  /// The dimensions of the destination image.
+  VkExtent3D DstSize;
+
+  /// The regions to copy.
+  std::vector<VkImageCopy> Regions;
 };
 
 /// This class encapsulates information about a copy image to buffer command.
