@@ -12,7 +12,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindIndexBuffer(VkCommandBuffer commandBuffer,
                                                 VkDeviceSize offset,
                                                 VkIndexType indexType)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->IndexBufferAddress = buffer->Address + offset;
+  commandBuffer->IndexType = indexType;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDraw(VkCommandBuffer commandBuffer,

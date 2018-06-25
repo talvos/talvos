@@ -57,8 +57,13 @@ struct VkCommandBuffer_T
   talvos::DescriptorSetMap DescriptorSetsCompute;
   talvos::VertexBindingMap VertexBindings;
 
+  // Parameters for draw commands.
   std::vector<VkRect2D> Scissors;
   std::shared_ptr<talvos::RenderPassInstance> RenderPassInstance;
+
+  // Parameters for indexed draw commands.
+  uint64_t IndexBufferAddress;
+  VkIndexType IndexType;
 
   // TODO: Move this into libtalvos?
   std::vector<talvos::Command *> Commands;
