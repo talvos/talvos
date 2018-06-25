@@ -471,7 +471,8 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
           assert(Binding->inputRate == VK_VERTEX_INPUT_RATE_VERTEX);
 
           // TODO: Handle other formats
-          assert(Attr->format == VK_FORMAT_R32G32B32A32_SFLOAT);
+          assert(Attr->format == VK_FORMAT_R32G32B32A32_SFLOAT ||
+                 Attr->format == VK_FORMAT_R32_SINT);
 
           // Calculate variable address in vertex buffer memory.
           uint64_t ElemAddr = DC->getVertexBindings().at(Attr->binding);
