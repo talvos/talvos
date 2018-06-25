@@ -106,6 +106,7 @@ Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
       {
         Dim3 LocalId(LX, LY, LZ);
         Dim3 GlobalId = LocalId + GroupId * GroupSize;
+        uint32_t LocalIndex = LX + (LY + (LZ * GroupSize.Y)) * GroupSize.X;
         std::vector<Object> InitialObjects = Objects;
 
         // Create pipeline memory and populate with builtin variables.
@@ -126,6 +127,9 @@ Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
             break;
           case SpvBuiltInLocalInvocationId:
             PipelineMemory->store(Address, Sz, (uint8_t *)LocalId.Data);
+            break;
+          case SpvBuiltInLocalInvocationIndex:
+            PipelineMemory->store(Address, Sz, (uint8_t *)&LocalIndex);
             break;
           case SpvBuiltInNumWorkgroups:
             PipelineMemory->store(Address, Sz,
