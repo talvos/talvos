@@ -282,5 +282,10 @@ VKAPI_ATTR void VKAPI_CALL vkGetImageSubresourceLayout(
     VkDevice device, VkImage image, const VkImageSubresource *pSubresource,
     VkSubresourceLayout *pLayout)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  uint32_t ElementSize = talvos::getElementSize(image->Format);
+  pLayout->rowPitch = image->Extent.width * ElementSize;
+  pLayout->depthPitch = image->Extent.height * pLayout->rowPitch;
+  pLayout->arrayPitch = image->Extent.depth * pLayout->depthPitch;
+  pLayout->size = pLayout->arrayPitch;
+  pLayout->offset = pSubresource->arrayLayer * pLayout->arrayPitch;
 }
