@@ -133,7 +133,7 @@ private:
   // The memory address of the source buffer.
   uint64_t SrcAddr;
 
-  /// The memory address of the destination image.
+  /// The memory address of the destination buffer.
   uint64_t DstAddr;
 
   /// The regions to copy.
