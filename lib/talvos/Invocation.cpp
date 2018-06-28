@@ -187,6 +187,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpUnreachable, Unreachable);
     DISPATCH(SpvOpVariable, Variable);
     DISPATCH(SpvOpVectorExtractDynamic, VectorExtractDynamic);
+    DISPATCH(SpvOpVectorInsertDynamic, VectorInsertDynamic);
     DISPATCH(SpvOpVectorShuffle, VectorShuffle);
     DISPATCH(SpvOpVectorTimesScalar, VectorTimesScalar);
 
@@ -1160,6 +1161,33 @@ void Invocation::executeVectorExtractDynamic(const Instruction *Inst)
   if (Index >= Vector.getType()->getElementCount())
     Dev.reportError("Vector index out of range");
   Objects[Id] = Vector.extract({Index});
+}
+
+void Invocation::executeVectorInsertDynamic(const Instruction *Inst)
+{
+  uint32_t Id = Inst->getOperand(1);
+  uint16_t Index = 0;
+  switch (Objects[Inst->getOperand(4)].getType()->getSize())
+  {
+  case 2:
+    Index = OP(4, uint16_t);
+    break;
+  case 4:
+    Index = (uint16_t)OP(4, uint32_t);
+    break;
+  case 8:
+    Index = (uint16_t)OP(4, uint64_t);
+    break;
+  default:
+    assert(false && "Unhandled index size in OpVectorInsertDynamic");
+  }
+
+  const Object &Vector = Objects[Inst->getOperand(2)];
+  const Object &Component = Objects[Inst->getOperand(3)];
+  if (Index >= Vector.getType()->getElementCount())
+    Dev.reportError("Vector index out of range");
+  Objects[Id] = Vector;
+  Objects[Id].insert({Index}, Component);
 }
 
 void Invocation::executeVectorShuffle(const Instruction *Inst)

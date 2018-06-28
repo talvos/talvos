@@ -176,6 +176,7 @@ public:
   void executeUnreachable(const Instruction *Inst);
   void executeVariable(const Instruction *Inst);
   void executeVectorExtractDynamic(const Instruction *Inst);
+  void executeVectorInsertDynamic(const Instruction *Inst);
   void executeVectorShuffle(const Instruction *Inst);
   void executeVectorTimesScalar(const Instruction *Inst);
   ///@}
