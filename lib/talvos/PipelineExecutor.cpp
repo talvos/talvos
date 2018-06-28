@@ -220,11 +220,6 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
   assert(CurrentCommand == nullptr);
   CurrentCommand = &Cmd;
 
-  CurrentStage = Cmd.getPipeline()->getVertexStage();
-
-  Objects = CurrentStage->getObjects();
-  initialiseBufferVariables(Cmd.getDescriptorSetMap());
-
   Continue = false;
   Interactive = checkEnv("TALVOS_INTERACTIVE", false);
 
@@ -237,74 +232,84 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
   RenderPipelineState State;
   State.VertexOutputs.resize(Cmd.getNumVertices());
 
-  // Create worker threads for vertex shader.
-  NextWorkIndex = 0;
-  std::vector<std::thread> Threads;
-  for (unsigned i = 0; i < NumThreads; i++)
-    Threads.push_back(
-        std::thread(&PipelineExecutor::runVertexWorker, this, &State));
-
-  // Wait for vertex shader workers to complete.
-  for (unsigned i = 0; i < NumThreads; i++)
-    Threads[i].join();
-
-  finaliseBufferVariables(Cmd.getDescriptorSetMap());
-
-  // Switch to fragment shader for rasterization.
-  CurrentStage = Cmd.getPipeline()->getFragmentStage();
-  assert(CurrentStage && "rendering without fragment shader not implemented");
-  Objects = CurrentStage->getObjects();
-  initialiseBufferVariables(Cmd.getDescriptorSetMap());
-
-  // TODO: Handle instancing
-  assert(Cmd.getNumInstances() == 1);
-
-  // TODO: Handle other topologies
-  VkPrimitiveTopology Topology = Cmd.getPipeline()->getTopology();
-  switch (Topology)
+  // Loop over instances.
+  for (uint32_t Instance = 0; Instance < Cmd.getNumInstances(); Instance++)
   {
-  case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
-  {
-    for (uint32_t v = 0; v < Cmd.getNumVertices(); v += 3)
-      rasterizeTriangle(Cmd, State.VertexOutputs[v], State.VertexOutputs[v + 1],
-                        State.VertexOutputs[v + 2]);
-    break;
-  }
-  case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP:
-  {
-    for (uint32_t v = 2; v < Cmd.getNumVertices(); v++)
+    uint32_t InstanceIndex = Instance + Cmd.getInstanceOffset();
+
+    // Prepare vertex stage objects.
+    CurrentStage = Cmd.getPipeline()->getVertexStage();
+    Objects = CurrentStage->getObjects();
+    initialiseBufferVariables(Cmd.getDescriptorSetMap());
+
+    // Create worker threads for vertex shader.
+    NextWorkIndex = 0;
+    std::vector<std::thread> Threads;
+    for (unsigned i = 0; i < NumThreads; i++)
+      Threads.push_back(std::thread(&PipelineExecutor::runVertexWorker, this,
+                                    &State, InstanceIndex));
+
+    // Wait for vertex shader workers to complete.
+    for (unsigned i = 0; i < NumThreads; i++)
+      Threads[i].join();
+
+    finaliseBufferVariables(Cmd.getDescriptorSetMap());
+
+    // Switch to fragment shader for rasterization.
+    CurrentStage = Cmd.getPipeline()->getFragmentStage();
+    assert(CurrentStage && "rendering without fragment shader not implemented");
+    Objects = CurrentStage->getObjects();
+    initialiseBufferVariables(Cmd.getDescriptorSetMap());
+
+    // TODO: Handle other topologies
+    VkPrimitiveTopology Topology = Cmd.getPipeline()->getTopology();
+    switch (Topology)
     {
-      const VertexOutput &A = State.VertexOutputs[v - 2];
-      const VertexOutput &B = State.VertexOutputs[v - 1];
-
-      const VertexOutput &C = State.VertexOutputs[v];
-      rasterizeTriangle(Cmd, A, B, C);
-
-      if (++v >= Cmd.getNumVertices())
-        break;
-
-      const VertexOutput &D = State.VertexOutputs[v];
-      rasterizeTriangle(Cmd, B, D, C);
-    }
-    break;
-  }
-  case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN:
-  {
-    const VertexOutput &Center = State.VertexOutputs[0];
-    for (uint32_t v = 2; v < Cmd.getNumVertices(); v++)
+    case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
     {
-      const VertexOutput &A = State.VertexOutputs[v - 1];
-      const VertexOutput &B = State.VertexOutputs[v];
-      rasterizeTriangle(Cmd, Center, A, B);
+      for (uint32_t v = 0; v < Cmd.getNumVertices(); v += 3)
+        rasterizeTriangle(Cmd, State.VertexOutputs[v],
+                          State.VertexOutputs[v + 1],
+                          State.VertexOutputs[v + 2]);
+      break;
     }
-    break;
-  }
-  default:
-    std::cerr << "Unimplemented primitive topology: " << Topology << std::endl;
-    abort();
-  }
+    case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP:
+    {
+      for (uint32_t v = 2; v < Cmd.getNumVertices(); v++)
+      {
+        const VertexOutput &A = State.VertexOutputs[v - 2];
+        const VertexOutput &B = State.VertexOutputs[v - 1];
 
-  finaliseBufferVariables(Cmd.getDescriptorSetMap());
+        const VertexOutput &C = State.VertexOutputs[v];
+        rasterizeTriangle(Cmd, A, B, C);
+
+        if (++v >= Cmd.getNumVertices())
+          break;
+
+        const VertexOutput &D = State.VertexOutputs[v];
+        rasterizeTriangle(Cmd, B, D, C);
+      }
+      break;
+    }
+    case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN:
+    {
+      const VertexOutput &Center = State.VertexOutputs[0];
+      for (uint32_t v = 2; v < Cmd.getNumVertices(); v++)
+      {
+        const VertexOutput &A = State.VertexOutputs[v - 1];
+        const VertexOutput &B = State.VertexOutputs[v];
+        rasterizeTriangle(Cmd, Center, A, B);
+      }
+      break;
+    }
+    default:
+      std::cerr << "Unimplemented primitive topology: " << Topology
+                << std::endl;
+      abort();
+    }
+
+    finaliseBufferVariables(Cmd.getDescriptorSetMap());
+  }
 
   CurrentStage = nullptr;
   CurrentCommand = nullptr;
@@ -407,7 +412,8 @@ void PipelineExecutor::runComputeWorker()
   }
 }
 
-void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
+void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
+                                       uint32_t InstanceIndex)
 {
   IsWorkerThread = true;
   CurrentInvocation = nullptr;
@@ -502,6 +508,9 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State)
         {
           switch (Var->getDecoration(SpvDecorationBuiltIn))
           {
+          case SpvBuiltInInstanceIndex:
+            PipelineMemory->store(Address, 4, (const uint8_t *)&InstanceIndex);
+            break;
           case SpvBuiltInVertexIndex:
             assert(ElemSize == 4);
             PipelineMemory->store(Address, 4, (const uint8_t *)&VertexIndex);

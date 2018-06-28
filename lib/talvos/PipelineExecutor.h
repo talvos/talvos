@@ -85,7 +85,7 @@ private:
   void runComputeWorker();
 
   /// Worker thread entry point for vertex shaders.
-  void runVertexWorker(RenderPipelineState *State);
+  void runVertexWorker(RenderPipelineState *State, uint32_t InstanceIndex);
 
   /// Finalise buffer variables.
   void finaliseBufferVariables(const DescriptorSetMap &DSM);
