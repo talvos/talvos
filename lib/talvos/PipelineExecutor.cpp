@@ -79,10 +79,10 @@ struct PipelineExecutor::VertexOutput
   std::map<uint32_t, Object> Locations;  ///< Location variables.
 };
 
-// TODO: Define proper Vec2/Vec3/Vec3/Vec<N> classes?
-struct Vec2
+// TODO: Define proper Vec2/Vec3/Vec4/Vec<N> classes?
+struct Vec4
 {
-  float X, Y;
+  float X, Y, Z, W;
 };
 
 PipelineExecutor::PipelineExecutor(PipelineExecutorKey Key, Device &Dev)
@@ -689,8 +689,8 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
   const std::vector<VkRect2D> &Scissors = Cmd.getScissors();
 
   // Gather vertex positions for the primitive.
-  Vec2 A, B, C;
-  auto getPosition = [](const VertexOutput &V, Vec2 &Pos) {
+  Vec4 A, B, C;
+  auto getPosition = [](const VertexOutput &V, Vec4 &Pos) {
     assert(V.BuiltIns.count(SpvBuiltInPosition));
 
     const Object &Position = V.BuiltIns.at(SpvBuiltInPosition);
@@ -699,14 +699,25 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
            Position.getType()->getElementType()->getBitWidth() == 32 &&
            "Position built-in type must be float4");
 
-    memcpy(&Pos, Position.getData(), sizeof(Vec2));
+    memcpy(&Pos, Position.getData(), sizeof(Vec4));
   };
   getPosition(VA, A);
   getPosition(VB, B);
   getPosition(VC, C);
 
+  // Convert X/Y/Z components to normalized device coordinates.
+  A.X /= A.W;
+  A.Y /= A.W;
+  A.Z /= A.W;
+  B.X /= B.W;
+  B.Y /= B.W;
+  B.Z /= B.W;
+  C.X /= C.W;
+  C.Y /= C.W;
+  C.Z /= C.W;
+
   // Define some convenience lambdas for converting between framebuffer
-  // coordinates and normalised device coordinates.
+  // coordinates and normalized device coordinates.
   uint32_t FBWidth = FB.getWidth();
   uint32_t FBHeight = FB.getHeight();
   auto xDevToFB = [FBWidth](float XDev) -> float {
@@ -769,6 +780,10 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
           uint32_t Component;
         };
 
+        // Compute fragment depth and 1/w using linear interpolation.
+        float Depth = (a * A.Z) + (b * B.Z) + (c * C.Z);
+        float InvW = (a / A.W) + (b / B.W) + (c / C.W);
+
         // Create pipeline memory and populate with input/output variables.
         std::vector<Object> InitialObjects = Objects;
         std::shared_ptr<Memory> PipelineMemory =
@@ -809,12 +824,38 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
                 // Interpolate each element of variable between vertices.
                 for (uint32_t i = 0; i < FA.getType()->getElementCount(); i++)
                 {
-                  // TODO: Handle perspective interpolation if NoPerspective
-                  // decoration is not present
-                  float F = a * FA.get<float>(i) + b * FB.get<float>(i) +
-                            c * FC.get<float>(i);
+                  float F;
+                  if (Var->hasDecoration(SpvDecorationNoPerspective))
+                  {
+                    // Linear interpolation.
+                    F = (a * FA.get<float>(i)) + (b * FB.get<float>(i)) +
+                        (c * FC.get<float>(i));
+                  }
+                  else
+                  {
+                    // Perspective interpolation.
+                    F = ((a * FA.get<float>(i) / A.W) +
+                        (b * FB.get<float>(i) / B.W) +
+                        (c * FC.get<float>(i) / C.W)) / InvW;
+                  }
                   PipelineMemory->store(Address + i * 4, 4, (uint8_t *)&F);
                 }
+              }
+            }
+            else if (Var->hasDecoration(SpvDecorationBuiltIn))
+            {
+              switch (Var->getDecoration(SpvDecorationBuiltIn))
+              {
+              case SpvBuiltInFragCoord:
+              {
+                // TODO: Sample shading affects x/y components
+                assert(VarTy->isVector() && VarTy->getSize() == 16);
+                float FragCoord[4] = {XFB + 0.5f, YFB + 0.5f, Depth, InvW};
+                PipelineMemory->store(Address, 16, (const uint8_t *)FragCoord);
+                break;
+              }
+              default:
+                assert(false && "Unhandled fragment input builtin");
               }
             }
             else
