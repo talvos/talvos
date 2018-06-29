@@ -211,7 +211,6 @@ std::unique_ptr<Type> Type::getPointer(uint32_t StorageClass,
                                        const Type *ElemType,
                                        uint32_t ArrayStride)
 {
-  assert(ArrayStride >= ElemType->getSize());
   std::unique_ptr<Type> T(new Type(POINTER, sizeof(uint64_t)));
   T->StorageClass = StorageClass;
   T->ElementType = ElemType;
