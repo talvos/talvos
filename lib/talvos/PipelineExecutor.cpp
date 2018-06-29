@@ -509,6 +509,9 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
 
           // TODO: Handle other formats
           assert(Attr->format == VK_FORMAT_R32G32B32A32_SFLOAT ||
+                 Attr->format == VK_FORMAT_R32G32B32_SFLOAT ||
+                 Attr->format == VK_FORMAT_R32G32_SFLOAT ||
+                 Attr->format == VK_FORMAT_R32_SFLOAT ||
                  Attr->format == VK_FORMAT_R32_SINT);
 
           // Calculate variable address in vertex buffer memory.
