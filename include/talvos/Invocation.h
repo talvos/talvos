@@ -146,6 +146,7 @@ public:
   void executeLogicalNot(const Instruction *Inst);
   void executeLogicalNotEqual(const Instruction *Inst);
   void executeLogicalOr(const Instruction *Inst);
+  void executeMatrixTimesScalar(const Instruction *Inst);
   void executeNot(const Instruction *Inst);
   void executePhi(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
