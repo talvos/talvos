@@ -41,6 +41,7 @@
 #include "talvos/ComputePipeline.h"
 #include "talvos/Device.h"
 #include "talvos/EntryPoint.h"
+#include "talvos/FormatUtils.h"
 #include "talvos/GraphicsPipeline.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
@@ -481,7 +482,8 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
       if (Ty->getStorageClass() == SpvStorageClassInput)
       {
         // Allocate storage for input variable.
-        size_t ElemSize = Ty->getElementType()->getSize();
+        const Type *ElemTy = Ty->getElementType();
+        size_t ElemSize = ElemTy->getSize();
         uint64_t Address = PipelineMemory->allocate(ElemSize);
         InitialObjects[Var->getId()] = Object(Ty, Address);
 
@@ -524,9 +526,33 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
           }
           ElemAddr += Attr->offset;
 
+          // Set default values for the variable.
+          // As per the Vulkan specification, if the G, B, or A components are
+          // missing, they should be filled with (0,0,1) as needed,
+          Object Default(ElemTy);
+          Default.zero();
+          if (ElemTy->isVector() && ElemTy->getElementCount() == 4)
+          {
+            const Type *ScalarTy = ElemTy->getElementType();
+            if (ScalarTy->isFloat() && ScalarTy->getBitWidth() == 32)
+              Default.set<float>(1.f, 3);
+            else if (ScalarTy->isFloat() && ScalarTy->getBitWidth() == 64)
+              Default.set<double>(1.0, 3);
+            else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 16)
+              Default.set<uint16_t>(1, 3);
+            else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 32)
+              Default.set<uint32_t>(1, 3);
+            else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 64)
+              Default.set<uint64_t>(1, 3);
+            else
+              assert(false && "Unhandled vertex input variable type");
+          }
+          Default.store(*PipelineMemory, Address);
+
           // Copy variable data to pipeline memory.
-          Memory::copy(Address, *PipelineMemory, ElemAddr,
-                       Dev.getGlobalMemory(), ElemSize);
+          Memory::copy(
+              Address, *PipelineMemory, ElemAddr, Dev.getGlobalMemory(),
+              std::min(ElemSize, (size_t)getElementSize(Attr->format)));
         }
         else if (Var->hasDecoration(SpvDecorationBuiltIn))
         {
