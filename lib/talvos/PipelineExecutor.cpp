@@ -859,8 +859,9 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
                   {
                     // Perspective interpolation.
                     F = ((a * FA.get<float>(i) / A.W) +
-                        (b * FB.get<float>(i) / B.W) +
-                        (c * FC.get<float>(i) / C.W)) / InvW;
+                         (b * FB.get<float>(i) / B.W) +
+                         (c * FC.get<float>(i) / C.W)) /
+                        InvW;
                   }
                   PipelineMemory->store(Address + i * 4, 4, (uint8_t *)&F);
                 }
