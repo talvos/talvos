@@ -505,16 +505,23 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
               });
           assert(Binding != Bindings.end() && "invalid binding number");
 
-          // TODO: Handle VK_VERTEX_INPUT_RATE_INSTANCE
-          assert(Binding->inputRate == VK_VERTEX_INPUT_RATE_VERTEX);
-
           // TODO: Handle other formats
           assert(Attr->format == VK_FORMAT_R32G32B32A32_SFLOAT ||
                  Attr->format == VK_FORMAT_R32_SINT);
 
           // Calculate variable address in vertex buffer memory.
           uint64_t ElemAddr = DC->getVertexBindings().at(Attr->binding);
-          ElemAddr += VertexIndex * Binding->stride;
+          switch (Binding->inputRate)
+          {
+          case VK_VERTEX_INPUT_RATE_VERTEX:
+            ElemAddr += VertexIndex * Binding->stride;
+            break;
+          case VK_VERTEX_INPUT_RATE_INSTANCE:
+            ElemAddr += InstanceIndex * Binding->stride;
+            break;
+          default:
+            assert(false && "Unhandled vertex input rate");
+          }
           ElemAddr += Attr->offset;
 
           // Copy variable data to pipeline memory.
