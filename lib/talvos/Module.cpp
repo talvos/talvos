@@ -102,6 +102,10 @@ public:
     }
     else if (CurrentFunction)
     {
+      // Skip OpLine/OpNoLine instructions.
+      if (Inst->opcode == SpvOpLine || Inst->opcode == SpvOpNoLine)
+        return;
+
       // Create an array of operand values.
       uint32_t *Operands = new uint32_t[Inst->num_operands];
       for (int i = 0; i < Inst->num_operands; i++)
