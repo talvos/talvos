@@ -440,10 +440,29 @@ public:
         break;
       case SpvOpTypeArray:
       {
+        // Get array length.
+        uint32_t LengthId = Inst->words[Inst->operands[2].offset];
+        const Object &LengthObj = Mod->getObject(LengthId);
+        uint32_t Length;
+        switch (LengthObj.getType()->getBitWidth())
+        {
+        case 16:
+          Length = (uint32_t)LengthObj.get<uint16_t>();
+          break;
+        case 32:
+          Length = (uint32_t)LengthObj.get<uint32_t>();
+          break;
+        case 64:
+          assert(LengthObj.get<uint64_t>() <= UINT32_MAX);
+          Length = (uint32_t)LengthObj.get<uint64_t>();
+          break;
+        default:
+          assert(false && "Invalid array length");
+          break;
+        }
+
         const Type *ElemType =
             Mod->getType(Inst->words[Inst->operands[1].offset]);
-        uint32_t LengthId = Inst->words[Inst->operands[2].offset];
-        uint32_t Length = Mod->getObject(LengthId).get<uint32_t>();
         uint32_t ArrayStride = (uint32_t)ElemType->getSize();
         if (ArrayStrides.count(Inst->result_id))
           ArrayStride = ArrayStrides[Inst->result_id];
