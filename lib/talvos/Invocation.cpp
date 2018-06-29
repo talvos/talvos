@@ -157,6 +157,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpLogicalAnd, LogicalAnd);
     DISPATCH(SpvOpLogicalNot, LogicalNot);
     DISPATCH(SpvOpMatrixTimesScalar, MatrixTimesScalar);
+    DISPATCH(SpvOpMatrixTimesVector, MatrixTimesVector);
     DISPATCH(SpvOpNot, Not);
     DISPATCH(SpvOpPhi, Phi);
     DISPATCH(SpvOpPtrAccessChain, AccessChain);
@@ -909,6 +910,44 @@ void Invocation::executeMatrixTimesScalar(const Instruction *Inst)
   }
 
   Objects[Inst->getOperand(1)] = Matrix;
+}
+
+void Invocation::executeMatrixTimesVector(const Instruction *Inst)
+{
+  Object Matrix = Objects[Inst->getOperand(2)];
+  Object Vector = Objects[Inst->getOperand(3)];
+  const Type *MatrixType = Matrix.getType();
+  const Type *ColumnType = MatrixType->getElementType();
+  const Type *ScalarType = Inst->getResultType()->getElementType();
+  assert(ScalarType->isFloat());
+
+  Object Result(Inst->getResultType());
+  for (uint32_t row = 0; row < ColumnType->getElementCount(); row++)
+  {
+    switch (ScalarType->getBitWidth())
+    {
+    case 32:
+    {
+      float R = 0.f;
+      for (uint32_t col = 0; col < MatrixType->getElementCount(); col++)
+        R += Vector.get<float>(col) * Matrix.extract({col, row}).get<float>();
+      Result.set(R, row);
+      break;
+    }
+    case 64:
+    {
+      double R = 0.f;
+      for (uint32_t col = 0; col < MatrixType->getElementCount(); col++)
+        R += Vector.get<double>(col) * Matrix.extract({col, row}).get<double>();
+      Result.set(R, row);
+      break;
+    }
+    default:
+      Dev.reportError("Unhandled floating point size", true);
+      break;
+    }
+  }
+  Objects[Inst->getOperand(1)] = Result;
 }
 
 void Invocation::executeNot(const Instruction *Inst)
