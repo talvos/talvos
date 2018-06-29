@@ -179,6 +179,7 @@ public:
   void executeVectorExtractDynamic(const Instruction *Inst);
   void executeVectorInsertDynamic(const Instruction *Inst);
   void executeVectorShuffle(const Instruction *Inst);
+  void executeVectorTimesMatrix(const Instruction *Inst);
   void executeVectorTimesScalar(const Instruction *Inst);
   ///@}
 

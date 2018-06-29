@@ -190,6 +190,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpVectorExtractDynamic, VectorExtractDynamic);
     DISPATCH(SpvOpVectorInsertDynamic, VectorInsertDynamic);
     DISPATCH(SpvOpVectorShuffle, VectorShuffle);
+    DISPATCH(SpvOpVectorTimesMatrix, VectorTimesMatrix);
     DISPATCH(SpvOpVectorTimesScalar, VectorTimesScalar);
 
     NOP(SpvOpNop);
@@ -1245,6 +1246,44 @@ void Invocation::executeVectorShuffle(const Instruction *Inst)
   }
 
   Objects[Id] = Result;
+}
+
+void Invocation::executeVectorTimesMatrix(const Instruction *Inst)
+{
+  Object Vector = Objects[Inst->getOperand(2)];
+  Object Matrix = Objects[Inst->getOperand(3)];
+  const Type *MatrixType = Matrix.getType();
+  const Type *VectorType = Vector.getType();
+  const Type *ScalarType = Inst->getResultType()->getElementType();
+  assert(ScalarType->isFloat());
+
+  Object Result(Inst->getResultType());
+  for (uint32_t col = 0; col < MatrixType->getElementCount(); col++)
+  {
+    switch (ScalarType->getBitWidth())
+    {
+    case 32:
+    {
+      float R = 0.f;
+      for (uint32_t row = 0; row < VectorType->getElementCount(); row++)
+        R += Vector.get<float>(row) * Matrix.extract({col, row}).get<float>();
+      Result.set(R, col);
+      break;
+    }
+    case 64:
+    {
+      double R = 0.0;
+      for (uint32_t row = 0; row < VectorType->getElementCount(); row++)
+        R += Vector.get<double>(row) * Matrix.extract({col, row}).get<double>();
+      Result.set(R, col);
+      break;
+    }
+    default:
+      Dev.reportError("Unhandled floating point size", true);
+      break;
+    }
+  }
+  Objects[Inst->getOperand(1)] = Result;
 }
 
 void Invocation::executeVectorTimesScalar(const Instruction *Inst)
