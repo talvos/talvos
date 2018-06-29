@@ -438,13 +438,30 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
       break;
     case Command::DRAW_INDEXED:
     {
-      // TODO: Handle VK_INDEX_TYPE_UINT16.
+      // Load index from memory.
       const DrawIndexedCommand *DIC = (const DrawIndexedCommand *)DC;
-      assert(DIC->getIndexType() == VK_INDEX_TYPE_UINT32);
       uint64_t BaseAddress = DIC->getIndexBaseAddress();
-      Dev.getGlobalMemory().load(
-          (uint8_t *)&VertexIndex,
-          BaseAddress + (WorkIndex + DIC->getIndexOffset()) * 4, 4);
+      switch (DIC->getIndexType())
+      {
+      case VK_INDEX_TYPE_UINT16:
+      {
+        uint16_t VertexIndex16;
+        Dev.getGlobalMemory().load(
+            (uint8_t *)&VertexIndex16,
+            BaseAddress + (WorkIndex + DIC->getIndexOffset()) * 2, 2);
+        VertexIndex = VertexIndex16;
+        break;
+      }
+      case VK_INDEX_TYPE_UINT32:
+        Dev.getGlobalMemory().load(
+            (uint8_t *)&VertexIndex,
+            BaseAddress + (WorkIndex + DIC->getIndexOffset()) * 4, 4);
+        break;
+      default:
+        assert(false && "Unhandled vertex index type");
+        VertexIndex = UINT32_MAX;
+        break;
+      }
       VertexIndex += DC->getVertexOffset();
       break;
     }
