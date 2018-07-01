@@ -207,20 +207,10 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
       for (uint32_t GX = 0; GX < Cmd.getNumGroups().X; GX++)
         PendingGroups.push_back({GX, GY, GZ});
 
+  // Run worker threads to process groups.
   NextWorkIndex = 0;
-
-  // Create worker threads.
-  NumThreads = 1;
-  if (!Interactive && Dev.isThreadSafe())
-    NumThreads = (uint32_t)getEnvUInt("TALVOS_NUM_WORKERS",
-                                      std::thread::hardware_concurrency());
-  std::vector<std::thread> Threads;
-  for (unsigned i = 0; i < NumThreads; i++)
-    Threads.push_back(std::thread(&PipelineExecutor::runComputeWorker, this));
-
-  // Wait for workers to complete
-  for (unsigned i = 0; i < NumThreads; i++)
-    Threads[i].join();
+  runWorkers(
+      [&]() { return std::thread(&PipelineExecutor::runComputeWorker, this); });
 
   finaliseBufferVariables(Cmd.getDescriptorSetMap());
 
@@ -236,11 +226,6 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
   Continue = false;
   Interactive = checkEnv("TALVOS_INTERACTIVE", false);
 
-  NumThreads = 1;
-  if (!Interactive && Dev.isThreadSafe())
-    NumThreads = (uint32_t)getEnvUInt("TALVOS_NUM_WORKERS",
-                                      std::thread::hardware_concurrency());
-
   // Set up vertex shader stage pipeline memories.
   RenderPipelineState State;
   State.VertexOutputs.resize(Cmd.getNumVertices());
@@ -255,16 +240,12 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
     Objects = CurrentStage->getObjects();
     initialiseBufferVariables(Cmd.getDescriptorSetMap());
 
-    // Create worker threads for vertex shader.
+    // Run worker threads to process vertices.
     NextWorkIndex = 0;
-    std::vector<std::thread> Threads;
-    for (unsigned i = 0; i < NumThreads; i++)
-      Threads.push_back(std::thread(&PipelineExecutor::runVertexWorker, this,
-                                    &State, InstanceIndex));
-
-    // Wait for vertex shader workers to complete.
-    for (unsigned i = 0; i < NumThreads; i++)
-      Threads[i].join();
+    runWorkers([&]() {
+      return std::thread(&PipelineExecutor::runVertexWorker, this, &State,
+                         InstanceIndex);
+    });
 
     finaliseBufferVariables(Cmd.getDescriptorSetMap());
 
@@ -326,6 +307,24 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
 
   CurrentStage = nullptr;
   CurrentCommand = nullptr;
+}
+
+void PipelineExecutor::runWorkers(std::function<std::thread()> ThreadCreator)
+{
+  // Get number of worker threads to launch.
+  NumThreads = 1;
+  if (!Interactive && Dev.isThreadSafe())
+    NumThreads = (uint32_t)getEnvUInt("TALVOS_NUM_WORKERS",
+                                      std::thread::hardware_concurrency());
+
+  // Create worker threads.
+  std::vector<std::thread> Threads;
+  for (unsigned i = 0; i < NumThreads; i++)
+    Threads.push_back(ThreadCreator());
+
+  // Wait for workers to complete.
+  for (unsigned i = 0; i < NumThreads; i++)
+    Threads[i].join();
 }
 
 void PipelineExecutor::runComputeWorker()
@@ -1019,18 +1018,13 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
     for (int XFB = XMinFB; XFB <= XMaxFB; XFB++)
       PendingFragments.push_back({(uint32_t)XFB, (uint32_t)YFB, 0});
 
+  // Run worker threads to process fragments.
   NextWorkIndex = 0;
   TrianglePrimitive Primitive = {A, B, C, VA, VB, VC};
-
-  // Create worker threads for rasterization.
-  std::vector<std::thread> Threads;
-  for (unsigned i = 0; i < NumThreads; i++)
-    Threads.push_back(std::thread(&PipelineExecutor::runTriangleFragmentWorker,
-                                  this, Primitive, RPI));
-
-  // Wait for workers to complete.
-  for (unsigned i = 0; i < NumThreads; i++)
-    Threads[i].join();
+  runWorkers([&]() {
+    return std::thread(&PipelineExecutor::runTriangleFragmentWorker, this,
+                       Primitive, RPI);
+  });
 
   PendingFragments.clear();
 }

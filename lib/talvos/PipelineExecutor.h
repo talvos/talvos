@@ -10,8 +10,10 @@
 #define TALVOS_PIPELINEEXECUTOR_H
 
 #include <atomic>
+#include <functional>
 #include <map>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 #include "talvos/DescriptorSet.h"
@@ -83,6 +85,9 @@ private:
 
   /// Internal structure to hold triangle primitive data during rasterization.
   struct TrianglePrimitive;
+
+  /// Helper function to launch worker threads (created by \p ThreadCreator).
+  void runWorkers(std::function<std::thread()> ThreadCreator);
 
   /// Worker thread entry point for compute shaders.
   void runComputeWorker();
