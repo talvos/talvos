@@ -503,9 +503,8 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
           else
           {
             assert(VarTy->isVector() || VarTy->isScalar());
-
-            const Type *ElemTy = VarTy->getScalarType();
-            assert(ElemTy->isFloat() && ElemTy->getBitWidth() == 32);
+            assert(VarTy->getScalarType()->isFloat() &&
+                   VarTy->getScalarType()->getBitWidth() == 32);
 
             // Gather output data from each vertex.
             const Object &FA = Primitive.OutA.Locations.at(Location);

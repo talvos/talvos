@@ -247,6 +247,7 @@ uint32_t getElementSize(VkFormat Format)
 
   default:
     assert(false && "Unrecognized image format");
+    return 0;
   }
 }
 

@@ -457,8 +457,8 @@ public:
           Length = (uint32_t)LengthObj.get<uint64_t>();
           break;
         default:
-          assert(false && "Invalid array length");
-          break;
+          std::cerr << "Invalid array length bitwidth" << std::endl;
+          abort();
         }
 
         const Type *ElemType =
