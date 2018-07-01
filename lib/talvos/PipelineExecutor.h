@@ -81,8 +81,15 @@ private:
   /// Internal structure to hold vertex shader output variables.
   struct VertexOutput;
 
+  /// Internal structure to hold triangle primitive data during rasterization.
+  struct TrianglePrimitive;
+
   /// Worker thread entry point for compute shaders.
   void runComputeWorker();
+
+  /// Worker thread entry point for triangle rasterization.
+  void runTriangleFragmentWorker(TrianglePrimitive Primitive,
+                                 const RenderPassInstance &RPI);
 
   /// Worker thread entry point for vertex shaders.
   void runVertexWorker(RenderPipelineState *State, uint32_t InstanceIndex);
@@ -120,6 +127,9 @@ private:
 
   /// Pool of groups that have begun execution and been suspended.
   std::vector<Workgroup *> RunningGroups;
+
+  /// Pool of framebuffer coordinates pending fragment processing.
+  std::vector<Dim3> PendingFragments;
 
   /// Create a compute shader workgroup and its work-item invocations.
   Workgroup *createWorkgroup(Dim3 GroupId) const;
