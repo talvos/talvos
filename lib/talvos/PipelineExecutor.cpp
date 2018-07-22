@@ -470,15 +470,20 @@ void interpolate(Object &Output, const Type *Ty, size_t Offset,
   // Recurse through aggregate members.
   for (uint32_t i = 0; i < Ty->getElementCount(); i++)
   {
-    // Check for Flat shading member decoration.
+    // Check for Flat and NoPerspective member decorations.
     bool FlatElement = Flat;
-    if (Ty->getTypeId() == Type::STRUCT &&
-        Ty->getStructMemberDecorations(i).count(SpvDecorationFlat))
-      FlatElement = true;
+    bool PerspectiveElement = Perspective;
+    if (Ty->getTypeId() == Type::STRUCT)
+    {
+      if (Ty->getStructMemberDecorations(i).count(SpvDecorationFlat))
+        FlatElement = true;
+      if (Ty->getStructMemberDecorations(i).count(SpvDecorationNoPerspective))
+        PerspectiveElement = false;
+    }
 
     interpolate(Output, Ty->getElementType(i), Offset + Ty->getElementOffset(i),
                 FA, FB, FC, AW, BW, CW, InvW, a, b, c, FlatElement,
-                Perspective);
+                PerspectiveElement);
   }
 }
 
