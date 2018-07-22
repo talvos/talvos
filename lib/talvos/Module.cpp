@@ -347,6 +347,7 @@ public:
           break;
         case SpvDecorationColMajor:
         case SpvDecorationRowMajor:
+        case SpvDecorationFlat:
           MemberDecorations[{Target, Member}][Decoration] = 1;
           break;
         case SpvDecorationRelaxedPrecision:
