@@ -77,7 +77,10 @@ public:
   /// of the scalar type must match \p sizeof(T).
   template <typename T> T get(uint32_t Element = 0) const;
 
-  /// Returns a pointer to the raw data backing this object.
+  /// Returns a mutable pointer to the raw data backing this object.
+  uint8_t *getData() { return Data; }
+
+  /// Returns an immutable pointer to the raw data backing this object.
   const uint8_t *getData() const { return Data; }
 
   /// Get the matrix layout for this object.
