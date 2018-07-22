@@ -497,8 +497,10 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
           if (Var->hasDecoration(SpvDecorationFlat))
           {
             // Use output data from provoking vertex.
-            Primitive.OutA.Locations.at(Location).store(*PipelineMemory,
-                                                        Address);
+            // Fragment Input may be smaller than Vertex Output.
+            PipelineMemory->store(
+                Address, VarTy->getSize(),
+                Primitive.OutA.Locations.at(Location).getData());
           }
           else
           {
