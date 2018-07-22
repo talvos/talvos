@@ -424,6 +424,64 @@ void PipelineExecutor::runComputeWorker()
   }
 }
 
+/// Recursively populate a fragment shader input variable by interpolating
+/// between the vertex shader output variables in a triangle.
+///
+/// \param Output       The object being populated.
+/// \param Ty           The current type.
+/// \param Offset       The current byte offset within the object.
+/// \param FA,FB,FC     The vertex shader output variables.
+/// \param AW,BW,CW     The clip w coordinates of the vertices.
+/// \param InvW         The inverse of the interpolated clip w coordinate.
+/// \param a,b,c        The barycentric coordinates of the fragment.
+/// \param Flat         True to signal flat shading.
+/// \param Perspective  True to signal perspective-correct interpolation.
+void interpolate(Object &Output, const Type *Ty, size_t Offset,
+                 const Object &FA, const Object &FB, const Object &FC, float AW,
+                 float BW, float CW, float InvW, float a, float b, float c,
+                 bool Flat, bool Perspective)
+{
+  if (Ty->isScalar())
+  {
+    if (Flat)
+    {
+      // Copy data from provoking vertex.
+      memcpy(Output.getData() + Offset, FA.getData() + Offset, Ty->getSize());
+      return;
+    }
+
+    // Interpolation requires 32-bit floating point values.
+    assert(Ty->isFloat() && Ty->getBitWidth() == 32);
+
+    // Interpolate scalar values between vertices.
+    float A = *(float *)(FA.getData() + Offset);
+    float B = *(float *)(FB.getData() + Offset);
+    float C = *(float *)(FC.getData() + Offset);
+    float F;
+    if (Perspective)
+      F = ((a * A / AW) + (b * B / BW) + (c * C / CW)) / InvW;
+    else
+      F = (a * A) + (b * B) + (c * C);
+
+    *(float *)(Output.getData() + Offset) = F;
+    return;
+  }
+
+  // Recurse through aggregate members.
+  for (uint32_t i = 0; i < Ty->getElementCount(); i++)
+  {
+    // Check for Flat shading member decoration.
+    bool FlatElement = Flat;
+    if (Ty->getTypeId() == Type::STRUCT &&
+        Ty->getStructMemberDecorations(i).count(SpvDecorationFlat))
+      FlatElement = true;
+
+    interpolate(Output, Ty->getElementType(i), Offset + Ty->getElementOffset(i),
+                FA, FB, FC, AW, BW, CW, InvW, a, b, c, FlatElement,
+                Perspective);
+  }
+}
+
 void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
                                                  const RenderPassInstance &RPI)
 {
@@ -494,46 +552,17 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
         {
           uint32_t Location = Var->getDecoration(SpvDecorationLocation);
 
-          if (Var->hasDecoration(SpvDecorationFlat))
-          {
-            // Use output data from provoking vertex.
-            // Fragment Input may be smaller than Vertex Output.
-            PipelineMemory->store(
-                Address, VarTy->getSize(),
-                Primitive.OutA.Locations.at(Location).getData());
-          }
-          else
-          {
-            assert(VarTy->isVector() || VarTy->isScalar());
-            assert(VarTy->getScalarType()->isFloat() &&
-                   VarTy->getScalarType()->getBitWidth() == 32);
+          // Gather output data from each vertex.
+          const Object &FA = Primitive.OutA.Locations.at(Location);
+          const Object &FB = Primitive.OutB.Locations.at(Location);
+          const Object &FC = Primitive.OutC.Locations.at(Location);
 
-            // Gather output data from each vertex.
-            const Object &FA = Primitive.OutA.Locations.at(Location);
-            const Object &FB = Primitive.OutB.Locations.at(Location);
-            const Object &FC = Primitive.OutC.Locations.at(Location);
-
-            // Interpolate each element of variable between vertices.
-            for (uint32_t i = 0; i < FA.getType()->getElementCount(); i++)
-            {
-              float F;
-              if (Var->hasDecoration(SpvDecorationNoPerspective))
-              {
-                // Linear interpolation.
-                F = (a * FA.get<float>(i)) + (b * FB.get<float>(i)) +
-                    (c * FC.get<float>(i));
-              }
-              else
-              {
-                // Perspective interpolation.
-                F = ((a * FA.get<float>(i) / A.W) +
-                     (b * FB.get<float>(i) / B.W) +
-                     (c * FC.get<float>(i) / C.W)) /
-                    InvW;
-              }
-              PipelineMemory->store(Address + i * 4, 4, (uint8_t *)&F);
-            }
-          }
+          // Interpolate vertex outputs to produce fragment input.
+          Object VarObj(VarTy);
+          interpolate(VarObj, VarTy, 0, FA, FB, FC, A.W, B.W, C.W, InvW, a, b,
+                      c, Var->hasDecoration(SpvDecorationFlat),
+                      !Var->hasDecoration(SpvDecorationNoPerspective));
+          VarObj.store(*PipelineMemory, Address);
         }
         else if (Var->hasDecoration(SpvDecorationBuiltIn))
         {
