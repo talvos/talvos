@@ -625,10 +625,12 @@ void Invocation::executeExtInst(const Instruction *Inst)
       return fmin(fmax(X, Min), Max);
     });
     break;
+  case GLSLstd450FMax:
   case GLSLstd450NMax:
     executeOpFP<2, 4>(Inst,
                       [](auto X, auto Y) -> decltype(X) { return fmax(X, Y); });
     break;
+  case GLSLstd450FMin:
   case GLSLstd450NMin:
     executeOpFP<2, 4>(Inst,
                       [](auto X, auto Y) -> decltype(X) { return fmin(X, Y); });
