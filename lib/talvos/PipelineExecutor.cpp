@@ -800,9 +800,34 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
           Default.store(*PipelineMemory, Address);
 
           // Copy variable data to pipeline memory.
-          Memory::copy(
-              Address, *PipelineMemory, ElemAddr, Dev.getGlobalMemory(),
-              std::min(ElemSize, (size_t)getElementSize(Attr->format)));
+          if (ElemTy->isMatrix())
+          {
+            // Each matrix column occupies a distinct location.
+            size_t ColSize = ElemTy->getElementType()->getSize();
+            for (uint32_t Col = 0; Col < ElemTy->getElementCount(); Col++)
+            {
+              // Get the attribute data for the column's location slot.
+              auto ColAttr =
+                  std::find_if(Attributes.begin(), Attributes.end(),
+                               [Location, Col](auto Elem) {
+                                 return Elem.location == (Location + Col);
+                               });
+              assert(ColAttr != Attributes.end() &&
+                     "invalid attribute location");
+
+              // Copy the column data.
+              Memory::copy(
+                  Address + Col * ColSize, *PipelineMemory,
+                  ElemAddr + ColAttr->offset, Dev.getGlobalMemory(),
+                  std::min(ColSize, (size_t)getElementSize(Attr->format)));
+            }
+          }
+          else
+          {
+            Memory::copy(
+                Address, *PipelineMemory, ElemAddr, Dev.getGlobalMemory(),
+                std::min(ElemSize, (size_t)getElementSize(Attr->format)));
+          }
         }
         else if (Var->hasDecoration(SpvDecorationBuiltIn))
         {
