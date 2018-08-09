@@ -28,6 +28,16 @@ VKAPI_ATTR VkResult VKAPI_CALL vkBeginCommandBuffer(
   commandBuffer->DescriptorSetsCompute.clear();
   commandBuffer->VertexBindings.clear();
   commandBuffer->Commands.clear();
+
+  if (pBeginInfo->flags & VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT)
+  {
+    // TODO: Handle non-zero subpass index here
+    assert(pBeginInfo->pInheritanceInfo->subpass == 0);
+
+    // TODO: Handle this (need to clone draw commands to update RPI)
+    assert(!(pBeginInfo->flags & VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT));
+  }
+
   return VK_SUCCESS;
 }
 
@@ -35,7 +45,20 @@ VKAPI_ATTR void VKAPI_CALL
 vkCmdExecuteCommands(VkCommandBuffer commandBuffer, uint32_t commandBufferCount,
                      const VkCommandBuffer *pCommandBuffers)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (uint32_t i = 0; i < commandBufferCount; i++)
+  {
+    for (auto Cmd : pCommandBuffers[i]->Commands)
+    {
+      // Update the render pass instance for draw commands.
+      if (Cmd->getType() == talvos::Command::DRAW ||
+          Cmd->getType() == talvos::Command::DRAW_INDEXED)
+        static_cast<talvos::DrawCommandBase *>(Cmd)->setRenderPassInstance(
+            commandBuffer->RenderPassInstance);
+
+      // Add the command to the primary command buffer.
+      commandBuffer->Commands.push_back(Cmd);
+    }
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMask(VkCommandBuffer commandBuffer,
