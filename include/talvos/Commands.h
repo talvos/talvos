@@ -339,6 +339,12 @@ public:
   /// Returns the offset of the first vertex.
   uint32_t getVertexOffset() const { return VertexOffset; }
 
+  /// Set the render pass instance used by this command.
+  void setRenderPassInstance(const std::shared_ptr<RenderPassInstance> RPI)
+  {
+    this->RPI = RPI;
+  }
+
 protected:
   /// Command execution handler.
   virtual void runImpl(Device &Dev) const override = 0;
@@ -357,7 +363,7 @@ private:
 
   std::vector<VkRect2D> Scissors; ///< The scissor rectangles to use.
 
-  const std::shared_ptr<RenderPassInstance> RPI; ///< The render pass instance.
+  std::shared_ptr<RenderPassInstance> RPI; ///< The render pass instance.
 };
 
 /// This class encapsulates information about a draw command.
