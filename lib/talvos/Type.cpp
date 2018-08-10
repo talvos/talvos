@@ -101,6 +101,84 @@ std::ostream &operator<<(std::ostream &Stream, const Type *Ty)
     Stream << Ty->ElementType->ElementType << " mat" << Ty->ElementCount << "x"
            << Ty->ElementType->ElementCount;
     break;
+  case Type::IMAGE:
+    Stream << "image ";
+
+    switch (Ty->Dimensionality)
+    {
+#define CASE(X)                                                                \
+  case SpvDim##X:                                                              \
+    Stream << #X;                                                              \
+    break
+      CASE(1D);
+      CASE(2D);
+      CASE(3D);
+      CASE(Cube);
+      CASE(Rect);
+      CASE(Buffer);
+      CASE(SubpassData);
+#undef CASE
+    default:
+      Stream << "<unknown>";
+      break;
+    }
+
+    Stream << " ";
+    switch (Ty->Format)
+    {
+#define CASE(X)                                                                \
+  case SpvImageFormat##X:                                                      \
+    Stream << #X;                                                              \
+    break
+      CASE(Unknown);
+      CASE(Rgba32f);
+      CASE(Rgba16f);
+      CASE(R32f);
+      CASE(Rgba8);
+      CASE(Rgba8Snorm);
+      CASE(Rg32f);
+      CASE(Rg16f);
+      CASE(R11fG11fB10f);
+      CASE(R16f);
+      CASE(Rgba16);
+      CASE(Rgb10A2);
+      CASE(Rg16);
+      CASE(Rg8);
+      CASE(R16);
+      CASE(R8);
+      CASE(Rgba16Snorm);
+      CASE(Rg16Snorm);
+      CASE(Rg8Snorm);
+      CASE(R16Snorm);
+      CASE(R8Snorm);
+      CASE(Rgba32i);
+      CASE(Rgba16i);
+      CASE(Rgba8i);
+      CASE(R32i);
+      CASE(Rg32i);
+      CASE(Rg16i);
+      CASE(Rg8i);
+      CASE(R16i);
+      CASE(R8i);
+      CASE(Rgba32ui);
+      CASE(Rgba16ui);
+      CASE(Rgba8ui);
+      CASE(R32ui);
+      CASE(Rgb10a2ui);
+      CASE(Rg32ui);
+      CASE(Rg16ui);
+      CASE(Rg8ui);
+      CASE(R16ui);
+      CASE(R8ui);
+#undef CASE
+    default:
+      Stream << "<unknown>";
+      break;
+    }
+
+    // TODO: Show other image info
+
+    break;
   case Type::ARRAY:
     Stream << Ty->ElementType << "[" << Ty->ElementCount << "]";
     break;
