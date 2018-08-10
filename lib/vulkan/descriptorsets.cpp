@@ -3,6 +3,8 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
+#include <functional>
+
 #include "runtime.h"
 
 VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
@@ -96,7 +98,18 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorUpdateTemplate(
     const VkAllocationCallbacks *pAllocator,
     VkDescriptorUpdateTemplate *pDescriptorUpdateTemplate)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pDescriptorUpdateTemplate = new VkDescriptorUpdateTemplate_T;
+
+  // Copy descriptor update entries.
+  uint32_t EntryCount = pCreateInfo->descriptorUpdateEntryCount;
+  (*pDescriptorUpdateTemplate)->EntryCount = EntryCount;
+  (*pDescriptorUpdateTemplate)->Entries =
+      new VkDescriptorUpdateTemplateEntry[EntryCount];
+  memcpy((*pDescriptorUpdateTemplate)->Entries,
+         pCreateInfo->pDescriptorUpdateEntries,
+         EntryCount * sizeof(VkDescriptorUpdateTemplateEntry));
+
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorUpdateTemplateKHR(
@@ -104,7 +117,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorUpdateTemplateKHR(
     const VkAllocationCallbacks *pAllocator,
     VkDescriptorUpdateTemplate *pDescriptorUpdateTemplate)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return vkCreateDescriptorUpdateTemplate(device, pCreateInfo, pAllocator,
+                                          pDescriptorUpdateTemplate);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreatePipelineLayout(
@@ -139,14 +153,19 @@ VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorUpdateTemplate(
     VkDevice device, VkDescriptorUpdateTemplate descriptorUpdateTemplate,
     const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  if (descriptorUpdateTemplate)
+  {
+    delete[] descriptorUpdateTemplate->Entries;
+    delete descriptorUpdateTemplate;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyDescriptorUpdateTemplateKHR(
     VkDevice device, VkDescriptorUpdateTemplate descriptorUpdateTemplate,
     const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkDestroyDescriptorUpdateTemplate(device, descriptorUpdateTemplate,
+                                    pAllocator);
 }
 
 VKAPI_ATTR void VKAPI_CALL
@@ -194,18 +213,69 @@ vkResetDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
   return VK_SUCCESS;
 }
 
+// Helper to update the descriptors for a particular descriptor set.
+// GetDescriptorInfo is a lambda that returns a pointer to the descriptor info
+// structure at a particular binding.
+template <typename Func>
+void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
+                       uint32_t Binding, uint32_t ArrayElement, uint32_t Count,
+                       const Func &GetDescriptorInfo)
+{
+  // TODO: Handle other types of descriptors.
+  assert(Type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
+         Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+
+  for (uint32_t b = 0; b < Count; b++)
+  {
+    // Check if the current binding is complete.
+    assert(Set->Layout->Bindings.count(Binding));
+    if (ArrayElement >= Set->Layout->Bindings.at(Binding))
+    {
+      ArrayElement = 0;
+
+      // Increment binding, skipping any that have a descriptor count of 0.
+      while (Set->Layout->Bindings.at(++Binding) == 0)
+        ;
+    }
+
+    // Get the descriptor info structure.
+    const VkDescriptorBufferInfo *BufferInfo =
+        (const VkDescriptorBufferInfo *)GetDescriptorInfo(b);
+
+    // Set address for target binding and array element.
+    uint64_t Address = BufferInfo->buffer->Address + BufferInfo->offset;
+    Set->DescriptorSet[{Binding, ArrayElement}] = Address;
+
+    ++ArrayElement;
+  }
+}
+
 VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSetWithTemplate(
     VkDevice device, VkDescriptorSet descriptorSet,
     VkDescriptorUpdateTemplate descriptorUpdateTemplate, const void *pData)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (uint32_t i = 0; i < descriptorUpdateTemplate->EntryCount; i++)
+  {
+    const VkDescriptorUpdateTemplateEntry &Entry =
+        descriptorUpdateTemplate->Entries[i];
+
+    // Return a pointer to the descriptor info for a specific binding.
+    auto GetDescriptorInfo = [pData, Entry](uint32_t Binding) -> const void * {
+      return ((uint8_t *)pData) + Entry.offset + Entry.stride * Binding;
+    };
+
+    updateDescriptors(descriptorSet, Entry.descriptorType, Entry.dstBinding,
+                      Entry.dstArrayElement, Entry.descriptorCount,
+                      GetDescriptorInfo);
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSetWithTemplateKHR(
     VkDevice device, VkDescriptorSet descriptorSet,
     VkDescriptorUpdateTemplate descriptorUpdateTemplate, const void *pData)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkUpdateDescriptorSetWithTemplate(device, descriptorSet,
+                                    descriptorUpdateTemplate, pData);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
@@ -218,34 +288,15 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
 
   for (uint32_t i = 0; i < descriptorWriteCount; i++)
   {
-    // TODO: Handle other types of descriptors.
-    assert(pDescriptorWrites[i].descriptorType ==
-               VK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
-           pDescriptorWrites[i].descriptorType ==
-               VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    // Return a pointer to the descriptor info for a specific binding.
+    VkWriteDescriptorSet Write = pDescriptorWrites[i];
+    auto GetDescriptorInfo = [Write](uint32_t Binding) -> const void * {
+      return &(Write.pBufferInfo[Binding]);
+    };
 
-    VkDescriptorSet Set = pDescriptorWrites[i].dstSet;
-    uint32_t Binding = pDescriptorWrites[i].dstBinding;
-    uint32_t ArrayElement = pDescriptorWrites[i].dstArrayElement;
-    for (uint32_t b = 0; b < pDescriptorWrites[i].descriptorCount; b++)
-    {
-      // Check if current binding is complete.
-      assert(Set->Layout->Bindings.count(Binding));
-      if (ArrayElement >= Set->Layout->Bindings.at(Binding))
-      {
-        ArrayElement = 0;
-
-        // Increment binding, skipping any that have a descriptor count of 0.
-        while (Set->Layout->Bindings.at(++Binding) == 0)
-          ;
-      }
-
-      // Set address for target binding and array element.
-      uint64_t Address = pDescriptorWrites[i].pBufferInfo[b].buffer->Address;
-      Address += pDescriptorWrites[i].pBufferInfo[b].offset;
-      Set->DescriptorSet[{Binding, ArrayElement}] = Address;
-
-      ++ArrayElement;
-    }
+    updateDescriptors(
+        pDescriptorWrites[i].dstSet, pDescriptorWrites[i].descriptorType,
+        pDescriptorWrites[i].dstBinding, pDescriptorWrites[i].dstArrayElement,
+        pDescriptorWrites[i].descriptorCount, GetDescriptorInfo);
   }
 }

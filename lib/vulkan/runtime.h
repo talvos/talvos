@@ -91,6 +91,12 @@ struct VkDescriptorSetLayout_T
   std::map<uint32_t, uint32_t> Bindings;
 };
 
+struct VkDescriptorUpdateTemplate_T
+{
+  uint32_t EntryCount;
+  VkDescriptorUpdateTemplateEntry *Entries;
+};
+
 struct VkDevice_T
 {
   talvos::Device *Device;
