@@ -88,7 +88,10 @@ struct VkDescriptorSet_T
 struct VkDescriptorSetLayout_T
 {
   /// Map from binding number to descriptor count.
-  std::map<uint32_t, uint32_t> Bindings;
+  std::map<uint32_t, uint32_t> BindingCounts;
+
+  /// Map from binding number to descriptor type.
+  std::map<uint32_t, VkDescriptorType> BindingTypes;
 };
 
 struct VkDescriptorUpdateTemplate_T

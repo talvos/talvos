@@ -39,12 +39,30 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
     assert(false && "invalid pipeline bind point");
   }
 
-  // TODO: Handle pDynamicOffsets?
-  assert(dynamicOffsetCount == 0 && "dynamic offsets not implemented");
-
   // Update descriptor set map.
+  uint32_t OffsetIndex = 0;
   for (uint32_t i = 0; i < descriptorSetCount; i++)
+  {
     (*DSM)[firstSet + i] = pDescriptorSets[i]->DescriptorSet;
+
+    // Add dynamic offsets.
+    for (auto &Mapping : (*DSM)[firstSet + i])
+    {
+      // Skip non-dynamic resources.
+      const VkDescriptorType &Type =
+          pDescriptorSets[i]->Layout->BindingTypes[Mapping.first.first];
+      if (!(Type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC ||
+            Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC))
+        continue;
+
+      assert(OffsetIndex < dynamicOffsetCount);
+      Mapping.second += pDynamicOffsets[OffsetIndex];
+
+      OffsetIndex++;
+    }
+  }
+
+  assert(OffsetIndex == dynamicOffsetCount);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdPushConstants(VkCommandBuffer commandBuffer,
@@ -88,7 +106,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorSetLayout(
   for (uint32_t i = 0; i < pCreateInfo->bindingCount; i++)
   {
     const VkDescriptorSetLayoutBinding &Binding = pCreateInfo->pBindings[i];
-    (*pSetLayout)->Bindings[Binding.binding] = Binding.descriptorCount;
+    (*pSetLayout)->BindingCounts[Binding.binding] = Binding.descriptorCount;
+    (*pSetLayout)->BindingTypes[Binding.binding] = Binding.descriptorType;
   }
   return VK_SUCCESS;
 }
@@ -223,18 +242,20 @@ void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
 {
   // TODO: Handle other types of descriptors.
   assert(Type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
-         Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+         Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
+         Type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC ||
+         Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC);
 
   for (uint32_t b = 0; b < Count; b++)
   {
     // Check if the current binding is complete.
-    assert(Set->Layout->Bindings.count(Binding));
-    if (ArrayElement >= Set->Layout->Bindings.at(Binding))
+    assert(Set->Layout->BindingCounts.count(Binding));
+    if (ArrayElement >= Set->Layout->BindingCounts.at(Binding))
     {
       ArrayElement = 0;
 
       // Increment binding, skipping any that have a descriptor count of 0.
-      while (Set->Layout->Bindings.at(++Binding) == 0)
+      while (Set->Layout->BindingCounts.at(++Binding) == 0)
         ;
     }
 
