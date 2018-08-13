@@ -3,12 +3,12 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-/// \file FormatUtils.cpp
-/// This file defines utility functions for processing VkFormat values.
+/// \file Image.cpp
+/// This file provides definitions for image functionality.
 
 #include <cassert>
 
-#include "talvos/FormatUtils.h"
+#include "talvos/Image.h"
 
 namespace talvos
 {

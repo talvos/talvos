@@ -5,7 +5,7 @@
 
 #include "runtime.h"
 
-#include "talvos/FormatUtils.h"
+#include "talvos/Image.h"
 
 VKAPI_ATTR VkResult VKAPI_CALL vkBindBufferMemory(VkDevice device,
                                                   VkBuffer buffer,

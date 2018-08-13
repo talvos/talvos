@@ -3,11 +3,11 @@
 // This file is distributed under a three-clause BSD license. For full license
 // terms please see the LICENSE file distributed with this source code.
 
-/// \file FormatUtils.h
-/// This file declares utility functions for processing VkFormat values.
+/// \file Image.h
+/// This file declares structures and utility functions for handling images.
 
-#ifndef TALVOS_FORMATUTILS_H
-#define TALVOS_FORMATUTILS_H
+#ifndef TALVOS_IMAGE_H
+#define TALVOS_IMAGE_H
 
 #include "vulkan/vulkan_core.h"
 
