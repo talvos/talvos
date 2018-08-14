@@ -69,14 +69,32 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkBindImageMemory2(VkDevice device, uint32_t bindInfoCount,
                    const VkBindImageMemoryInfo *pBindInfos)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  for (uint32_t i = 0; i < bindInfoCount; i++)
+  {
+    // Walk through extensions.
+    const void *Ext = pBindInfos[i].pNext;
+    while (Ext)
+    {
+      switch (*(VkStructureType *)Ext)
+      {
+      default:
+        assert(false && "Unimplemented extension");
+      }
+
+      Ext = ((void **)Ext)[1];
+    }
+
+    vkBindImageMemory(device, pBindInfos[i].image, pBindInfos[i].memory,
+                      pBindInfos[i].memoryOffset);
+  }
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
 vkBindImageMemory2KHR(VkDevice device, uint32_t bindInfoCount,
                       const VkBindImageMemoryInfo *pBindInfos)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return vkBindImageMemory2(device, bindInfoCount, pBindInfos);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
