@@ -146,6 +146,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpImageRead, ImageRead);
+    DISPATCH(SpvOpImageWrite, ImageWrite);
     DISPATCH(SpvOpIMul, IMul);
     DISPATCH(SpvOpInBoundsAccessChain, AccessChain);
     DISPATCH(SpvOpINotEqual, INotEqual);
@@ -842,6 +843,21 @@ void Invocation::executeImageRead(const Instruction *Inst)
   Object Texel = Object(Inst->getResultType());
   Image->read(Coord, Texel);
   Objects[Inst->getOperand(1)] = Texel;
+}
+
+void Invocation::executeImageWrite(const Instruction *Inst)
+{
+  // Get image view object.
+  const Object &ImageObj = Objects[Inst->getOperand(0)];
+  const ImageView *Image = *(const ImageView **)(ImageObj.getData());
+
+  // TODO: Handle additional operands
+  assert(Inst->getNumOperands() == 3);
+
+  // Write texel to image.
+  const Object &Coord = Objects[Inst->getOperand(1)];
+  const Object &Texel = Objects[Inst->getOperand(2)];
+  Image->write(Coord, Texel);
 }
 
 void Invocation::executeIMul(const Instruction *Inst)
