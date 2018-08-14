@@ -121,9 +121,9 @@ vkCreateImageView(VkDevice device, const VkImageViewCreateInfo *pCreateInfo,
                   const VkAllocationCallbacks *pAllocator, VkImageView *pView)
 {
   *pView = new VkImageView_T;
-  (*pView)->ImageView =
-      new talvos::ImageView(*pCreateInfo->image->Image, pCreateInfo->viewType,
-                            pCreateInfo->format, pCreateInfo->subresourceRange);
+  (*pView)->ImageView = new talvos::ImageView(
+      *device->Device, *pCreateInfo->image->Image, pCreateInfo->viewType,
+      pCreateInfo->format, pCreateInfo->subresourceRange);
 
   // TODO: Handle pCreateInfo->components
 

@@ -14,6 +14,8 @@
 namespace talvos
 {
 
+class Device;
+
 /// This class represents an image object.
 class Image
 {
@@ -90,8 +92,8 @@ class ImageView
 {
 public:
   /// Create an image view.
-  ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
-            VkImageSubresourceRange Range);
+  ImageView(Device &Dev, const Image &Img, VkImageViewType Type,
+            VkFormat Format, VkImageSubresourceRange Range);
 
   /// Returns the memory address of the start of the image view data.
   uint64_t getAddress() const { return Address; }
@@ -118,6 +120,8 @@ public:
   VkImageViewType getType() const { return Type; }
 
 private:
+  Device &Dev; ///< The device this image view is created on.
+
   const Image &Img; ///< The image that the image corresponds to.
 
   VkImageViewType Type; ///< The type of the image view.
