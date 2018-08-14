@@ -19,6 +19,7 @@
 #include "talvos/Device.h"
 #include "talvos/EntryPoint.h"
 #include "talvos/Function.h"
+#include "talvos/Image.h"
 #include "talvos/Instruction.h"
 #include "talvos/Invocation.h"
 #include "talvos/Memory.h"
@@ -144,6 +145,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpFUnordNotEqual, FUnordNotEqual);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
+    DISPATCH(SpvOpImageRead, ImageRead);
     DISPATCH(SpvOpIMul, IMul);
     DISPATCH(SpvOpInBoundsAccessChain, AccessChain);
     DISPATCH(SpvOpINotEqual, INotEqual);
@@ -823,6 +825,25 @@ void Invocation::executeIEqual(const Instruction *Inst)
   executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A == B; });
 }
 
+void Invocation::executeImageRead(const Instruction *Inst)
+{
+  // Get image view object.
+  const Object &ImageObj = Objects[Inst->getOperand(2)];
+  const ImageView *Image = *(const ImageView **)(ImageObj.getData());
+
+  // TODO: Handle additional operands
+  assert(Inst->getNumOperands() == 4);
+
+  // TODO: Handle subpass data dimensionality
+  assert(ImageObj.getType()->getDimensionality() != SpvDimSubpassData);
+
+  // Load texel from image.
+  const Object &Coord = Objects[Inst->getOperand(3)];
+  Object Texel = Object(Inst->getResultType());
+  Image->read(Coord, Texel);
+  Objects[Inst->getOperand(1)] = Texel;
+}
+
 void Invocation::executeIMul(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A * B; });
@@ -1354,6 +1375,7 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
   {
   case SpvStorageClassStorageBuffer:
   case SpvStorageClassUniform:
+  case SpvStorageClassUniformConstant:
     return Dev.getGlobalMemory();
   case SpvStorageClassWorkgroup:
     assert(Group && "Not executing within a workgroup.");
