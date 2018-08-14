@@ -11,6 +11,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <mutex>
 #include <vector>
 
 namespace talvos
@@ -100,6 +101,8 @@ private:
   Device &Dev; ///< The device this memory instance is part of.
 
   MemoryScope Scope; ///< The scope of this memory instance.
+
+  std::mutex Mutex; ///< Mutex for guarding allocate/release operations.
 
   /// An allocation within this memory instance.
   struct Buffer

@@ -40,6 +40,8 @@ Memory::~Memory()
 
 uint64_t Memory::allocate(uint64_t NumBytes)
 {
+  std::lock_guard<std::mutex> Lock(Mutex);
+
   // Allocate buffer.
   Buffer B;
   B.NumBytes = NumBytes;
@@ -156,6 +158,8 @@ uint8_t *Memory::map(uint64_t Base, uint64_t Offset, uint64_t NumBytes)
 
 void Memory::release(uint64_t Address)
 {
+  std::lock_guard<std::mutex> Lock(Mutex);
+
   uint64_t Id = (Address >> OFFSET_BITS);
   assert(Buffers[Id].Data != nullptr);
 
