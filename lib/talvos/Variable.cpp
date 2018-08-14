@@ -38,7 +38,8 @@ bool Variable::hasDecoration(uint32_t Decoration) const
 bool Variable::isBufferVariable() const
 {
   if (Ty->getStorageClass() == SpvStorageClassStorageBuffer ||
-      Ty->getStorageClass() == SpvStorageClassUniform)
+      Ty->getStorageClass() == SpvStorageClassUniform ||
+      Ty->getStorageClass() == SpvStorageClassUniformConstant)
     return true;
   else
     return false;
