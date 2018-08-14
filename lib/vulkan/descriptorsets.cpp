@@ -236,17 +236,12 @@ vkResetDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
 // Helper to update the descriptors for a particular descriptor set.
 // GetDescriptorInfo is a lambda that returns a pointer to the descriptor info
 // structure at a particular binding.
-template <typename Func>
+template <typename BufFunc, typename ImgFunc>
 void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
                        uint32_t Binding, uint32_t ArrayElement, uint32_t Count,
-                       const Func &GetDescriptorInfo)
+                       const BufFunc &GetBufferDescriptorInfo,
+                       const ImgFunc &GetImageDescriptorInfo)
 {
-  // TODO: Handle other types of descriptors.
-  assert(Type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER ||
-         Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ||
-         Type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC ||
-         Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC);
-
   for (uint32_t b = 0; b < Count; b++)
   {
     // Check if the current binding is complete.
@@ -260,12 +255,33 @@ void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
         ;
     }
 
-    // Get the descriptor info structure.
-    const VkDescriptorBufferInfo *BufferInfo =
-        (const VkDescriptorBufferInfo *)GetDescriptorInfo(b);
+    // Get the address of the resource.
+    uint64_t Address;
+    switch (Type)
+    {
+    case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+    case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+    case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
+    case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
+    {
+      const VkDescriptorBufferInfo *BufferInfo =
+          (const VkDescriptorBufferInfo *)GetBufferDescriptorInfo(b);
+      Address = BufferInfo->buffer->Address + BufferInfo->offset;
+      break;
+    }
+    case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+    {
+      const VkDescriptorImageInfo *ImageInfo =
+          (const VkDescriptorImageInfo *)GetImageDescriptorInfo(b);
+      Address = ImageInfo->imageView->ObjectAddress;
+      break;
+    }
+    default:
+      assert(false && "unhandled descriptor type");
+      abort();
+    }
 
     // Set address for target binding and array element.
-    uint64_t Address = BufferInfo->buffer->Address + BufferInfo->offset;
     Set->DescriptorSet[{Binding, ArrayElement}] = Address;
 
     ++ArrayElement;
@@ -288,7 +304,7 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSetWithTemplate(
 
     updateDescriptors(descriptorSet, Entry.descriptorType, Entry.dstBinding,
                       Entry.dstArrayElement, Entry.descriptorCount,
-                      GetDescriptorInfo);
+                      GetDescriptorInfo, GetDescriptorInfo);
   }
 }
 
@@ -310,15 +326,19 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
 
   for (uint32_t i = 0; i < descriptorWriteCount; i++)
   {
-    // Return a pointer to the descriptor info for a specific binding.
+    // Lambdas to return pointers to the descriptor info for a specific binding.
     VkWriteDescriptorSet Write = pDescriptorWrites[i];
-    auto GetDescriptorInfo = [Write](uint32_t Binding) -> const void * {
+    auto GetBufferDescriptorInfo = [Write](uint32_t Binding) -> const void * {
       return &(Write.pBufferInfo[Binding]);
+    };
+    auto GetImageDescriptorInfo = [Write](uint32_t Binding) -> const void * {
+      return &(Write.pImageInfo[Binding]);
     };
 
     updateDescriptors(
         pDescriptorWrites[i].dstSet, pDescriptorWrites[i].descriptorType,
         pDescriptorWrites[i].dstBinding, pDescriptorWrites[i].dstArrayElement,
-        pDescriptorWrites[i].descriptorCount, GetDescriptorInfo);
+        pDescriptorWrites[i].descriptorCount, GetBufferDescriptorInfo,
+        GetImageDescriptorInfo);
   }
 }
