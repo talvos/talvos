@@ -77,9 +77,8 @@ ImageView::ImageView(Device &Dev, const Image &Img, VkImageViewType Type,
             (BaseArrayLayer * LevelWidth * LevelHeight * Img.getElementSize());
 }
 
-void ImageView::read(const Object &Coord, Object &Output) const
+uint64_t ImageView::getTexelAddress(const Object &Coord) const
 {
-  // Calculate texel address.
   uint64_t Address = this->Address;
   switch (Type)
   {
@@ -107,6 +106,12 @@ void ImageView::read(const Object &Coord, Object &Output) const
     assert(false && "unhandled image view type");
     abort();
   }
+  return Address;
+}
+
+void ImageView::read(const Object &Coord, Object &Texel) const
+{
+  uint64_t Address = getTexelAddress(Coord);
 
   // TODO: Handle other formats
   assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
@@ -116,10 +121,28 @@ void ImageView::read(const Object &Coord, Object &Output) const
   Dev.getGlobalMemory().load(Data, Address, 4);
 
   // Convert to output format.
-  Output.set<float>(Data[0] / 255.f, 0);
-  Output.set<float>(Data[1] / 255.f, 1);
-  Output.set<float>(Data[2] / 255.f, 2);
-  Output.set<float>(Data[3] / 255.f, 3);
+  Texel.set<float>(Data[0] / 255.f, 0);
+  Texel.set<float>(Data[1] / 255.f, 1);
+  Texel.set<float>(Data[2] / 255.f, 2);
+  Texel.set<float>(Data[3] / 255.f, 3);
+}
+
+void ImageView::write(const Object &Coord, const Object &Texel) const
+{
+  uint64_t Address = getTexelAddress(Coord);
+
+  // TODO: Handle other formats
+  assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
+
+  // Convert to storage format.
+  uint8_t Data[4];
+  Data[0] = Texel.get<float>(0) * 255.f;
+  Data[1] = Texel.get<float>(1) * 255.f;
+  Data[2] = Texel.get<float>(2) * 255.f;
+  Data[3] = Texel.get<float>(3) * 255.f;
+
+  // Write raw texel data.
+  Dev.getGlobalMemory().store(Address, 4, Data);
 }
 
 uint32_t getElementSize(VkFormat Format)

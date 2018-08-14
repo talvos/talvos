@@ -117,11 +117,17 @@ public:
   /// Returns the number of mip levels in the image view.
   uint32_t getNumMipLevels() const { return NumMipLevels; }
 
+  /// Returns the address in memory of the texel at coordinate \p Coord.
+  uint64_t getTexelAddress(const Object &Coord) const;
+
   /// Returns the type of the image view.
   VkImageViewType getType() const { return Type; }
 
   /// Read a texel from the image view at coordinate \p Coord.
   void read(const Object &Coord, Object &Texel) const;
+
+  /// Write a texel to the image view at coordinate \p Coord.
+  void write(const Object &Coord, const Object &Texel) const;
 
 private:
   Device &Dev; ///< The device this image view is created on.
