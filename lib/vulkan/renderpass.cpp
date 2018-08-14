@@ -5,6 +5,7 @@
 
 #include "runtime.h"
 
+#include "talvos/Image.h"
 #include "talvos/RenderPass.h"
 
 VKAPI_ATTR void VKAPI_CALL vkCmdBeginRenderPass(
@@ -58,8 +59,10 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateFramebuffer(
   for (uint32_t i = 0; i < pCreateInfo->attachmentCount; i++)
   {
     talvos::Attachment Attach;
-    Attach.Address = pCreateInfo->pAttachments[i]->Address;
-    Attach.XStride = pCreateInfo->pAttachments[i]->Image->Extent.width;
+    Attach.Address = pCreateInfo->pAttachments[i]->ImageView->getAddress();
+    Attach.XStride =
+        pCreateInfo->pAttachments[i]->ImageView->getImage().getWidthAtMipLevel(
+            pCreateInfo->pAttachments[i]->ImageView->getBaseMipLevel());
     Attachments.push_back(Attach);
   }
 

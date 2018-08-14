@@ -32,35 +32,36 @@ void ClearColorImageCommand::runImpl(Device &Dev) const
 {
   // TODO: Handle mip levels and other formats.
   assert(Ranges[0].baseMipLevel == 0 && Ranges[0].levelCount == 1);
-  assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
+  assert(DstImage.getFormat() == VK_FORMAT_R8G8B8A8_UNORM);
 
   // Generate pixel data.
   uint8_t PixelValue[4];
   for (uint32_t i = 0; i < 4; i++)
     PixelValue[i] = (uint8_t)std::round(Color.float32[i] * 255);
 
+  uint32_t ImageWidth = DstImage.getWidth();
+  uint32_t ImageHeight = DstImage.getHeight();
+  uint32_t ImageDepth = DstImage.getDepth();
+  uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
+
   // Loop over ranges in command.
   for (auto &Range : Ranges)
   {
+    // TODO: Handle VK_REMAINING_ARRAY_LAYERS
     // Loop over array layers in range.
     for (uint32_t Layer = Range.baseArrayLayer;
          Layer < Range.baseArrayLayer + Range.layerCount; Layer++)
     {
-      uint32_t ImageWidth = Extent.width;
-      uint32_t ImageHeight = Extent.height;
-      uint32_t ImageDepth = Extent.depth;
-      uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
-
       // Store pixel data to each pixel in image.
-      for (uint32_t Z = 0; Z < Extent.depth; Z++)
+      for (uint32_t Z = 0; Z < ImageDepth; Z++)
       {
-        for (uint32_t Y = 0; Y < Extent.height; Y++)
+        for (uint32_t Y = 0; Y < ImageHeight; Y++)
         {
-          for (uint32_t X = 0; X < Extent.width; X++)
+          for (uint32_t X = 0; X < ImageWidth; X++)
           {
             Dev.getGlobalMemory().store(
-                Address + (ImageLayerSize * Layer * 4) +
-                    (X + ((Y + (Z * Extent.height)) * Extent.width)) * 4,
+                DstImage.getAddress() + (ImageLayerSize * Layer * 4) +
+                    (X + ((Y + (Z * ImageHeight)) * ImageWidth)) * 4,
                 4, PixelValue);
           }
         }
@@ -79,32 +80,87 @@ void CopyBufferCommand::runImpl(Device &Dev) const
   }
 }
 
+void CopyBufferToImageCommand::runImpl(Device &Dev) const
+{
+  uint32_t ElementSize = DstImage.getElementSize();
+
+  for (const VkBufferImageCopy &Region : Regions)
+  {
+    uint32_t MipLevel = Region.imageSubresource.mipLevel;
+    uint64_t MipOffset = DstImage.getMipLevelOffset(MipLevel);
+    uint32_t ImageWidth = DstImage.getWidthAtMipLevel(MipLevel);
+    uint32_t ImageHeight = DstImage.getHeightAtMipLevel(MipLevel);
+    uint32_t ImageDepth = DstImage.getDepthAtMipLevel(MipLevel);
+    uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
+
+    // TODO: Handle VK_REMAINING_ARRAY_LAYERS
+    for (uint32_t LayerOffset = 0;
+         LayerOffset < Region.imageSubresource.layerCount; LayerOffset++)
+    {
+      uint32_t BufferWidth = Region.bufferRowLength ? Region.bufferRowLength
+                                                    : Region.imageExtent.width;
+      uint32_t BufferHeight = Region.bufferImageHeight
+                                  ? Region.bufferImageHeight
+                                  : Region.imageExtent.height;
+      uint64_t SrcBase = SrcAddr + Region.bufferOffset;
+      SrcBase += BufferWidth * BufferHeight * ElementSize * LayerOffset;
+
+      uint64_t DstBase =
+          DstImage.getAddress() + MipOffset +
+          (Region.imageOffset.x +
+           (Region.imageOffset.y + (Region.imageOffset.z * ImageHeight)) *
+               ImageWidth) *
+              ElementSize;
+      DstBase += ImageLayerSize * ElementSize *
+                 (Region.imageSubresource.baseArrayLayer + LayerOffset);
+
+      // Copy region one scanline at a time.
+      for (uint32_t z = 0; z < Region.imageExtent.depth; z++)
+      {
+        for (uint32_t y = 0; y < Region.imageExtent.height; y++)
+        {
+          Memory::copy(
+              DstBase + (((z * ImageHeight) + y) * ImageWidth) * ElementSize,
+              Dev.getGlobalMemory(),
+              SrcBase + (((z * BufferHeight) + y) * BufferWidth) * ElementSize,
+              Dev.getGlobalMemory(), Region.imageExtent.width * ElementSize);
+        }
+      }
+    }
+  }
+}
+
 void CopyImageCommand::runImpl(Device &Dev) const
 {
-  uint32_t SrcElementSize = getElementSize(SrcFormat);
-  uint32_t DstElementSize = getElementSize(DstFormat);
+  uint32_t SrcElementSize = SrcImage.getElementSize();
+  uint32_t DstElementSize = DstImage.getElementSize();
+
   assert(SrcElementSize == DstElementSize);
   for (const VkImageCopy &Region : Regions)
   {
+    // TODO: Handle mip levels.
+    assert(Region.srcSubresource.mipLevel == 0 &&
+           Region.dstSubresource.mipLevel == 0);
+
     // TODO: Handle array layers.
     assert(Region.srcSubresource.baseArrayLayer == 0 &&
            Region.srcSubresource.layerCount == 1);
     assert(Region.srcSubresource.baseArrayLayer == 0 &&
            Region.dstSubresource.layerCount == 1);
 
-    uint32_t DstImageWidth = DstSize.width;
-    uint32_t DstImageHeight = DstSize.height;
+    uint32_t DstImageWidth = DstImage.getWidth();
+    uint32_t DstImageHeight = DstImage.getHeight();
     uint64_t DstBase =
-        DstAddr +
+        DstImage.getAddress() +
         (Region.dstOffset.x +
          (Region.dstOffset.y + (Region.dstOffset.z * DstImageHeight)) *
              DstImageWidth) *
             DstElementSize;
 
-    uint32_t SrcImageWidth = SrcSize.width;
-    uint32_t SrcImageHeight = SrcSize.height;
+    uint32_t SrcImageWidth = SrcImage.getWidth();
+    uint32_t SrcImageHeight = SrcImage.getHeight();
     uint64_t SrcBase =
-        SrcAddr +
+        SrcImage.getAddress() +
         (Region.srcOffset.x +
          (Region.srcOffset.y + (Region.srcOffset.z * SrcImageHeight)) *
              SrcImageWidth) *
@@ -129,9 +185,18 @@ void CopyImageCommand::runImpl(Device &Dev) const
 
 void CopyImageToBufferCommand::runImpl(Device &Dev) const
 {
-  uint32_t ElementSize = getElementSize(SrcFormat);
+  uint32_t ElementSize = SrcImage.getElementSize();
+
   for (const VkBufferImageCopy &Region : Regions)
   {
+    uint32_t MipLevel = Region.imageSubresource.mipLevel;
+    uint64_t MipOffset = SrcImage.getMipLevelOffset(MipLevel);
+    uint32_t ImageWidth = SrcImage.getWidthAtMipLevel(MipLevel);
+    uint32_t ImageHeight = SrcImage.getHeightAtMipLevel(MipLevel);
+    uint32_t ImageDepth = SrcImage.getDepthAtMipLevel(MipLevel);
+    uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
+
+    // TODO: Handle VK_REMAINING_ARRAY_LAYERS
     for (uint32_t LayerOffset = 0;
          LayerOffset < Region.imageSubresource.layerCount; LayerOffset++)
     {
@@ -143,12 +208,8 @@ void CopyImageToBufferCommand::runImpl(Device &Dev) const
       uint64_t DstBase = DstAddr + Region.bufferOffset;
       DstBase += BufferWidth * BufferHeight * ElementSize * LayerOffset;
 
-      uint32_t ImageWidth = SrcSize.width;
-      uint32_t ImageHeight = SrcSize.height;
-      uint32_t ImageDepth = SrcSize.depth;
-      uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
       uint64_t SrcBase =
-          SrcAddr +
+          SrcImage.getAddress() + MipOffset +
           (Region.imageOffset.x +
            (Region.imageOffset.y + (Region.imageOffset.z * ImageHeight)) *
                ImageWidth) *
@@ -165,51 +226,6 @@ void CopyImageToBufferCommand::runImpl(Device &Dev) const
               DstBase + (((z * BufferHeight) + y) * BufferWidth) * ElementSize,
               Dev.getGlobalMemory(),
               SrcBase + (((z * ImageHeight) + y) * ImageWidth) * ElementSize,
-              Dev.getGlobalMemory(), Region.imageExtent.width * ElementSize);
-        }
-      }
-    }
-  }
-}
-
-void CopyBufferToImageCommand::runImpl(Device &Dev) const
-{
-  uint32_t ElementSize = getElementSize(DstFormat);
-  for (const VkBufferImageCopy &Region : Regions)
-  {
-    for (uint32_t LayerOffset = 0;
-         LayerOffset < Region.imageSubresource.layerCount; LayerOffset++)
-    {
-      uint32_t BufferWidth = Region.bufferRowLength ? Region.bufferRowLength
-                                                    : Region.imageExtent.width;
-      uint32_t BufferHeight = Region.bufferImageHeight
-                                  ? Region.bufferImageHeight
-                                  : Region.imageExtent.height;
-      uint64_t SrcBase = SrcAddr + Region.bufferOffset;
-      SrcBase += BufferWidth * BufferHeight * ElementSize * LayerOffset;
-
-      uint32_t ImageWidth = DstSize.width;
-      uint32_t ImageHeight = DstSize.height;
-      uint32_t ImageDepth = DstSize.depth;
-      uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
-      uint64_t DstBase =
-          DstAddr +
-          (Region.imageOffset.x +
-           (Region.imageOffset.y + (Region.imageOffset.z * ImageHeight)) *
-               ImageWidth) *
-              ElementSize;
-      DstBase += ImageLayerSize * ElementSize *
-                 (Region.imageSubresource.baseArrayLayer + LayerOffset);
-
-      // Copy region one scanline at a time.
-      for (uint32_t z = 0; z < Region.imageExtent.depth; z++)
-      {
-        for (uint32_t y = 0; y < Region.imageExtent.height; y++)
-        {
-          Memory::copy(
-              DstBase + (((z * ImageHeight) + y) * ImageWidth) * ElementSize,
-              Dev.getGlobalMemory(),
-              SrcBase + (((z * BufferHeight) + y) * BufferWidth) * ElementSize,
               Dev.getGlobalMemory(), Region.imageExtent.width * ElementSize);
         }
       }

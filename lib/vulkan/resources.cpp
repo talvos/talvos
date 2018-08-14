@@ -5,7 +5,9 @@
 
 #include "runtime.h"
 
+#include "talvos/Device.h"
 #include "talvos/Image.h"
+#include "talvos/Memory.h"
 
 VKAPI_ATTR VkResult VKAPI_CALL vkBindBufferMemory(VkDevice device,
                                                   VkBuffer buffer,
@@ -59,7 +61,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkBindImageMemory(VkDevice device, VkImage image,
                                                  VkDeviceMemory memory,
                                                  VkDeviceSize memoryOffset)
 {
-  image->Address = memory->Address + memoryOffset;
+  image->Image->bindAddress(memory->Address + memoryOffset);
   return VK_SUCCESS;
 }
 
@@ -104,17 +106,12 @@ vkCreateImage(VkDevice device, const VkImageCreateInfo *pCreateInfo,
               const VkAllocationCallbacks *pAllocator, VkImage *pImage)
 {
   *pImage = new VkImage_T;
-  (*pImage)->Type = pCreateInfo->imageType;
-  (*pImage)->Format = pCreateInfo->format;
-  (*pImage)->Extent = pCreateInfo->extent;
-  (*pImage)->MipLevels = pCreateInfo->mipLevels;
-  (*pImage)->ArrayLayers = pCreateInfo->arrayLayers;
-  (*pImage)->Address = 0;
+  (*pImage)->Image = new talvos::Image(
+      pCreateInfo->imageType, pCreateInfo->format, pCreateInfo->extent,
+      pCreateInfo->arrayLayers, pCreateInfo->mipLevels);
 
   // TODO: Handle multisampling
   assert(pCreateInfo->samples == VK_SAMPLE_COUNT_1_BIT);
-
-  // TODO: Handle image layout parameter
 
   return VK_SUCCESS;
 }
@@ -124,15 +121,17 @@ vkCreateImageView(VkDevice device, const VkImageViewCreateInfo *pCreateInfo,
                   const VkAllocationCallbacks *pAllocator, VkImageView *pView)
 {
   *pView = new VkImageView_T;
-  (*pView)->Image = pCreateInfo->image;
-  (*pView)->Type = pCreateInfo->viewType;
-  (*pView)->Format = pCreateInfo->format;
+  (*pView)->ImageView =
+      new talvos::ImageView(*pCreateInfo->image->Image, pCreateInfo->format,
+                            pCreateInfo->subresourceRange);
 
-  VkExtent3D Extent = pCreateInfo->image->Extent;
-  (*pView)->Address = pCreateInfo->image->Address +
-                      pCreateInfo->subresourceRange.baseArrayLayer *
-                          (Extent.width * Extent.height *
-                           talvos::getElementSize(pCreateInfo->format));
+  // TODO: Handle pCreateInfo->components
+
+  // Create image view object in memory.
+  talvos::Memory &Mem = device->Device->getGlobalMemory();
+  (*pView)->ObjectAddress = Mem.allocate(sizeof(talvos::ImageView *));
+  Mem.store((*pView)->ObjectAddress, sizeof(talvos::ImageView *),
+            (uint8_t *)&(*pView)->ImageView);
 
   return VK_SUCCESS;
 }
@@ -153,14 +152,23 @@ vkDestroyBufferView(VkDevice device, VkBufferView bufferView,
 VKAPI_ATTR void VKAPI_CALL vkDestroyImage(
     VkDevice device, VkImage image, const VkAllocationCallbacks *pAllocator)
 {
-  delete image;
+  if (image)
+  {
+    delete image->Image;
+    delete image;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL
 vkDestroyImageView(VkDevice device, VkImageView imageView,
                    const VkAllocationCallbacks *pAllocator)
 {
-  delete imageView;
+  if (imageView)
+  {
+    device->Device->getGlobalMemory().release(imageView->ObjectAddress);
+    delete imageView->ImageView;
+    delete imageView;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements(
@@ -217,9 +225,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2KHR(
 VKAPI_ATTR void VKAPI_CALL vkGetImageMemoryRequirements(
     VkDevice device, VkImage image, VkMemoryRequirements *pMemoryRequirements)
 {
-  VkDeviceSize pixels = image->Extent.width * image->Extent.height *
-                        image->Extent.depth * image->ArrayLayers;
-  pMemoryRequirements->size = pixels * talvos::getElementSize(image->Format);
+  pMemoryRequirements->size = image->Image->getTotalSize();
   pMemoryRequirements->alignment = 1;
   pMemoryRequirements->memoryTypeBits = 0b1;
 }
@@ -281,10 +287,10 @@ VKAPI_ATTR void VKAPI_CALL vkGetImageSubresourceLayout(
     VkDevice device, VkImage image, const VkImageSubresource *pSubresource,
     VkSubresourceLayout *pLayout)
 {
-  uint32_t ElementSize = talvos::getElementSize(image->Format);
-  pLayout->rowPitch = image->Extent.width * ElementSize;
-  pLayout->depthPitch = image->Extent.height * pLayout->rowPitch;
-  pLayout->arrayPitch = image->Extent.depth * pLayout->depthPitch;
+  uint32_t ElementSize = image->Image->getElementSize();
+  pLayout->rowPitch = image->Image->getWidth() * ElementSize;
+  pLayout->depthPitch = image->Image->getHeight() * pLayout->rowPitch;
+  pLayout->arrayPitch = image->Image->getDepth() * pLayout->depthPitch;
   pLayout->size = pLayout->arrayPitch;
   pLayout->offset = pSubresource->arrayLayer * pLayout->arrayPitch;
 }

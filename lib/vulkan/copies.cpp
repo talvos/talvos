@@ -32,8 +32,7 @@ vkCmdCopyBufferToImage(VkCommandBuffer commandBuffer, VkBuffer srcBuffer,
 {
   std::vector<VkBufferImageCopy> Regions(pRegions, pRegions + regionCount);
   commandBuffer->Commands.push_back(new talvos::CopyBufferToImageCommand(
-      srcBuffer->Address, dstImage->Address, dstImage->Format, dstImage->Extent,
-      Regions));
+      srcBuffer->Address, *dstImage->Image, Regions));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdCopyImage(VkCommandBuffer commandBuffer,
@@ -46,8 +45,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdCopyImage(VkCommandBuffer commandBuffer,
 {
   std::vector<VkImageCopy> Regions(pRegions, pRegions + regionCount);
   commandBuffer->Commands.push_back(new talvos::CopyImageCommand(
-      srcImage->Address, dstImage->Address, srcImage->Format, dstImage->Format,
-      srcImage->Extent, dstImage->Extent, Regions));
+      *srcImage->Image, *dstImage->Image, Regions));
 }
 
 VKAPI_ATTR void VKAPI_CALL
@@ -57,8 +55,7 @@ vkCmdCopyImageToBuffer(VkCommandBuffer commandBuffer, VkImage srcImage,
 {
   std::vector<VkBufferImageCopy> Regions(pRegions, pRegions + regionCount);
   commandBuffer->Commands.push_back(new talvos::CopyImageToBufferCommand(
-      srcImage->Address, dstBuffer->Address, srcImage->Format, srcImage->Extent,
-      Regions));
+      *srcImage->Image, dstBuffer->Address, Regions));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdResolveImage(VkCommandBuffer commandBuffer,

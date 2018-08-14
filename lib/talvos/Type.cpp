@@ -8,6 +8,7 @@
 
 #include <spirv/unified1/spirv.h>
 
+#include "talvos/Image.h"
 #include "talvos/Type.h"
 
 #include <cassert>
@@ -265,7 +266,7 @@ std::unique_ptr<Type> Type::getImage(const Type *SampledType, uint32_t Dim,
                                      uint32_t Depth, bool Arrayed, bool MS,
                                      uint32_t Sampled, uint32_t Format)
 {
-  std::unique_ptr<Type> T(new Type(IMAGE, sizeof(uint64_t)));
+  std::unique_ptr<Type> T(new Type(IMAGE, sizeof(ImageView *)));
   T->ElementType = SampledType;
   T->Dimensionality = Dim;
   T->Depth = Depth;

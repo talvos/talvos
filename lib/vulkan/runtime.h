@@ -21,6 +21,8 @@ class Device;
 class Framebuffer;
 class Function;
 class GraphicsPipeline;
+class Image;
+class ImageView;
 class Module;
 class RenderPass;
 class RenderPassInstance;
@@ -127,20 +129,13 @@ struct VkFramebuffer_T
 
 struct VkImage_T
 {
-  VkImageType Type;
-  VkFormat Format;
-  VkExtent3D Extent;
-  uint32_t MipLevels;
-  uint32_t ArrayLayers;
-  uint64_t Address;
+  talvos::Image *Image;
 };
 
 struct VkImageView_T
 {
-  VkImage Image;
-  VkImageViewType Type;
-  VkFormat Format;
-  uint64_t Address;
+  talvos::ImageView *ImageView;
+  uint64_t ObjectAddress;
 };
 
 struct VkInstance_T

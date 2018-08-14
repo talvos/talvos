@@ -23,6 +23,7 @@ namespace talvos
 class Device;
 class ComputePipeline;
 class GraphicsPipeline;
+class Image;
 class Object;
 class RenderPassInstance;
 
@@ -88,11 +89,10 @@ class ClearColorImageCommand : public Command
 {
 public:
   /// Create a new ClearColorImageCommand.
-  ClearColorImageCommand(uint64_t Address, VkFormat Format, VkExtent3D Extent,
-                         VkClearColorValue Color,
+  ClearColorImageCommand(const Image &DstImage, VkClearColorValue Color,
                          const std::vector<VkImageSubresourceRange> &Ranges)
-      : Command(CLEAR_COLOR_IMAGE), Address(Address), Format(Format),
-        Extent(Extent), Color(Color), Ranges(Ranges)
+      : Command(CLEAR_COLOR_IMAGE), DstImage(DstImage), Color(Color),
+        Ranges(Ranges)
   {}
 
 protected:
@@ -100,14 +100,8 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The memory address of the image allocation.
-  uint64_t Address;
-
-  /// The format of the image.
-  VkFormat Format;
-
-  /// The dimensions of the image.
-  VkExtent3D Extent;
+  // The image to clear.
+  const Image &DstImage;
 
   /// The clear color to use.
   VkClearColorValue Color;
@@ -147,11 +141,10 @@ class CopyBufferToImageCommand : public Command
 {
 public:
   /// Create a new CopyBufferToImageCommand.
-  CopyBufferToImageCommand(uint64_t SrcAddr, uint64_t DstAddr,
-                           VkFormat DstFormat, VkExtent3D DstSize,
+  CopyBufferToImageCommand(uint64_t SrcAddr, const Image &DstImage,
                            const std::vector<VkBufferImageCopy> &Regions)
-      : Command(COPY_BUFFER_TO_IMAGE), SrcAddr(SrcAddr), DstAddr(DstAddr),
-        DstFormat(DstFormat), DstSize(DstSize), Regions(Regions)
+      : Command(COPY_BUFFER_TO_IMAGE), SrcAddr(SrcAddr), DstImage(DstImage),
+        Regions(Regions)
   {}
 
 protected:
@@ -162,14 +155,8 @@ private:
   // The memory address of the source buffer.
   uint64_t SrcAddr;
 
-  /// The memory address of the destination image.
-  uint64_t DstAddr;
-
-  /// The format of the destination image.
-  VkFormat DstFormat;
-
-  /// The dimensions of the destination image.
-  VkExtent3D DstSize;
+  /// The destination image.
+  const Image &DstImage;
 
   /// The regions to copy.
   std::vector<VkBufferImageCopy> Regions;
@@ -180,12 +167,10 @@ class CopyImageCommand : public Command
 {
 public:
   /// Create a new CopyImageCommand.
-  CopyImageCommand(uint64_t SrcAddr, uint64_t DstAddr, VkFormat SrcFormat,
-                   VkFormat DstFormat, VkExtent3D SrcSize, VkExtent3D DstSize,
+  CopyImageCommand(const Image &SrcImage, const Image &DstImage,
                    const std::vector<VkImageCopy> &Regions)
-      : Command(COPY_IMAGE), SrcAddr(SrcAddr), DstAddr(DstAddr),
-        SrcFormat(SrcFormat), DstFormat(DstFormat), SrcSize(SrcSize),
-        DstSize(DstSize), Regions(Regions)
+      : Command(COPY_IMAGE), SrcImage(SrcImage), DstImage(DstImage),
+        Regions(Regions)
   {}
 
 protected:
@@ -193,23 +178,11 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The memory address of the source image.
-  uint64_t SrcAddr;
+  /// The source image.
+  const Image &SrcImage;
 
-  /// The memory address of the destination image.
-  uint64_t DstAddr;
-
-  /// The format of the source image.
-  VkFormat SrcFormat;
-
-  /// The format of the destination image.
-  VkFormat DstFormat;
-
-  /// The dimensions of the source image.
-  VkExtent3D SrcSize;
-
-  /// The dimensions of the destination image.
-  VkExtent3D DstSize;
+  /// The destination image.
+  const Image &DstImage;
 
   /// The regions to copy.
   std::vector<VkImageCopy> Regions;
@@ -220,11 +193,10 @@ class CopyImageToBufferCommand : public Command
 {
 public:
   /// Create a new CopyImageToBufferCommand.
-  CopyImageToBufferCommand(uint64_t SrcAddr, uint64_t DstAddr,
-                           VkFormat SrcFormat, VkExtent3D SrcSize,
+  CopyImageToBufferCommand(const Image &SrcImage, uint64_t DstAddr,
                            const std::vector<VkBufferImageCopy> &Regions)
-      : Command(COPY_IMAGE_TO_BUFFER), SrcAddr(SrcAddr), DstAddr(DstAddr),
-        SrcFormat(SrcFormat), SrcSize(SrcSize), Regions(Regions)
+      : Command(COPY_IMAGE_TO_BUFFER), SrcImage(SrcImage), DstAddr(DstAddr),
+        Regions(Regions)
   {}
 
 protected:
@@ -232,17 +204,11 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The memory address of the source image.
-  uint64_t SrcAddr;
+  // The source image.
+  const Image &SrcImage;
 
   /// The memory address of the destination buffer.
   uint64_t DstAddr;
-
-  /// The format of the source image.
-  VkFormat SrcFormat;
-
-  /// The dimensions of the source image.
-  VkExtent3D SrcSize;
 
   /// The regions to copy.
   std::vector<VkBufferImageCopy> Regions;

@@ -13,6 +13,67 @@
 namespace talvos
 {
 
+void Image::bindAddress(uint64_t Address)
+{
+  assert(this->Address == 0 && "image address is already bound");
+  this->Address = Address;
+}
+
+uint32_t Image::getDepthAtMipLevel(uint32_t Level) const
+{
+  uint32_t Ret = Extent.depth >> Level;
+  return Ret ? Ret : 1;
+}
+
+uint32_t Image::getElementSize() const
+{
+  return talvos::getElementSize(Format);
+}
+
+uint32_t Image::getHeightAtMipLevel(uint32_t Level) const
+{
+  uint32_t Ret = Extent.height >> Level;
+  return Ret ? Ret : 1;
+}
+
+uint64_t Image::getMipLevelOffset(uint32_t Level) const
+{
+  // TODO: Precompute these offsets in constructor?
+  uint64_t Offset = 0;
+  for (uint32_t l = 0; l < Level; l++)
+  {
+    Offset += getWidthAtMipLevel(l) * getHeightAtMipLevel(l) *
+              getDepthAtMipLevel(l) * NumArrayLayers * getElementSize();
+  }
+  return Offset;
+}
+
+uint32_t Image::getWidthAtMipLevel(uint32_t Level) const
+{
+  uint32_t Ret = Extent.width >> Level;
+  return Ret ? Ret : 1;
+}
+
+ImageView::ImageView(const Image &Img, VkFormat Format,
+                     VkImageSubresourceRange Range)
+    : Img(Img), Format(Format)
+{
+  BaseArrayLayer = Range.baseArrayLayer;
+  NumArrayLayers = Range.layerCount;
+  if (NumMipLevels == VK_REMAINING_ARRAY_LAYERS)
+    NumArrayLayers = Img.getNumArrayLayers() - BaseArrayLayer;
+
+  BaseMipLevel = Range.baseMipLevel;
+  NumMipLevels = Range.levelCount;
+  if (NumMipLevels == VK_REMAINING_MIP_LEVELS)
+    NumMipLevels = Img.getNumMipLevels() - BaseMipLevel;
+
+  uint32_t LevelWidth = Img.getWidthAtMipLevel(BaseMipLevel);
+  uint32_t LevelHeight = Img.getHeightAtMipLevel(BaseMipLevel);
+  Address = Img.getAddress() + Img.getMipLevelOffset(BaseMipLevel) +
+            (BaseArrayLayer * LevelWidth * LevelHeight * Img.getElementSize());
+}
+
 uint32_t getElementSize(VkFormat Format)
 {
   switch (Format)
