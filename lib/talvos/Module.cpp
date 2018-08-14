@@ -136,6 +136,7 @@ public:
         uint32_t Capability = Inst->words[Inst->operands[0].offset];
         switch (Capability)
         {
+        case SpvCapabilityImage1D:
         case SpvCapabilityInt16:
         case SpvCapabilityInt64:
         case SpvCapabilityFloat64:
