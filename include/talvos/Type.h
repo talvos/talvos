@@ -56,6 +56,9 @@ public:
   /// Valid for integer and floating point types.
   uint32_t getBitWidth() const;
 
+  /// Returns the dimensionality of an image type.
+  uint32_t getDimensionality() const { return Dimensionality; }
+
   /// Returns the number of elements in this array, struct, or vector type.
   /// Returns 1 for any scalar type.
   uint32_t getElementCount() const { return ElementCount; }
