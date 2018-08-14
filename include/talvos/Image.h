@@ -90,7 +90,8 @@ class ImageView
 {
 public:
   /// Create an image view.
-  ImageView(const Image &Img, VkFormat Format, VkImageSubresourceRange Range);
+  ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
+            VkImageSubresourceRange Range);
 
   /// Returns the memory address of the start of the image view data.
   uint64_t getAddress() const { return Address; }
@@ -113,10 +114,14 @@ public:
   /// Returns the number of mip levels in the image view.
   uint32_t getNumMipLevels() const { return NumMipLevels; }
 
+  /// Returns the type of the image view.
+  VkImageViewType getType() const { return Type; }
+
 private:
   const Image &Img; ///< The image that the image corresponds to.
 
-  VkFormat Format; ///< The format of the image view.
+  VkImageViewType Type; ///< The type of the image view.
+  VkFormat Format;      ///< The format of the image view.
 
   uint32_t BaseArrayLayer; ///< The base array layer.
   uint32_t NumArrayLayers; ///< The number of array layers.

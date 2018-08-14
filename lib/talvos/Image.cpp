@@ -54,9 +54,9 @@ uint32_t Image::getWidthAtMipLevel(uint32_t Level) const
   return Ret ? Ret : 1;
 }
 
-ImageView::ImageView(const Image &Img, VkFormat Format,
+ImageView::ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
                      VkImageSubresourceRange Range)
-    : Img(Img), Format(Format)
+    : Img(Img), Type(Type), Format(Format)
 {
   BaseArrayLayer = Range.baseArrayLayer;
   NumArrayLayers = Range.layerCount;
