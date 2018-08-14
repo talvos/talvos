@@ -235,6 +235,8 @@ public:
               {Decoration, Inst->words[Inst->operands[2].offset]});
           break;
         case SpvDecorationFlat:
+        case SpvDecorationNonReadable:
+        case SpvDecorationNonWritable:
         case SpvDecorationNoPerspective:
           ObjectDecorations[Target].push_back({Decoration, 0});
           break;
@@ -349,6 +351,8 @@ public:
         case SpvDecorationColMajor:
         case SpvDecorationRowMajor:
         case SpvDecorationFlat:
+        case SpvDecorationNonReadable:
+        case SpvDecorationNonWritable:
         case SpvDecorationNoPerspective:
           MemberDecorations[{Target, Member}][Decoration] = 1;
           break;
