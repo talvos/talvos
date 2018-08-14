@@ -8,7 +8,10 @@
 
 #include <cassert>
 
+#include "talvos/Device.h"
 #include "talvos/Image.h"
+#include "talvos/Memory.h"
+#include "talvos/Object.h"
 
 namespace talvos
 {
@@ -72,6 +75,51 @@ ImageView::ImageView(Device &Dev, const Image &Img, VkImageViewType Type,
   uint32_t LevelHeight = Img.getHeightAtMipLevel(BaseMipLevel);
   Address = Img.getAddress() + Img.getMipLevelOffset(BaseMipLevel) +
             (BaseArrayLayer * LevelWidth * LevelHeight * Img.getElementSize());
+}
+
+void ImageView::read(const Object &Coord, Object &Output) const
+{
+  // Calculate texel address.
+  uint64_t Address = this->Address;
+  switch (Type)
+  {
+  case VK_IMAGE_VIEW_TYPE_1D:
+    Address += Coord.get<uint32_t>(0) * Img.getElementSize();
+    break;
+  case VK_IMAGE_VIEW_TYPE_1D_ARRAY:
+  case VK_IMAGE_VIEW_TYPE_2D:
+    Address += (Coord.get<uint32_t>(0) +
+                Coord.get<uint32_t>(1) * Img.getWidthAtMipLevel(BaseMipLevel)) *
+               Img.getElementSize();
+    break;
+  case VK_IMAGE_VIEW_TYPE_2D_ARRAY:
+  case VK_IMAGE_VIEW_TYPE_3D:
+  case VK_IMAGE_VIEW_TYPE_CUBE:
+  case VK_IMAGE_VIEW_TYPE_CUBE_ARRAY:
+    Address +=
+        (Coord.get<uint32_t>(0) +
+         ((Coord.get<uint32_t>(1) +
+           Coord.get<uint32_t>(2) * Img.getHeightAtMipLevel(BaseMipLevel)) *
+          Img.getWidthAtMipLevel(BaseMipLevel))) *
+        Img.getElementSize();
+    break;
+  default:
+    assert(false && "unhandled image view type");
+    abort();
+  }
+
+  // TODO: Handle other formats
+  assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
+
+  // Load raw texel data.
+  uint8_t Data[4];
+  Dev.getGlobalMemory().load(Data, Address, 4);
+
+  // Convert to output format.
+  Output.set<float>(Data[0] / 255.f, 0);
+  Output.set<float>(Data[1] / 255.f, 1);
+  Output.set<float>(Data[2] / 255.f, 2);
+  Output.set<float>(Data[3] / 255.f, 3);
 }
 
 uint32_t getElementSize(VkFormat Format)
