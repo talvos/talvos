@@ -140,6 +140,7 @@ public:
         case SpvCapabilityInt16:
         case SpvCapabilityInt64:
         case SpvCapabilityFloat64:
+        case SpvCapabilityImageBuffer:
         case SpvCapabilityMatrix:
         case SpvCapabilityShader:
         case SpvCapabilityStorageBuffer16BitAccess:
