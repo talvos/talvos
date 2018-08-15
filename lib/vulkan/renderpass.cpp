@@ -55,16 +55,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateFramebuffer(
     const VkAllocationCallbacks *pAllocator, VkFramebuffer *pFramebuffer)
 {
   // Build list of attachments.
-  std::vector<talvos::Attachment> Attachments;
+  std::vector<talvos::ImageView *> Attachments;
   for (uint32_t i = 0; i < pCreateInfo->attachmentCount; i++)
-  {
-    talvos::Attachment Attach;
-    Attach.Address = pCreateInfo->pAttachments[i]->ImageView->getAddress();
-    Attach.XStride =
-        pCreateInfo->pAttachments[i]->ImageView->getImage().getWidthAtMipLevel(
-            pCreateInfo->pAttachments[i]->ImageView->getBaseMipLevel());
-    Attachments.push_back(Attach);
-  }
+    Attachments.push_back(pCreateInfo->pAttachments[i]->ImageView);
 
   // Create framebuffer.
   *pFramebuffer = new VkFramebuffer_T;

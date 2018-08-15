@@ -7,10 +7,8 @@
 /// This file defines the RenderPass class and related data structures.
 
 #include <cassert>
-#include <cmath>
 
-#include "talvos/Device.h"
-#include "talvos/Memory.h"
+#include "talvos/Image.h"
 #include "talvos/RenderPass.h"
 
 namespace talvos
@@ -66,26 +64,17 @@ void RenderPassInstance::beginSubpass()
     if (AttachDesc.loadOp != VK_ATTACHMENT_LOAD_OP_CLEAR)
       continue;
 
-    // TODO: Handle other image formats.
-    assert(AttachDesc.format == VK_FORMAT_R8G8B8A8_UNORM);
-
     // Generate integer clear value.
     assert(AttachRef < ClearValues.size());
-    const float *Clear = ClearValues[AttachRef].color.float32;
-    uint8_t Pixel[4] = {(uint8_t)std::round(Clear[0] * 255),
-                        (uint8_t)std::round(Clear[1] * 255),
-                        (uint8_t)std::round(Clear[2] * 255),
-                        (uint8_t)std::round(Clear[3] * 255)};
 
     // Store clear value to each pixel in attachment.
-    const Attachment &Attach = FB.getAttachments()[AttachRef];
-    for (uint32_t y = 0; y < FB.getHeight(); y++)
+    VkClearColorValue Color = ClearValues[AttachRef].color;
+    const ImageView *Attach = FB.getAttachments()[AttachRef];
+    for (uint32_t Y = 0; Y < FB.getHeight(); Y++)
     {
-      for (uint32_t x = 0; x < FB.getWidth(); x++)
+      for (uint32_t X = 0; X < FB.getWidth(); X++)
       {
-        uint64_t Address = Attach.Address;
-        Address += (x + (y * Attach.XStride)) * 4;
-        FB.getDevice().getGlobalMemory().store(Address, 4, Pixel);
+        Attach->write(Image::ClearColorTexel(Color), X, Y);
       }
     }
   }

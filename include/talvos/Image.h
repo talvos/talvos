@@ -11,20 +11,63 @@
 
 #include "vulkan/vulkan_core.h"
 
+#include "talvos/Object.h"
+
 namespace talvos
 {
 
 class Device;
-class Object;
 
 /// This class represents an image object.
 class Image
 {
 public:
+  /// Abstract class for wrapping a source of texel data.
+  /// Provides methods to extract texel components of various types.
+  class TexelWrapper
+  {
+  public:
+    /// Get the component at index \p C as a 32-bit floating point value.
+    virtual float getFloat(uint32_t C) const = 0;
+
+    /// Get the component at index \p C as a signed 32-bit integer value.
+    virtual int32_t getSInt(uint32_t C) const = 0;
+
+    /// Get the component at index \p C as an unsigned 32-bit integer value.
+    virtual uint32_t getUInt(uint32_t C) const = 0;
+  };
+
+  /// Texel wrapper for VkClearColorValue.
+  class ClearColorTexel : public TexelWrapper
+  {
+  public:
+    ClearColorTexel(VkClearColorValue Color) : Color(Color) {}
+    float getFloat(uint32_t c) const override { return Color.float32[c]; }
+    int32_t getSInt(uint32_t c) const override { return Color.int32[c]; }
+    uint32_t getUInt(uint32_t c) const override { return Color.uint32[c]; }
+
+  private:
+    VkClearColorValue Color;
+  };
+
+  /// Texel wrapper for talvos::Object.
+  class ObjectTexel : public TexelWrapper
+  {
+  public:
+    ObjectTexel(const Object &Obj) : Obj(Obj) {}
+    float getFloat(uint32_t C) const override { return Obj.get<float>(C); }
+    int32_t getSInt(uint32_t C) const override { return Obj.get<int32_t>(C); }
+    uint32_t getUInt(uint32_t C) const override { return Obj.get<uint32_t>(C); }
+
+  private:
+    const Object &Obj;
+  };
+
+public:
   /// Create an image.
-  Image(VkImageType Type, VkFormat Format, VkExtent3D Extent,
+  Image(Device &Dev, VkImageType Type, VkFormat Format, VkExtent3D Extent,
         uint32_t NumArrayLayers = 1, uint32_t NumMipLevels = 1)
-      : Type(Type), Format(Format), Extent(Extent),
+      : Dev(Dev), Type(Type), Format(Format), Extent(Extent),
         NumArrayLayers(NumArrayLayers), NumMipLevels(NumMipLevels)
   {
     Address = 0;
@@ -66,6 +109,10 @@ public:
   /// Returns the number of mip levels in the image.
   uint32_t getNumMipLevels() const { return NumMipLevels; }
 
+  /// Returns the address in memory of the texel at the specified coordinate.
+  uint64_t getTexelAddress(uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
+                           uint32_t Layer = 0, uint32_t MipLevel = 0) const;
+
   /// Returns the total size of the image (including all mip levels).
   uint64_t getTotalSize() const { return getMipLevelOffset(NumMipLevels); }
 
@@ -78,7 +125,15 @@ public:
   /// Returns the width of the image at the specified mip level.
   uint32_t getWidthAtMipLevel(uint32_t Level) const;
 
+  /// Read a texel from the image at the specified address.
+  void read(Object &Texel, uint64_t Address) const;
+
+  /// Write a texel to the image at the specified address.
+  void write(const Image::TexelWrapper &&CE, uint64_t Address) const;
+
 private:
+  Device &Dev; ///< The device this image view is created on.
+
   VkImageType Type;        ///< The image type.
   VkFormat Format;         ///< The image format.
   VkExtent3D Extent;       ///< The image extent.
@@ -93,8 +148,8 @@ class ImageView
 {
 public:
   /// Create an image view.
-  ImageView(Device &Dev, const Image &Img, VkImageViewType Type,
-            VkFormat Format, VkImageSubresourceRange Range);
+  ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
+            VkImageSubresourceRange Range);
 
   /// Returns the memory address of the start of the image view data.
   uint64_t getAddress() const { return Address; }
@@ -117,21 +172,22 @@ public:
   /// Returns the number of mip levels in the image view.
   uint32_t getNumMipLevels() const { return NumMipLevels; }
 
-  /// Returns the address in memory of the texel at coordinate \p Coord.
-  uint64_t getTexelAddress(const Object &Coord) const;
+  /// Returns the address in memory of the texel at the specified coordinate.
+  uint64_t getTexelAddress(uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
+                           uint32_t Layer = 0) const;
 
   /// Returns the type of the image view.
   VkImageViewType getType() const { return Type; }
 
-  /// Read a texel from the image view at coordinate \p Coord.
-  void read(const Object &Coord, Object &Texel) const;
+  /// Read a texel from the image view at the specified coordinate.
+  void read(Object &Texel, uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
+            uint32_t Layer = 0) const;
 
-  /// Write a texel to the image view at coordinate \p Coord.
-  void write(const Object &Coord, const Object &Texel) const;
+  /// Write a texel to the image view at the specified coordinate.
+  void write(const Image::TexelWrapper &&Texel, uint32_t X, uint32_t Y = 0,
+             uint32_t Z = 0, uint32_t Layer = 0) const;
 
 private:
-  Device &Dev; ///< The device this image view is created on.
-
   const Image &Img; ///< The image that the image corresponds to.
 
   VkImageViewType Type; ///< The type of the image view.

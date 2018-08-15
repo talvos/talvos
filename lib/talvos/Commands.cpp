@@ -7,7 +7,6 @@
 /// This file defines the Command base class and its subclasses.
 
 #include <cassert>
-#include <cmath>
 
 #include "PipelineExecutor.h"
 #include "talvos/Commands.h"
@@ -32,17 +31,6 @@ void ClearColorImageCommand::runImpl(Device &Dev) const
 {
   // TODO: Handle mip levels and other formats.
   assert(Ranges[0].baseMipLevel == 0 && Ranges[0].levelCount == 1);
-  assert(DstImage.getFormat() == VK_FORMAT_R8G8B8A8_UNORM);
-
-  // Generate pixel data.
-  uint8_t PixelValue[4];
-  for (uint32_t i = 0; i < 4; i++)
-    PixelValue[i] = (uint8_t)std::round(Color.float32[i] * 255);
-
-  uint32_t ImageWidth = DstImage.getWidth();
-  uint32_t ImageHeight = DstImage.getHeight();
-  uint32_t ImageDepth = DstImage.getDepth();
-  uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
 
   // Loop over ranges in command.
   for (auto &Range : Ranges)
@@ -53,16 +41,14 @@ void ClearColorImageCommand::runImpl(Device &Dev) const
          Layer < Range.baseArrayLayer + Range.layerCount; Layer++)
     {
       // Store pixel data to each pixel in image.
-      for (uint32_t Z = 0; Z < ImageDepth; Z++)
+      for (uint32_t Z = 0; Z < DstImage.getDepth(); Z++)
       {
-        for (uint32_t Y = 0; Y < ImageHeight; Y++)
+        for (uint32_t Y = 0; Y < DstImage.getHeight(); Y++)
         {
-          for (uint32_t X = 0; X < ImageWidth; X++)
+          for (uint32_t X = 0; X < DstImage.getWidth(); X++)
           {
-            Dev.getGlobalMemory().store(
-                DstImage.getAddress() + (ImageLayerSize * Layer * 4) +
-                    (X + ((Y + (Z * ImageHeight)) * ImageWidth)) * 4,
-                4, PixelValue);
+            DstImage.write(Image::ClearColorTexel(Color),
+                           DstImage.getTexelAddress(X, Y, Z, Layer));
           }
         }
       }

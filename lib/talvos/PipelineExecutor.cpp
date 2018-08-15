@@ -634,28 +634,13 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
       assert(Ref < FB.getAttachments().size());
 
       // Get output variable data.
-      // TODO: Handle other formats
-      assert(RP.getAttachment(Ref).format == VK_FORMAT_R8G8B8A8_UNORM);
       const Object &OutputData =
           Object::load(Output.first->getType()->getElementType(),
                        *PipelineMemory, Output.second.Address);
-      auto convert = [](float v) -> uint8_t {
-        if (v < 0.f)
-          return 0;
-        else if (v >= 1.f)
-          return 255;
-        else
-          return (uint8_t)std::round(v * 255);
-      };
-      uint8_t Pixel[4] = {
-          convert(OutputData.get<float>(0)), convert(OutputData.get<float>(1)),
-          convert(OutputData.get<float>(2)), convert(OutputData.get<float>(3))};
 
       // Write pixel color to attachment.
-      Attachment Attach = FB.getAttachments()[Ref];
-      uint64_t Address = Attach.Address;
-      Address += (XFB + YFB * Attach.XStride) * 4;
-      Dev.getGlobalMemory().store(Address, 4, Pixel);
+      const ImageView *Attach = FB.getAttachments()[Ref];
+      Attach->write(Image::ObjectTexel(OutputData), XFB, YFB);
     }
   }
 }

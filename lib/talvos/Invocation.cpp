@@ -838,10 +838,26 @@ void Invocation::executeImageRead(const Instruction *Inst)
   // TODO: Handle subpass data dimensionality
   assert(ImageObj.getType()->getDimensionality() != SpvDimSubpassData);
 
-  // Load texel from image.
+  // Get coordinate operand.
   const Object &Coord = Objects[Inst->getOperand(3)];
+  const Type *CoordType = Coord.getType();
+  uint32_t NumCoords = CoordType->getElementCount();
+  assert(NumCoords <= 3);
+
+  // Last coordinate is array layer if required.
+  uint32_t Layer = 0;
+  if (ImageObj.getType()->isArrayedImage() ||
+      ImageObj.getType()->getDimensionality() == SpvDimCube)
+    Layer = Coord.get<uint32_t>(--NumCoords);
+
+  // Extract coordinates.
+  uint32_t X = Coord.get<uint32_t>(0);
+  uint32_t Y = (NumCoords > 1) ? Coord.get<uint32_t>(1) : 0;
+  uint32_t Z = (NumCoords > 2) ? Coord.get<uint32_t>(2) : 0;
+
+  // Read texel from image.
   Object Texel = Object(Inst->getResultType());
-  Image->read(Coord, Texel);
+  Image->read(Texel, X, Y, Z, Layer);
   Objects[Inst->getOperand(1)] = Texel;
 }
 
@@ -854,10 +870,26 @@ void Invocation::executeImageWrite(const Instruction *Inst)
   // TODO: Handle additional operands
   assert(Inst->getNumOperands() == 3);
 
-  // Write texel to image.
+  // Get coordinate operand.
   const Object &Coord = Objects[Inst->getOperand(1)];
+  const Type *CoordType = Coord.getType();
+  uint32_t NumCoords = CoordType->getElementCount();
+  assert(NumCoords <= 3);
+
+  // Last coordinate is array layer if required.
+  uint32_t Layer = 0;
+  if (ImageObj.getType()->isArrayedImage() ||
+      ImageObj.getType()->getDimensionality() == SpvDimCube)
+    Layer = Coord.get<uint32_t>(--NumCoords);
+
+  // Extract coordinates.
+  uint32_t X = Coord.get<uint32_t>(0);
+  uint32_t Y = (NumCoords > 1) ? Coord.get<uint32_t>(1) : 0;
+  uint32_t Z = (NumCoords > 2) ? Coord.get<uint32_t>(2) : 0;
+
+  // Write texel to image.
   const Object &Texel = Objects[Inst->getOperand(2)];
-  Image->write(Coord, Texel);
+  Image->write(Image::ObjectTexel(Texel), X, Y, Z, Layer);
 }
 
 void Invocation::executeIMul(const Instruction *Inst)

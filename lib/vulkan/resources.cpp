@@ -125,8 +125,8 @@ vkCreateImage(VkDevice device, const VkImageCreateInfo *pCreateInfo,
 {
   *pImage = new VkImage_T;
   (*pImage)->Image = new talvos::Image(
-      pCreateInfo->imageType, pCreateInfo->format, pCreateInfo->extent,
-      pCreateInfo->arrayLayers, pCreateInfo->mipLevels);
+      *device->Device, pCreateInfo->imageType, pCreateInfo->format,
+      pCreateInfo->extent, pCreateInfo->arrayLayers, pCreateInfo->mipLevels);
 
   // TODO: Handle multisampling
   assert(pCreateInfo->samples == VK_SAMPLE_COUNT_1_BIT);
@@ -139,9 +139,9 @@ vkCreateImageView(VkDevice device, const VkImageViewCreateInfo *pCreateInfo,
                   const VkAllocationCallbacks *pAllocator, VkImageView *pView)
 {
   *pView = new VkImageView_T;
-  (*pView)->ImageView = new talvos::ImageView(
-      *device->Device, *pCreateInfo->image->Image, pCreateInfo->viewType,
-      pCreateInfo->format, pCreateInfo->subresourceRange);
+  (*pView)->ImageView =
+      new talvos::ImageView(*pCreateInfo->image->Image, pCreateInfo->viewType,
+                            pCreateInfo->format, pCreateInfo->subresourceRange);
 
   // TODO: Handle pCreateInfo->components
 

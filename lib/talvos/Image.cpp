@@ -7,6 +7,7 @@
 /// This file provides definitions for image functionality.
 
 #include <cassert>
+#include <cmath>
 
 #include "talvos/Device.h"
 #include "talvos/Image.h"
@@ -51,68 +52,24 @@ uint64_t Image::getMipLevelOffset(uint32_t Level) const
   return Offset;
 }
 
+uint64_t Image::getTexelAddress(uint32_t X, uint32_t Y, uint32_t Z,
+                                uint32_t Layer, uint32_t MipLevel) const
+{
+  return Address + getMipLevelOffset(MipLevel) +
+         (X + (Y + (Z + (Layer * getDepthAtMipLevel(MipLevel))) *
+                       getHeightAtMipLevel(MipLevel)) *
+                  getWidthAtMipLevel(MipLevel)) *
+             getElementSize();
+}
+
 uint32_t Image::getWidthAtMipLevel(uint32_t Level) const
 {
   uint32_t Ret = Extent.width >> Level;
   return Ret ? Ret : 1;
 }
 
-ImageView::ImageView(Device &Dev, const Image &Img, VkImageViewType Type,
-                     VkFormat Format, VkImageSubresourceRange Range)
-    : Dev(Dev), Img(Img), Type(Type), Format(Format)
+void Image::read(Object &Texel, uint64_t Address) const
 {
-  BaseArrayLayer = Range.baseArrayLayer;
-  NumArrayLayers = Range.layerCount;
-  if (NumMipLevels == VK_REMAINING_ARRAY_LAYERS)
-    NumArrayLayers = Img.getNumArrayLayers() - BaseArrayLayer;
-
-  BaseMipLevel = Range.baseMipLevel;
-  NumMipLevels = Range.levelCount;
-  if (NumMipLevels == VK_REMAINING_MIP_LEVELS)
-    NumMipLevels = Img.getNumMipLevels() - BaseMipLevel;
-
-  uint32_t LevelWidth = Img.getWidthAtMipLevel(BaseMipLevel);
-  uint32_t LevelHeight = Img.getHeightAtMipLevel(BaseMipLevel);
-  Address = Img.getAddress() + Img.getMipLevelOffset(BaseMipLevel) +
-            (BaseArrayLayer * LevelWidth * LevelHeight * Img.getElementSize());
-}
-
-uint64_t ImageView::getTexelAddress(const Object &Coord) const
-{
-  uint64_t Address = this->Address;
-  switch (Type)
-  {
-  case VK_IMAGE_VIEW_TYPE_1D:
-    Address += Coord.get<uint32_t>(0) * Img.getElementSize();
-    break;
-  case VK_IMAGE_VIEW_TYPE_1D_ARRAY:
-  case VK_IMAGE_VIEW_TYPE_2D:
-    Address += (Coord.get<uint32_t>(0) +
-                Coord.get<uint32_t>(1) * Img.getWidthAtMipLevel(BaseMipLevel)) *
-               Img.getElementSize();
-    break;
-  case VK_IMAGE_VIEW_TYPE_2D_ARRAY:
-  case VK_IMAGE_VIEW_TYPE_3D:
-  case VK_IMAGE_VIEW_TYPE_CUBE:
-  case VK_IMAGE_VIEW_TYPE_CUBE_ARRAY:
-    Address +=
-        (Coord.get<uint32_t>(0) +
-         ((Coord.get<uint32_t>(1) +
-           Coord.get<uint32_t>(2) * Img.getHeightAtMipLevel(BaseMipLevel)) *
-          Img.getWidthAtMipLevel(BaseMipLevel))) *
-        Img.getElementSize();
-    break;
-  default:
-    assert(false && "unhandled image view type");
-    abort();
-  }
-  return Address;
-}
-
-void ImageView::read(const Object &Coord, Object &Texel) const
-{
-  uint64_t Address = getTexelAddress(Coord);
-
   // TODO: Handle other formats
   assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
 
@@ -127,22 +84,70 @@ void ImageView::read(const Object &Coord, Object &Texel) const
   Texel.set<float>(Data[3] / 255.f, 3);
 }
 
-void ImageView::write(const Object &Coord, const Object &Texel) const
+void Image::write(const Image::TexelWrapper &&TW, uint64_t Address) const
 {
-  uint64_t Address = getTexelAddress(Coord);
-
   // TODO: Handle other formats
   assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
 
   // Convert to storage format.
+  auto convert = [](float v) -> uint8_t {
+    if (v < 0.f)
+      return 0;
+    else if (v >= 1.f)
+      return 255;
+    else
+      return (uint8_t)std::round(v * 255);
+  };
   uint8_t Data[4];
-  Data[0] = Texel.get<float>(0) * 255.f;
-  Data[1] = Texel.get<float>(1) * 255.f;
-  Data[2] = Texel.get<float>(2) * 255.f;
-  Data[3] = Texel.get<float>(3) * 255.f;
+  Data[0] = convert(TW.getFloat(0));
+  Data[1] = convert(TW.getFloat(1));
+  Data[2] = convert(TW.getFloat(2));
+  Data[3] = convert(TW.getFloat(3));
 
   // Write raw texel data.
   Dev.getGlobalMemory().store(Address, 4, Data);
+}
+
+ImageView::ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
+                     VkImageSubresourceRange Range)
+    : Img(Img), Type(Type), Format(Format)
+{
+  BaseArrayLayer = Range.baseArrayLayer;
+  NumArrayLayers = Range.layerCount;
+  if (NumArrayLayers == VK_REMAINING_ARRAY_LAYERS)
+    NumArrayLayers = Img.getNumArrayLayers() - BaseArrayLayer;
+
+  BaseMipLevel = Range.baseMipLevel;
+  NumMipLevels = Range.levelCount;
+  if (NumMipLevels == VK_REMAINING_MIP_LEVELS)
+    NumMipLevels = Img.getNumMipLevels() - BaseMipLevel;
+
+  uint32_t LevelWidth = Img.getWidthAtMipLevel(BaseMipLevel);
+  uint32_t LevelHeight = Img.getHeightAtMipLevel(BaseMipLevel);
+  Address = Img.getAddress() + Img.getMipLevelOffset(BaseMipLevel) +
+            (BaseArrayLayer * LevelWidth * LevelHeight * Img.getElementSize());
+}
+
+uint64_t ImageView::getTexelAddress(uint32_t X, uint32_t Y, uint32_t Z,
+                                    uint32_t Layer) const
+{
+  return Address +
+         (X + (Y + (Z + (Layer * Img.getDepthAtMipLevel(BaseMipLevel))) *
+                       Img.getHeightAtMipLevel(BaseMipLevel)) *
+                  Img.getWidthAtMipLevel(BaseMipLevel)) *
+             Img.getElementSize();
+}
+
+void ImageView::read(Object &Texel, uint32_t X, uint32_t Y, uint32_t Z,
+                     uint32_t Layer) const
+{
+  Img.read(Texel, getTexelAddress(X, Y, Z, Layer));
+}
+
+void ImageView::write(const Image::TexelWrapper &&TW, uint32_t X, uint32_t Y,
+                      uint32_t Z, uint32_t Layer) const
+{
+  Img.write(std::move(TW), getTexelAddress(X, Y, Z, Layer));
 }
 
 uint32_t getElementSize(VkFormat Format)
