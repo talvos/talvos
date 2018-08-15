@@ -38,7 +38,7 @@ vkBindBufferMemory2(VkDevice device, uint32_t bindInfoCount,
         break;
       }
       default:
-        assert(false && "Unimplemented extension");
+        break;
       }
 
       Ext = ((void **)Ext)[1];
@@ -78,7 +78,7 @@ vkBindImageMemory2(VkDevice device, uint32_t bindInfoCount,
       switch (*(VkStructureType *)Ext)
       {
       default:
-        assert(false && "Unimplemented extension");
+        break;
       }
 
       Ext = ((void **)Ext)[1];
@@ -254,7 +254,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetBufferMemoryRequirements2(
       break;
     }
     default:
-      assert(false && "Unimplemented extension");
+      break;
     }
 
     Ext = ((void **)Ext)[1];
@@ -291,7 +291,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetImageMemoryRequirements2(
       switch (*(VkStructureType *)Ext)
       {
       default:
-        assert(false && "Unimplemented extension");
+        break;
       }
 
       Ext = ((void **)Ext)[1];
@@ -314,7 +314,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetImageMemoryRequirements2(
         break;
       }
       default:
-        assert(false && "Unimplemented extension");
+        break;
       }
 
       Ext = ((void **)Ext)[1];

@@ -315,7 +315,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties2(
       break;
     }
     default:
-      assert(false && "Unimplemented extension");
+      break;
     }
 
     Ext = ((void **)Ext)[1];
