@@ -91,6 +91,9 @@ public:
   /// Returns the type ID of this type.
   TypeId getTypeId() const { return Id; }
 
+  /// Returns the \p Arrayed flag of an image type.
+  bool isArrayedImage() const { return Arrayed; }
+
   /// Returns \p true if this is a bool type.
   bool isBool() const { return Id == BOOL; }
 
