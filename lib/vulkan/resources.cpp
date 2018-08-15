@@ -113,9 +113,31 @@ vkCreateBufferView(VkDevice device, const VkBufferViewCreateInfo *pCreateInfo,
                    const VkAllocationCallbacks *pAllocator, VkBufferView *pView)
 {
   *pView = new VkBufferView_T;
-  (*pView)->Format = pCreateInfo->format;
-  (*pView)->NumBytes = pCreateInfo->range;
-  (*pView)->Address = pCreateInfo->buffer->Address + pCreateInfo->offset;
+
+  uint64_t Address = pCreateInfo->buffer->Address + pCreateInfo->offset;
+  uint64_t NumBytes = pCreateInfo->range;
+  if (NumBytes == VK_WHOLE_SIZE)
+    NumBytes = pCreateInfo->buffer->NumBytes - pCreateInfo->offset;
+
+  // Create image object.
+  VkDeviceSize NumElements =
+      NumBytes / talvos::getElementSize(pCreateInfo->format);
+  VkExtent3D Extent = {(uint32_t)NumElements, 1, 1};
+  (*pView)->Image = new talvos::Image(*device->Device, VK_IMAGE_TYPE_1D,
+                                      pCreateInfo->format, Extent);
+  (*pView)->Image->bindAddress(Address);
+
+  // Create 1D image view object.
+  VkImageSubresourceRange Range = {0, 0, 1, 0, 1};
+  (*pView)->ImageView = new talvos::ImageView(
+      *(*pView)->Image, VK_IMAGE_VIEW_TYPE_1D, pCreateInfo->format, Range);
+
+  // Store image view object in memory.
+  talvos::Memory &Mem = device->Device->getGlobalMemory();
+  (*pView)->ObjectAddress = Mem.allocate(sizeof(talvos::ImageView *));
+  Mem.store((*pView)->ObjectAddress, sizeof(talvos::ImageView *),
+            (uint8_t *)&(*pView)->ImageView);
+
   return VK_SUCCESS;
 }
 
@@ -164,7 +186,13 @@ VKAPI_ATTR void VKAPI_CALL
 vkDestroyBufferView(VkDevice device, VkBufferView bufferView,
                     const VkAllocationCallbacks *pAllocator)
 {
-  delete bufferView;
+  if (bufferView)
+  {
+    device->Device->getGlobalMemory().release(bufferView->ObjectAddress);
+    delete bufferView->ImageView;
+    delete bufferView->Image;
+    delete bufferView;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyImage(

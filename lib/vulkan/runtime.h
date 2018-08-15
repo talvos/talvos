@@ -45,9 +45,9 @@ struct VkBuffer_T
 
 struct VkBufferView_T
 {
-  VkFormat Format;
-  VkDeviceSize NumBytes;
-  uint64_t Address;
+  talvos::Image *Image;
+  talvos::ImageView *ImageView;
+  uint64_t ObjectAddress;
 };
 
 struct VkCommandBuffer_T

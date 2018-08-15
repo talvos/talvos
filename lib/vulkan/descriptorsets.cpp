@@ -234,13 +234,14 @@ vkResetDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
 }
 
 // Helper to update the descriptors for a particular descriptor set.
-// GetDescriptorInfo is a lambda that returns a pointer to the descriptor info
-// structure at a particular binding.
-template <typename BufFunc, typename ImgFunc>
+// The Get* parameters are lambdas that return pointers to the descriptor info
+// structures at a particular binding.
+template <typename BufFunc, typename ImgFunc, typename TexBufFunc>
 void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
                        uint32_t Binding, uint32_t ArrayElement, uint32_t Count,
                        const BufFunc &GetBufferDescriptorInfo,
-                       const ImgFunc &GetImageDescriptorInfo)
+                       const ImgFunc &GetImageDescriptorInfo,
+                       const TexBufFunc &GetTexelBuffer)
 {
   for (uint32_t b = 0; b < Count; b++)
   {
@@ -276,6 +277,12 @@ void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
       Address = ImageInfo->imageView->ObjectAddress;
       break;
     }
+    case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
+    {
+      const VkBufferView *TexelBuffer = (const VkBufferView *)GetTexelBuffer(b);
+      Address = (*TexelBuffer)->ObjectAddress;
+      break;
+    }
     default:
       assert(false && "unhandled descriptor type");
       abort();
@@ -304,7 +311,7 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSetWithTemplate(
 
     updateDescriptors(descriptorSet, Entry.descriptorType, Entry.dstBinding,
                       Entry.dstArrayElement, Entry.descriptorCount,
-                      GetDescriptorInfo, GetDescriptorInfo);
+                      GetDescriptorInfo, GetDescriptorInfo, GetDescriptorInfo);
   }
 }
 
@@ -334,11 +341,14 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
     auto GetImageDescriptorInfo = [Write](uint32_t Binding) -> const void * {
       return &(Write.pImageInfo[Binding]);
     };
+    auto GetTexelBufferView = [Write](uint32_t Binding) -> const void * {
+      return &(Write.pTexelBufferView[Binding]);
+    };
 
     updateDescriptors(
         pDescriptorWrites[i].dstSet, pDescriptorWrites[i].descriptorType,
         pDescriptorWrites[i].dstBinding, pDescriptorWrites[i].dstArrayElement,
         pDescriptorWrites[i].descriptorCount, GetBufferDescriptorInfo,
-        GetImageDescriptorInfo);
+        GetImageDescriptorInfo, GetTexelBufferView);
   }
 }
