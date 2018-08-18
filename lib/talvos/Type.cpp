@@ -180,6 +180,9 @@ std::ostream &operator<<(std::ostream &Stream, const Type *Ty)
     // TODO: Show other image info
 
     break;
+  case Type::SAMPLER:
+    Stream << "sampler";
+    break;
   case Type::SAMPLED_IMAGE:
     Stream << "sampled " << Ty->getElementType();
     break;
