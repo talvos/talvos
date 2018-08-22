@@ -1044,10 +1044,10 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
   int YMaxFB = (int)std::ceil(yDevToFB(YMaxDev));
 
   // Clamp the bounding box to be within the framebuffer.
-  XMinFB = std::max(std::min(XMinFB, (int)(FBWidth - 1)), 0);
-  XMaxFB = std::max(std::min(XMaxFB, (int)(FBWidth - 1)), 0);
-  YMinFB = std::max(std::min(YMinFB, (int)(FBHeight - 1)), 0);
-  YMaxFB = std::max(std::min(YMaxFB, (int)(FBHeight - 1)), 0);
+  XMinFB = std::clamp(XMinFB, 0, (int)(FBWidth - 1));
+  XMaxFB = std::clamp(XMaxFB, 0, (int)(FBWidth - 1));
+  YMinFB = std::clamp(YMinFB, 0, (int)(FBHeight - 1));
+  YMaxFB = std::clamp(YMaxFB, 0, (int)(FBHeight - 1));
 
   // Clamp the bounding box to be within the scissor rectangle.
   // TODO: Select correct scissor for current viewport
