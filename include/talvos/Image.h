@@ -151,8 +151,14 @@ public:
   /// Returns the base mip level of the image view.
   uint32_t getBaseMipLevel() const { return BaseMipLevel; }
 
+  /// Get the depth of the image view at the specified mip level.
+  uint32_t getDepth(uint32_t Level = 0) const;
+
   /// Returns the format of the image.
   VkFormat getFormat() const { return Format; }
+
+  /// Get the height of the image view at the specified mip level.
+  uint32_t getHeight(uint32_t Level = 0) const;
 
   /// Returns the image that the image view corresponds to.
   const Image &getImage() const { return Img; }
@@ -169,6 +175,9 @@ public:
 
   /// Returns the type of the image view.
   VkImageViewType getType() const { return Type; }
+
+  /// Get the width of the image view at the specified mip level.
+  uint32_t getWidth(uint32_t Level = 0) const;
 
   /// Read a texel from the image view at the specified coordinate.
   void read(Object &Texel, uint32_t X, uint32_t Y = 0, uint32_t Z = 0,

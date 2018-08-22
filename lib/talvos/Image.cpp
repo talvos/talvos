@@ -127,6 +127,16 @@ ImageView::ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
             (BaseArrayLayer * LevelWidth * LevelHeight * Img.getElementSize());
 }
 
+uint32_t ImageView::getDepth(uint32_t Level) const
+{
+  return Img.getDepth(BaseMipLevel + Level);
+}
+
+uint32_t ImageView::getHeight(uint32_t Level) const
+{
+  return Img.getHeight(BaseMipLevel + Level);
+}
+
 uint64_t ImageView::getTexelAddress(uint32_t X, uint32_t Y, uint32_t Z,
                                     uint32_t Layer) const
 {
@@ -134,6 +144,11 @@ uint64_t ImageView::getTexelAddress(uint32_t X, uint32_t Y, uint32_t Z,
                                  Img.getHeight(BaseMipLevel)) *
                             Img.getWidth(BaseMipLevel)) *
                        Img.getElementSize();
+}
+
+uint32_t ImageView::getWidth(uint32_t Level) const
+{
+  return Img.getWidth(BaseMipLevel + Level);
 }
 
 void ImageView::read(Object &Texel, uint32_t X, uint32_t Y, uint32_t Z,
