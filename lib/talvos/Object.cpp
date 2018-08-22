@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 
+#include "talvos/Image.h"
 #include "talvos/Memory.h"
 #include "talvos/Object.h"
 
@@ -239,6 +240,24 @@ void print(std::ostream &Stream, uint8_t *Data, const Type *Ty)
       print(Stream, Data + Ty->getElementOffset(i), Ty->getElementType(i));
     }
     Stream << "}";
+    break;
+  }
+  case Type::IMAGE:
+  {
+    ImageView *Image = *(ImageView **)Data;
+    Stream << Ty << std::endl;
+    Stream << std::endl;
+    Stream << Image->getWidth() << " x " << Image->getHeight() << " x "
+           << Image->getDepth() << std::endl;
+    Stream << Image->getNumArrayLayers() << " layers" << std::endl;
+    Stream << Image->getNumMipLevels() << " mip levels" << std::endl;
+    Stream << "Format = " << Image->getFormat() << std::endl;
+    break;
+  }
+  case Type::SAMPLER:
+  {
+    // TODO: Show information about the sampler.
+    Stream << "sampler object";
     break;
   }
   case Type::POINTER:
