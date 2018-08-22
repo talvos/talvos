@@ -11,8 +11,8 @@ Talvos requires a compiler that supports C++17.
 The following compilers/platforms are frequently tested via continuous
 integration (Travis CI and AppVeyor):
 
-- GCC 5 (Ubuntu 14.04)
 - GCC 7 (Ubuntu 14.04)
+- GCC 8 (Ubuntu 14.04)
 - Clang 5.0 (Ubuntu 14.04)
 - AppleClang 9.1 (macOS 10.13 / Xcode 9.4)
 - Visual Studio 2017 (x64)

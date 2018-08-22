@@ -19,16 +19,6 @@ matrix:
           packages:
             - g++-7 doxygen
 
-    # GCC 5
-    - os: linux
-      env: COMPILER_NAME=g++ CC=gcc-5 CXX=g++-5
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-
     # GCC 7
     - os: linux
       env: COMPILER_NAME=g++ CC=gcc-7 CXX=g++-7
@@ -38,6 +28,16 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
+
+    # GCC 8
+    - os: linux
+      env: COMPILER_NAME=g++ CC=gcc-8 CXX=g++-8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
 
 install:
   - if [[ "$DEPLOY_DOCS" == "1" ]]; then
