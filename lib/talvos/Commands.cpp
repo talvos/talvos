@@ -74,9 +74,9 @@ void CopyBufferToImageCommand::runImpl(Device &Dev) const
   {
     uint32_t MipLevel = Region.imageSubresource.mipLevel;
     uint64_t MipOffset = DstImage.getMipLevelOffset(MipLevel);
-    uint32_t ImageWidth = DstImage.getWidthAtMipLevel(MipLevel);
-    uint32_t ImageHeight = DstImage.getHeightAtMipLevel(MipLevel);
-    uint32_t ImageDepth = DstImage.getDepthAtMipLevel(MipLevel);
+    uint32_t ImageWidth = DstImage.getWidth(MipLevel);
+    uint32_t ImageHeight = DstImage.getHeight(MipLevel);
+    uint32_t ImageDepth = DstImage.getDepth(MipLevel);
     uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
 
     // TODO: Handle VK_REMAINING_ARRAY_LAYERS
@@ -177,9 +177,9 @@ void CopyImageToBufferCommand::runImpl(Device &Dev) const
   {
     uint32_t MipLevel = Region.imageSubresource.mipLevel;
     uint64_t MipOffset = SrcImage.getMipLevelOffset(MipLevel);
-    uint32_t ImageWidth = SrcImage.getWidthAtMipLevel(MipLevel);
-    uint32_t ImageHeight = SrcImage.getHeightAtMipLevel(MipLevel);
-    uint32_t ImageDepth = SrcImage.getDepthAtMipLevel(MipLevel);
+    uint32_t ImageWidth = SrcImage.getWidth(MipLevel);
+    uint32_t ImageHeight = SrcImage.getHeight(MipLevel);
+    uint32_t ImageDepth = SrcImage.getDepth(MipLevel);
     uint32_t ImageLayerSize = ImageWidth * ImageHeight * ImageDepth;
 
     // TODO: Handle VK_REMAINING_ARRAY_LAYERS

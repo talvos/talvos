@@ -79,11 +79,8 @@ public:
   /// Returns the memory address of the beginning of the image.
   uint64_t getAddress() const { return Address; }
 
-  /// Returns the depth of the image.
-  uint32_t getDepth() const { return Extent.depth; }
-
   /// Returns the depth of the image at the specified mip level.
-  uint32_t getDepthAtMipLevel(uint32_t Level) const;
+  uint32_t getDepth(uint32_t Level = 0) const;
 
   /// Returns the size in bytes of a single pixel in the image.
   uint32_t getElementSize() const;
@@ -94,11 +91,8 @@ public:
   /// Returns the format of the image.
   VkFormat getFormat() const { return Format; }
 
-  /// Returns the height of the image.
-  uint32_t getHeight() const { return Extent.height; }
-
   /// Returns the height of the image at the specified mip level.
-  uint32_t getHeightAtMipLevel(uint32_t Level) const;
+  uint32_t getHeight(uint32_t Level = 0) const;
 
   /// Returns the offset in bytes to the beginning of the specified mip level.
   uint64_t getMipLevelOffset(uint32_t Level) const;
@@ -119,11 +113,8 @@ public:
   /// Returns the type of the image.
   VkImageType getType() const { return Type; }
 
-  /// Returns the width of the image.
-  uint32_t getWidth() const { return Extent.width; }
-
   /// Returns the width of the image at the specified mip level.
-  uint32_t getWidthAtMipLevel(uint32_t Level) const;
+  uint32_t getWidth(uint32_t Level = 0) const;
 
   /// Read a texel from the image at the specified address.
   void read(Object &Texel, uint64_t Address) const;

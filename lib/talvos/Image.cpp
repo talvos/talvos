@@ -23,7 +23,7 @@ void Image::bindAddress(uint64_t Address)
   this->Address = Address;
 }
 
-uint32_t Image::getDepthAtMipLevel(uint32_t Level) const
+uint32_t Image::getDepth(uint32_t Level) const
 {
   uint32_t Ret = Extent.depth >> Level;
   return Ret ? Ret : 1;
@@ -34,7 +34,7 @@ uint32_t Image::getElementSize() const
   return talvos::getElementSize(Format);
 }
 
-uint32_t Image::getHeightAtMipLevel(uint32_t Level) const
+uint32_t Image::getHeight(uint32_t Level) const
 {
   uint32_t Ret = Extent.height >> Level;
   return Ret ? Ret : 1;
@@ -46,8 +46,8 @@ uint64_t Image::getMipLevelOffset(uint32_t Level) const
   uint64_t Offset = 0;
   for (uint32_t l = 0; l < Level; l++)
   {
-    Offset += getWidthAtMipLevel(l) * getHeightAtMipLevel(l) *
-              getDepthAtMipLevel(l) * NumArrayLayers * getElementSize();
+    Offset += getWidth(l) * getHeight(l) * getDepth(l) * NumArrayLayers *
+              getElementSize();
   }
   return Offset;
 }
@@ -56,13 +56,12 @@ uint64_t Image::getTexelAddress(uint32_t X, uint32_t Y, uint32_t Z,
                                 uint32_t Layer, uint32_t MipLevel) const
 {
   return Address + getMipLevelOffset(MipLevel) +
-         (X + (Y + (Z + (Layer * getDepthAtMipLevel(MipLevel))) *
-                       getHeightAtMipLevel(MipLevel)) *
-                  getWidthAtMipLevel(MipLevel)) *
+         (X + (Y + (Z + (Layer * getDepth(MipLevel))) * getHeight(MipLevel)) *
+                  getWidth(MipLevel)) *
              getElementSize();
 }
 
-uint32_t Image::getWidthAtMipLevel(uint32_t Level) const
+uint32_t Image::getWidth(uint32_t Level) const
 {
   uint32_t Ret = Extent.width >> Level;
   return Ret ? Ret : 1;
@@ -122,8 +121,8 @@ ImageView::ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
   if (NumMipLevels == VK_REMAINING_MIP_LEVELS)
     NumMipLevels = Img.getNumMipLevels() - BaseMipLevel;
 
-  uint32_t LevelWidth = Img.getWidthAtMipLevel(BaseMipLevel);
-  uint32_t LevelHeight = Img.getHeightAtMipLevel(BaseMipLevel);
+  uint32_t LevelWidth = Img.getWidth(BaseMipLevel);
+  uint32_t LevelHeight = Img.getHeight(BaseMipLevel);
   Address = Img.getAddress() + Img.getMipLevelOffset(BaseMipLevel) +
             (BaseArrayLayer * LevelWidth * LevelHeight * Img.getElementSize());
 }
@@ -131,11 +130,10 @@ ImageView::ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
 uint64_t ImageView::getTexelAddress(uint32_t X, uint32_t Y, uint32_t Z,
                                     uint32_t Layer) const
 {
-  return Address +
-         (X + (Y + (Z + (Layer * Img.getDepthAtMipLevel(BaseMipLevel))) *
-                       Img.getHeightAtMipLevel(BaseMipLevel)) *
-                  Img.getWidthAtMipLevel(BaseMipLevel)) *
-             Img.getElementSize();
+  return Address + (X + (Y + (Z + (Layer * Img.getDepth(BaseMipLevel))) *
+                                 Img.getHeight(BaseMipLevel)) *
+                            Img.getWidth(BaseMipLevel)) *
+                       Img.getElementSize();
 }
 
 void ImageView::read(Object &Texel, uint32_t X, uint32_t Y, uint32_t Z,
