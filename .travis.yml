@@ -9,15 +9,29 @@ matrix:
     # Skip extra Linux configurations that the "os:" entry adds.
     - os: linux
   include:
-    # Clang
+    # Clang 5
     - os: linux
-      env: COMPILER_NAME=clang CC=clang CXX=clang++ DEPLOY_DOCS=1
+      env: COMPILER_NAME=clang CC=clang-5.0 CXX=clang++-5.0 DEPLOY_DOCS=1
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0
           packages:
             - g++-7 doxygen
+            - clang-5.0
+
+    # Clang 6
+    - os: linux
+      env: COMPILER_NAME=clang CC=clang-6.0 CXX=clang++-6.0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+          packages:
+            - g++-7
+            - clang-6.0
 
     # GCC 7
     - os: linux
