@@ -32,7 +32,7 @@ Contributions in these (or other) areas would be extremely welcome.
 More detailed build instructions are provided
 [here](https://talvos.github.io/building.html).
 
-Building Talvos requires a compiler that supports C++14, and Python to enable
+Building Talvos requires a compiler that supports C++17, and Python to enable
 the internal test suite.
 Talvos depends on
 [SPIRV-Headers](https://github.com/KhronosGroup/SPIRV-Headers) and

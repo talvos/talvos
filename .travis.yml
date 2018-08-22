@@ -19,15 +19,15 @@ matrix:
           packages:
             - g++-7 doxygen
 
-    # GCC 4.9
+    # GCC 5
     - os: linux
-      env: COMPILER_NAME=g++ CC=gcc-4.9 CXX=g++-4.9
+      env: COMPILER_NAME=g++ CC=gcc-5 CXX=g++-5
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.9
+            - g++-5
 
     # GCC 7
     - os: linux

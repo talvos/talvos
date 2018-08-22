@@ -7,15 +7,14 @@ on GitHub builds and passes the internal test suite on each of these platforms.
 Prebuilt binaries for releases are provided on the `GitHub releases page
 <https://github.com/talvos/talvos/releases>`_.
 
-Talvos requires a compiler that supports C++14, specifically for generic lambda
-expressions.
+Talvos requires a compiler that supports C++17.
 The following compilers/platforms are frequently tested via continuous
 integration (Travis CI and AppVeyor):
 
-- GCC 4.9 (Ubuntu 14.04)
+- GCC 5 (Ubuntu 14.04)
 - GCC 7 (Ubuntu 14.04)
 - Clang 5.0 (Ubuntu 14.04)
-- AppleClang 8.1 (macOS 10.12 / Xcode 8.3)
+- AppleClang 9.1 (macOS 10.13 / Xcode 9.4)
 - Visual Studio 2017 (x64)
 
 Building Talvos as a 32-bit library is not currently tested.

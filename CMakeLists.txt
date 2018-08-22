@@ -3,7 +3,7 @@
 # This file is distributed under a three-clause BSD license. For full license
 # terms please see the LICENSE file distributed with this source code.
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.8.2)
 project(Talvos)
 
 set(TALVOS_VERSION_MAJOR 0)
@@ -13,19 +13,15 @@ set(TALVOS_VERSION_SUFFIX "-dev")
 configure_file("version.h.in" "version.h")
 include_directories(${CMAKE_BINARY_DIR})
 
-include(CheckCXXCompilerFlag)
 include(CheckIncludeFileCXX)
 
 # Enable rpath on OS X
 set(CMAKE_MACOSX_RPATH 1)
 
-if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-  check_cxx_compiler_flag("-std=c++14" HAS_CXX14)
-  if (NOT HAS_CXX14)
-    message(FATAL_ERROR "A compiler with support for C++14 is required")
-  endif()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
-endif()
+# Require and enable C++17 support, and disable compiler extensions.
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Disable non-secure function warnings for MSVC
 if (MSVC)
