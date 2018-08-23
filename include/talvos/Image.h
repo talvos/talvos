@@ -179,6 +179,18 @@ public:
   /// Get the width of the image view at the specified mip level.
   uint32_t getWidth(uint32_t Level = 0) const;
 
+  /// Returns true if this image view corresponds to a 1D image.
+  bool is1D() const;
+
+  /// Returns true if this image view corresponds to a 2D image.
+  bool is2D() const;
+
+  /// Returns true if this image view corresponds to a 3D image.
+  bool is3D() const;
+
+  /// Returns true if this image view corresponds to a cube map.
+  bool isCube() const;
+
   /// Read a texel from the image view at the specified coordinate.
   void read(Object &Texel, uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
             uint32_t Layer = 0) const;

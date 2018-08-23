@@ -151,6 +151,24 @@ uint32_t ImageView::getWidth(uint32_t Level) const
   return Img.getWidth(BaseMipLevel + Level);
 }
 
+bool ImageView::is1D() const
+{
+  return Type == VK_IMAGE_VIEW_TYPE_1D || Type == VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+}
+
+bool ImageView::is2D() const
+{
+  return Type == VK_IMAGE_VIEW_TYPE_2D || Type == VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+}
+
+bool ImageView::is3D() const { return Type == VK_IMAGE_VIEW_TYPE_3D; }
+
+bool ImageView::isCube() const
+{
+  return Type == VK_IMAGE_VIEW_TYPE_CUBE ||
+         Type == VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+}
+
 void ImageView::read(Object &Texel, uint32_t X, uint32_t Y, uint32_t Z,
                      uint32_t Layer) const
 {
