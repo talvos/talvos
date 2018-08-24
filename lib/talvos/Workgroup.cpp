@@ -13,6 +13,7 @@
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
+#include "talvos/Type.h"
 #include "talvos/Variable.h"
 #include "talvos/Workgroup.h"
 

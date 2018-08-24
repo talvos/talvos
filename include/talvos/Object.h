@@ -12,12 +12,11 @@
 #include <cstdint>
 #include <iosfwd>
 
-#include "talvos/Type.h"
-
 namespace talvos
 {
 
 class Memory;
+class Type;
 
 /// Structure to describe the memory layout of a matrix.
 /// Used for objects that hold pointers to matrix or vector types.

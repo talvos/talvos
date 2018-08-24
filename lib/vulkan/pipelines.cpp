@@ -9,6 +9,7 @@
 #include "talvos/GraphicsPipeline.h"
 #include "talvos/Module.h"
 #include "talvos/PipelineStage.h"
+#include "talvos/Type.h"
 
 // Values match SPIR-V spec.
 #define EXEC_MODEL_VERTEX 0

@@ -11,6 +11,7 @@
 #include "talvos/Device.h"
 #include "talvos/Memory.h"
 #include "talvos/Module.h"
+#include "talvos/Type.h"
 
 using namespace std;
 

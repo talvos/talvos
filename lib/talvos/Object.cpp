@@ -14,6 +14,7 @@
 #include "talvos/Image.h"
 #include "talvos/Memory.h"
 #include "talvos/Object.h"
+#include "talvos/Type.h"
 
 namespace talvos
 {
