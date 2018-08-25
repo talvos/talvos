@@ -26,6 +26,7 @@ class ImageView;
 class Module;
 class RenderPass;
 class RenderPassInstance;
+class Sampler;
 }; // namespace talvos
 
 // TODO: Remove this when all functions have implementations.
@@ -170,6 +171,12 @@ struct VkQueue_T
 struct VkRenderPass_T
 {
   talvos::RenderPass *RenderPass;
+};
+
+struct VkSampler_T
+{
+  talvos::Sampler *Sampler;
+  uint64_t ObjectAddress;
 };
 
 struct VkSemaphore_T

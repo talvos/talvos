@@ -5,11 +5,25 @@
 
 #include "runtime.h"
 
+#include "talvos/Device.h"
+#include "talvos/Image.h"
+#include "talvos/Memory.h"
+
 VKAPI_ATTR VkResult VKAPI_CALL
 vkCreateSampler(VkDevice device, const VkSamplerCreateInfo *pCreateInfo,
                 const VkAllocationCallbacks *pAllocator, VkSampler *pSampler)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pSampler = new VkSampler_T;
+
+  (*pSampler)->Sampler = new talvos::Sampler(*pCreateInfo);
+
+  // Create sampler object in memory.
+  talvos::Memory &Mem = device->Device->getGlobalMemory();
+  (*pSampler)->ObjectAddress = Mem.allocate(sizeof(talvos::Sampler *));
+  Mem.store((*pSampler)->ObjectAddress, sizeof(talvos::Sampler *),
+            (uint8_t *)&(*pSampler)->Sampler);
+
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateSamplerYcbcrConversion(
@@ -31,7 +45,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateSamplerYcbcrConversionKHR(
 VKAPI_ATTR void VKAPI_CALL vkDestroySampler(
     VkDevice device, VkSampler sampler, const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  if (sampler)
+  {
+    device->Device->getGlobalMemory().release(sampler->ObjectAddress);
+    delete sampler->Sampler;
+    delete sampler;
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroySamplerYcbcrConversion(
