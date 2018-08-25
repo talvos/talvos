@@ -270,6 +270,13 @@ void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
       Address = BufferInfo->buffer->Address + BufferInfo->offset;
       break;
     }
+    case VK_DESCRIPTOR_TYPE_SAMPLER:
+    {
+      const VkDescriptorImageInfo *ImageInfo =
+          (const VkDescriptorImageInfo *)GetImageDescriptorInfo(b);
+      Address = ImageInfo->sampler->ObjectAddress;
+      break;
+    }
     case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
     {
       const VkDescriptorImageInfo *ImageInfo =
