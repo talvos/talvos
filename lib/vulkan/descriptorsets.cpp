@@ -14,8 +14,23 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
 {
   for (uint32_t i = 0; i < pAllocateInfo->descriptorSetCount; i++)
   {
+    const VkDescriptorSetLayout &Layout = pAllocateInfo->pSetLayouts[i];
+
     pDescriptorSets[i] = new VkDescriptorSet_T;
-    pDescriptorSets[i]->Layout = pAllocateInfo->pSetLayouts[i];
+    pDescriptorSets[i]->Layout = Layout;
+
+    // Set addresses for immutable samplers.
+    for (auto IS : Layout->ImmutableSamplers)
+    {
+      uint32_t Binding = IS.first;
+      for (uint32_t ArrayElement = 0;
+           ArrayElement < Layout->BindingCounts[Binding]; ArrayElement++)
+      {
+        pDescriptorSets[i]->DescriptorSet[{Binding, ArrayElement}] =
+            IS.second[ArrayElement]->ObjectAddress;
+      }
+    }
+
     pAllocateInfo->descriptorPool->Pool.insert(pDescriptorSets[i]);
   }
   return VK_SUCCESS;
@@ -109,6 +124,15 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDescriptorSetLayout(
     const VkDescriptorSetLayoutBinding &Binding = pCreateInfo->pBindings[i];
     (*pSetLayout)->BindingCounts[Binding.binding] = Binding.descriptorCount;
     (*pSetLayout)->BindingTypes[Binding.binding] = Binding.descriptorType;
+
+    // Capture immutable sampler handles.
+    if (Binding.pImmutableSamplers)
+    {
+      (*pSetLayout)->ImmutableSamplers[Binding.binding] =
+          std::vector<VkSampler>(Binding.pImmutableSamplers,
+                                 Binding.pImmutableSamplers +
+                                     Binding.descriptorCount);
+    }
   }
   return VK_SUCCESS;
 }

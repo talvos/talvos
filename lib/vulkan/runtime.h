@@ -95,6 +95,9 @@ struct VkDescriptorSetLayout_T
 
   /// Map from binding number to descriptor type.
   std::map<uint32_t, VkDescriptorType> BindingTypes;
+
+  /// Map from binding number to list of immutable sampler addresses.
+  std::map<uint32_t, std::vector<VkSampler>> ImmutableSamplers;
 };
 
 struct VkDescriptorUpdateTemplate_T
