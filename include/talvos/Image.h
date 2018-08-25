@@ -233,6 +233,13 @@ private:
   VkSamplerCreateInfo Info;
 };
 
+/// A combination of an image and a sampler used to access it.
+struct SampledImage
+{
+  const ImageView *Image;
+  const Sampler *Sampler;
+};
+
 /// Returns the size in bytes for each element of an image with type \p Format.
 uint32_t getElementSize(VkFormat Format);
 

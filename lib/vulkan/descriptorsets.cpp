@@ -277,6 +277,7 @@ void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
       Address = ImageInfo->sampler->ObjectAddress;
       break;
     }
+    case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
     case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
     {
       const VkDescriptorImageInfo *ImageInfo =

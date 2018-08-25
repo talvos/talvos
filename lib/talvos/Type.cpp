@@ -315,7 +315,7 @@ std::unique_ptr<Type> Type::getRuntimeArray(const Type *ElemType,
 
 std::unique_ptr<Type> Type::getSampledImage(const Type *ImageType)
 {
-  std::unique_ptr<Type> T(new Type(SAMPLED_IMAGE, sizeof(uint64_t)));
+  std::unique_ptr<Type> T(new Type(SAMPLED_IMAGE, sizeof(SampledImage)));
   T->ElementType = ImageType;
   return T;
 }
