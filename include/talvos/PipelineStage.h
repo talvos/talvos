@@ -10,6 +10,7 @@
 #define TALVOS_PIPELINESTAGE_H
 
 #include <map>
+#include <memory>
 #include <vector>
 
 #include "talvos/Dim3.h"

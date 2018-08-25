@@ -11,6 +11,7 @@
 
 #include <cstdint>
 #include <iosfwd>
+#include <vector>
 
 namespace talvos
 {
