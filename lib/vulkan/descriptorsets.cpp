@@ -8,6 +8,10 @@
 
 #include "runtime.h"
 
+#include "talvos/Device.h"
+#include "talvos/Image.h"
+#include "talvos/Memory.h"
+
 VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
     VkDevice device, const VkDescriptorSetAllocateInfo *pAllocateInfo,
     VkDescriptorSet *pDescriptorSets)
@@ -34,6 +38,17 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
     pAllocateInfo->descriptorPool->Pool.insert(pDescriptorSets[i]);
   }
   return VK_SUCCESS;
+}
+
+// Destroy a descriptor set and cleanup resources as necessary.
+void destroyDescriptorSet(VkDevice Device, VkDescriptorSet Set)
+{
+  // Release allocations for combined image sampler objects.
+  talvos::Memory &Mem = Device->Device->getGlobalMemory();
+  for (auto Addr : Set->CombinedImageSamplers)
+    Mem.release(Addr.second);
+
+  delete Set;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
@@ -181,7 +196,7 @@ vkDestroyDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
   if (descriptorPool)
   {
     for (auto DS : descriptorPool->Pool)
-      delete DS;
+      destroyDescriptorSet(device, DS);
     delete descriptorPool;
   }
 }
@@ -226,7 +241,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkFreeDescriptorSets(
   for (uint32_t i = 0; i < descriptorSetCount; i++)
   {
     descriptorPool->Pool.erase(pDescriptorSets[i]);
-    delete pDescriptorSets[i];
+    destroyDescriptorSet(device, pDescriptorSets[i]);
   }
   return VK_SUCCESS;
 }
@@ -250,7 +265,7 @@ vkResetDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
                       VkDescriptorPoolResetFlags flags)
 {
   for (auto &DS : descriptorPool->Pool)
-    delete DS;
+    destroyDescriptorSet(device, DS);
 
   descriptorPool->Pool.clear();
 
@@ -261,8 +276,9 @@ vkResetDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool,
 // The Get* parameters are lambdas that return pointers to the descriptor info
 // structures at a particular binding.
 template <typename BufFunc, typename ImgFunc, typename TexBufFunc>
-void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
-                       uint32_t Binding, uint32_t ArrayElement, uint32_t Count,
+void updateDescriptors(VkDevice Device, VkDescriptorSet Set,
+                       VkDescriptorType Type, uint32_t Binding,
+                       uint32_t ArrayElement, uint32_t Count,
                        const BufFunc &GetBufferDescriptorInfo,
                        const ImgFunc &GetImageDescriptorInfo,
                        const TexBufFunc &GetTexelBuffer)
@@ -309,6 +325,31 @@ void updateDescriptors(VkDescriptorSet Set, VkDescriptorType Type,
       Address = ImageInfo->imageView->ObjectAddress;
       break;
     }
+    case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+    {
+      const VkDescriptorImageInfo *ImageInfo =
+          (const VkDescriptorImageInfo *)GetImageDescriptorInfo(b);
+
+      // Allocate memory to store SampledImage object if necessary.
+      talvos::Memory &Mem = Device->Device->getGlobalMemory();
+      if (Set->CombinedImageSamplers.count({Binding, ArrayElement}))
+        Address = Set->CombinedImageSamplers[{Binding, ArrayElement}];
+      else
+        Address = Mem.allocate(sizeof(talvos::SampledImage));
+
+      // Create SampledImage object and store to global memory.
+      talvos::SampledImage SI;
+      SI.Image = ImageInfo->imageView->ImageView;
+      if (Set->Layout->ImmutableSamplers.count(Binding))
+        SI.Sampler =
+            Set->Layout->ImmutableSamplers[Binding][ArrayElement]->Sampler;
+      else
+        SI.Sampler = ImageInfo->sampler->Sampler;
+      Mem.store(Address, sizeof(talvos::SampledImage), (uint8_t *)&SI);
+      Set->CombinedImageSamplers[{Binding, ArrayElement}] = Address;
+
+      break;
+    }
     case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
     {
       const VkBufferView *TexelBuffer = (const VkBufferView *)GetTexelBuffer(b);
@@ -341,9 +382,10 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSetWithTemplate(
       return ((uint8_t *)pData) + Entry.offset + Entry.stride * Binding;
     };
 
-    updateDescriptors(descriptorSet, Entry.descriptorType, Entry.dstBinding,
-                      Entry.dstArrayElement, Entry.descriptorCount,
-                      GetDescriptorInfo, GetDescriptorInfo, GetDescriptorInfo);
+    updateDescriptors(device, descriptorSet, Entry.descriptorType,
+                      Entry.dstBinding, Entry.dstArrayElement,
+                      Entry.descriptorCount, GetDescriptorInfo,
+                      GetDescriptorInfo, GetDescriptorInfo);
   }
 }
 
@@ -378,8 +420,9 @@ VKAPI_ATTR void VKAPI_CALL vkUpdateDescriptorSets(
     };
 
     updateDescriptors(
-        pDescriptorWrites[i].dstSet, pDescriptorWrites[i].descriptorType,
-        pDescriptorWrites[i].dstBinding, pDescriptorWrites[i].dstArrayElement,
+        device, pDescriptorWrites[i].dstSet,
+        pDescriptorWrites[i].descriptorType, pDescriptorWrites[i].dstBinding,
+        pDescriptorWrites[i].dstArrayElement,
         pDescriptorWrites[i].descriptorCount, GetBufferDescriptorInfo,
         GetImageDescriptorInfo, GetTexelBufferView);
   }

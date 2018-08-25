@@ -86,6 +86,9 @@ struct VkDescriptorSet_T
 {
   VkDescriptorSetLayout Layout;
   talvos::DescriptorSet DescriptorSet;
+
+  /// Map from Binding/ArrayElement pair to address of SampledImage object.
+  std::map<std::pair<uint32_t, uint32_t>, uint64_t> CombinedImageSamplers;
 };
 
 struct VkDescriptorSetLayout_T
