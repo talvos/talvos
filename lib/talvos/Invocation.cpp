@@ -166,6 +166,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpPtrAccessChain, AccessChain);
     DISPATCH(SpvOpReturn, Return);
     DISPATCH(SpvOpReturnValue, ReturnValue);
+    DISPATCH(SpvOpSampledImage, SampledImage);
     DISPATCH(SpvOpSConvert, SConvert);
     DISPATCH(SpvOpSDiv, SDiv);
     DISPATCH(SpvOpSelect, Select);
@@ -1080,6 +1081,23 @@ void Invocation::executeReturnValue(const Instruction *Inst)
   CurrentFunction = SE.CallFunc;
   CurrentBlock = SE.CallBlock;
   CurrentInstruction = SE.CallInst->next();
+}
+
+void Invocation::executeSampledImage(const Instruction *Inst)
+{
+  // Get image view object.
+  const Object &ImageObj = Objects[Inst->getOperand(2)];
+  const ImageView *Image = *(const ImageView **)(ImageObj.getData());
+
+  // Get sampler object.
+  const Object &SamplerObj = Objects[Inst->getOperand(3)];
+  const Sampler *Sampler = *(const talvos::Sampler **)(SamplerObj.getData());
+
+  // Create and populate SampledImage structure.
+  Object Result(Inst->getResultType());
+  ((SampledImage *)(Result.getData()))->Image = Image;
+  ((SampledImage *)(Result.getData()))->Sampler = Sampler;
+  Objects[Inst->getOperand(1)] = Result;
 }
 
 void Invocation::executeSConvert(const Instruction *Inst)

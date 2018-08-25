@@ -154,6 +154,7 @@ public:
   void executePhi(const Instruction *Inst);
   void executeReturn(const Instruction *Inst);
   void executeReturnValue(const Instruction *Inst);
+  void executeSampledImage(const Instruction *Inst);
   void executeSConvert(const Instruction *Inst);
   void executeSDiv(const Instruction *Inst);
   void executeSelect(const Instruction *Inst);
