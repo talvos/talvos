@@ -136,6 +136,7 @@ public:
   void executeIAdd(const Instruction *Inst);
   void executeIEqual(const Instruction *Inst);
   void executeImageRead(const Instruction *Inst);
+  void executeImageSampleExplicitLod(const Instruction *Inst);
   void executeImageWrite(const Instruction *Inst);
   void executeIMul(const Instruction *Inst);
   void executeINotEqual(const Instruction *Inst);

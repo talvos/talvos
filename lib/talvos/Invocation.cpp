@@ -146,6 +146,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
     DISPATCH(SpvOpImageRead, ImageRead);
+    DISPATCH(SpvOpImageSampleExplicitLod, ImageSampleExplicitLod);
     DISPATCH(SpvOpImageWrite, ImageWrite);
     DISPATCH(SpvOpIMul, IMul);
     DISPATCH(SpvOpInBoundsAccessChain, AccessChain);
@@ -860,6 +861,45 @@ void Invocation::executeImageRead(const Instruction *Inst)
   Image::Texel T;
   Image->read(T, X, Y, Z, Layer);
   Objects[Inst->getOperand(1)] = T.toObject(Inst->getResultType());
+}
+
+void Invocation::executeImageSampleExplicitLod(const Instruction *Inst)
+{
+  // Get sampler and image view objects.
+  const Object &SampledImageObj = Objects[Inst->getOperand(2)];
+  const SampledImage *SI = (const SampledImage *)(SampledImageObj.getData());
+  const ImageView *Image = SI->Image;
+  const Sampler *Sampler = SI->Sampler;
+  const Type *ImageType = SampledImageObj.getType()->getElementType();
+
+  // Get coordinate operand.
+  const Object &Coord = Objects[Inst->getOperand(3)];
+  const Type *CoordType = Coord.getType();
+  uint32_t NumCoords = CoordType->getElementCount();
+  assert(CoordType->getScalarType()->isFloat());
+  assert(NumCoords <= 3);
+
+  // Last coordinate is array layer if required.
+  float Layer = 0;
+  if (ImageType->isArrayedImage() ||
+      ImageType->getDimensionality() == SpvDimCube)
+    Layer = Coord.get<float>(--NumCoords);
+
+  // Extract coordinates.
+  float X = Coord.get<float>(0);
+  float Y = (NumCoords > 1) ? Coord.get<float>(1) : 0;
+  float Z = (NumCoords > 2) ? Coord.get<float>(2) : 0;
+
+  // TODO: Handle additional operands
+  // TODO: Handle Lod properly
+  assert(Inst->getNumOperands() == 6);
+  assert(Inst->getOperand(4) == SpvImageOperandsLodMask);
+  assert(Objects[Inst->getOperand(5)].get<float>() == 0);
+
+  // Sample texel from image.
+  Image::Texel Texel;
+  Sampler->sample(Image, Texel, X, Y, Z, Layer);
+  Objects[Inst->getOperand(1)] = Texel.toObject(Inst->getResultType());
 }
 
 void Invocation::executeImageWrite(const Instruction *Inst)
