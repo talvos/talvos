@@ -217,6 +217,22 @@ private:
   uint64_t Address; ///< The memory address of the image view data.
 };
 
+/// This class represents a sampler object.
+class Sampler
+{
+public:
+  /// Create a sampler.
+  Sampler(const VkSamplerCreateInfo &CreateInfo) { Info = CreateInfo; }
+
+  /// Sample a texel from an image at the specified coordinates.
+  void sample(const ImageView *Image, Image::Texel &Texel, float S, float T = 0,
+              float R = 0, float A = 0, float Lod = 0) const;
+
+private:
+  /// The sampler parameters.
+  VkSamplerCreateInfo Info;
+};
+
 /// Returns the size in bytes for each element of an image with type \p Format.
 uint32_t getElementSize(VkFormat Format);
 

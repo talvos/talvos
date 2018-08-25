@@ -6,6 +6,7 @@
 /// \file Image.cpp
 /// This file provides definitions for image functionality.
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 
@@ -201,6 +202,140 @@ void ImageView::write(const Image::Texel &T, uint32_t X, uint32_t Y, uint32_t Z,
                       uint32_t Layer) const
 {
   Img.write(T, getTexelAddress(X, Y, Z, Layer));
+}
+
+void Sampler::sample(const talvos::ImageView *Image, Image::Texel &Texel,
+                     float S, float T, float R, float A, float Lod) const
+{
+  // TODO: Handle non-zero Lod
+  assert(Lod == 0);
+
+  // TODO: Handle other formats (with integer types)
+  assert(Image->getFormat() == VK_FORMAT_R8G8B8A8_UNORM);
+
+  // TODO: Handle anisotropic filtering
+  assert(Info.anisotropyEnable == VK_FALSE);
+
+  // TODO: Handle comparison
+  assert(Info.compareEnable == VK_FALSE);
+
+  // TODO: Handle cube maps
+  assert(!Image->isCube());
+
+  // Select array layer.
+  uint32_t Layer =
+      std::clamp((uint32_t)std::round(A), 0U, Image->getNumArrayLayers() - 1);
+
+  // TODO: Handle unnormalized coordinates
+  assert(Info.unnormalizedCoordinates == VK_FALSE);
+  float U = S * Image->getWidth();
+  float V = T * Image->getHeight();
+  float W = R * Image->getDepth();
+
+  // Compute neighboring coordinates and weights for linear filtering.
+  int32_t I0 = floor(U - 0.5f);
+  int32_t I1 = I0 + 1;
+  int32_t J0 = floor(V - 0.5f);
+  int32_t J1 = J0 + 1;
+  int32_t K0 = floor(W - 0.5f);
+  int32_t K1 = K0 + 1;
+  float Alpha = (U - 0.5f) - I0;
+  float Beta = (V - 0.5f) - J0;
+  float Gamma = (W - 0.5f) - K0;
+
+  // Handle edge behavior for coordinates.
+  auto handleEdge = [](VkSamplerAddressMode AddrMode, int32_t Coord,
+                       uint32_t Dim) {
+    switch (AddrMode)
+    {
+    case VK_SAMPLER_ADDRESS_MODE_REPEAT:
+      return Coord % Dim;
+    case VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE:
+      return (uint32_t)std::clamp(Coord, 0, (int32_t)Dim - 1);
+    default:
+      // TODO: handle other addressing modes
+      assert(false && "unhandled sampler addressing mode");
+      return ~0U;
+    }
+  };
+  I0 = handleEdge(Info.addressModeU, I0, Image->getWidth());
+  I1 = handleEdge(Info.addressModeU, I1, Image->getWidth());
+  J0 = handleEdge(Info.addressModeV, J0, Image->getHeight());
+  J1 = handleEdge(Info.addressModeV, J1, Image->getHeight());
+  K0 = handleEdge(Info.addressModeW, K0, Image->getDepth());
+  K1 = handleEdge(Info.addressModeW, K1, Image->getDepth());
+
+  // TODO: Select magFilter/minFilter based on Lod
+  if (Info.magFilter == VK_FILTER_LINEAR)
+  {
+    // Load texel region for linear filtering.
+    // Re-use texels when dimensionality is not 3D.
+    Image::Texel T000, T100, T010, T110, T001, T101, T011, T111;
+    Image->getImage().read(T000, Image->getTexelAddress(I0, J0, K0, Layer));
+    Image->getImage().read(T100, Image->getTexelAddress(I1, J0, K0, Layer));
+    if (Image->is1D())
+    {
+      T010 = T000;
+      T110 = T100;
+      T001 = T000;
+      T101 = T100;
+      T011 = T000;
+      T111 = T100;
+    }
+    else
+    {
+      Image->getImage().read(T010, Image->getTexelAddress(I0, J1, K0, Layer));
+      Image->getImage().read(T110, Image->getTexelAddress(I1, J1, K0, Layer));
+      if (Image->is2D())
+      {
+        T001 = T000;
+        T101 = T100;
+        T011 = T010;
+        T111 = T110;
+      }
+      else
+      {
+        assert(Image->is3D());
+        Image->getImage().read(T001, Image->getTexelAddress(I0, J0, K1, Layer));
+        Image->getImage().read(T101, Image->getTexelAddress(I1, J0, K1, Layer));
+        Image->getImage().read(T011, Image->getTexelAddress(I0, J1, K1, Layer));
+        Image->getImage().read(T111, Image->getTexelAddress(I1, J1, K1, Layer));
+      }
+    }
+
+    // Apply linear filter to texels.
+    auto linear = [&](uint32_t C) {
+      return ((1 - Alpha) * (1 - Beta) * (1 - Gamma) * T000.get<float>(C)) +
+             (Alpha * (1 - Beta) * (1 - Gamma) * T100.get<float>(C)) +
+             ((1 - Alpha) * Beta * (1 - Gamma) * T010.get<float>(C)) +
+             (Alpha * Beta * (1 - Gamma) * T110.get<float>(C)) +
+             ((1 - Alpha) * (1 - Beta) * Gamma * T001.get<float>(C)) +
+             (Alpha * (1 - Beta) * Gamma * T101.get<float>(C)) +
+             ((1 - Alpha) * Beta * Gamma * T011.get<float>(C)) +
+             (Alpha * Beta * Gamma * T111.get<float>(C));
+    };
+    Texel.set<float>(0, linear(0));
+    Texel.set<float>(1, linear(1));
+    Texel.set<float>(2, linear(2));
+    Texel.set<float>(3, linear(3));
+  }
+  else
+  {
+    assert(Info.magFilter == VK_FILTER_NEAREST);
+
+    // Select nearest coordinates based on weights.
+    int32_t I = Alpha <= 0.5 ? I0 : I1;
+    int32_t J = Beta <= 0.5 ? J0 : J1;
+    int32_t K = Gamma <= 0.5 ? K0 : K1;
+
+    // Load texel.
+    Image::Texel T;
+    Image->getImage().read(T, Image->getTexelAddress(I, J, K, Layer));
+    Texel.set<float>(0, T.get<float>(0));
+    Texel.set<float>(1, T.get<float>(1));
+    Texel.set<float>(2, T.get<float>(2));
+    Texel.set<float>(3, T.get<float>(3));
+  }
 }
 
 uint32_t getElementSize(VkFormat Format)
