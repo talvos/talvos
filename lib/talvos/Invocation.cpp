@@ -856,9 +856,9 @@ void Invocation::executeImageRead(const Instruction *Inst)
   uint32_t Z = (NumCoords > 2) ? Coord.get<uint32_t>(2) : 0;
 
   // Read texel from image.
-  Object Texel = Object(Inst->getResultType());
-  Image->read(Texel, X, Y, Z, Layer);
-  Objects[Inst->getOperand(1)] = Texel;
+  Image::Texel T;
+  Image->read(T, X, Y, Z, Layer);
+  Objects[Inst->getOperand(1)] = T.toObject(Inst->getResultType());
 }
 
 void Invocation::executeImageWrite(const Instruction *Inst)
@@ -889,7 +889,7 @@ void Invocation::executeImageWrite(const Instruction *Inst)
 
   // Write texel to image.
   const Object &Texel = Objects[Inst->getOperand(2)];
-  Image->write(Image::ObjectTexel(Texel), X, Y, Z, Layer);
+  Image->write(Texel, X, Y, Z, Layer);
 }
 
 void Invocation::executeIMul(const Instruction *Inst)

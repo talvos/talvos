@@ -641,7 +641,7 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
 
       // Write pixel color to attachment.
       const ImageView *Attach = FB.getAttachments()[Ref];
-      Attach->write(Image::ObjectTexel(OutputData), XFB, YFB);
+      Attach->write(OutputData, XFB, YFB);
     }
   }
 }

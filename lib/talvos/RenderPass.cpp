@@ -74,7 +74,7 @@ void RenderPassInstance::beginSubpass()
     {
       for (uint32_t X = 0; X < FB.getWidth(); X++)
       {
-        Attach->write(Image::ClearColorTexel(Color), X, Y);
+        Attach->write(Color, X, Y);
       }
     }
   }

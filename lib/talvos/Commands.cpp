@@ -47,8 +47,7 @@ void ClearColorImageCommand::runImpl(Device &Dev) const
         {
           for (uint32_t X = 0; X < DstImage.getWidth(); X++)
           {
-            DstImage.write(Image::ClearColorTexel(Color),
-                           DstImage.getTexelAddress(X, Y, Z, Layer));
+            DstImage.write(Color, DstImage.getTexelAddress(X, Y, Z, Layer));
           }
         }
       }

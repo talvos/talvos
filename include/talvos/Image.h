@@ -9,6 +9,8 @@
 #ifndef TALVOS_IMAGE_H
 #define TALVOS_IMAGE_H
 
+#include <cassert>
+
 #include "vulkan/vulkan_core.h"
 
 #include "talvos/Object.h"
@@ -22,45 +24,47 @@ class Device;
 class Image
 {
 public:
-  /// Abstract class for wrapping a source of texel data.
-  /// Provides methods to extract texel components of various types.
-  class TexelWrapper
+  /// This class represents a single texel with four 32-bit component values.
+  class Texel
   {
   public:
-    /// Get the component at index \p C as a 32-bit floating point value.
-    virtual float getFloat(uint32_t C) const = 0;
+    /// Create a texel with uninitialized component values.
+    Texel() {}
 
-    /// Get the component at index \p C as a signed 32-bit integer value.
-    virtual int32_t getSInt(uint32_t C) const = 0;
+    /// Create a texel and copy component values from the data in \p Obj.
+    /// The type of \p Obj must be a 32-bit scalar or a vector with no more than
+    /// four 32-bit elements.
+    Texel(const Object &Obj);
 
-    /// Get the component at index \p C as an unsigned 32-bit integer value.
-    virtual uint32_t getUInt(uint32_t C) const = 0;
-  };
+    /// Create a texel and copy component values from \p ClearColor.
+    Texel(const VkClearColorValue &ClearColor);
 
-  /// Texel wrapper for VkClearColorValue.
-  class ClearColorTexel : public TexelWrapper
-  {
-  public:
-    ClearColorTexel(VkClearColorValue Color) : Color(Color) {}
-    float getFloat(uint32_t c) const override { return Color.float32[c]; }
-    int32_t getSInt(uint32_t c) const override { return Color.int32[c]; }
-    uint32_t getUInt(uint32_t c) const override { return Color.uint32[c]; }
+    /// Get a component value from the texel.
+    /// \p T must be a 32-bit type, and \p C must be less than 4.
+    template <typename T> T get(unsigned C) const
+    {
+      static_assert(sizeof(T) == 4);
+      assert(C < 4);
+      return ((T *)Data)[C];
+    }
+
+    /// Set a component value in the texel.
+    /// \p T must be a 32-bit type, and \p C must be less than 4.
+    template <typename T> void set(unsigned C, T Value)
+    {
+      static_assert(sizeof(T) == 4);
+      assert(C < 4);
+      ((T *)Data)[C] = Value;
+    }
+
+    /// Create an object with type \p Ty from the texel data.
+    /// \p Ty must be a 32-bit scalar or a vector with no more than four 32-bit
+    /// elements.
+    Object toObject(const Type *Ty) const;
 
   private:
-    VkClearColorValue Color;
-  };
-
-  /// Texel wrapper for talvos::Object.
-  class ObjectTexel : public TexelWrapper
-  {
-  public:
-    ObjectTexel(const Object &Obj) : Obj(Obj) {}
-    float getFloat(uint32_t C) const override { return Obj.get<float>(C); }
-    int32_t getSInt(uint32_t C) const override { return Obj.get<int32_t>(C); }
-    uint32_t getUInt(uint32_t C) const override { return Obj.get<uint32_t>(C); }
-
-  private:
-    const Object &Obj;
+    /// The data backing this texel.
+    uint8_t Data[16];
   };
 
 public:
@@ -117,10 +121,10 @@ public:
   uint32_t getWidth(uint32_t Level = 0) const;
 
   /// Read a texel from the image at the specified address.
-  void read(Object &Texel, uint64_t Address) const;
+  void read(Texel &T, uint64_t Address) const;
 
   /// Write a texel to the image at the specified address.
-  void write(const Image::TexelWrapper &&CE, uint64_t Address) const;
+  void write(const Texel &T, uint64_t Address) const;
 
 private:
   Device &Dev; ///< The device this image view is created on.
@@ -192,12 +196,12 @@ public:
   bool isCube() const;
 
   /// Read a texel from the image view at the specified coordinate.
-  void read(Object &Texel, uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
+  void read(Image::Texel &T, uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
             uint32_t Layer = 0) const;
 
   /// Write a texel to the image view at the specified coordinate.
-  void write(const Image::TexelWrapper &&Texel, uint32_t X, uint32_t Y = 0,
-             uint32_t Z = 0, uint32_t Layer = 0) const;
+  void write(const Image::Texel &T, uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
+             uint32_t Layer = 0) const;
 
 private:
   const Image &Img; ///< The image that the image corresponds to.

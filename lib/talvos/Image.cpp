@@ -18,6 +18,27 @@
 namespace talvos
 {
 
+Image::Texel::Texel(const Object &Obj)
+{
+  assert(Obj.getType()->getScalarType()->getSize() == 4);
+  assert(Obj.getType()->getElementCount() <= 4);
+  memcpy(Data, Obj.getData(), Obj.getType()->getSize());
+}
+
+Image::Texel::Texel(const VkClearColorValue &ClearColor)
+{
+  memcpy(Data, ClearColor.float32, 16);
+}
+
+Object Image::Texel::toObject(const talvos::Type *Ty) const
+{
+  assert(Ty->getScalarType()->getSize() == 4);
+  assert(Ty->getElementCount() <= 4);
+  Object Obj(Ty);
+  memcpy(Obj.getData(), Data, Ty->getSize());
+  return Obj;
+}
+
 void Image::bindAddress(uint64_t Address)
 {
   assert(this->Address == 0 && "image address is already bound");
@@ -68,7 +89,7 @@ uint32_t Image::getWidth(uint32_t Level) const
   return Ret ? Ret : 1;
 }
 
-void Image::read(Object &Texel, uint64_t Address) const
+void Image::read(Texel &T, uint64_t Address) const
 {
   // TODO: Handle other formats
   assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
@@ -78,13 +99,13 @@ void Image::read(Object &Texel, uint64_t Address) const
   Dev.getGlobalMemory().load(Data, Address, 4);
 
   // Convert to output format.
-  Texel.set<float>(Data[0] / 255.f, 0);
-  Texel.set<float>(Data[1] / 255.f, 1);
-  Texel.set<float>(Data[2] / 255.f, 2);
-  Texel.set<float>(Data[3] / 255.f, 3);
+  T.set<float>(0, Data[0] / 255.f);
+  T.set<float>(1, Data[1] / 255.f);
+  T.set<float>(2, Data[2] / 255.f);
+  T.set<float>(3, Data[3] / 255.f);
 }
 
-void Image::write(const Image::TexelWrapper &&TW, uint64_t Address) const
+void Image::write(const Texel &T, uint64_t Address) const
 {
   // TODO: Handle other formats
   assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
@@ -99,10 +120,10 @@ void Image::write(const Image::TexelWrapper &&TW, uint64_t Address) const
       return (uint8_t)std::round(v * 255);
   };
   uint8_t Data[4];
-  Data[0] = convert(TW.getFloat(0));
-  Data[1] = convert(TW.getFloat(1));
-  Data[2] = convert(TW.getFloat(2));
-  Data[3] = convert(TW.getFloat(3));
+  Data[0] = convert(T.get<float>(0));
+  Data[1] = convert(T.get<float>(1));
+  Data[2] = convert(T.get<float>(2));
+  Data[3] = convert(T.get<float>(3));
 
   // Write raw texel data.
   Dev.getGlobalMemory().store(Address, 4, Data);
@@ -170,16 +191,16 @@ bool ImageView::isCube() const
          Type == VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
 }
 
-void ImageView::read(Object &Texel, uint32_t X, uint32_t Y, uint32_t Z,
+void ImageView::read(Image::Texel &T, uint32_t X, uint32_t Y, uint32_t Z,
                      uint32_t Layer) const
 {
-  Img.read(Texel, getTexelAddress(X, Y, Z, Layer));
+  Img.read(T, getTexelAddress(X, Y, Z, Layer));
 }
 
-void ImageView::write(const Image::TexelWrapper &&TW, uint32_t X, uint32_t Y,
-                      uint32_t Z, uint32_t Layer) const
+void ImageView::write(const Image::Texel &T, uint32_t X, uint32_t Y, uint32_t Z,
+                      uint32_t Layer) const
 {
-  Img.write(std::move(TW), getTexelAddress(X, Y, Z, Layer));
+  Img.write(T, getTexelAddress(X, Y, Z, Layer));
 }
 
 uint32_t getElementSize(VkFormat Format)
