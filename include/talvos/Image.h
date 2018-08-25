@@ -236,8 +236,8 @@ private:
 /// A combination of an image and a sampler used to access it.
 struct SampledImage
 {
-  const ImageView *Image;
-  const Sampler *Sampler;
+  const class ImageView *Image;
+  const class Sampler *Sampler;
 };
 
 /// Returns the size in bytes for each element of an image with type \p Format.
