@@ -137,6 +137,7 @@ public:
         switch (Capability)
         {
         case SpvCapabilityImage1D:
+        case SpvCapabilityImageQuery:
         case SpvCapabilityInt16:
         case SpvCapabilityInt64:
         case SpvCapabilityFloat64:
