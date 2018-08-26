@@ -745,7 +745,14 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
                  Attr->format == VK_FORMAT_R32G32B32_SFLOAT ||
                  Attr->format == VK_FORMAT_R32G32_SFLOAT ||
                  Attr->format == VK_FORMAT_R32_SFLOAT ||
-                 Attr->format == VK_FORMAT_R32_SINT);
+                 Attr->format == VK_FORMAT_R32G32B32A32_SINT ||
+                 Attr->format == VK_FORMAT_R32G32B32_SINT ||
+                 Attr->format == VK_FORMAT_R32G32_SINT ||
+                 Attr->format == VK_FORMAT_R32_SINT ||
+                 Attr->format == VK_FORMAT_R32G32B32A32_UINT ||
+                 Attr->format == VK_FORMAT_R32G32B32_UINT ||
+                 Attr->format == VK_FORMAT_R32G32_UINT ||
+                 Attr->format == VK_FORMAT_R32_UINT);
 
           // Calculate variable address in vertex buffer memory.
           uint64_t ElemAddr = DC->getVertexBindings().at(Attr->binding);
