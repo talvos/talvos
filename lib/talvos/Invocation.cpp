@@ -145,6 +145,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpFUnordNotEqual, FUnordNotEqual);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
+    DISPATCH(SpvOpImageQuerySize, ImageQuerySize);
     DISPATCH(SpvOpImageRead, ImageRead);
     DISPATCH(SpvOpImageSampleExplicitLod, ImageSampleExplicitLod);
     DISPATCH(SpvOpImageWrite, ImageWrite);
@@ -826,6 +827,54 @@ void Invocation::executeIAdd(const Instruction *Inst)
 void Invocation::executeIEqual(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A == B; });
+}
+
+void Invocation::executeImageQuerySize(const Instruction *Inst)
+{
+  // Get image view object.
+  const Object &ImageObj = Objects[Inst->getOperand(2)];
+  const ImageView *Image = *(const ImageView **)(ImageObj.getData());
+
+  Object Result(Inst->getResultType());
+  assert(Result.getType()->getScalarType()->getBitWidth() == 32);
+
+  // Get size in each dimension.
+  uint32_t ArraySizeIndex;
+  switch (ImageObj.getType()->getDimensionality())
+  {
+  case SpvDim1D:
+  case SpvDimBuffer:
+    Result.set<uint32_t>(Image->getWidth(), 0);
+    ArraySizeIndex = 1;
+    break;
+  case SpvDim2D:
+  case SpvDimCube:
+  case SpvDimRect:
+    Result.set<uint32_t>(Image->getWidth(), 0);
+    Result.set<uint32_t>(Image->getHeight(), 1);
+    ArraySizeIndex = 2;
+    break;
+  case SpvDim3D:
+    Result.set<uint32_t>(Image->getWidth(), 0);
+    Result.set<uint32_t>(Image->getHeight(), 1);
+    Result.set<uint32_t>(Image->getDepth(), 2);
+    ArraySizeIndex = 3;
+    break;
+  default:
+    Dev.reportError("Unhandled image dimensionality", true);
+    break;
+  }
+
+  // Get number of array layers.
+  if (ImageObj.getType()->isArrayedImage())
+  {
+    if (ImageObj.getType()->getDimensionality() == SpvDimCube)
+      Result.set<uint32_t>(Image->getNumArrayLayers() / 6, ArraySizeIndex);
+    else
+      Result.set<uint32_t>(Image->getNumArrayLayers(), ArraySizeIndex);
+  }
+
+  Objects[Inst->getOperand(1)] = Result;
 }
 
 void Invocation::executeImageRead(const Instruction *Inst)
