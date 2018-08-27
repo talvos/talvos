@@ -155,9 +155,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandPool(VkDevice device,
 VKAPI_ATTR void VKAPI_CALL vkTrimCommandPool(VkDevice device,
                                              VkCommandPool commandPool,
                                              VkCommandPoolTrimFlags flags)
-{
-  TALVOS_ABORT_UNIMPLEMENTED;
-}
+{}
 
 VKAPI_ATTR void VKAPI_CALL vkTrimCommandPoolKHR(VkDevice device,
                                                 VkCommandPool commandPool,
