@@ -43,6 +43,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
 // Destroy a descriptor set and cleanup resources as necessary.
 void destroyDescriptorSet(VkDevice Device, VkDescriptorSet Set)
 {
+  if (!Set)
+    return;
+
   // Release allocations for combined image sampler objects.
   talvos::Memory &Mem = Device->Device->getGlobalMemory();
   for (auto Addr : Set->CombinedImageSamplers)
