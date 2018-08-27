@@ -237,4 +237,6 @@ void EndRenderPassCommand::runImpl(Device &Dev) const { RPI->end(); }
 
 void NextSubpassCommand::runImpl(Device &Dev) const { RPI->nextSubpass(); }
 
+void SetEventCommand::runImpl(Device &Dev) const { Flag = true; }
+
 } // namespace talvos

@@ -11,6 +11,8 @@
 #include <sys/time.h>
 #endif
 
+#include "talvos/Commands.h"
+
 /// Utility to return the current time in nanoseconds since the epoch.
 double now()
 {
@@ -46,7 +48,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetEvent(VkCommandBuffer commandBuffer,
                                          VkEvent event,
                                          VkPipelineStageFlags stageMask)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->Commands.push_back(
+      new talvos::SetEventCommand(event->Signaled));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(

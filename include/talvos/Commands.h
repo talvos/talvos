@@ -48,6 +48,7 @@ public:
     DRAW_INDEXED,
     END_RENDER_PASS,
     NEXT_SUBPASS,
+    SET_EVENT,
   };
 
   /// Returns the type of this command.
@@ -448,6 +449,22 @@ protected:
 private:
   /// The render pass instance.
   std::shared_ptr<RenderPassInstance> RPI;
+};
+
+/// This class encapsulates information about a set event command.
+class SetEventCommand : public Command
+{
+public:
+  /// Create a new SetEventCommand.
+  SetEventCommand(bool &Flag) : Command(SET_EVENT), Flag(Flag) {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  /// The flag to set when this command executes.
+  bool &Flag;
 };
 
 } // namespace talvos
