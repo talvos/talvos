@@ -41,7 +41,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdResetEvent(VkCommandBuffer commandBuffer,
                                            VkEvent event,
                                            VkPipelineStageFlags stageMask)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->Commands.push_back(
+      new talvos::ResetEventCommand(event->Signaled));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdSetEvent(VkCommandBuffer commandBuffer,
