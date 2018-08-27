@@ -130,10 +130,25 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
   return VK_SUCCESS;
 }
 
+void resetCommandBuffer(VkCommandBuffer Cmd)
+{
+  Cmd->PipelineGraphics = nullptr;
+  Cmd->PipelineCompute = nullptr;
+  Cmd->DescriptorSetsGraphics.clear();
+  Cmd->DescriptorSetsCompute.clear();
+  Cmd->VertexBindings.clear();
+  Cmd->Scissors.clear();
+  Cmd->RenderPassInstance.reset();
+  Cmd->IndexBufferAddress = 0;
+  Cmd->IndexType = VK_INDEX_TYPE_MAX_ENUM;
+  Cmd->Commands.clear();
+}
+
 VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandBuffer(
     VkCommandBuffer commandBuffer, VkCommandBufferResetFlags flags)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  resetCommandBuffer(commandBuffer);
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandPool(VkDevice device,
@@ -141,14 +156,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandPool(VkDevice device,
                                                   VkCommandPoolResetFlags flags)
 {
   for (auto Cmd : commandPool->Pool)
-  {
-    Cmd->PipelineGraphics = nullptr;
-    Cmd->PipelineCompute = nullptr;
-    Cmd->DescriptorSetsGraphics.clear();
-    Cmd->DescriptorSetsCompute.clear();
-    Cmd->VertexBindings.clear();
-    Cmd->Commands.clear();
-  }
+    resetCommandBuffer(Cmd);
+
   return VK_SUCCESS;
 }
 
