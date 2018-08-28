@@ -47,6 +47,7 @@ public:
     DRAW,
     DRAW_INDEXED,
     END_RENDER_PASS,
+    FILL_BUFFER,
     NEXT_SUBPASS,
     SET_EVENT,
     RESET_EVENT,
@@ -433,6 +434,30 @@ protected:
 private:
   /// The render pass instance.
   std::shared_ptr<RenderPassInstance> RPI;
+};
+
+/// This class encapsulates information about a fill buffer command.
+class FillBufferCommand : public Command
+{
+public:
+  /// Create a new FillBufferCommand.
+  FillBufferCommand(uint64_t Base, uint64_t NumBytes, uint32_t Data)
+      : Command(FILL_BUFFER), Base(Base), NumBytes(NumBytes), Data(Data)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  // The memory address to begin filling from.
+  uint64_t Base;
+
+  /// The number of bytes to fill.
+  uint64_t NumBytes;
+
+  /// The data to fill the buffer with.
+  uint32_t Data;
 };
 
 /// This class encapsulates information about a next subpass command.

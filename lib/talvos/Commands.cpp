@@ -65,6 +65,12 @@ void CopyBufferCommand::runImpl(Device &Dev) const
   }
 }
 
+void FillBufferCommand::runImpl(Device &Dev) const
+{
+  for (uint64_t Address = Base; Address < Base + NumBytes; Address += 4)
+    Dev.getGlobalMemory().store(Address, 4, (const uint8_t *)&Data);
+}
+
 void CopyBufferToImageCommand::runImpl(Device &Dev) const
 {
   uint32_t ElementSize = DstImage.getElementSize();
