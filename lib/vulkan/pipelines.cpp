@@ -189,7 +189,33 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkGetPipelineCacheData(VkDevice device, VkPipelineCache pipelineCache,
                        size_t *pDataSize, void *pData)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  if (pData == nullptr)
+  {
+    *pDataSize = 32;
+    return VK_SUCCESS;
+  }
+
+  if (*pDataSize < 32)
+  {
+    *pDataSize = 0;
+    return VK_INCOMPLETE;
+  }
+
+  // Pipeline cache header.
+  ((uint32_t *)pData)[0] = 32;
+  ((uint32_t *)pData)[1] = VK_PIPELINE_CACHE_HEADER_VERSION_ONE;
+  ((uint32_t *)pData)[2] = 0;
+  ((uint32_t *)pData)[3] = 0;
+
+  // Pipeline cache UUID.
+  ((uint32_t *)pData)[4] = 0;
+  ((uint32_t *)pData)[5] = 0;
+  ((uint32_t *)pData)[6] = 0;
+  ((uint32_t *)pData)[7] = 0;
+
+  *pDataSize = 32;
+
+  return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
