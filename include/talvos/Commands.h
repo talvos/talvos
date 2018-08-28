@@ -453,12 +453,12 @@ private:
   std::shared_ptr<RenderPassInstance> RPI;
 };
 
-/// This class encapsulates information about a resset event command.
+/// This class encapsulates information about a reset event command.
 class ResetEventCommand : public Command
 {
 public:
   /// Create a new ResetEventCommand.
-  ResetEventCommand(bool &Flag) : Command(RESET_EVENT), Flag(Flag) {}
+  ResetEventCommand(bool *Event) : Command(RESET_EVENT), Event(Event) {}
 
 protected:
   /// Command execution handler.
@@ -466,7 +466,7 @@ protected:
 
 private:
   /// The flag to reset when this command executes.
-  bool &Flag;
+  bool *Event;
 };
 
 /// This class encapsulates information about a set event command.
@@ -474,7 +474,7 @@ class SetEventCommand : public Command
 {
 public:
   /// Create a new SetEventCommand.
-  SetEventCommand(bool &Flag) : Command(SET_EVENT), Flag(Flag) {}
+  SetEventCommand(bool *Event) : Command(SET_EVENT), Event(Event) {}
 
 protected:
   /// Command execution handler.
@@ -482,7 +482,7 @@ protected:
 
 private:
   /// The flag to set when this command executes.
-  bool &Flag;
+  bool *Event;
 };
 
 /// This class encapsulates information about a wait events command.

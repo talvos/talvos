@@ -237,9 +237,9 @@ void EndRenderPassCommand::runImpl(Device &Dev) const { RPI->end(); }
 
 void NextSubpassCommand::runImpl(Device &Dev) const { RPI->nextSubpass(); }
 
-void ResetEventCommand::runImpl(Device &Dev) const { Flag = false; }
+void ResetEventCommand::runImpl(Device &Dev) const { *Event = false; }
 
-void SetEventCommand::runImpl(Device &Dev) const { Flag = true; }
+void SetEventCommand::runImpl(Device &Dev) const { *Event = true; }
 
 void WaitEventsCommand::runImpl(Device &Dev) const
 {

@@ -43,7 +43,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdResetEvent(VkCommandBuffer commandBuffer,
                                            VkPipelineStageFlags stageMask)
 {
   commandBuffer->Commands.push_back(
-      new talvos::ResetEventCommand(event->Signaled));
+      new talvos::ResetEventCommand(&event->Signaled));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdSetEvent(VkCommandBuffer commandBuffer,
@@ -51,7 +51,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetEvent(VkCommandBuffer commandBuffer,
                                          VkPipelineStageFlags stageMask)
 {
   commandBuffer->Commands.push_back(
-      new talvos::SetEventCommand(event->Signaled));
+      new talvos::SetEventCommand(&event->Signaled));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(
