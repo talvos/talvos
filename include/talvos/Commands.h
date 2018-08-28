@@ -483,7 +483,8 @@ class ResetEventCommand : public Command
 {
 public:
   /// Create a new ResetEventCommand.
-  ResetEventCommand(bool *Event) : Command(RESET_EVENT), Event(Event) {}
+  ResetEventCommand(volatile bool *Event) : Command(RESET_EVENT), Event(Event)
+  {}
 
 protected:
   /// Command execution handler.
@@ -491,7 +492,7 @@ protected:
 
 private:
   /// The flag to reset when this command executes.
-  bool *Event;
+  volatile bool *Event;
 };
 
 /// This class encapsulates information about a set event command.
@@ -499,7 +500,7 @@ class SetEventCommand : public Command
 {
 public:
   /// Create a new SetEventCommand.
-  SetEventCommand(bool *Event) : Command(SET_EVENT), Event(Event) {}
+  SetEventCommand(volatile bool *Event) : Command(SET_EVENT), Event(Event) {}
 
 protected:
   /// Command execution handler.
@@ -507,7 +508,7 @@ protected:
 
 private:
   /// The flag to set when this command executes.
-  bool *Event;
+  volatile bool *Event;
 };
 
 /// This class encapsulates information about a wait events command.
@@ -515,7 +516,7 @@ class WaitEventsCommand : public Command
 {
 public:
   /// Create a new WaitEventsCommand.
-  WaitEventsCommand(std::vector<bool *> Events)
+  WaitEventsCommand(std::vector<volatile bool *> Events)
       : Command(WAIT_EVENTS), Events(Events)
   {}
 
@@ -525,7 +526,7 @@ protected:
 
 private:
   /// The events to wait for.
-  std::vector<bool *> Events;
+  std::vector<volatile bool *> Events;
 };
 
 } // namespace talvos

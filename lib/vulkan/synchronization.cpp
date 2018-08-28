@@ -65,7 +65,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(
 {
   // TODO: Do we need to handle barriers and stage masks?
 
-  std::vector<bool *> Flags;
+  std::vector<volatile bool *> Flags;
   for (uint32_t i = 0; i < eventCount; i++)
     Flags.push_back(&pEvents[i]->Signaled);
 

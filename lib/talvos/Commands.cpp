@@ -250,7 +250,7 @@ void SetEventCommand::runImpl(Device &Dev) const { *Event = true; }
 void WaitEventsCommand::runImpl(Device &Dev) const
 {
   // Wait for all events to be set.
-  for (bool *Event : Events)
+  for (volatile bool *Event : Events)
   {
     while (!*Event)
       ;

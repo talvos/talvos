@@ -8,8 +8,8 @@
 
 #include <cassert>
 
-#include "talvos/Queue.h"
 #include "talvos/Commands.h"
+#include "talvos/Queue.h"
 
 namespace talvos
 {
@@ -33,7 +33,8 @@ Queue::~Queue()
   Thread.join();
 }
 
-void Queue::submit(const std::vector<Command *> &NewCommands, bool *Fence)
+void Queue::submit(const std::vector<Command *> &NewCommands,
+                   volatile bool *Fence)
 {
   std::lock_guard<std::mutex> Lock(Mutex);
 

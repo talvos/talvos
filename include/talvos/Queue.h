@@ -40,7 +40,8 @@ public:
   /// Submit a batch of commands to the queue.
   /// If \p Fence is not `nullptr`, its pointee will be set to `true` when all
   /// of the commands have completed.
-  void submit(const std::vector<Command *> &NewCommands, bool *Fence = nullptr);
+  void submit(const std::vector<Command *> &NewCommands,
+              volatile bool *Fence = nullptr);
 
   /// Wait until all commands in the queue have completed.
   void waitIdle();
@@ -53,7 +54,7 @@ private:
   std::queue<Command *> Commands;
 
   /// A set of pending fences.
-  std::set<bool *> Fences;
+  std::set<volatile bool *> Fences;
 
   // Background queue thread used to progress command execution.
   std::thread Thread;
@@ -65,7 +66,7 @@ private:
   std::condition_variable StateChanged;
 
   /// Flag to signal whether the queue thread is active.
-  bool Running;
+  volatile bool Running;
 
   /// Entry point for background queue thread.
   void run();
