@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#if defined(_WIN32) && defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__)
 #include <windows.h>
 #else
 #include <unistd.h>
