@@ -47,7 +47,9 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalSemaphoreProperties(
     const VkPhysicalDeviceExternalSemaphoreInfo *pExternalSemaphoreInfo,
     VkExternalSemaphoreProperties *pExternalSemaphoreProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  pExternalSemaphoreProperties->exportFromImportedHandleTypes = 0;
+  pExternalSemaphoreProperties->compatibleHandleTypes = 0;
+  pExternalSemaphoreProperties->externalSemaphoreFeatures = 0;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
@@ -55,7 +57,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
     const VkPhysicalDeviceExternalSemaphoreInfo *pExternalSemaphoreInfo,
     VkExternalSemaphoreProperties *pExternalSemaphoreProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceExternalSemaphoreProperties(
+      physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures(
