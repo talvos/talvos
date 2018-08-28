@@ -63,7 +63,13 @@ VKAPI_ATTR void VKAPI_CALL vkCmdWaitEvents(
     uint32_t imageMemoryBarrierCount,
     const VkImageMemoryBarrier *pImageMemoryBarriers)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Do we need to handle barriers and stage masks?
+
+  std::vector<bool *> Flags;
+  for (uint32_t i = 0; i < eventCount; i++)
+    Flags.push_back(&pEvents[i]->Signaled);
+
+  commandBuffer->Commands.push_back(new talvos::WaitEventsCommand(Flags));
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL

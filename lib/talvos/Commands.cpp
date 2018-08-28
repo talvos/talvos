@@ -241,4 +241,14 @@ void ResetEventCommand::runImpl(Device &Dev) const { Flag = false; }
 
 void SetEventCommand::runImpl(Device &Dev) const { Flag = true; }
 
+void WaitEventsCommand::runImpl(Device &Dev) const
+{
+  // Wait for all events to be set.
+  for (bool *Event : Events)
+  {
+    while (!*Event)
+      ;
+  }
+}
+
 } // namespace talvos

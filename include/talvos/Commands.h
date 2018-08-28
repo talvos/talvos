@@ -50,6 +50,7 @@ public:
     NEXT_SUBPASS,
     SET_EVENT,
     RESET_EVENT,
+    WAIT_EVENTS,
   };
 
   /// Returns the type of this command.
@@ -482,6 +483,24 @@ protected:
 private:
   /// The flag to set when this command executes.
   bool &Flag;
+};
+
+/// This class encapsulates information about a wait events command.
+class WaitEventsCommand : public Command
+{
+public:
+  /// Create a new WaitEventsCommand.
+  WaitEventsCommand(std::vector<bool *> Events)
+      : Command(WAIT_EVENTS), Events(Events)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  /// The events to wait for.
+  std::vector<bool *> Events;
 };
 
 } // namespace talvos
