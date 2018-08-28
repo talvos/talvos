@@ -3,14 +3,18 @@
 # This file is distributed under a three-clause BSD license. For full license
 # terms please see the LICENSE file distributed with this source code.
 
+# Common runtime code and utils.
+add_library(test_runtime_common OBJECT common.cpp)
+
 foreach(test
   vecadd
 )
   # Build test executable.
   set(TEST_EXE "${test}-test")
-  add_executable(${TEST_EXE} ${test}.c)
-  set_property(TARGET ${TEST_EXE} PROPERTY C_STANDARD 99)
-  target_link_libraries(${TEST_EXE} talvos-vulkan)
+  add_executable(${TEST_EXE} ${test}.cpp)
+  target_link_libraries(${TEST_EXE}
+                        $<TARGET_OBJECTS:test_runtime_common>
+                        talvos-vulkan)
 
   # Add test.
   set(TEST_NAME "runtime/${test}")
