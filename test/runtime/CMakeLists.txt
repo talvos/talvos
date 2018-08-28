@@ -13,6 +13,7 @@ foreach(test
   # Build test executable.
   set(TEST_EXE "${test}-test")
   add_executable(${TEST_EXE} ${test}.cpp)
+  add_dependencies(${TEST_EXE} test_runtime_common)
   target_link_libraries(${TEST_EXE}
                         $<TARGET_OBJECTS:test_runtime_common>
                         talvos-vulkan)
