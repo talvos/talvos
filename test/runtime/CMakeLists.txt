@@ -8,6 +8,7 @@ add_library(test_runtime_common OBJECT common.cpp)
 
 foreach(test
   vecadd
+  async-queue
 )
   # Build test executable.
   set(TEST_EXE "${test}-test")
