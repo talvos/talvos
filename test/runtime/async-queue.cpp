@@ -8,6 +8,7 @@
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 #include <windows.h>
+#define sleep(X) Sleep((X)*1000)
 #else
 #include <unistd.h>
 #endif
