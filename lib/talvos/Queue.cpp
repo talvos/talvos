@@ -6,6 +6,8 @@
 /// \file Queue.cpp
 /// This file defines the Queue class.
 
+#include <cassert>
+
 #include "talvos/Queue.h"
 #include "talvos/Commands.h"
 
