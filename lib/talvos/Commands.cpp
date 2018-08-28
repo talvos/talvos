@@ -247,6 +247,24 @@ void ResetEventCommand::runImpl(Device &Dev) const { *Event = false; }
 
 void SetEventCommand::runImpl(Device &Dev) const { *Event = true; }
 
+UpdateBufferCommand::UpdateBufferCommand(uint64_t Base, uint64_t NumBytes,
+                                         const void *Data)
+    : Command(UPDATE_BUFFER), Base(Base), NumBytes(NumBytes)
+{
+  this->Data = new uint8_t[NumBytes];
+  memcpy(this->Data, Data, NumBytes);
+}
+
+UpdateBufferCommand::~UpdateBufferCommand()
+{
+  delete[] Data;
+}
+
+void UpdateBufferCommand::runImpl(Device &Dev) const
+{
+  Dev.getGlobalMemory().store(Base, NumBytes, Data);
+}
+
 void WaitEventsCommand::runImpl(Device &Dev) const
 {
   // Wait for all events to be set.

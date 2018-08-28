@@ -49,5 +49,9 @@ VKAPI_ATTR void VKAPI_CALL vkCmdUpdateBuffer(VkCommandBuffer commandBuffer,
                                              VkDeviceSize dataSize,
                                              const void *pData)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  uint64_t NumBytes = dataSize;
+  if (NumBytes == VK_WHOLE_SIZE)
+    NumBytes = dstBuffer->NumBytes - dstOffset;
+  commandBuffer->Commands.push_back(new talvos::UpdateBufferCommand(
+      dstBuffer->Address + dstOffset, NumBytes, pData));
 }

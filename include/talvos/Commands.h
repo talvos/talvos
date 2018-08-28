@@ -51,6 +51,7 @@ public:
     NEXT_SUBPASS,
     SET_EVENT,
     RESET_EVENT,
+    UPDATE_BUFFER,
     WAIT_EVENTS,
   };
 
@@ -509,6 +510,30 @@ protected:
 private:
   /// The flag to set when this command executes.
   volatile bool *Event;
+};
+
+/// This class encapsulates information about an update buffer command.
+class UpdateBufferCommand : public Command
+{
+public:
+  /// Create a new UpdateBufferCommand.
+  UpdateBufferCommand(uint64_t Base, uint64_t NumBytes, const void *Data);
+
+  ~UpdateBufferCommand();
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  // The memory address to begin updating from.
+  uint64_t Base;
+
+  /// The number of bytes to update.
+  uint64_t NumBytes;
+
+  /// The data to update the buffer with.
+  uint8_t *Data;
 };
 
 /// This class encapsulates information about a wait events command.
