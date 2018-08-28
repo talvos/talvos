@@ -12,7 +12,11 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalBufferProperties(
     const VkPhysicalDeviceExternalBufferInfo *pExternalBufferInfo,
     VkExternalBufferProperties *pExternalBufferProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  pExternalBufferProperties->externalMemoryProperties
+      .exportFromImportedHandleTypes = 0;
+  pExternalBufferProperties->externalMemoryProperties.compatibleHandleTypes = 0;
+  pExternalBufferProperties->externalMemoryProperties.externalMemoryFeatures =
+      0;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalBufferPropertiesKHR(
@@ -20,7 +24,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalBufferPropertiesKHR(
     const VkPhysicalDeviceExternalBufferInfo *pExternalBufferInfo,
     VkExternalBufferProperties *pExternalBufferProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceExternalBufferProperties(
+      physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalFenceProperties(
