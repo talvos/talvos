@@ -5,7 +5,7 @@
 
 #include "runtime.h"
 
-#include "talvos/Device.h"
+#include "talvos/Queue.h"
 
 VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
     VkDevice device, const VkCommandBufferAllocateInfo *pAllocateInfo,
@@ -115,18 +115,21 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
                                              const VkSubmitInfo *pSubmits,
                                              VkFence fence)
 {
+  // Build full list of commands in this submission.
+  std::vector<talvos::Command *> Commands;
   for (uint32_t s = 0; s < submitCount; s++)
   {
     for (uint32_t c = 0; c < pSubmits[s].commandBufferCount; c++)
     {
-      for (auto Command : pSubmits[s].pCommandBuffers[c]->Commands)
-      {
-        Command->run(*queue->Device->Device);
-      }
+      Commands.insert(Commands.end(),
+                      pSubmits[s].pCommandBuffers[c]->Commands.begin(),
+                      pSubmits[s].pCommandBuffers[c]->Commands.end());
     }
   }
-  if (fence)
-    fence->Signaled = true;
+
+  // Submit commands with fence.
+  queue->Queue->submit(Commands, fence ? &fence->Signaled : nullptr);
+
   return VK_SUCCESS;
 }
 

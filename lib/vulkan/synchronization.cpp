@@ -12,6 +12,7 @@
 #endif
 
 #include "talvos/Commands.h"
+#include "talvos/Queue.h"
 
 /// Utility to return the current time in nanoseconds since the epoch.
 double now()
@@ -113,7 +114,7 @@ vkDestroySemaphore(VkDevice device, VkSemaphore semaphore,
 
 VKAPI_ATTR VkResult VKAPI_CALL vkDeviceWaitIdle(VkDevice device)
 {
-  // TODO: Implement? All work currently completes in vkQueueSubmit.
+  device->Queue->waitIdle();
   return VK_SUCCESS;
 }
 
@@ -153,7 +154,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkImportSemaphoreFdKHR(
 
 VKAPI_ATTR VkResult VKAPI_CALL vkQueueWaitIdle(VkQueue queue)
 {
-  // TODO: Implement? All work currently completes in vkQueueSubmit.
+  queue->Queue->waitIdle();
   return VK_SUCCESS;
 }
 

@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include "talvos/Device.h"
+#include "talvos/Queue.h"
 #include "version.h"
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
@@ -35,6 +36,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
 
   *pDevice = new VkDevice_T;
   (*pDevice)->Device = new talvos::Device;
+  (*pDevice)->Queue = new talvos::Queue(*(*pDevice)->Device);
   return VK_SUCCESS;
 }
 
@@ -43,6 +45,7 @@ vkDestroyDevice(VkDevice device, const VkAllocationCallbacks *pAllocator)
 {
   if (device)
   {
+    delete device->Queue;
     delete device->Device;
     delete device;
   }
@@ -94,14 +97,14 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue(VkDevice device,
                                             VkQueue *pQueue)
 {
   *pQueue = new VkQueue_T;
-  (*pQueue)->Device = device;
+  (*pQueue)->Queue = device->Queue;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetDeviceQueue2(
     VkDevice device, const VkDeviceQueueInfo2 *pQueueInfo, VkQueue *pQueue)
 {
   *pQueue = new VkQueue_T;
-  (*pQueue)->Device = device;
+  (*pQueue)->Queue = device->Queue;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties(

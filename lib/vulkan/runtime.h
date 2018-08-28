@@ -24,6 +24,7 @@ class GraphicsPipeline;
 class Image;
 class ImageView;
 class Module;
+class Queue;
 class RenderPass;
 class RenderPassInstance;
 class Sampler;
@@ -112,6 +113,7 @@ struct VkDescriptorUpdateTemplate_T
 struct VkDevice_T
 {
   talvos::Device *Device;
+  talvos::Queue *Queue;
 };
 
 struct VkDeviceMemory_T
@@ -171,7 +173,7 @@ struct VkPipelineLayout_T
 
 struct VkQueue_T
 {
-  VkDevice Device;
+  talvos::Queue *Queue;
 };
 
 struct VkRenderPass_T

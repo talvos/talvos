@@ -84,6 +84,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
     ${CMAKE_SOURCE_DIR}/include/talvos/PipelineStage.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Plugin.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/Queue.h
     ${CMAKE_SOURCE_DIR}/include/talvos/RenderPass.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Type.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Variable.h
@@ -105,6 +106,7 @@ set(TALVOS_SOURCES
     PipelineExecutor.cpp
     PipelineExecutor.h
     PipelineStage.cpp
+    Queue.cpp
     RenderPass.cpp
     Type.cpp
     Variable.cpp
