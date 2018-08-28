@@ -28,7 +28,9 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalFenceProperties(
     const VkPhysicalDeviceExternalFenceInfo *pExternalFenceInfo,
     VkExternalFenceProperties *pExternalFenceProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  pExternalFenceProperties->exportFromImportedHandleTypes = 0;
+  pExternalFenceProperties->compatibleHandleTypes = 0;
+  pExternalFenceProperties->externalFenceFeatures = 0;
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalFencePropertiesKHR(
@@ -36,7 +38,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalFencePropertiesKHR(
     const VkPhysicalDeviceExternalFenceInfo *pExternalFenceInfo,
     VkExternalFenceProperties *pExternalFenceProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceExternalFenceProperties(physicalDevice, pExternalFenceInfo,
+                                             pExternalFenceProperties);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceExternalSemaphoreProperties(
