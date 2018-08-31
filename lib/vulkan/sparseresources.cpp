@@ -25,7 +25,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetImageSparseMemoryRequirements2KHR(
     uint32_t *pSparseMemoryRequirementCount,
     VkSparseImageMemoryRequirements2 *pSparseMemoryRequirements)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetImageSparseMemoryRequirements2(
+      device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceSparseImageFormatProperties(
@@ -53,7 +54,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
     const VkPhysicalDeviceSparseImageFormatInfo2 *pFormatInfo,
     uint32_t *pPropertyCount, VkSparseImageFormatProperties2 *pProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceSparseImageFormatProperties2(physicalDevice, pFormatInfo,
+                                                  pPropertyCount, pProperties);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL

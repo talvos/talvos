@@ -70,7 +70,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMask(VkCommandBuffer commandBuffer,
 VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMaskKHR(VkCommandBuffer commandBuffer,
                                                  uint32_t deviceMask)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkCmdSetDeviceMask(commandBuffer, deviceMask);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateCommandPool(
@@ -173,5 +173,5 @@ VKAPI_ATTR void VKAPI_CALL vkTrimCommandPoolKHR(VkDevice device,
                                                 VkCommandPool commandPool,
                                                 VkCommandPoolTrimFlags flags)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkTrimCommandPool(device, commandPool, flags);
 }

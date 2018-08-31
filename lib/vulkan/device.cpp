@@ -74,7 +74,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroupsKHR(
     VkInstance instance, uint32_t *pPhysicalDeviceGroupCount,
     VkPhysicalDeviceGroupProperties *pPhysicalDeviceGroupProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return vkEnumeratePhysicalDeviceGroups(instance, pPhysicalDeviceGroupCount,
+                                         pPhysicalDeviceGroupProperties);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
@@ -370,5 +371,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceQueueFamilyProperties2KHR(
     VkPhysicalDevice physicalDevice, uint32_t *pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2 *pQueueFamilyProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceQueueFamilyProperties2(
+      physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
 }

@@ -260,7 +260,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetDescriptorSetLayoutSupportKHR(
     VkDevice device, const VkDescriptorSetLayoutCreateInfo *pCreateInfo,
     VkDescriptorSetLayoutSupport *pSupport)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetDescriptorSetLayoutSupport(device, pCreateInfo, pSupport);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL

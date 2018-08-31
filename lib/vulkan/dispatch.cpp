@@ -32,7 +32,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDispatchBaseKHR(
     uint32_t baseGroupZ, uint32_t groupCountX, uint32_t groupCountY,
     uint32_t groupCountZ)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkCmdDispatchBase(commandBuffer, baseGroupX, baseGroupY, baseGroupZ,
+                    groupCountX, groupCountY, groupCountZ);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDispatchIndirect(VkCommandBuffer commandBuffer,

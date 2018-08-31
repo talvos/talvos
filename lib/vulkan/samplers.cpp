@@ -39,7 +39,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateSamplerYcbcrConversionKHR(
     const VkAllocationCallbacks *pAllocator,
     VkSamplerYcbcrConversion *pYcbcrConversion)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return vkCreateSamplerYcbcrConversion(device, pCreateInfo, pAllocator,
+                                        pYcbcrConversion);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroySampler(
@@ -64,5 +65,5 @@ VKAPI_ATTR void VKAPI_CALL vkDestroySamplerYcbcrConversionKHR(
     VkDevice device, VkSamplerYcbcrConversion ycbcrConversion,
     const VkAllocationCallbacks *pAllocator)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkDestroySamplerYcbcrConversion(device, ycbcrConversion, pAllocator);
 }

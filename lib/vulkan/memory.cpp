@@ -44,7 +44,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceGroupPeerMemoryFeaturesKHR(
     VkDevice device, uint32_t heapIndex, uint32_t localDeviceIndex,
     uint32_t remoteDeviceIndex, VkPeerMemoryFeatureFlags *pPeerMemoryFeatures)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetDeviceGroupPeerMemoryFeatures(device, heapIndex, localDeviceIndex,
+                                     remoteDeviceIndex, pPeerMemoryFeatures);
 }
 
 VKAPI_ATTR void VKAPI_CALL
@@ -95,7 +96,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties2 *pMemoryProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceMemoryProperties2(physicalDevice, pMemoryProperties);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL

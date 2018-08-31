@@ -135,7 +135,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2(
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2KHR(
     VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures2 *pFeatures)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceFeatures2(physicalDevice, pFeatures);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFormatProperties(
@@ -159,7 +159,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFormatProperties2KHR(
     VkPhysicalDevice physicalDevice, VkFormat format,
     VkFormatProperties2 *pFormatProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  vkGetPhysicalDeviceFormatProperties2(physicalDevice, format,
+                                       pFormatProperties);
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceImageFormatProperties(
@@ -186,5 +187,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceImageFormatProperties2KHR(
     const VkPhysicalDeviceImageFormatInfo2 *pImageFormatInfo,
     VkImageFormatProperties2 *pImageFormatProperties)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  return vkGetPhysicalDeviceImageFormatProperties2(
+      physicalDevice, pImageFormatInfo, pImageFormatProperties);
 }
