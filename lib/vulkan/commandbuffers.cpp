@@ -7,6 +7,15 @@
 
 #include "talvos/Queue.h"
 
+void resetCommandBuffer(VkCommandBuffer Cmd)
+{
+  Cmd->PipelineContext.clear();
+  Cmd->RenderPassInstance.reset();
+  Cmd->IndexBufferAddress = 0;
+  Cmd->IndexType = VK_INDEX_TYPE_MAX_ENUM;
+  Cmd->Commands.clear();
+}
+
 VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
     VkDevice device, const VkCommandBufferAllocateInfo *pAllocateInfo,
     VkCommandBuffer *pCommandBuffers)
@@ -22,12 +31,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateCommandBuffers(
 VKAPI_ATTR VkResult VKAPI_CALL vkBeginCommandBuffer(
     VkCommandBuffer commandBuffer, const VkCommandBufferBeginInfo *pBeginInfo)
 {
-  commandBuffer->PipelineGraphics = nullptr;
-  commandBuffer->PipelineCompute = nullptr;
-  commandBuffer->DescriptorSetsGraphics.clear();
-  commandBuffer->DescriptorSetsCompute.clear();
-  commandBuffer->VertexBindings.clear();
-  commandBuffer->Commands.clear();
+  resetCommandBuffer(commandBuffer);
 
   if (pBeginInfo->flags & VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT)
   {
@@ -131,20 +135,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueueSubmit(VkQueue queue,
   queue->Queue->submit(Commands, fence ? &fence->Signaled : nullptr);
 
   return VK_SUCCESS;
-}
-
-void resetCommandBuffer(VkCommandBuffer Cmd)
-{
-  Cmd->PipelineGraphics = nullptr;
-  Cmd->PipelineCompute = nullptr;
-  Cmd->DescriptorSetsGraphics.clear();
-  Cmd->DescriptorSetsCompute.clear();
-  Cmd->VertexBindings.clear();
-  Cmd->Scissors.clear();
-  Cmd->RenderPassInstance.reset();
-  Cmd->IndexBufferAddress = 0;
-  Cmd->IndexType = VK_INDEX_TYPE_MAX_ENUM;
-  Cmd->Commands.clear();
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkResetCommandBuffer(

@@ -13,8 +13,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindVertexBuffers(VkCommandBuffer commandBuffer,
 {
   for (uint32_t b = 0; b < bindingCount; b++)
   {
-    commandBuffer->VertexBindings[firstBinding + b] =
-        pBuffers[b]->Address + pOffsets[b];
+    commandBuffer->PipelineContext.bindVertexBuffer(
+        firstBinding + b, pBuffers[b]->Address + pOffsets[b]);
   }
 }
 

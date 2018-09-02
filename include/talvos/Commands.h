@@ -14,8 +14,8 @@
 
 #include "vulkan/vulkan_core.h"
 
-#include "talvos/DescriptorSet.h"
 #include "talvos/Dim3.h"
+#include "talvos/PipelineContext.h"
 
 namespace talvos
 {
@@ -26,9 +26,6 @@ class GraphicsPipeline;
 class Image;
 class Object;
 class RenderPassInstance;
-
-/// Mapping from binding indexes to device memory addresses for vertex buffers.
-typedef std::map<uint32_t, uint64_t> VertexBindingMap;
 
 /// This class is a base class for all commands.
 class Command
@@ -225,35 +222,26 @@ class DispatchCommand : public Command
 public:
   /// Create a new DispatchCommand.
   ///
-  /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
-  ///
-  /// \param PL The compute pipeline to invoke.
+  /// \param PC The pipeline context used for the shader launch.
   /// \param NumGroups The number of groups to launch.
-  /// \param DSM The descriptor set mapping to use.
-  DispatchCommand(const ComputePipeline *PL, Dim3 NumGroups,
-                  const DescriptorSetMap &DSM)
-      : Command(DISPATCH), Pipeline(PL), NumGroups(NumGroups), DSM(DSM)
+  DispatchCommand(const PipelineContext &PC, Dim3 NumGroups)
+      : Command(DISPATCH), PC(PC), NumGroups(NumGroups)
   {}
-
-  /// Returns the descriptor set map used by the command.
-  const DescriptorSetMap &getDescriptorSetMap() const { return DSM; }
 
   /// Returns the number of workgroups this command launches.
   Dim3 getNumGroups() const { return NumGroups; }
 
-  /// Returns the pipeline this command is invoking.
-  const ComputePipeline *getPipeline() const { return Pipeline; }
+  /// Returns the pipeline context.
+  const PipelineContext &getPipelineContext() const { return PC; }
 
 protected:
   /// Command execution handler.
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  const ComputePipeline *Pipeline; ///< The pipeline to use.
+  PipelineContext PC; ///< The pipeline context.
 
   Dim3 NumGroups; ///< The number of workgroups to launch.
-
-  DescriptorSetMap DSM; ///< The descriptor set map to use.
 };
 
 /// This is an abstract base class for draw commands.
@@ -262,29 +250,20 @@ class DrawCommandBase : public Command
 public:
   /// Create a new DrawCommandBase.
   ///
-  /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
-  ///
-  /// \param PL The graphics pipeline to invoke.
+  /// \param PC The pipeline context used for the draw command.
+  /// \param RPI The render pass instance to use.
   /// \param NumVertices The number of vertices to draw.
   /// \param VertexOffset The offset of the first vertex.
   /// \param NumInstances The number of instances to draw.
   /// \param InstanceOffset The offset of the first instance.
-  /// \param DSM The descriptor set mapping to use.
-  /// \param VertexBindings The vertex buffer bindings to use.
-  /// \param RPI The render pass instance to use;
-  DrawCommandBase(Type Ty, const GraphicsPipeline *PL, uint32_t NumVertices,
-                  uint32_t VertexOffset, uint32_t NumInstances,
-                  uint32_t InstanceOffset, const DescriptorSetMap &DSM,
-                  const VertexBindingMap &VertexBindings,
-                  const std::vector<VkRect2D> &Scissors,
-                  const std::shared_ptr<RenderPassInstance> RPI)
-      : Command(Ty), Pipeline(PL), NumVertices(NumVertices),
+  DrawCommandBase(Type Ty, const PipelineContext &PC,
+                  const std::shared_ptr<RenderPassInstance> RPI,
+                  uint32_t NumVertices, uint32_t VertexOffset,
+                  uint32_t NumInstances, uint32_t InstanceOffset)
+      : Command(Ty), PC(PC), RPI(RPI), NumVertices(NumVertices),
         VertexOffset(VertexOffset), NumInstances(NumInstances),
-        InstanceOffset(InstanceOffset), DSM(DSM),
-        VertexBindings(VertexBindings), Scissors(Scissors), RPI(RPI){};
-
-  /// Returns the descriptor set map used by the command.
-  const DescriptorSetMap &getDescriptorSetMap() const { return DSM; }
+        InstanceOffset(InstanceOffset)
+  {}
 
   /// Returns the offset of the first instance.
   uint32_t getInstanceOffset() const { return InstanceOffset; }
@@ -295,17 +274,11 @@ public:
   /// Returns the number of vertices.
   uint32_t getNumVertices() const { return NumVertices; }
 
-  /// Returns the pipeline this command is invoking.
-  const GraphicsPipeline *getPipeline() const { return Pipeline; }
+  /// Returns the pipeline context.
+  const PipelineContext &getPipelineContext() const { return PC; }
 
   /// Returns the render pass instance used by this command.
   const RenderPassInstance &getRenderPassInstance() const { return *RPI; }
-
-  /// Returns the scissor rectangles used by this command.
-  const std::vector<VkRect2D> &getScissors() const { return Scissors; }
-
-  /// Returns the vertex binding map used by the command.
-  const VertexBindingMap &getVertexBindings() const { return VertexBindings; }
 
   /// Returns the offset of the first vertex.
   uint32_t getVertexOffset() const { return VertexOffset; }
@@ -321,20 +294,14 @@ protected:
   virtual void runImpl(Device &Dev) const override = 0;
 
 private:
-  const GraphicsPipeline *Pipeline; ///< The pipeline to use.
+  PipelineContext PC; ///< The pipeline context.
+
+  std::shared_ptr<RenderPassInstance> RPI; ///< The render pass instance.
 
   uint32_t NumVertices;    ///< Number of vertices.
   uint32_t VertexOffset;   ///< Offset of first vertex.
   uint32_t NumInstances;   ///< Number of instances.
   uint32_t InstanceOffset; ///< Offset of first instance.
-
-  DescriptorSetMap DSM; ///< The descriptor set map to use.
-
-  VertexBindingMap VertexBindings; ///< The vertex buffer bindings to use.
-
-  std::vector<VkRect2D> Scissors; ///< The scissor rectangles to use.
-
-  std::shared_ptr<RenderPassInstance> RPI; ///< The render pass instance.
 };
 
 /// This class encapsulates information about a draw command.
@@ -343,24 +310,18 @@ class DrawCommand : public DrawCommandBase
 public:
   /// Create a new DrawCommand.
   ///
-  /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
-  ///
-  /// \param PL The graphics pipeline to invoke.
+  /// \param PC The pipeline context used for the draw command.
+  /// \param RPI The render pass instance to use.
   /// \param NumVertices The number of vertices to draw.
   /// \param VertexOffset The offset of the first vertex.
   /// \param NumInstances The number of instances to draw.
   /// \param InstanceOffset The offset of the first instance.
-  /// \param DSM The descriptor set mapping to use.
-  /// \param VertexBindings The vertex buffer bindings to use.
-  /// \param RPI The render pass instance to use;
-  DrawCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
-              uint32_t VertexOffset, uint32_t NumInstances,
-              uint32_t InstanceOffset, const DescriptorSetMap &DSM,
-              const VertexBindingMap &VertexBindings,
-              const std::vector<VkRect2D> &Scissors,
-              const std::shared_ptr<RenderPassInstance> RPI)
-      : DrawCommandBase(DRAW, PL, NumVertices, VertexOffset, NumInstances,
-                        InstanceOffset, DSM, VertexBindings, Scissors, RPI){};
+  DrawCommand(const PipelineContext &PC,
+              const std::shared_ptr<RenderPassInstance> RPI,
+              uint32_t NumVertices, uint32_t VertexOffset,
+              uint32_t NumInstances, uint32_t InstanceOffset)
+      : DrawCommandBase(DRAW, PC, RPI, NumVertices, VertexOffset, NumInstances,
+                        InstanceOffset){};
 
 protected:
   /// Command execution handler.
@@ -373,9 +334,8 @@ class DrawIndexedCommand : public DrawCommandBase
 public:
   /// Create a new DrawIndexedCommand.
   ///
-  /// Any buffers used by \p PL must have a corresponding entry in \p DSM.
-  ///
-  /// \param PL The graphics pipeline to invoke.
+  /// \param PC The pipeline context used for the draw command.
+  /// \param RPI The render pass instance to use.
   /// \param NumVertices The number of vertices to draw.
   /// \param IndexOffset The offset of the first index.
   /// \param VertexOffset The offset of the first vertex.
@@ -383,20 +343,14 @@ public:
   /// \param InstanceOffset The offset of the first instance.
   /// \param IndexBaseAddress The address in memory of the indices.
   /// \param IndexType The type of the indices.
-  /// \param DSM The descriptor set mapping to use.
-  /// \param VertexBindings The vertex buffer bindings to use.
-  /// \param RPI The render pass instance to use;
-  DrawIndexedCommand(const GraphicsPipeline *PL, uint32_t NumVertices,
-                     uint32_t IndexOffset, uint32_t VertexOffset,
-                     uint32_t NumInstances, uint32_t InstanceOffset,
-                     uint64_t IndexBaseAddress, VkIndexType IndexType,
-                     const DescriptorSetMap &DSM,
-                     const VertexBindingMap &VertexBindings,
-                     const std::vector<VkRect2D> &Scissors,
-                     const std::shared_ptr<RenderPassInstance> RPI)
-      : DrawCommandBase(DRAW_INDEXED, PL, NumVertices, VertexOffset,
-                        NumInstances, InstanceOffset, DSM, VertexBindings,
-                        Scissors, RPI),
+  DrawIndexedCommand(const PipelineContext &PC,
+                     const std::shared_ptr<RenderPassInstance> RPI,
+                     uint32_t NumVertices, uint32_t IndexOffset,
+                     uint32_t VertexOffset, uint32_t NumInstances,
+                     uint32_t InstanceOffset, uint64_t IndexBaseAddress,
+                     VkIndexType IndexType)
+      : DrawCommandBase(DRAW_INDEXED, PC, RPI, NumVertices, VertexOffset,
+                        NumInstances, InstanceOffset),
         IndexOffset(IndexOffset), IndexBaseAddress(IndexBaseAddress),
         IndexType(IndexType){};
 

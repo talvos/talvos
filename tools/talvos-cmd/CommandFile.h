@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "talvos/DescriptorSet.h"
+#include "talvos/PipelineContext.h"
 #include "talvos/PipelineStage.h"
 
 namespace talvos

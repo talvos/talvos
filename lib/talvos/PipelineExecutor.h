@@ -16,8 +16,8 @@
 #include <thread>
 #include <vector>
 
-#include "talvos/DescriptorSet.h"
 #include "talvos/Dim3.h"
+#include "talvos/PipelineContext.h"
 
 namespace talvos
 {

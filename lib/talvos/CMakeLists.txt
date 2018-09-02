@@ -70,7 +70,6 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Block.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Commands.h
     ${CMAKE_SOURCE_DIR}/include/talvos/ComputePipeline.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/DescriptorSet.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Dim3.h
     ${CMAKE_SOURCE_DIR}/include/talvos/EntryPoint.h
@@ -82,6 +81,7 @@ set(TALVOS_HEADERS
     ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
+    ${CMAKE_SOURCE_DIR}/include/talvos/PipelineContext.h
     ${CMAKE_SOURCE_DIR}/include/talvos/PipelineStage.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Plugin.h
     ${CMAKE_SOURCE_DIR}/include/talvos/Queue.h
@@ -103,6 +103,7 @@ set(TALVOS_SOURCES
     Memory.cpp
     Module.cpp
     Object.cpp
+    PipelineContext.cpp
     PipelineExecutor.cpp
     PipelineExecutor.h
     PipelineStage.cpp

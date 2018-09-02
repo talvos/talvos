@@ -23,11 +23,12 @@ vkCmdBindPipeline(VkCommandBuffer commandBuffer,
   switch (pipelineBindPoint)
   {
   case VK_PIPELINE_BIND_POINT_GRAPHICS:
-    commandBuffer->PipelineGraphics = pipeline;
-    commandBuffer->Scissors = pipeline->GraphicsPipeline->getScissors();
+    commandBuffer->PipelineContext.bindGraphicsPipeline(
+        pipeline->GraphicsPipeline);
     break;
   case VK_PIPELINE_BIND_POINT_COMPUTE:
-    commandBuffer->PipelineCompute = pipeline;
+    commandBuffer->PipelineContext.bindComputePipeline(
+        pipeline->ComputePipeline);
     break;
   default:
     assert(false && "invalid pipeline bind point");

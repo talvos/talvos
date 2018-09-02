@@ -60,27 +60,15 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
     const VkDescriptorSet *pDescriptorSets, uint32_t dynamicOffsetCount,
     const uint32_t *pDynamicOffsets)
 {
-  talvos::DescriptorSetMap *DSM;
-  switch (pipelineBindPoint)
-  {
-  case VK_PIPELINE_BIND_POINT_GRAPHICS:
-    DSM = &commandBuffer->DescriptorSetsGraphics;
-    break;
-  case VK_PIPELINE_BIND_POINT_COMPUTE:
-    DSM = &commandBuffer->DescriptorSetsCompute;
-    break;
-  default:
-    assert(false && "invalid pipeline bind point");
-  }
-
-  // Update descriptor set map.
+  // Build descriptor set map.
+  talvos::DescriptorSetMap DSM;
   uint32_t OffsetIndex = 0;
   for (uint32_t i = 0; i < descriptorSetCount; i++)
   {
-    (*DSM)[firstSet + i] = pDescriptorSets[i]->DescriptorSet;
+    DSM[firstSet + i] = pDescriptorSets[i]->DescriptorSet;
 
     // Add dynamic offsets.
-    for (auto &Mapping : (*DSM)[firstSet + i])
+    for (auto &Mapping : DSM[firstSet + i])
     {
       // Skip non-dynamic resources.
       const VkDescriptorType &Type =
@@ -97,6 +85,19 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
   }
 
   assert(OffsetIndex == dynamicOffsetCount);
+
+  // Bind descriptor sets to pipeline context.
+  switch (pipelineBindPoint)
+  {
+  case VK_PIPELINE_BIND_POINT_GRAPHICS:
+    commandBuffer->PipelineContext.bindGraphicsDescriptors(DSM);
+    break;
+  case VK_PIPELINE_BIND_POINT_COMPUTE:
+    commandBuffer->PipelineContext.bindComputeDescriptors(DSM);
+    break;
+  default:
+    assert(false && "invalid pipeline bind point");
+  }
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdPushConstants(VkCommandBuffer commandBuffer,

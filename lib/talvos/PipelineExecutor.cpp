@@ -190,10 +190,13 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   assert(CurrentCommand == nullptr);
   CurrentCommand = &Cmd;
 
-  CurrentStage = Cmd.getPipeline()->getStage();
+  const PipelineContext &PC = Cmd.getPipelineContext();
+  const ComputePipeline *PL = PC.getComputePipeline();
+  assert(PL != nullptr);
+  CurrentStage = PL->getStage();
 
   Objects = CurrentStage->getObjects();
-  initialiseBufferVariables(Cmd.getDescriptorSetMap());
+  initialiseBufferVariables(PC.getComputeDescriptors());
 
   assert(PendingGroups.empty());
   assert(RunningGroups.empty());
@@ -213,7 +216,7 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   runWorkers(
       [&]() { return std::thread(&PipelineExecutor::runComputeWorker, this); });
 
-  finaliseBufferVariables(Cmd.getDescriptorSetMap());
+  finaliseBufferVariables(PC.getComputeDescriptors());
 
   PendingGroups.clear();
   CurrentCommand = nullptr;
@@ -227,6 +230,10 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
   Continue = false;
   Interactive = checkEnv("TALVOS_INTERACTIVE", false);
 
+  const PipelineContext &PC = Cmd.getPipelineContext();
+  const GraphicsPipeline *PL = PC.getGraphicsPipeline();
+  assert(PL != nullptr);
+
   // Set up vertex shader stage pipeline memories.
   RenderPipelineState State;
   State.VertexOutputs.resize(Cmd.getNumVertices());
@@ -237,9 +244,9 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
     uint32_t InstanceIndex = Instance + Cmd.getInstanceOffset();
 
     // Prepare vertex stage objects.
-    CurrentStage = Cmd.getPipeline()->getVertexStage();
+    CurrentStage = PL->getVertexStage();
     Objects = CurrentStage->getObjects();
-    initialiseBufferVariables(Cmd.getDescriptorSetMap());
+    initialiseBufferVariables(PC.getGraphicsDescriptors());
 
     // Run worker threads to process vertices.
     NextWorkIndex = 0;
@@ -248,16 +255,16 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
                          InstanceIndex);
     });
 
-    finaliseBufferVariables(Cmd.getDescriptorSetMap());
+    finaliseBufferVariables(PC.getGraphicsDescriptors());
 
     // Switch to fragment shader for rasterization.
-    CurrentStage = Cmd.getPipeline()->getFragmentStage();
+    CurrentStage = PL->getFragmentStage();
     assert(CurrentStage && "rendering without fragment shader not implemented");
     Objects = CurrentStage->getObjects();
-    initialiseBufferVariables(Cmd.getDescriptorSetMap());
+    initialiseBufferVariables(PC.getGraphicsDescriptors());
 
     // TODO: Handle other topologies
-    VkPrimitiveTopology Topology = Cmd.getPipeline()->getTopology();
+    VkPrimitiveTopology Topology = PL->getTopology();
     switch (Topology)
     {
     case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
@@ -303,7 +310,7 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
       abort();
     }
 
-    finaliseBufferVariables(Cmd.getDescriptorSetMap());
+    finaliseBufferVariables(PC.getGraphicsDescriptors());
   }
 
   CurrentStage = nullptr;
@@ -653,7 +660,9 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
   CurrentInvocation = nullptr;
 
   const DrawCommandBase *DC = (const DrawCommandBase *)CurrentCommand;
-  const GraphicsPipeline *Pipeline = DC->getPipeline();
+  const GraphicsPipeline *Pipeline =
+      DC->getPipelineContext().getGraphicsPipeline();
+  assert(Pipeline != nullptr);
 
   // Loop until all vertices are finished.
   while (true)
@@ -755,7 +764,8 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
                  Attr->format == VK_FORMAT_R32_UINT);
 
           // Calculate variable address in vertex buffer memory.
-          uint64_t ElemAddr = DC->getVertexBindings().at(Attr->binding);
+          uint64_t ElemAddr =
+              DC->getPipelineContext().getVertexBindings().at(Attr->binding);
           switch (Binding->inputRate)
           {
           case VK_VERTEX_INPUT_RATE_VERTEX:
@@ -1000,7 +1010,8 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
 {
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
   const Framebuffer &FB = RPI.getFramebuffer();
-  const std::vector<VkRect2D> &Scissors = Cmd.getScissors();
+  const std::vector<VkRect2D> &Scissors =
+      Cmd.getPipelineContext().getScissors();
 
   // Gather vertex positions for the primitive.
   Vec4 A, B, C;

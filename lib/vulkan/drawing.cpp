@@ -23,10 +23,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDraw(VkCommandBuffer commandBuffer,
                                      uint32_t firstInstance)
 {
   commandBuffer->Commands.push_back(new talvos::DrawCommand(
-      commandBuffer->PipelineGraphics->GraphicsPipeline, vertexCount,
-      firstVertex, instanceCount, firstInstance,
-      commandBuffer->DescriptorSetsGraphics, commandBuffer->VertexBindings,
-      commandBuffer->Scissors, commandBuffer->RenderPassInstance));
+      commandBuffer->PipelineContext, commandBuffer->RenderPassInstance,
+      vertexCount, firstVertex, instanceCount, firstInstance));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexed(
@@ -34,11 +32,9 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexed(
     uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
 {
   commandBuffer->Commands.push_back(new talvos::DrawIndexedCommand(
-      commandBuffer->PipelineGraphics->GraphicsPipeline, indexCount, firstIndex,
-      vertexOffset, instanceCount, firstInstance,
-      commandBuffer->IndexBufferAddress, commandBuffer->IndexType,
-      commandBuffer->DescriptorSetsGraphics, commandBuffer->VertexBindings,
-      commandBuffer->Scissors, commandBuffer->RenderPassInstance));
+      commandBuffer->PipelineContext, commandBuffer->RenderPassInstance,
+      indexCount, firstIndex, vertexOffset, instanceCount, firstInstance,
+      commandBuffer->IndexBufferAddress, commandBuffer->IndexType));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDrawIndexedIndirect(

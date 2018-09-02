@@ -14,9 +14,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdDispatch(VkCommandBuffer commandBuffer,
 {
   // TODO: These dispatch commands are currently never deleted.
   commandBuffer->Commands.push_back(new talvos::DispatchCommand(
-      commandBuffer->PipelineCompute->ComputePipeline,
-      {groupCountX, groupCountY, groupCountZ},
-      commandBuffer->DescriptorSetsCompute));
+      commandBuffer->PipelineContext, {groupCountX, groupCountY, groupCountZ}));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdDispatchBase(

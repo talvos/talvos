@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "talvos/Commands.h"
-#include "talvos/DescriptorSet.h"
+#include "talvos/PipelineContext.h"
 
 namespace talvos
 {
@@ -54,15 +54,10 @@ struct VkBufferView_T
 
 struct VkCommandBuffer_T
 {
-  // Resources that are currently bound to the command buffer.
-  VkPipeline PipelineGraphics;
-  VkPipeline PipelineCompute;
-  talvos::DescriptorSetMap DescriptorSetsGraphics;
-  talvos::DescriptorSetMap DescriptorSetsCompute;
-  talvos::VertexBindingMap VertexBindings;
+  // Pipeline state that is currently bound to the command buffer.
+  talvos::PipelineContext PipelineContext;
 
-  // Parameters for draw commands.
-  std::vector<VkRect2D> Scissors;
+  // The current render pass instance.
   std::shared_ptr<talvos::RenderPassInstance> RenderPassInstance;
 
   // Parameters for indexed draw commands.
