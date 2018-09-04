@@ -6,6 +6,8 @@
 /// \file PipelineContext.cpp
 /// This file defines the PipelineContext class.
 
+#include <cassert>
+
 #include "talvos/PipelineContext.h"
 #include "talvos/GraphicsPipeline.h"
 
