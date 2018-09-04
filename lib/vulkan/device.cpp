@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include "talvos/Device.h"
+#include "talvos/PipelineContext.h"
 #include "talvos/Queue.h"
 #include "version.h"
 
@@ -128,7 +129,8 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceProperties(
   pProperties->limits.maxTexelBufferElements = 65536;
   pProperties->limits.maxUniformBufferRange = 16384;
   pProperties->limits.maxStorageBufferRange = (1 << 27);
-  pProperties->limits.maxPushConstantsSize = 128;
+  pProperties->limits.maxPushConstantsSize =
+      talvos::PipelineContext::PUSH_CONSTANT_MEM_SIZE;
   pProperties->limits.maxMemoryAllocationCount = 4096;
   pProperties->limits.maxSamplerAllocationCount = 4000;
   pProperties->limits.bufferImageGranularity = 131072;

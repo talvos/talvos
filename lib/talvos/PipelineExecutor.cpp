@@ -195,8 +195,15 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   assert(PL != nullptr);
   CurrentStage = PL->getStage();
 
+  // Allocate and initialize push constant data.
+  Memory &GlobalMem = Dev.getGlobalMemory();
+  uint64_t PushConstantAddress =
+      GlobalMem.allocate(PipelineContext::PUSH_CONSTANT_MEM_SIZE);
+  GlobalMem.store(PushConstantAddress, PipelineContext::PUSH_CONSTANT_MEM_SIZE,
+                  PC.getPushConstantData());
+
   Objects = CurrentStage->getObjects();
-  initialiseBufferVariables(PC.getComputeDescriptors());
+  initializeVariables(PC.getComputeDescriptors(), PushConstantAddress);
 
   assert(PendingGroups.empty());
   assert(RunningGroups.empty());
@@ -216,7 +223,8 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   runWorkers(
       [&]() { return std::thread(&PipelineExecutor::runComputeWorker, this); });
 
-  finaliseBufferVariables(PC.getComputeDescriptors());
+  finalizeVariables(PC.getComputeDescriptors());
+  GlobalMem.release(PushConstantAddress);
 
   PendingGroups.clear();
   CurrentCommand = nullptr;
@@ -234,6 +242,13 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
   const GraphicsPipeline *PL = PC.getGraphicsPipeline();
   assert(PL != nullptr);
 
+  // Allocate and initialize push constant data.
+  Memory &GlobalMem = Dev.getGlobalMemory();
+  uint64_t PushConstantAddress =
+      GlobalMem.allocate(PipelineContext::PUSH_CONSTANT_MEM_SIZE);
+  GlobalMem.store(PushConstantAddress, PipelineContext::PUSH_CONSTANT_MEM_SIZE,
+                  PC.getPushConstantData());
+
   // Set up vertex shader stage pipeline memories.
   RenderPipelineState State;
   State.VertexOutputs.resize(Cmd.getNumVertices());
@@ -246,7 +261,7 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
     // Prepare vertex stage objects.
     CurrentStage = PL->getVertexStage();
     Objects = CurrentStage->getObjects();
-    initialiseBufferVariables(PC.getGraphicsDescriptors());
+    initializeVariables(PC.getGraphicsDescriptors(), PushConstantAddress);
 
     // Run worker threads to process vertices.
     NextWorkIndex = 0;
@@ -255,13 +270,13 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
                          InstanceIndex);
     });
 
-    finaliseBufferVariables(PC.getGraphicsDescriptors());
+    finalizeVariables(PC.getGraphicsDescriptors());
 
     // Switch to fragment shader for rasterization.
     CurrentStage = PL->getFragmentStage();
     assert(CurrentStage && "rendering without fragment shader not implemented");
     Objects = CurrentStage->getObjects();
-    initialiseBufferVariables(PC.getGraphicsDescriptors());
+    initializeVariables(PC.getGraphicsDescriptors(), PushConstantAddress);
 
     // TODO: Handle other topologies
     VkPrimitiveTopology Topology = PL->getTopology();
@@ -310,8 +325,10 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
       abort();
     }
 
-    finaliseBufferVariables(PC.getGraphicsDescriptors());
+    finalizeVariables(PC.getGraphicsDescriptors());
   }
+
+  GlobalMem.release(PushConstantAddress);
 
   CurrentStage = nullptr;
   CurrentCommand = nullptr;
@@ -921,7 +938,7 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
   }
 }
 
-void PipelineExecutor::finaliseBufferVariables(const DescriptorSetMap &DSM)
+void PipelineExecutor::finalizeVariables(const DescriptorSetMap &DSM)
 {
   // Copy array variable data back to original buffers.
   for (auto V : CurrentStage->getModule()->getVariables())
@@ -959,11 +976,18 @@ void PipelineExecutor::finaliseBufferVariables(const DescriptorSetMap &DSM)
   }
 }
 
-void PipelineExecutor::initialiseBufferVariables(
-    const talvos::DescriptorSetMap &DSM)
+void PipelineExecutor::initializeVariables(const talvos::DescriptorSetMap &DSM,
+                                           uint64_t PushConstantAddress)
 {
   for (auto V : CurrentStage->getModule()->getVariables())
   {
+    // Set push constant data address.
+    if (V->getType()->getStorageClass() == SpvStorageClassPushConstant)
+    {
+      Objects[V->getId()] = Object(V->getType(), PushConstantAddress);
+      continue;
+    }
+
     if (!V->isBufferVariable())
       continue;
 

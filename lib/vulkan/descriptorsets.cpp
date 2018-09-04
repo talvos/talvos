@@ -106,7 +106,8 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPushConstants(VkCommandBuffer commandBuffer,
                                               uint32_t offset, uint32_t size,
                                               const void *pValues)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  commandBuffer->PipelineContext.setPushConstantData(offset, size,
+                                                     (const uint8_t *)pValues);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHR(

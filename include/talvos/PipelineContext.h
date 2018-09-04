@@ -35,6 +35,9 @@ typedef std::map<uint32_t, talvos::DescriptorSet> DescriptorSetMap;
 class PipelineContext
 {
 public:
+  /// The number of bytes used for push constant data.
+  static const uint32_t PUSH_CONSTANT_MEM_SIZE = 128;
+
   /// Bind descriptor sets used for compute commands.
   void bindComputeDescriptors(const DescriptorSetMap &DSM);
 
@@ -65,11 +68,18 @@ public:
   /// Returns the graphics pipeline.
   const GraphicsPipeline *getGraphicsPipeline() const { return GraphicsPL; }
 
+  /// Returns a pointer to the push constant data.
+  const uint8_t *getPushConstantData() const { return PushConstantData; }
+
   /// Returns the scissor rectangles.
   const std::vector<VkRect2D> &getScissors() const { return Scissors; }
 
   /// Returns the vertex bindings.
   const VertexBindingMap &getVertexBindings() const { return VertexBindings; }
+
+  /// Set push constant data.
+  void setPushConstantData(uint32_t Offset, uint32_t NumBytes,
+                           const uint8_t *Data);
 
 private:
   const ComputePipeline *ComputePL = nullptr;   ///< The compute pipeline.
@@ -77,6 +87,8 @@ private:
 
   DescriptorSetMap ComputeDSM;  ///< The descriptors for compute commands.
   DescriptorSetMap GraphicsDSM; ///< The descriptors for draw commands.
+
+  uint8_t PushConstantData[PUSH_CONSTANT_MEM_SIZE]; ///< Push constant data.
 
   std::vector<VkRect2D> Scissors; ///< The scissor rectangles.
 

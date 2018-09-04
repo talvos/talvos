@@ -50,4 +50,11 @@ void PipelineContext::clear()
   VertexBindings.clear();
 }
 
+void PipelineContext::setPushConstantData(uint32_t Offset, uint32_t NumBytes,
+                                          const uint8_t *Data)
+{
+  assert(Offset + NumBytes <= PUSH_CONSTANT_MEM_SIZE);
+  memcpy(PushConstantData + Offset, Data, NumBytes);
+}
+
 } // namespace talvos

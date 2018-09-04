@@ -99,11 +99,12 @@ private:
   /// Worker thread entry point for vertex shaders.
   void runVertexWorker(RenderPipelineState *State, uint32_t InstanceIndex);
 
-  /// Finalise buffer variables.
-  void finaliseBufferVariables(const DescriptorSetMap &DSM);
+  /// Finalize variables.
+  void finalizeVariables(const DescriptorSetMap &DSM);
 
-  /// Initialise buffer variables.
-  void initialiseBufferVariables(const DescriptorSetMap &DSM);
+  /// Initialize variables.
+  void initializeVariables(const DescriptorSetMap &DSM,
+                           uint64_t PushConstantAddress);
 
   /// Helper function to rasterize a triangle primitive.
   void rasterizeTriangle(const DrawCommandBase &Cmd, const VertexOutput &VA,

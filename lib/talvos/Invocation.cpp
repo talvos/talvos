@@ -1528,6 +1528,7 @@ Memory &Invocation::getMemory(uint32_t StorageClass)
 {
   switch (StorageClass)
   {
+  case SpvStorageClassPushConstant:
   case SpvStorageClassStorageBuffer:
   case SpvStorageClassUniform:
   case SpvStorageClassUniformConstant:
