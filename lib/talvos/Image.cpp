@@ -133,6 +133,7 @@ void Image::write(const Texel &T, uint64_t Address) const
 
   switch (Format)
   {
+  case VK_FORMAT_R32_SFLOAT:
   case VK_FORMAT_R32G32B32A32_SFLOAT:
   case VK_FORMAT_R32_UINT:
   case VK_FORMAT_R32G32B32A32_UINT:
