@@ -48,6 +48,9 @@ public:
       return ((T *)Data)[C];
     }
 
+    /// Returns a const pointer to the raw data backing the texel.
+    const uint8_t *getData() const { return Data; }
+
     /// Set a component value in the texel.
     /// \p T must be a 32-bit type, and \p C must be less than 4.
     template <typename T> void set(unsigned C, T Value)

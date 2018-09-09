@@ -106,28 +106,43 @@ void Image::read(Texel &T, uint64_t Address) const
   T.set<float>(3, Data[3] / 255.f);
 }
 
-void Image::write(const Texel &T, uint64_t Address) const
+template <typename IntTy> void convertUNorm(const Image::Texel &T, IntTy *Data)
 {
-  // TODO: Handle other formats
-  assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
-
-  // Convert to storage format.
-  auto convert = [](float v) -> uint8_t {
+  // Clamp and normalize each component value.
+  auto convert = [](float v) -> IntTy {
     if (v < 0.f)
       return 0;
     else if (v >= 1.f)
-      return 255;
+      return (IntTy)~0U;
     else
-      return (uint8_t)std::round(v * 255);
+      return (uint8_t)std::round(v * (IntTy)(~0U));
   };
-  uint8_t Data[4];
   Data[0] = convert(T.get<float>(0));
   Data[1] = convert(T.get<float>(1));
   Data[2] = convert(T.get<float>(2));
   Data[3] = convert(T.get<float>(3));
+}
+
+void Image::write(const Texel &T, uint64_t Address) const
+{
+  // Will point to texel data to be written to memory.
+  const uint8_t *Data;
+
+  // Used as intermediate buffer when conversions need to happen.
+  uint8_t TData[32];
+
+  switch (Format)
+  {
+  case VK_FORMAT_R8G8B8A8_UNORM:
+    convertUNorm(T, TData);
+    Data = TData;
+    break;
+  default:
+    assert(false && "Unhandled format");
+  }
 
   // Write raw texel data.
-  Dev.getGlobalMemory().store(Address, 4, Data);
+  Dev.getGlobalMemory().store(Address, getElementSize(), Data);
 }
 
 ImageView::ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
