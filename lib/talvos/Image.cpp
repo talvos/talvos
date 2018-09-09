@@ -133,6 +133,9 @@ void Image::write(const Texel &T, uint64_t Address) const
 
   switch (Format)
   {
+  case VK_FORMAT_R32G32B32A32_SFLOAT:
+    Data = T.getData();
+    break;
   case VK_FORMAT_R8G8B8A8_UNORM:
     convertUNorm(T, TData);
     Data = TData;
