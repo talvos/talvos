@@ -161,6 +161,10 @@ void Image::write(const Texel &T, uint64_t Address) const
     gatherSInt(T, (int16_t *)TData);
     Data = TData;
     break;
+  case VK_FORMAT_R16G16B16A16_UINT:
+    gatherUInt(T, (uint16_t *)TData);
+    Data = TData;
+    break;
   case VK_FORMAT_R32_SFLOAT:
   case VK_FORMAT_R32G32B32A32_SFLOAT:
   case VK_FORMAT_R32_SINT:
