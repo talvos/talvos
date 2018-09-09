@@ -123,6 +123,14 @@ template <typename IntTy> void convertUNorm(const Image::Texel &T, IntTy *Data)
   Data[3] = convert(T.get<float>(3));
 }
 
+template <typename IntTy> void gatherSInt(const Image::Texel &T, IntTy *Data)
+{
+  Data[0] = (IntTy)T.get<int32_t>(0);
+  Data[1] = (IntTy)T.get<int32_t>(1);
+  Data[2] = (IntTy)T.get<int32_t>(2);
+  Data[3] = (IntTy)T.get<int32_t>(3);
+}
+
 template <typename IntTy> void gatherUInt(const Image::Texel &T, IntTy *Data)
 {
   Data[0] = (IntTy)T.get<uint32_t>(0);
@@ -141,6 +149,10 @@ void Image::write(const Texel &T, uint64_t Address) const
 
   switch (Format)
   {
+  case VK_FORMAT_R8G8B8A8_SINT:
+    gatherSInt(T, (int8_t *)TData);
+    Data = TData;
+    break;
   case VK_FORMAT_R8G8B8A8_UINT:
     gatherUInt(T, (uint8_t *)TData);
     Data = TData;
