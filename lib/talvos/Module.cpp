@@ -238,11 +238,14 @@ public:
           ObjectDecorations[Target].push_back(
               {Decoration, Inst->words[Inst->operands[2].offset]});
           break;
+        case SpvDecorationCoherent:
         case SpvDecorationFlat:
         case SpvDecorationNonReadable:
         case SpvDecorationNonWritable:
         case SpvDecorationNoPerspective:
-          ObjectDecorations[Target].push_back({Decoration, 0});
+        case SpvDecorationRestrict:
+        case SpvDecorationVolatile:
+          ObjectDecorations[Target].push_back({Decoration, 1});
           break;
         case SpvDecorationBlock:
         case SpvDecorationBufferBlock:
