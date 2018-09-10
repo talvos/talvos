@@ -512,6 +512,120 @@ void interpolate(Object &Output, const Type *Ty, size_t Offset,
   }
 }
 
+void PipelineExecutor::processFragment(
+    const Fragment &Frag, const RenderPassInstance &RPI,
+    std::function<void(uint32_t, const Variable *, const Type *, Memory *,
+                       uint64_t)>
+        GenLocData)
+{
+  const Framebuffer &FB = RPI.getFramebuffer();
+  const RenderPass &RP = RPI.getRenderPass();
+
+  // Data about a fragment shader output variable.
+  struct FragmentOutput
+  {
+    uint64_t Address;
+    uint32_t Location;
+    uint32_t Component;
+  };
+
+  // Create pipeline memory and populate with input/output variables.
+  std::vector<Object> InitialObjects = Objects;
+  std::shared_ptr<Memory> PipelineMemory =
+      std::make_shared<Memory>(Dev, MemoryScope::Invocation);
+  std::map<const Variable *, FragmentOutput> Outputs;
+  for (auto Var : CurrentStage->getEntryPoint()->getVariables())
+  {
+    const Type *PtrTy = Var->getType();
+    const Type *VarTy = PtrTy->getElementType();
+    if (PtrTy->getStorageClass() == SpvStorageClassInput)
+    {
+      // Allocate storage for input variable.
+      uint64_t Address = PipelineMemory->allocate(VarTy->getSize());
+      InitialObjects[Var->getId()] = Object(PtrTy, Address);
+
+      // Initialize input variable data.
+      if (Var->hasDecoration(SpvDecorationLocation))
+      {
+        uint32_t Location = Var->getDecoration(SpvDecorationLocation);
+        GenLocData(Location, Var, VarTy, &*PipelineMemory, Address);
+      }
+      else if (Var->hasDecoration(SpvDecorationBuiltIn))
+      {
+        switch (Var->getDecoration(SpvDecorationBuiltIn))
+        {
+        case SpvBuiltInFragCoord:
+        {
+          // TODO: Sample shading affects x/y components
+          assert(VarTy->isVector() && VarTy->getSize() == 16);
+          float FragCoord[4] = {Frag.X + 0.5f, Frag.Y + 0.5f, Frag.Depth,
+                                Frag.InvW};
+          PipelineMemory->store(Address, 16, (const uint8_t *)FragCoord);
+          break;
+        }
+        default:
+          assert(false && "Unhandled fragment input builtin");
+        }
+      }
+      else
+      {
+        assert(false && "Unhandled input variable type");
+      }
+    }
+    else if (PtrTy->getStorageClass() == SpvStorageClassOutput)
+    {
+      // Allocate storage for output variable.
+      uint64_t Address = PipelineMemory->allocate(VarTy->getSize());
+      InitialObjects[Var->getId()] = Object(PtrTy, Address);
+
+      // Store output variable information.
+      assert(Var->hasDecoration(SpvDecorationLocation));
+      uint32_t Location = Var->getDecoration(SpvDecorationLocation);
+      uint32_t Component = 0;
+      if (Var->hasDecoration(SpvDecorationComponent))
+        Var->getDecoration(SpvDecorationComponent);
+      Outputs[Var] = {Address, Location, Component};
+    }
+  }
+
+  // Create fragment shader invocation.
+  CurrentInvocation = new Invocation(Dev, *CurrentStage, InitialObjects,
+                                     PipelineMemory, nullptr, Dim3(0, 0, 0));
+
+  // Run shader invocation to completion.
+  interact();
+  while (CurrentInvocation->getState() == Invocation::READY)
+  {
+    CurrentInvocation->step();
+    interact();
+  }
+
+  delete CurrentInvocation;
+  CurrentInvocation = nullptr;
+
+  // Write fragment outputs to color attachments.
+  std::vector<uint32_t> ColorAttachments =
+      RP.getSubpass(RPI.getSubpassIndex()).ColorAttachments;
+  for (auto Output : Outputs)
+  {
+    uint32_t Location = Output.second.Location;
+    assert(Location < ColorAttachments.size());
+
+    uint32_t Ref = ColorAttachments[Location];
+    assert(Ref < RP.getNumAttachments());
+    assert(Ref < FB.getAttachments().size());
+
+    // Get output variable data.
+    const Object &OutputData =
+        Object::load(Output.first->getType()->getElementType(), *PipelineMemory,
+                     Output.second.Address);
+
+    // Write pixel color to attachment.
+    const ImageView *Attach = FB.getAttachments()[Ref];
+    Attach->write(OutputData, Frag.X, Frag.Y);
+  }
+}
+
 void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
                                                  const RenderPassInstance &RPI)
 {
@@ -523,9 +637,6 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
   Vec4 B = Primitive.PosB;
   Vec4 C = Primitive.PosC;
 
-  const Framebuffer &FB = RPI.getFramebuffer();
-  const RenderPass &RP = RPI.getRenderPass();
-
   // Loop until all framebuffer coordinates have been processed.
   while (true)
   {
@@ -534,139 +645,46 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
     if (WorkIndex >= PendingFragments.size())
       break;
 
-    // Get framebuffer coordinates.
-    uint32_t XFB = PendingFragments[WorkIndex].X;
-    uint32_t YFB = PendingFragments[WorkIndex].Y;
+    Fragment Frag;
+    Frag.X = PendingFragments[WorkIndex].X;
+    Frag.Y = PendingFragments[WorkIndex].Y;
 
     // Compute barycentric coordinates using normalized device coordinates.
-    float XD = ((XFB + 0.5f) - (FB.getWidth() / 2.f)) / (FB.getWidth() / 2.f);
-    float YD = ((YFB + 0.5f) - (FB.getHeight() / 2.f)) / (FB.getHeight() / 2.f);
+    const Framebuffer &FB = RPI.getFramebuffer();
+    float XD =
+        ((Frag.X + 0.5f) - (FB.getWidth() / 2.f)) / (FB.getWidth() / 2.f);
+    float YD =
+        ((Frag.Y + 0.5f) - (FB.getHeight() / 2.f)) / (FB.getHeight() / 2.f);
     float Div = (B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y);
     float a = (((B.Y - C.Y) * (XD - C.X)) + ((C.X - B.X) * (YD - C.Y))) / Div;
     float b = (((C.Y - A.Y) * (XD - C.X)) + ((A.X - C.X) * (YD - C.Y))) / Div;
     float c = 1.f - a - b;
 
-    // Compute fragment depth and 1/w using linear interpolation.
-    float Depth = (a * A.Z) + (b * B.Z) + (c * C.Z);
-    float InvW = (a / A.W) + (b / B.W) + (c / C.W);
-
     // Check if pixel is inside triangle.
     if (!(a >= 0 && b >= 0 && c >= 0))
       continue;
 
-    // Data about a fragment shader output variable.
-    struct FragmentOutput
-    {
-      uint64_t Address;
-      uint32_t Location;
-      uint32_t Component;
+    // Compute fragment depth and 1/w using linear interpolation.
+    Frag.Depth = (a * A.Z) + (b * B.Z) + (c * C.Z);
+    Frag.InvW = (a / A.W) + (b / B.W) + (c / C.W);
+
+    // Lambda for generating data for location variables.
+    auto GenLocData = [&](uint32_t Loc, const Variable *Var, const Type *VarTy,
+                          Memory *Mem, uint64_t Address) {
+      // Gather output data from each vertex.
+      const Object &FA = Primitive.OutA.Locations.at(Loc);
+      const Object &FB = Primitive.OutB.Locations.at(Loc);
+      const Object &FC = Primitive.OutC.Locations.at(Loc);
+
+      // Interpolate vertex outputs to produce fragment input.
+      Object VarObj(VarTy);
+      interpolate(VarObj, VarTy, 0, FA, FB, FC, A.W, B.W, C.W, Frag.InvW, a, b,
+                  c, Var->hasDecoration(SpvDecorationFlat),
+                  !Var->hasDecoration(SpvDecorationNoPerspective));
+      VarObj.store(*Mem, Address);
     };
 
-    // Create pipeline memory and populate with input/output variables.
-    std::vector<Object> InitialObjects = Objects;
-    std::shared_ptr<Memory> PipelineMemory =
-        std::make_shared<Memory>(Dev, MemoryScope::Invocation);
-    std::map<const Variable *, FragmentOutput> Outputs;
-    for (auto Var : CurrentStage->getEntryPoint()->getVariables())
-    {
-      const Type *PtrTy = Var->getType();
-      const Type *VarTy = PtrTy->getElementType();
-      if (PtrTy->getStorageClass() == SpvStorageClassInput)
-      {
-        // Allocate storage for input variable.
-        uint64_t Address = PipelineMemory->allocate(VarTy->getSize());
-        InitialObjects[Var->getId()] = Object(PtrTy, Address);
-
-        // Initialize input variable data.
-        if (Var->hasDecoration(SpvDecorationLocation))
-        {
-          uint32_t Location = Var->getDecoration(SpvDecorationLocation);
-
-          // Gather output data from each vertex.
-          const Object &FA = Primitive.OutA.Locations.at(Location);
-          const Object &FB = Primitive.OutB.Locations.at(Location);
-          const Object &FC = Primitive.OutC.Locations.at(Location);
-
-          // Interpolate vertex outputs to produce fragment input.
-          Object VarObj(VarTy);
-          interpolate(VarObj, VarTy, 0, FA, FB, FC, A.W, B.W, C.W, InvW, a, b,
-                      c, Var->hasDecoration(SpvDecorationFlat),
-                      !Var->hasDecoration(SpvDecorationNoPerspective));
-          VarObj.store(*PipelineMemory, Address);
-        }
-        else if (Var->hasDecoration(SpvDecorationBuiltIn))
-        {
-          switch (Var->getDecoration(SpvDecorationBuiltIn))
-          {
-          case SpvBuiltInFragCoord:
-          {
-            // TODO: Sample shading affects x/y components
-            assert(VarTy->isVector() && VarTy->getSize() == 16);
-            float FragCoord[4] = {XFB + 0.5f, YFB + 0.5f, Depth, InvW};
-            PipelineMemory->store(Address, 16, (const uint8_t *)FragCoord);
-            break;
-          }
-          default:
-            assert(false && "Unhandled fragment input builtin");
-          }
-        }
-        else
-        {
-          assert(false && "Unhandled input variable type");
-        }
-      }
-      else if (PtrTy->getStorageClass() == SpvStorageClassOutput)
-      {
-        // Allocate storage for output variable.
-        uint64_t Address = PipelineMemory->allocate(VarTy->getSize());
-        InitialObjects[Var->getId()] = Object(PtrTy, Address);
-
-        // Store output variable information.
-        assert(Var->hasDecoration(SpvDecorationLocation));
-        uint32_t Location = Var->getDecoration(SpvDecorationLocation);
-        uint32_t Component = 0;
-        if (Var->hasDecoration(SpvDecorationComponent))
-          Var->getDecoration(SpvDecorationComponent);
-        Outputs[Var] = {Address, Location, Component};
-      }
-    }
-
-    // Create fragment shader invocation.
-    CurrentInvocation = new Invocation(Dev, *CurrentStage, InitialObjects,
-                                       PipelineMemory, nullptr, Dim3(0, 0, 0));
-
-    // Run shader invocation to completion.
-    interact();
-    while (CurrentInvocation->getState() == Invocation::READY)
-    {
-      CurrentInvocation->step();
-      interact();
-    }
-
-    delete CurrentInvocation;
-    CurrentInvocation = nullptr;
-
-    // Write fragment outputs to color attachments.
-    std::vector<uint32_t> ColorAttachments =
-        RP.getSubpass(RPI.getSubpassIndex()).ColorAttachments;
-    for (auto Output : Outputs)
-    {
-      uint32_t Location = Output.second.Location;
-      assert(Location < ColorAttachments.size());
-
-      uint32_t Ref = ColorAttachments[Location];
-      assert(Ref < RP.getNumAttachments());
-      assert(Ref < FB.getAttachments().size());
-
-      // Get output variable data.
-      const Object &OutputData =
-          Object::load(Output.first->getType()->getElementType(),
-                       *PipelineMemory, Output.second.Address);
-
-      // Write pixel color to attachment.
-      const ImageView *Attach = FB.getAttachments()[Ref];
-      Attach->write(OutputData, XFB, YFB);
-    }
+    processFragment(Frag, RPI, GenLocData);
   }
 }
 

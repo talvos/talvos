@@ -28,9 +28,11 @@ class DispatchCommand;
 class DrawCommandBase;
 class Framebuffer;
 class Invocation;
+class Memory;
 class Object;
 class PipelineStage;
 class RenderPassInstance;
+class Type;
 class Variable;
 class Workgroup;
 
@@ -86,6 +88,15 @@ private:
   /// Internal structure to hold triangle primitive data during rasterization.
   struct TrianglePrimitive;
 
+  /// Internal structure to hold fragment data.
+  struct Fragment
+  {
+    uint32_t X;  ///< Framebuffer x-coordinate.
+    uint32_t Y;  ///< Framebuffer y-coordinate.
+    float Depth; ///< Fragment depth.
+    float InvW;  ///< Inverse of the interpolated clip w coordinate.
+  };
+
   /// Helper function to launch worker threads (created by \p ThreadCreator).
   void runWorkers(std::function<std::thread()> ThreadCreator);
 
@@ -105,6 +116,12 @@ private:
   /// Initialize variables.
   void initializeVariables(const DescriptorSetMap &DSM,
                            uint64_t PushConstantAddress);
+
+  /// Helper function to process a fragment.
+  void processFragment(const Fragment &Frag, const RenderPassInstance &RPI,
+                       std::function<void(uint32_t, const Variable *,
+                                          const Type *, Memory *, uint64_t)>
+                           GenLocData);
 
   /// Helper function to rasterize a triangle primitive.
   void rasterizeTriangle(const DrawCommandBase &Cmd, const VertexOutput &VA,
