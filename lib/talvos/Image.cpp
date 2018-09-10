@@ -213,6 +213,7 @@ void Image::write(const Texel &T, uint64_t Address) const
     T.storeSInt((int16_t *)TData);
     Data = TData;
     break;
+  case VK_FORMAT_R16G16_UINT:
   case VK_FORMAT_R16G16B16A16_UINT:
     T.storeUInt((uint16_t *)TData);
     Data = TData;
