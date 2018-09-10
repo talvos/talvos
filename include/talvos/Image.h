@@ -69,6 +69,10 @@ public:
       ((T *)Data)[C] = Value;
     }
 
+    /// Directly set the contents of the raw data backing the texel.
+    /// \p Data must be a pointer to 16 bytes of texel data.
+    void setData(const uint8_t *Data);
+
     /// Store signed integer texel components, truncating as necessary.
     template <typename T> void storeSInt(T *Data) const;
 

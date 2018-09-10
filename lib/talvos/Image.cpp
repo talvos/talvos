@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 
 #include "talvos/Device.h"
 #include "talvos/Image.h"
@@ -53,6 +54,11 @@ template <typename T> void Image::Texel::loadUNorm(const T *Data)
   set<float>(1, Data[1] / (float)(T)(~0U));
   set<float>(2, Data[2] / (float)(T)(~0U));
   set<float>(3, Data[3] / (float)(T)(~0U));
+}
+
+void Image::Texel::setData(const uint8_t *Data)
+{
+  memcpy(this->Data, Data, 16);
 }
 
 template <typename T> void Image::Texel::storeSInt(T *Data) const
@@ -170,11 +176,9 @@ void Image::read(Texel &T, uint64_t Address) const
     break;
   case VK_FORMAT_R32_SINT:
   case VK_FORMAT_R32G32B32A32_SINT:
-    T.loadSInt((int32_t *)Data);
-    break;
   case VK_FORMAT_R32_UINT:
   case VK_FORMAT_R32G32B32A32_UINT:
-    T.loadUInt((uint32_t *)Data);
+    T.setData(Data);
     break;
   case VK_FORMAT_R8G8B8A8_UNORM:
     T.loadUNorm(Data);
