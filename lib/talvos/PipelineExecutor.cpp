@@ -449,6 +449,36 @@ void PipelineExecutor::runComputeWorker()
   }
 }
 
+void PipelineExecutor::buildPendingFragments(const DrawCommandBase &Cmd,
+                                             int XMinFB, int XMaxFB, int YMinFB,
+                                             int YMaxFB)
+{
+  const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
+  const Framebuffer &FB = RPI.getFramebuffer();
+  const std::vector<VkRect2D> &Scissors =
+      Cmd.getPipelineContext().getScissors();
+
+  // Clamp the bounding box to be within the framebuffer.
+  XMinFB = std::clamp(XMinFB, 0, (int)(FB.getWidth() - 1));
+  XMaxFB = std::clamp(XMaxFB, 0, (int)(FB.getWidth() - 1));
+  YMinFB = std::clamp(YMinFB, 0, (int)(FB.getHeight() - 1));
+  YMaxFB = std::clamp(YMaxFB, 0, (int)(FB.getHeight() - 1));
+
+  // Clamp the bounding box to be within the scissor rectangle.
+  // TODO: Select correct scissor for current viewport
+  VkRect2D Scissor = Scissors[0];
+  XMinFB = std::max<int>(XMinFB, Scissor.offset.x);
+  XMaxFB = std::min<int>(XMaxFB, Scissor.offset.x + Scissor.extent.width - 1);
+  YMinFB = std::max<int>(YMinFB, Scissor.offset.y);
+  YMaxFB = std::min<int>(YMaxFB, Scissor.offset.y + Scissor.extent.height - 1);
+
+  // Build list of framebuffer coordinates in the axis-aligned bounding box.
+  assert(PendingFragments.empty());
+  for (int YFB = YMinFB; YFB <= YMaxFB; YFB++)
+    for (int XFB = XMinFB; XFB <= XMaxFB; XFB++)
+      PendingFragments.push_back({(uint32_t)XFB, (uint32_t)YFB, 0});
+}
+
 /// Recursively populate a fragment shader input variable by interpolating
 /// between the vertex shader output variables in a triangle.
 ///
@@ -1052,8 +1082,6 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
 {
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
   const Framebuffer &FB = RPI.getFramebuffer();
-  const std::vector<VkRect2D> &Scissors =
-      Cmd.getPipelineContext().getScissors();
 
   // Gather vertex positions for the primitive.
   Vec4 A, B, C;
@@ -1104,25 +1132,7 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
   int YMinFB = (int)std::floor(yDevToFB(YMinDev));
   int YMaxFB = (int)std::ceil(yDevToFB(YMaxDev));
 
-  // Clamp the bounding box to be within the framebuffer.
-  XMinFB = std::clamp(XMinFB, 0, (int)(FBWidth - 1));
-  XMaxFB = std::clamp(XMaxFB, 0, (int)(FBWidth - 1));
-  YMinFB = std::clamp(YMinFB, 0, (int)(FBHeight - 1));
-  YMaxFB = std::clamp(YMaxFB, 0, (int)(FBHeight - 1));
-
-  // Clamp the bounding box to be within the scissor rectangle.
-  // TODO: Select correct scissor for current viewport
-  VkRect2D Scissor = Scissors[0];
-  XMinFB = std::max<int>(XMinFB, Scissor.offset.x);
-  XMaxFB = std::min<int>(XMaxFB, Scissor.offset.x + Scissor.extent.width - 1);
-  YMinFB = std::max<int>(YMinFB, Scissor.offset.y);
-  YMaxFB = std::min<int>(YMaxFB, Scissor.offset.y + Scissor.extent.height - 1);
-
-  // Build list of framebuffer coordinates in the axis-aligned bounding box.
-  assert(PendingFragments.empty());
-  for (int YFB = YMinFB; YFB <= YMaxFB; YFB++)
-    for (int XFB = XMinFB; XFB <= XMaxFB; XFB++)
-      PendingFragments.push_back({(uint32_t)XFB, (uint32_t)YFB, 0});
+  buildPendingFragments(Cmd, XMinFB, XMaxFB, YMinFB, YMaxFB);
 
   // Run worker threads to process fragments.
   NextWorkIndex = 0;

@@ -117,6 +117,10 @@ private:
   void initializeVariables(const DescriptorSetMap &DSM,
                            uint64_t PushConstantAddress);
 
+  /// Helper function to build list of pending fragments in a bounding box.
+  void buildPendingFragments(const DrawCommandBase &Cmd, int XMinFB, int XMaxFB,
+                             int YMinFB, int YMaxFB);
+
   /// Helper function to process a fragment.
   void processFragment(const Fragment &Frag, const RenderPassInstance &RPI,
                        std::function<void(uint32_t, const Variable *,
