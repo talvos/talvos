@@ -156,11 +156,14 @@ void Image::read(Texel &T, uint64_t Address) const
   // Load component values.
   switch (Format)
   {
+  case VK_FORMAT_R16G16B16A16_UINT:
+    T.loadUInt((uint16_t *)Data);
+    break;
   case VK_FORMAT_R32G32B32A32_SINT:
-    T.loadSInt((int32_t*)Data);
+    T.loadSInt((int32_t *)Data);
     break;
   case VK_FORMAT_R32G32B32A32_UINT:
-    T.loadUInt((uint32_t*)Data);
+    T.loadUInt((uint32_t *)Data);
     break;
   case VK_FORMAT_R8G8B8A8_UNORM:
     T.loadUNorm(Data);
