@@ -31,6 +31,14 @@ Image::Texel::Texel(const VkClearColorValue &ClearColor)
   memcpy(Data, ClearColor.float32, 16);
 }
 
+template <typename T> void Image::Texel::loadSInt(const T *Data)
+{
+  set<int32_t>(0, Data[0]);
+  set<int32_t>(1, Data[1]);
+  set<int32_t>(2, Data[2]);
+  set<int32_t>(3, Data[3]);
+}
+
 template <typename T> void Image::Texel::loadUNorm(const T *Data)
 {
   set<float>(0, Data[0] / (float)(T)(~0U));
@@ -140,6 +148,9 @@ void Image::read(Texel &T, uint64_t Address) const
   // Load component values.
   switch (Format)
   {
+  case VK_FORMAT_R32G32B32A32_SINT:
+    T.loadSInt((int32_t*)Data);
+    break;
   case VK_FORMAT_R8G8B8A8_UNORM:
     T.loadUNorm(Data);
     break;

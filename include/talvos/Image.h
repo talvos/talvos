@@ -51,6 +51,9 @@ public:
     /// Returns a const pointer to the raw data backing the texel.
     const uint8_t *getData() const { return Data; }
 
+    /// Load signed integer texel components.
+    template <typename T> void loadSInt(const T *Data);
+
     /// Load normalized texel components from unsigned integer data.
     template <typename T> void loadUNorm(const T *Data);
 
