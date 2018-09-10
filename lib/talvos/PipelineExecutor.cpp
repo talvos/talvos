@@ -81,12 +81,6 @@ struct PipelineExecutor::VertexOutput
   std::map<uint32_t, Object> Locations;  ///< Location variables.
 };
 
-// TODO: Define proper Vec2/Vec3/Vec4/Vec<N> classes?
-struct Vec4
-{
-  float X, Y, Z, W;
-};
-
 /// Triangle primitive data, used for rasterization.
 struct PipelineExecutor::TrianglePrimitive
 {
@@ -1084,21 +1078,9 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
   const Framebuffer &FB = RPI.getFramebuffer();
 
   // Gather vertex positions for the primitive.
-  Vec4 A, B, C;
-  auto getPosition = [](const VertexOutput &V, Vec4 &Pos) {
-    assert(V.BuiltIns.count(SpvBuiltInPosition));
-
-    const Object &Position = V.BuiltIns.at(SpvBuiltInPosition);
-    assert(Position.getType()->isVector() &&
-           Position.getType()->getElementType()->isFloat() &&
-           Position.getType()->getElementType()->getBitWidth() == 32 &&
-           "Position built-in type must be float4");
-
-    memcpy(&Pos, Position.getData(), sizeof(Vec4));
-  };
-  getPosition(VA, A);
-  getPosition(VB, B);
-  getPosition(VC, C);
+  Vec4 A = getPosition(VA);
+  Vec4 B = getPosition(VB);
+  Vec4 C = getPosition(VC);
 
   // Convert clip coordinates to normalized device coordinates.
   A.X /= A.W;
@@ -1153,6 +1135,19 @@ void PipelineExecutor::signalError()
   // Drop to interactive prompt.
   Continue = false;
   interact();
+}
+
+Vec4 PipelineExecutor::getPosition(const VertexOutput &Out)
+{
+  Vec4 Pos;
+  assert(Out.BuiltIns.count(SpvBuiltInPosition));
+  const Object &PosObj = Out.BuiltIns.at(SpvBuiltInPosition);
+  assert(PosObj.getType()->isVector() &&
+         PosObj.getType()->getElementType()->isFloat() &&
+         PosObj.getType()->getElementType()->getBitWidth() == 32 &&
+         "Position built-in type must be float4");
+  memcpy(&Pos, PosObj.getData(), sizeof(Vec4));
+  return Pos;
 }
 
 // Private functions for interactive execution and debugging.

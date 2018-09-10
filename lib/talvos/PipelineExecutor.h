@@ -43,6 +43,12 @@ class PipelineExecutorKey
   PipelineExecutorKey(){};
 };
 
+// TODO: Define proper Vec2/Vec3/Vec4/Vec<N> classes?
+struct Vec4
+{
+  float X, Y, Z, W;
+};
+
 /// An internal class that handles pipeline execution, including the interactive
 /// debugger.
 class PipelineExecutor
@@ -130,6 +136,9 @@ private:
   /// Helper function to rasterize a triangle primitive.
   void rasterizeTriangle(const DrawCommandBase &Cmd, const VertexOutput &VA,
                          const VertexOutput &VB, const VertexOutput &VC);
+
+  /// Helper function to get the position from vertex output builtin data.
+  static Vec4 getPosition(const VertexOutput &Out);
 
   /// The device this shader is executing on.
   Device &Dev;
