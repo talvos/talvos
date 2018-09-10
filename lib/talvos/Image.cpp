@@ -175,6 +175,7 @@ void Image::read(Texel &T, uint64_t Address) const
     T.loadUInt((uint16_t *)Data);
     break;
   case VK_FORMAT_R32_SFLOAT:
+  case VK_FORMAT_R32G32B32A32_SFLOAT:
   case VK_FORMAT_R32_SINT:
   case VK_FORMAT_R32G32B32A32_SINT:
   case VK_FORMAT_R32_UINT:
