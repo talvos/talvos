@@ -91,6 +91,9 @@ private:
   /// Internal structure to hold vertex shader output variables.
   struct VertexOutput;
 
+  /// Internal structure to hold point primitive data during rasterization.
+  struct PointPrimitive;
+
   /// Internal structure to hold triangle primitive data during rasterization.
   struct TrianglePrimitive;
 
@@ -113,6 +116,10 @@ private:
   void runTriangleFragmentWorker(TrianglePrimitive Primitive,
                                  const RenderPassInstance &RPI);
 
+  /// Worker thread entry point for point rasterization.
+  void runPointFragmentWorker(PointPrimitive Primitive,
+                              const RenderPassInstance &RPI);
+
   /// Worker thread entry point for vertex shaders.
   void runVertexWorker(RenderPipelineState *State, uint32_t InstanceIndex);
 
@@ -132,6 +139,9 @@ private:
                        std::function<void(uint32_t, const Variable *,
                                           const Type *, Memory *, uint64_t)>
                            GenLocData);
+
+  /// Helper function to rasterize a point primitive.
+  void rasterizePoint(const DrawCommandBase &Cmd, const VertexOutput &Vertex);
 
   /// Helper function to rasterize a triangle primitive.
   void rasterizeTriangle(const DrawCommandBase &Cmd, const VertexOutput &VA,

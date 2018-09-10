@@ -81,6 +81,16 @@ struct PipelineExecutor::VertexOutput
   std::map<uint32_t, Object> Locations;  ///< Location variables.
 };
 
+/// Point primitive data, used for rasterization.
+struct PipelineExecutor::PointPrimitive
+{
+  float X;         ///< The framebuffer x-coordinate.
+  float Y;         ///< The framebuffer y-coordinate.
+  float PointSize; ///< The point size.
+
+  const VertexOutput &Out; ///< The vertex shader output.
+};
+
 /// Triangle primitive data, used for rasterization.
 struct PipelineExecutor::TrianglePrimitive
 {
@@ -276,6 +286,12 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
     VkPrimitiveTopology Topology = PL->getTopology();
     switch (Topology)
     {
+    case VK_PRIMITIVE_TOPOLOGY_POINT_LIST:
+    {
+      for (uint32_t v = 0; v < Cmd.getNumVertices(); v++)
+        rasterizePoint(Cmd, State.VertexOutputs[v]);
+      break;
+    }
     case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
     {
       for (uint32_t v = 0; v < Cmd.getNumVertices(); v += 3)
@@ -647,6 +663,45 @@ void PipelineExecutor::processFragment(
     // Write pixel color to attachment.
     const ImageView *Attach = FB.getAttachments()[Ref];
     Attach->write(OutputData, Frag.X, Frag.Y);
+  }
+}
+
+void PipelineExecutor::runPointFragmentWorker(PointPrimitive Primitive,
+                                              const RenderPassInstance &RPI)
+{
+  IsWorkerThread = true;
+  CurrentInvocation = nullptr;
+
+  // Loop until all framebuffer coordinates have been processed.
+  while (true)
+  {
+    // Get next framebuffer coordinate index.
+    uint32_t WorkIndex = (uint32_t)NextWorkIndex++;
+    if (WorkIndex >= PendingFragments.size())
+      break;
+
+    Fragment Frag;
+    Frag.X = PendingFragments[WorkIndex].X;
+    Frag.Y = PendingFragments[WorkIndex].Y;
+    Frag.Depth = 0; // TODO
+    Frag.InvW = 0;  // TODO
+
+    // Compute point coordinate.
+    float S = 0.5f + (Frag.X + 0.5f - Primitive.X) / Primitive.PointSize;
+    float T = 0.5f + (Frag.Y + 0.5f - Primitive.Y) / Primitive.PointSize;
+
+    // Check if pixel is inside point radius.
+    if (S < 0 || T < 0 || S > 1 || T > 1)
+      continue;
+
+    // Lambda for generating data for location variables.
+    auto GenLocData = [&](uint32_t Loc, const Variable *Var, const Type *VarTy,
+                          Memory *Mem, uint64_t Address) {
+      const Object &Out = Primitive.Out.Locations.at(Loc);
+      Mem->store(Address, VarTy->getSize(), Out.getData());
+    };
+
+    processFragment(Frag, RPI, GenLocData);
   }
 }
 
@@ -1067,6 +1122,45 @@ void PipelineExecutor::initializeVariables(const talvos::DescriptorSetMap &DSM,
       Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at({Binding, 0}));
     }
   }
+}
+
+void PipelineExecutor::rasterizePoint(const DrawCommandBase &Cmd,
+                                      const VertexOutput &Vertex)
+{
+  const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
+  const Framebuffer &FB = RPI.getFramebuffer();
+
+  // Get the point position.
+  Vec4 Position = getPosition(Vertex);
+
+  // Get the point size.
+  float PointSize = 0.1f;
+  if (Vertex.BuiltIns.count(SpvBuiltInPointSize))
+    PointSize = Vertex.BuiltIns.at(SpvBuiltInPointSize).get<float>();
+
+  // Get framebuffer coordinate of primitive.
+  uint32_t FBWidth = FB.getWidth();
+  uint32_t FBHeight = FB.getHeight();
+  float X = (FBWidth / 2.f) * Position.X + (FBWidth / 2.f);
+  float Y = (FBHeight / 2.f) * Position.Y + (FBHeight / 2.f);
+
+  // Compute a bounding box for the point primitive.
+  int XMinFB = (int)std::floor(X - (PointSize / 2));
+  int XMaxFB = (int)std::ceil(X + (PointSize / 2));
+  int YMinFB = (int)std::floor(Y - (PointSize / 2));
+  int YMaxFB = (int)std::ceil(Y + (PointSize / 2));
+
+  buildPendingFragments(Cmd, XMinFB, XMaxFB, YMinFB, YMaxFB);
+
+  // Run worker threads to process fragments.
+  NextWorkIndex = 0;
+  PointPrimitive Primitive = {X, Y, PointSize, Vertex};
+  runWorkers([&]() {
+    return std::thread(&PipelineExecutor::runPointFragmentWorker, this,
+                       Primitive, RPI);
+  });
+
+  PendingFragments.clear();
 }
 
 void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
