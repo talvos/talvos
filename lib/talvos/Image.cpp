@@ -31,6 +31,14 @@ Image::Texel::Texel(const VkClearColorValue &ClearColor)
   memcpy(Data, ClearColor.float32, 16);
 }
 
+template <typename T> void Image::Texel::loadUNorm(const T *Data)
+{
+  set<float>(0, Data[0] / (float)(T)(~0U));
+  set<float>(1, Data[1] / (float)(T)(~0U));
+  set<float>(2, Data[2] / (float)(T)(~0U));
+  set<float>(3, Data[3] / (float)(T)(~0U));
+}
+
 template <typename T> void Image::Texel::storeSInt(T *Data) const
 {
   Data[0] = (T)get<int32_t>(0);
@@ -125,18 +133,19 @@ uint32_t Image::getWidth(uint32_t Level) const
 
 void Image::read(Texel &T, uint64_t Address) const
 {
-  // TODO: Handle other formats
-  assert(Format == VK_FORMAT_R8G8B8A8_UNORM);
-
   // Load raw texel data.
-  uint8_t Data[4];
-  Dev.getGlobalMemory().load(Data, Address, 4);
+  uint8_t Data[32];
+  Dev.getGlobalMemory().load(Data, Address, getElementSize());
 
-  // Convert to output format.
-  T.set<float>(0, Data[0] / 255.f);
-  T.set<float>(1, Data[1] / 255.f);
-  T.set<float>(2, Data[2] / 255.f);
-  T.set<float>(3, Data[3] / 255.f);
+  // Load component values.
+  switch (Format)
+  {
+  case VK_FORMAT_R8G8B8A8_UNORM:
+    T.loadUNorm(Data);
+    break;
+  default:
+    assert(false && "Unhandled format");
+  }
 }
 
 void Image::write(const Texel &T, uint64_t Address) const
