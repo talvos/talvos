@@ -31,6 +31,39 @@ Image::Texel::Texel(const VkClearColorValue &ClearColor)
   memcpy(Data, ClearColor.float32, 16);
 }
 
+template <typename T> void Image::Texel::storeSInt(T *Data) const
+{
+  Data[0] = (T)get<int32_t>(0);
+  Data[1] = (T)get<int32_t>(1);
+  Data[2] = (T)get<int32_t>(2);
+  Data[3] = (T)get<int32_t>(3);
+}
+
+template <typename T> void Image::Texel::storeUInt(T *Data) const
+{
+  Data[0] = (T)get<uint32_t>(0);
+  Data[1] = (T)get<uint32_t>(1);
+  Data[2] = (T)get<uint32_t>(2);
+  Data[3] = (T)get<uint32_t>(3);
+}
+
+template <typename T> void Image::Texel::storeUNorm(T *Data) const
+{
+  // Clamp and normalize each component value.
+  auto convert = [](float v) -> T {
+    if (v < 0.f)
+      return 0;
+    else if (v >= 1.f)
+      return (T)~0U;
+    else
+      return (T)std::round(v * (T)(~0U));
+  };
+  Data[0] = convert(get<float>(0));
+  Data[1] = convert(get<float>(1));
+  Data[2] = convert(get<float>(2));
+  Data[3] = convert(get<float>(3));
+}
+
 Object Image::Texel::toObject(const talvos::Type *Ty) const
 {
   assert(Ty->getScalarType()->getSize() == 4);
@@ -106,39 +139,6 @@ void Image::read(Texel &T, uint64_t Address) const
   T.set<float>(3, Data[3] / 255.f);
 }
 
-template <typename IntTy> void convertUNorm(const Image::Texel &T, IntTy *Data)
-{
-  // Clamp and normalize each component value.
-  auto convert = [](float v) -> IntTy {
-    if (v < 0.f)
-      return 0;
-    else if (v >= 1.f)
-      return (IntTy)~0U;
-    else
-      return (uint8_t)std::round(v * (IntTy)(~0U));
-  };
-  Data[0] = convert(T.get<float>(0));
-  Data[1] = convert(T.get<float>(1));
-  Data[2] = convert(T.get<float>(2));
-  Data[3] = convert(T.get<float>(3));
-}
-
-template <typename IntTy> void gatherSInt(const Image::Texel &T, IntTy *Data)
-{
-  Data[0] = (IntTy)T.get<int32_t>(0);
-  Data[1] = (IntTy)T.get<int32_t>(1);
-  Data[2] = (IntTy)T.get<int32_t>(2);
-  Data[3] = (IntTy)T.get<int32_t>(3);
-}
-
-template <typename IntTy> void gatherUInt(const Image::Texel &T, IntTy *Data)
-{
-  Data[0] = (IntTy)T.get<uint32_t>(0);
-  Data[1] = (IntTy)T.get<uint32_t>(1);
-  Data[2] = (IntTy)T.get<uint32_t>(2);
-  Data[3] = (IntTy)T.get<uint32_t>(3);
-}
-
 void Image::write(const Texel &T, uint64_t Address) const
 {
   // Will point to texel data to be written to memory.
@@ -150,20 +150,20 @@ void Image::write(const Texel &T, uint64_t Address) const
   switch (Format)
   {
   case VK_FORMAT_R8G8B8A8_SINT:
-    gatherSInt(T, (int8_t *)TData);
+    T.storeSInt((int8_t *)TData);
     Data = TData;
     break;
   case VK_FORMAT_R8G8B8A8_UINT:
-    gatherUInt(T, (uint8_t *)TData);
+    T.storeUInt((uint8_t *)TData);
     Data = TData;
     break;
   case VK_FORMAT_R16G16_SINT:
   case VK_FORMAT_R16G16B16A16_SINT:
-    gatherSInt(T, (int16_t *)TData);
+    T.storeSInt((int16_t *)TData);
     Data = TData;
     break;
   case VK_FORMAT_R16G16B16A16_UINT:
-    gatherUInt(T, (uint16_t *)TData);
+    T.storeUInt((uint16_t *)TData);
     Data = TData;
     break;
   case VK_FORMAT_R32_SFLOAT:
@@ -175,7 +175,7 @@ void Image::write(const Texel &T, uint64_t Address) const
     Data = T.getData();
     break;
   case VK_FORMAT_R8G8B8A8_UNORM:
-    convertUNorm(T, TData);
+    T.storeUNorm(TData);
     Data = TData;
     break;
   default:

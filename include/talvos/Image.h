@@ -60,6 +60,15 @@ public:
       ((T *)Data)[C] = Value;
     }
 
+    /// Store signed integer texel components, truncating as necessary.
+    template <typename T> void storeSInt(T *Data) const;
+
+    /// Store unsigned integer texel components, truncating as necessary.
+    template <typename T> void storeUInt(T *Data) const;
+
+    /// Store normalized texel components as unsigned integers.
+    template <typename T> void storeUNorm(T *Data) const;
+
     /// Create an object with type \p Ty from the texel data.
     /// \p Ty must be a 32-bit scalar or a vector with no more than four 32-bit
     /// elements.
