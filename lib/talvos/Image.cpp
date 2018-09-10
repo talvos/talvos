@@ -168,9 +168,11 @@ void Image::read(Texel &T, uint64_t Address) const
   case VK_FORMAT_R16G16B16A16_UINT:
     T.loadUInt((uint16_t *)Data);
     break;
+  case VK_FORMAT_R32_SINT:
   case VK_FORMAT_R32G32B32A32_SINT:
     T.loadSInt((int32_t *)Data);
     break;
+  case VK_FORMAT_R32_UINT:
   case VK_FORMAT_R32G32B32A32_UINT:
     T.loadUInt((uint32_t *)Data);
     break;
