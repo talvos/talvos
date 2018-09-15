@@ -640,8 +640,13 @@ void PipelineExecutor::processFragment(
     interact();
   }
 
+  bool Discarded = CurrentInvocation->wasDiscarded();
+
   delete CurrentInvocation;
   CurrentInvocation = nullptr;
+
+  if (Discarded)
+    return;
 
   // Write fragment outputs to color attachments.
   std::vector<uint32_t> ColorAttachments =

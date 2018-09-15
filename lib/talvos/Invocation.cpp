@@ -53,6 +53,7 @@ Invocation::Invocation(Device &Dev, const PipelineStage &Stage,
   PrivateMemory = new Memory(Dev, MemoryScope::Invocation);
 
   AtBarrier = false;
+  Discarded = false;
   CurrentModule = Stage.getModule();
   CurrentFunction = Stage.getEntryPoint()->getFunction();
   moveToBlock(CurrentFunction->getFirstBlockId());
@@ -155,6 +156,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpIsInf, IsInf);
     DISPATCH(SpvOpIsNan, IsNan);
     DISPATCH(SpvOpISub, ISub);
+    DISPATCH(SpvOpKill, Kill);
     DISPATCH(SpvOpLoad, Load);
     DISPATCH(SpvOpLogicalEqual, LogicalEqual);
     DISPATCH(SpvOpLogicalNotEqual, LogicalNotEqual);
@@ -1005,6 +1007,12 @@ void Invocation::executeIsNan(const Instruction *Inst)
 void Invocation::executeISub(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> decltype(A) { return A - B; });
+}
+
+void Invocation::executeKill(const Instruction *Inst)
+{
+  Discarded = true;
+  CurrentInstruction = nullptr;
 }
 
 void Invocation::executeLoad(const Instruction *Inst)

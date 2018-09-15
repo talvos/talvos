@@ -89,6 +89,9 @@ public:
   /// Step this invocation by executing the next instruction.
   void step();
 
+  /// Returns true if this invocation has been discarded with OpKill.
+  bool wasDiscarded() const { return Discarded; }
+
   /// \name Instruction handlers.
   ///@{
   void executeAccessChain(const Instruction *Inst);
@@ -144,6 +147,7 @@ public:
   void executeIsInf(const Instruction *Inst);
   void executeIsNan(const Instruction *Inst);
   void executeISub(const Instruction *Inst);
+  void executeKill(const Instruction *Inst);
   void executeLoad(const Instruction *Inst);
   void executeLogicalAnd(const Instruction *Inst);
   void executeLogicalEqual(const Instruction *Inst);
@@ -198,6 +202,7 @@ private:
   uint32_t CurrentBlock;                 ///< The current block.
   uint32_t PreviousBlock;                ///< The previous block (for OpPhi).
   bool AtBarrier;                        ///< True when at a barrier.
+  bool Discarded;                        ///< True when fragment was discarded.
 
   /// A data structure holding information for a function call.
   struct StackEntry
