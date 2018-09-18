@@ -12,10 +12,13 @@ endif()
 find_program(SPHINX_EXECUTABLE NAMES sphinx-build
              DOC "Sphinx documentation generator")
 if (SPHINX_EXECUTABLE)
+  message(STATUS "Sphinx found: ${SPHINX_EXECUTABLE}")
   configure_file(sphinx/conf.py.in conf.py)
   add_custom_target(sphinx VERBATIM
                     COMMAND ${SPHINX_EXECUTABLE}
                     -c ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
                     ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
+else()
+  message(STATUS "Sphinx NOT found (set SPHINX_EXECUTABLE if needed)")
 endif()
