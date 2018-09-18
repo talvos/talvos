@@ -191,3 +191,6 @@ struct VkShaderModule_T
 {
   std::shared_ptr<talvos::Module> Module;
 };
+
+extern const uint32_t NumDeviceExtensions;
+extern const VkExtensionProperties DeviceExtensions[];

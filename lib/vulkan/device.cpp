@@ -19,8 +19,16 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDevice(
   // Check extensions are supported.
   for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; i++)
   {
-    // TODO: Check whether we actually can support the extension.
-    return VK_ERROR_EXTENSION_NOT_PRESENT;
+    bool Supported = false;
+    for (uint32_t e = 0; e < NumDeviceExtensions; e++)
+    {
+      if (!strcmp(pCreateInfo->ppEnabledExtensionNames[i],
+                  DeviceExtensions[e].extensionName))
+        Supported = true;
+    }
+
+    if (!Supported)
+      return VK_ERROR_EXTENSION_NOT_PRESENT;
   }
 
   // Check features are supported.
