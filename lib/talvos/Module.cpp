@@ -329,8 +329,8 @@ public:
             strcmp(Extension, "SPV_KHR_storage_buffer_storage_class") &&
             strcmp(Extension, "SPV_KHR_variable_pointers"))
         {
-          std::cerr << "WARNING: Unrecognized extension " << Extension
-                    << std::endl;
+          std::cerr << "Unimplemented extension " << Extension << std::endl;
+          abort();
         }
         break;
       }
@@ -389,13 +389,14 @@ public:
         uint32_t MemoryModel = Inst->words[Inst->operands[1].offset];
         if (AddressingMode != SpvAddressingModelLogical)
         {
-          std::cerr << "WARNING: Unrecognized addressing mode "
-                    << AddressingMode << std::endl;
+          std::cerr << "Unrecognized addressing mode " << AddressingMode
+                    << std::endl;
+          abort();
         }
         if (MemoryModel != SpvMemoryModelGLSL450)
         {
-          std::cerr << "WARNING: Unrecognized memory model " << MemoryModel
-                    << std::endl;
+          std::cerr << "Unrecognized memory model " << MemoryModel << std::endl;
+          abort();
         }
         break;
       }
