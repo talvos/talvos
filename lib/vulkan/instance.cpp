@@ -25,6 +25,7 @@ vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
   VkPhysicalDevice_T *Device = new VkPhysicalDevice_T;
   memset(&Device->Features, 0, sizeof(VkPhysicalDeviceFeatures));
   Device->Features.robustBufferAccess = VK_TRUE;
+  Device->Features.imageCubeArray = VK_TRUE;
   Device->Features.shaderFloat64 = VK_TRUE;
   Device->Features.shaderInt16 = VK_TRUE;
   Device->Features.shaderInt64 = VK_TRUE;
