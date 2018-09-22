@@ -241,8 +241,11 @@ public:
           ObjectDecorations[Target].push_back(
               {Decoration, Inst->words[Inst->operands[2].offset]});
           break;
+        case SpvDecorationAliased:
+        case SpvDecorationCentroid:
         case SpvDecorationCoherent:
         case SpvDecorationFlat:
+        case SpvDecorationNoContraction:
         case SpvDecorationNonReadable:
         case SpvDecorationNonWritable:
         case SpvDecorationNoPerspective:
@@ -274,7 +277,8 @@ public:
           Mod->addSpecConstant(Inst->words[Inst->operands[2].offset], Target);
           break;
         default:
-          std::cout << "Unhandled decoration " << Decoration << std::endl;
+          std::cerr << "Unhandled decoration " << Decoration << std::endl;
+          abort();
         }
         break;
       }
@@ -358,6 +362,7 @@ public:
         case SpvDecorationOffset:
           MemberDecorations[{Target, Member}][Decoration] = Inst->words[Offset];
           break;
+        case SpvDecorationCoherent:
         case SpvDecorationColMajor:
         case SpvDecorationRowMajor:
         case SpvDecorationFlat:
@@ -369,7 +374,9 @@ public:
         case SpvDecorationRelaxedPrecision:
           break;
         default:
-          std::cout << "Unhandled decoration " << Decoration << std::endl;
+          std::cerr << "Unhandled member decoration " << Decoration
+                    << std::endl;
+          abort();
         }
         break;
       }
