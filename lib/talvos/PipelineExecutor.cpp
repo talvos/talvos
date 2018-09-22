@@ -246,6 +246,11 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
   const GraphicsPipeline *PL = PC.getGraphicsPipeline();
   assert(PL != nullptr);
 
+  // Get selected viewport.
+  // TODO: Handle multiple viewports (and ViewportIndex)
+  assert(Cmd.getPipelineContext().getViewports().size() == 1);
+  VkViewport Viewport = Cmd.getPipelineContext().getViewports()[0];
+
   // Allocate and initialize push constant data.
   Memory &GlobalMem = Dev.getGlobalMemory();
   uint64_t PushConstantAddress =
@@ -289,13 +294,13 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
     case VK_PRIMITIVE_TOPOLOGY_POINT_LIST:
     {
       for (uint32_t v = 0; v < Cmd.getNumVertices(); v++)
-        rasterizePoint(Cmd, State.VertexOutputs[v]);
+        rasterizePoint(Cmd, Viewport, State.VertexOutputs[v]);
       break;
     }
     case VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST:
     {
       for (uint32_t v = 0; v < Cmd.getNumVertices(); v += 3)
-        rasterizeTriangle(Cmd, State.VertexOutputs[v],
+        rasterizeTriangle(Cmd, Viewport, State.VertexOutputs[v],
                           State.VertexOutputs[v + 1],
                           State.VertexOutputs[v + 2]);
       break;
@@ -308,13 +313,13 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
         const VertexOutput &B = State.VertexOutputs[v - 1];
 
         const VertexOutput &C = State.VertexOutputs[v];
-        rasterizeTriangle(Cmd, A, B, C);
+        rasterizeTriangle(Cmd, Viewport, A, B, C);
 
         if (++v >= Cmd.getNumVertices())
           break;
 
         const VertexOutput &D = State.VertexOutputs[v];
-        rasterizeTriangle(Cmd, B, D, C);
+        rasterizeTriangle(Cmd, Viewport, B, D, C);
       }
       break;
     }
@@ -325,7 +330,7 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
       {
         const VertexOutput &A = State.VertexOutputs[v - 1];
         const VertexOutput &B = State.VertexOutputs[v];
-        rasterizeTriangle(Cmd, Center, A, B);
+        rasterizeTriangle(Cmd, Viewport, Center, A, B);
       }
       break;
     }
@@ -465,8 +470,7 @@ void PipelineExecutor::buildPendingFragments(const DrawCommandBase &Cmd,
 {
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
   const Framebuffer &FB = RPI.getFramebuffer();
-  const std::vector<VkRect2D> &Scissors =
-      Cmd.getPipelineContext().getScissors();
+  const PipelineContext &PC = Cmd.getPipelineContext();
 
   // Clamp the bounding box to be within the framebuffer.
   XMinFB = std::clamp(XMinFB, 0, (int)(FB.getWidth() - 1));
@@ -476,7 +480,8 @@ void PipelineExecutor::buildPendingFragments(const DrawCommandBase &Cmd,
 
   // Clamp the bounding box to be within the scissor rectangle.
   // TODO: Select correct scissor for current viewport
-  VkRect2D Scissor = Scissors[0];
+  assert(PC.getScissors().size() == 1);
+  VkRect2D Scissor = PC.getScissors()[0];
   XMinFB = std::max<int>(XMinFB, Scissor.offset.x);
   XMaxFB = std::min<int>(XMaxFB, Scissor.offset.x + Scissor.extent.width - 1);
   YMinFB = std::max<int>(YMinFB, Scissor.offset.y);
@@ -550,6 +555,28 @@ void interpolate(Object &Output, const Type *Ty, size_t Offset,
                 FA, FB, FC, AW, BW, CW, InvW, a, b, c, FlatElement,
                 PerspectiveElement);
   }
+}
+
+float XDevToFB(float Xd, VkViewport Viewport)
+{
+  return ((Viewport.width / 2.f) * Xd) + (Viewport.x + Viewport.width / 2.f);
+}
+
+float XFBToDev(float Xfb, VkViewport Viewport)
+{
+  return ((Xfb + 0.5f) - (Viewport.x + Viewport.width / 2.f)) /
+         (Viewport.width / 2.f);
+}
+
+float YDevToFB(float Yd, VkViewport Viewport)
+{
+  return ((Viewport.height / 2.f) * Yd) + (Viewport.y + Viewport.height / 2.f);
+}
+
+float YFBToDev(float Yfb, VkViewport Viewport)
+{
+  return ((Yfb + 0.5f) - (Viewport.y + Viewport.height / 2.f)) /
+         (Viewport.height / 2.f);
 }
 
 void PipelineExecutor::processFragment(
@@ -711,7 +738,8 @@ void PipelineExecutor::runPointFragmentWorker(PointPrimitive Primitive,
 }
 
 void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
-                                                 const RenderPassInstance &RPI)
+                                                 const RenderPassInstance &RPI,
+                                                 const VkViewport &Viewport)
 {
   IsWorkerThread = true;
   CurrentInvocation = nullptr;
@@ -734,11 +762,8 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
     Frag.Y = PendingFragments[WorkIndex].Y;
 
     // Compute barycentric coordinates using normalized device coordinates.
-    const Framebuffer &FB = RPI.getFramebuffer();
-    float XD =
-        ((Frag.X + 0.5f) - (FB.getWidth() / 2.f)) / (FB.getWidth() / 2.f);
-    float YD =
-        ((Frag.Y + 0.5f) - (FB.getHeight() / 2.f)) / (FB.getHeight() / 2.f);
+    float XD = XFBToDev(Frag.X, Viewport);
+    float YD = YFBToDev(Frag.Y, Viewport);
     float Div = (B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y);
     float a = (((B.Y - C.Y) * (XD - C.X)) + ((C.X - B.X) * (YD - C.Y))) / Div;
     float b = (((C.Y - A.Y) * (XD - C.X)) + ((A.X - C.X) * (YD - C.Y))) / Div;
@@ -1130,10 +1155,10 @@ void PipelineExecutor::initializeVariables(const talvos::DescriptorSetMap &DSM,
 }
 
 void PipelineExecutor::rasterizePoint(const DrawCommandBase &Cmd,
+                                      const VkViewport &Viewport,
                                       const VertexOutput &Vertex)
 {
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
-  const Framebuffer &FB = RPI.getFramebuffer();
 
   // Get the point position.
   Vec4 Position = getPosition(Vertex);
@@ -1144,10 +1169,8 @@ void PipelineExecutor::rasterizePoint(const DrawCommandBase &Cmd,
     PointSize = Vertex.BuiltIns.at(SpvBuiltInPointSize).get<float>();
 
   // Get framebuffer coordinate of primitive.
-  uint32_t FBWidth = FB.getWidth();
-  uint32_t FBHeight = FB.getHeight();
-  float X = (FBWidth / 2.f) * Position.X + (FBWidth / 2.f);
-  float Y = (FBHeight / 2.f) * Position.Y + (FBHeight / 2.f);
+  float X = XDevToFB(Position.X, Viewport);
+  float Y = YDevToFB(Position.Y, Viewport);
 
   // Compute a bounding box for the point primitive.
   int XMinFB = (int)std::floor(X - (PointSize / 2));
@@ -1169,12 +1192,12 @@ void PipelineExecutor::rasterizePoint(const DrawCommandBase &Cmd,
 }
 
 void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
+                                         const VkViewport &Viewport,
                                          const VertexOutput &VA,
                                          const VertexOutput &VB,
                                          const VertexOutput &VC)
 {
   const RenderPassInstance &RPI = Cmd.getRenderPassInstance();
-  const Framebuffer &FB = RPI.getFramebuffer();
 
   // Gather vertex positions for the primitive.
   Vec4 A = getPosition(VA);
@@ -1192,26 +1215,15 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
   C.Y /= C.W;
   C.Z /= C.W;
 
-  // Define some convenience lambdas for converting from normalized device
-  // coordinates to framebuffer coordinates.
-  uint32_t FBWidth = FB.getWidth();
-  uint32_t FBHeight = FB.getHeight();
-  auto xDevToFB = [FBWidth](float XDev) -> float {
-    return (FBWidth / 2.f) * XDev + (FBWidth / 2.f);
-  };
-  auto yDevToFB = [FBHeight](float YDev) -> float {
-    return (FBHeight / 2.f) * YDev + (FBHeight / 2.f);
-  };
-
   // Compute an axis-aligned bounding box for the primitive.
   float XMinDev = std::fmin(A.X, std::fmin(B.X, C.X));
   float YMinDev = std::fmin(A.Y, std::fmin(B.Y, C.Y));
   float XMaxDev = std::fmax(A.X, std::fmax(B.X, C.X));
   float YMaxDev = std::fmax(A.Y, std::fmax(B.Y, C.Y));
-  int XMinFB = (int)std::floor(xDevToFB(XMinDev));
-  int XMaxFB = (int)std::ceil(xDevToFB(XMaxDev));
-  int YMinFB = (int)std::floor(yDevToFB(YMinDev));
-  int YMaxFB = (int)std::ceil(yDevToFB(YMaxDev));
+  int XMinFB = (int)std::floor(XDevToFB(XMinDev, Viewport));
+  int XMaxFB = (int)std::ceil(XDevToFB(XMaxDev, Viewport));
+  int YMinFB = (int)std::floor(YDevToFB(YMinDev, Viewport));
+  int YMaxFB = (int)std::ceil(YDevToFB(YMaxDev, Viewport));
 
   buildPendingFragments(Cmd, XMinFB, XMaxFB, YMinFB, YMaxFB);
 
@@ -1220,7 +1232,7 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
   TrianglePrimitive Primitive = {A, B, C, VA, VB, VC};
   runWorkers([&]() {
     return std::thread(&PipelineExecutor::runTriangleFragmentWorker, this,
-                       Primitive, RPI);
+                       Primitive, RPI, Viewport);
   });
 
   PendingFragments.clear();

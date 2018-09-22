@@ -114,7 +114,8 @@ private:
 
   /// Worker thread entry point for triangle rasterization.
   void runTriangleFragmentWorker(TrianglePrimitive Primitive,
-                                 const RenderPassInstance &RPI);
+                                 const RenderPassInstance &RPI,
+                                 const VkViewport &Viewport);
 
   /// Worker thread entry point for point rasterization.
   void runPointFragmentWorker(PointPrimitive Primitive,
@@ -141,11 +142,13 @@ private:
                            GenLocData);
 
   /// Helper function to rasterize a point primitive.
-  void rasterizePoint(const DrawCommandBase &Cmd, const VertexOutput &Vertex);
+  void rasterizePoint(const DrawCommandBase &Cmd, const VkViewport &Viewport,
+                      const VertexOutput &Vertex);
 
   /// Helper function to rasterize a triangle primitive.
-  void rasterizeTriangle(const DrawCommandBase &Cmd, const VertexOutput &VA,
-                         const VertexOutput &VB, const VertexOutput &VC);
+  void rasterizeTriangle(const DrawCommandBase &Cmd, const VkViewport &Viewport,
+                         const VertexOutput &VA, const VertexOutput &VB,
+                         const VertexOutput &VC);
 
   /// Helper function to get the position from vertex output builtin data.
   static Vec4 getPosition(const VertexOutput &Out);
