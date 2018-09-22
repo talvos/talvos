@@ -136,7 +136,10 @@ public:
         uint32_t Capability = Inst->words[Inst->operands[0].offset];
         switch (Capability)
         {
+        case SpvCapabilityClipDistance:
+        case SpvCapabilityCullDistance:
         case SpvCapabilityImage1D:
+        case SpvCapabilityImageCubeArray:
         case SpvCapabilityImageQuery:
         case SpvCapabilityInputAttachment:
         case SpvCapabilityInt16:
@@ -151,8 +154,8 @@ public:
         case SpvCapabilityVariablePointersStorageBuffer:
           break;
         default:
-          std::cerr << "WARNING: Unrecognized capability " << Capability
-                    << std::endl;
+          std::cerr << "Unimplemented capability: " << Capability << std::endl;
+          abort();
         }
         break;
       }
