@@ -146,11 +146,13 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
     // TODO: Handle dynamic state
     assert(!pCreateInfos[i].pDynamicState);
 
-    // Get list of static scissor rectangles.
-    // TODO: Implement multiple viewports
+    // Get lists of viewports and scissors.
     const VkPipelineViewportStateCreateInfo &ViewportInfo =
         *pCreateInfos[i].pViewportState;
-    assert(ViewportInfo.viewportCount == 1);
+    assert(ViewportInfo.viewportCount == ViewportInfo.scissorCount);
+    std::vector<VkViewport> Viewports(ViewportInfo.pViewports,
+                                      ViewportInfo.pViewports +
+                                          ViewportInfo.viewportCount);
     std::vector<VkRect2D> Scissors(ViewportInfo.pScissors,
                                    ViewportInfo.pScissors +
                                        ViewportInfo.scissorCount);
@@ -160,7 +162,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
     pPipelines[i]->GraphicsPipeline = new talvos::GraphicsPipeline(
         pCreateInfos[i].pInputAssemblyState->topology, VertexStage,
         FragmentStage, VertexBindingDescriptions, VertexAttributeDescriptions,
-        Scissors);
+        Viewports, Scissors);
   }
   return VK_SUCCESS;
 }

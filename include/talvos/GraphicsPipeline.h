@@ -37,12 +37,13 @@ public:
       PipelineStage *FragmentStage,
       const VertexBindingDescriptionList &VertexBindingDescriptions,
       const VertexAttributeDescriptionList &VertexAttributeDescriptions,
+      const std::vector<VkViewport> &Viewports,
       const std::vector<VkRect2D> &Scissors)
       : Topology(Topology), VertexStage(VertexStage),
         FragmentStage(FragmentStage),
         VertexBindingDescriptions(VertexBindingDescriptions),
         VertexAttributeDescriptions(VertexAttributeDescriptions),
-        Scissors(Scissors){};
+        Viewports(Viewports), Scissors(Scissors){};
 
   /// Destroy the pipeline.
   ~GraphicsPipeline();
@@ -77,6 +78,9 @@ public:
     return VertexBindingDescriptions;
   }
 
+  /// Returns the static viewports used by this pipeline.
+  const std::vector<VkViewport> &getViewports() const { return Viewports; }
+
 private:
   /// The primitive topology used by this pipeline.
   VkPrimitiveTopology Topology;
@@ -92,6 +96,9 @@ private:
 
   /// The vertex attribute descriptions.
   VertexAttributeDescriptionList VertexAttributeDescriptions;
+
+  /// The static viewports used by this pipeline.
+  std::vector<VkViewport> Viewports;
 
   /// The static scissor rectangles used by this pipeline.
   std::vector<VkRect2D> Scissors;

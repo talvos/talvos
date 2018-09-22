@@ -77,6 +77,9 @@ public:
   /// Returns the vertex bindings.
   const VertexBindingMap &getVertexBindings() const { return VertexBindings; }
 
+  /// Returns the viewports.
+  const std::vector<VkViewport> &getViewports() const { return Viewports; }
+
   /// Set push constant data.
   void setPushConstantData(uint32_t Offset, uint32_t NumBytes,
                            const uint8_t *Data);
@@ -89,6 +92,8 @@ private:
   DescriptorSetMap GraphicsDSM; ///< The descriptors for draw commands.
 
   uint8_t PushConstantData[PUSH_CONSTANT_MEM_SIZE]; ///< Push constant data.
+
+  std::vector<VkViewport> Viewports; ///< The viewports.
 
   std::vector<VkRect2D> Scissors; ///< The scissor rectangles.
 

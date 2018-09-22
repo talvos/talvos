@@ -35,6 +35,7 @@ void PipelineContext::bindGraphicsDescriptors(const DescriptorSetMap &DSM)
 void PipelineContext::bindGraphicsPipeline(const GraphicsPipeline *PL)
 {
   GraphicsPL = PL;
+  Viewports = PL->getViewports();
   Scissors = PL->getScissors();
 }
 
