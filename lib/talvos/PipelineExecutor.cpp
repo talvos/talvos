@@ -78,7 +78,9 @@ struct PipelineExecutor::RenderPipelineState
 struct PipelineExecutor::VertexOutput
 {
   std::map<SpvBuiltIn, Object> BuiltIns; ///< BuiltIn variables.
-  std::map<uint32_t, Object> Locations;  ///< Location variables.
+
+  /// Location variables (key is {Location, Component}).
+  std::map<std::pair<uint32_t, uint32_t>, Object> Locations;
 };
 
 /// Point primitive data, used for rasterization.
@@ -581,8 +583,8 @@ float YFBToDev(float Yfb, VkViewport Viewport)
 
 void PipelineExecutor::processFragment(
     const Fragment &Frag, const RenderPassInstance &RPI,
-    std::function<void(uint32_t, const Variable *, const Type *, Memory *,
-                       uint64_t)>
+    std::function<void(uint32_t, uint32_t, const Variable *, const Type *,
+                       Memory *, uint64_t)>
         GenLocData)
 {
   const Framebuffer &FB = RPI.getFramebuffer();
@@ -615,7 +617,10 @@ void PipelineExecutor::processFragment(
       if (Var->hasDecoration(SpvDecorationLocation))
       {
         uint32_t Location = Var->getDecoration(SpvDecorationLocation);
-        GenLocData(Location, Var, VarTy, &*PipelineMemory, Address);
+        uint32_t Component = 0;
+        if (Var->hasDecoration(SpvDecorationComponent))
+          Component = Var->getDecoration(SpvDecorationComponent);
+        GenLocData(Location, Component, Var, VarTy, &*PipelineMemory, Address);
       }
       else if (Var->hasDecoration(SpvDecorationBuiltIn))
       {
@@ -650,7 +655,7 @@ void PipelineExecutor::processFragment(
       uint32_t Location = Var->getDecoration(SpvDecorationLocation);
       uint32_t Component = 0;
       if (Var->hasDecoration(SpvDecorationComponent))
-        Var->getDecoration(SpvDecorationComponent);
+        Component = Var->getDecoration(SpvDecorationComponent);
       Outputs[Var] = {Address, Location, Component};
     }
   }
@@ -675,26 +680,42 @@ void PipelineExecutor::processFragment(
   if (Discarded)
     return;
 
-  // Write fragment outputs to color attachments.
+  // Gather fragment outputs for each location.
   std::vector<uint32_t> ColorAttachments =
       RP.getSubpass(RPI.getSubpassIndex()).ColorAttachments;
+  std::map<uint32_t, Image::Texel> OutTexels;
   for (auto Output : Outputs)
   {
     uint32_t Location = Output.second.Location;
     assert(Location < ColorAttachments.size());
-
-    uint32_t Ref = ColorAttachments[Location];
-    assert(Ref < RP.getNumAttachments());
-    assert(Ref < FB.getAttachments().size());
 
     // Get output variable data.
     const Object &OutputData =
         Object::load(Output.first->getType()->getElementType(), *PipelineMemory,
                      Output.second.Address);
 
+    // Set texel component(s) for this variable.
+    assert(OutputData.getType()->isScalar() ||
+           OutputData.getType()->isVector());
+    assert(OutputData.getType()->getScalarType()->getSize() == 4);
+    Image::Texel T;
+    if (OutTexels.count(Location))
+      T = OutTexels.at(Location);
+    for (uint32_t i = 0; i < OutputData.getType()->getElementCount(); i++)
+      T.set(Output.second.Component + i, OutputData.get<uint32_t>(i));
+    OutTexels[Location] = T;
+  }
+
+  // Write fragment outputs to color attachments.
+  for (auto OT : OutTexels)
+  {
+    uint32_t Ref = ColorAttachments[OT.first];
+    assert(Ref < RP.getNumAttachments());
+    assert(Ref < FB.getAttachments().size());
+
     // Write pixel color to attachment.
     const ImageView *Attach = FB.getAttachments()[Ref];
-    Attach->write(OutputData, Frag.X, Frag.Y);
+    Attach->write(OT.second, Frag.X, Frag.Y);
   }
 }
 
@@ -727,9 +748,10 @@ void PipelineExecutor::runPointFragmentWorker(PointPrimitive Primitive,
       continue;
 
     // Lambda for generating data for location variables.
-    auto GenLocData = [&](uint32_t Loc, const Variable *Var, const Type *VarTy,
-                          Memory *Mem, uint64_t Address) {
-      const Object &Out = Primitive.Out.Locations.at(Loc);
+    auto GenLocData = [&](uint32_t Location, uint32_t Component,
+                          const Variable *Var, const Type *VarTy, Memory *Mem,
+                          uint64_t Address) {
+      const Object &Out = Primitive.Out.Locations.at({Location, Component});
       Mem->store(Address, VarTy->getSize(), Out.getData());
     };
 
@@ -778,12 +800,13 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
     Frag.InvW = (a / A.W) + (b / B.W) + (c / C.W);
 
     // Lambda for generating data for location variables.
-    auto GenLocData = [&](uint32_t Loc, const Variable *Var, const Type *VarTy,
-                          Memory *Mem, uint64_t Address) {
+    auto GenLocData = [&](uint32_t Location, uint32_t Component,
+                          const Variable *Var, const Type *VarTy, Memory *Mem,
+                          uint64_t Address) {
       // Gather output data from each vertex.
-      const Object &FA = Primitive.OutA.Locations.at(Loc);
-      const Object &FB = Primitive.OutB.Locations.at(Loc);
-      const Object &FC = Primitive.OutC.Locations.at(Loc);
+      const Object &FA = Primitive.OutA.Locations.at({Location, Component});
+      const Object &FB = Primitive.OutB.Locations.at({Location, Component});
+      const Object &FC = Primitive.OutC.Locations.at({Location, Component});
 
       // Interpolate vertex outputs to produce fragment input.
       Object VarObj(VarTy);
@@ -877,6 +900,9 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
         if (Var->hasDecoration(SpvDecorationLocation))
         {
           uint32_t Location = Var->getDecoration(SpvDecorationLocation);
+          uint32_t Component = 0;
+          if (Var->hasDecoration(SpvDecorationComponent))
+            Component = Var->getDecoration(SpvDecorationComponent);
 
           // Get vertex attribute description.
           auto &Attributes = Pipeline->getVertexAttributeDescriptions();
@@ -922,6 +948,13 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
             assert(false && "Unhandled vertex input rate");
           }
           ElemAddr += Attr->offset;
+
+          // Add offset for requested component.
+          if (Component)
+          {
+            assert(ElemTy->isScalar() || ElemTy->isVector());
+            ElemAddr += Component * ElemTy->getScalarType()->getSize();
+          }
 
           // Set default values for the variable.
           // As per the Vulkan specification, if the G, B, or A components are
@@ -1041,7 +1074,10 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
       else if (Var->hasDecoration(SpvDecorationLocation))
       {
         uint32_t Location = Var->getDecoration(SpvDecorationLocation);
-        State->VertexOutputs[WorkIndex].Locations[Location] =
+        uint32_t Component = 0;
+        if (Var->hasDecoration(SpvDecorationComponent))
+          Component = Var->getDecoration(SpvDecorationComponent);
+        State->VertexOutputs[WorkIndex].Locations[{Location, Component}] =
             Object::load(Ty, *PipelineMemory, BaseAddress);
       }
       else if (Ty->getTypeId() == Type::STRUCT &&

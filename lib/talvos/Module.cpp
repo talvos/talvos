@@ -236,6 +236,7 @@ public:
           ArrayStrides[Target] = Inst->words[Inst->operands[2].offset];
           break;
         case SpvDecorationBinding:
+        case SpvDecorationComponent:
         case SpvDecorationDescriptorSet:
         case SpvDecorationLocation:
           ObjectDecorations[Target].push_back(

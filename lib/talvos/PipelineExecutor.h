@@ -137,7 +137,7 @@ private:
 
   /// Helper function to process a fragment.
   void processFragment(const Fragment &Frag, const RenderPassInstance &RPI,
-                       std::function<void(uint32_t, const Variable *,
+                       std::function<void(uint32_t, uint32_t, const Variable *,
                                           const Type *, Memory *, uint64_t)>
                            GenLocData);
 
