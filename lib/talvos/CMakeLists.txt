@@ -67,28 +67,28 @@ endif()
 configure_file("config.h.in" "config.h")
 
 set(TALVOS_HEADERS
-    ${CMAKE_SOURCE_DIR}/include/talvos/Block.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Commands.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/ComputePipeline.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Device.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Dim3.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/EntryPoint.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Function.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/GraphicsPipeline.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Image.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Instruction.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Invocation.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Memory.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Module.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Object.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/PipelineContext.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/PipelineStage.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Plugin.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Queue.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/RenderPass.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Type.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Variable.h
-    ${CMAKE_SOURCE_DIR}/include/talvos/Workgroup.h)
+    ${PROJECT_SOURCE_DIR}/include/talvos/Block.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Commands.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/ComputePipeline.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Device.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Dim3.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/EntryPoint.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Function.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/GraphicsPipeline.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Image.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Instruction.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Invocation.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Memory.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Module.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Object.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/PipelineContext.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/PipelineStage.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Plugin.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Queue.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/RenderPass.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Type.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Variable.h
+    ${PROJECT_SOURCE_DIR}/include/talvos/Workgroup.h)
 set(TALVOS_SOURCES
     Block.cpp
     Commands.cpp

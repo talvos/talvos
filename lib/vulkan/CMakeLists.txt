@@ -9,8 +9,8 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 endif()
 
 add_library(talvos-vulkan SHARED
-  ${CMAKE_SOURCE_DIR}/include/vulkan/vk_platform.h
-  ${CMAKE_SOURCE_DIR}/include/vulkan/vulkan_core.h
+  ${PROJECT_SOURCE_DIR}/include/vulkan/vk_platform.h
+  ${PROJECT_SOURCE_DIR}/include/vulkan/vulkan_core.h
   ${DLL_EXPORTS}
   runtime.h
   clears.cpp

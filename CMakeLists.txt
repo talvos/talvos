@@ -11,7 +11,7 @@ set(TALVOS_VERSION_MINOR 1)
 set(TALVOS_VERSION_PATCH 0)
 set(TALVOS_VERSION_SUFFIX "-dev")
 configure_file("version.h.in" "version.h")
-include_directories(${CMAKE_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 include(CheckIncludeFileCXX)
 
