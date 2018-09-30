@@ -1,0 +1,18 @@
+# Test directly accessing SSBO variables with OpLoad/OpStore instructions
+# (without a preceding OpAccessChain).
+
+MODULE ssbo-direct-load-store.spvasm
+ENTRY ssbo-direct-load-store
+
+BUFFER input  4 FILL INT32 42
+BUFFER output 4 FILL INT32 0
+
+DESCRIPTOR_SET 0 0 input
+DESCRIPTOR_SET 0 1 output
+
+DISPATCH 1 1 1
+
+DUMP INT32 output
+
+# CHECK: Buffer 'output' (4 bytes):
+# CHECK:   output[0] = 42

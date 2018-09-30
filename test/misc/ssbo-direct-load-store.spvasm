@@ -1,0 +1,25 @@
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %kernel "ssbo-direct-load-store"
+
+               OpDecorate %input DescriptorSet 0
+               OpDecorate %input Binding 0
+               OpDecorate %output DescriptorSet 0
+               OpDecorate %output Binding 1
+
+     %voidty = OpTypeVoid
+   %kernelty = OpTypeFunction %voidty
+      %intty = OpTypeInt 32 0
+   %structty = OpTypeStruct %intty
+     %ssboty = OpTypePointer StorageBuffer %structty
+
+      %input = OpVariable %ssboty StorageBuffer
+     %output = OpVariable %ssboty StorageBuffer
+
+     %kernel = OpFunction %voidty None %kernelty
+      %label = OpLabel
+        %tmp = OpLoad %structty %input
+               OpStore %output %tmp
+               OpReturn
+               OpFunctionEnd

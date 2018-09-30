@@ -15,6 +15,7 @@ foreach(test
   misc/multiple-entry-points
   misc/nbody
   misc/reduce
+  misc/ssbo-direct-load-store
   misc/vecadd
   misc/vecadd_binary
   spirv/bitcast
