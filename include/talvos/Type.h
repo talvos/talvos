@@ -118,6 +118,9 @@ public:
   /// Returns \p true if this is a scalar type.
   bool isScalar() const;
 
+  /// Returns \p true if this is a struct type.
+  bool isStruct() const { return Id == STRUCT; }
+
   /// Returns \p true if this is a vector type.
   bool isVector() const { return Id == VECTOR; }
 
