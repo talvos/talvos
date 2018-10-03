@@ -16,6 +16,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateMemory(
       device->Device->getGlobalMemory().allocate(pAllocateInfo->allocationSize);
   (*pMemory) = new VkDeviceMemory_T;
   (*pMemory)->Address = Address;
+  (*pMemory)->NumBytes = pAllocateInfo->allocationSize;
   return VK_SUCCESS;
 }
 
@@ -110,8 +111,11 @@ VKAPI_ATTR VkResult VKAPI_CALL
 vkMapMemory(VkDevice device, VkDeviceMemory memory, VkDeviceSize offset,
             VkDeviceSize size, VkMemoryMapFlags flags, void **ppData)
 {
+  VkDeviceSize NumBytes = size;
+  if (NumBytes == VK_WHOLE_SIZE)
+    size = memory->NumBytes - offset;
   talvos::Memory &GlobalMemory = device->Device->getGlobalMemory();
-  *ppData = GlobalMemory.map(memory->Address, offset, size);
+  *ppData = GlobalMemory.map(memory->Address, offset, NumBytes);
   return VK_SUCCESS;
 }
 

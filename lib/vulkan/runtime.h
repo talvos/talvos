@@ -114,6 +114,7 @@ struct VkDevice_T
 struct VkDeviceMemory_T
 {
   uint64_t Address;
+  uint64_t NumBytes;
 };
 
 struct VkEvent_T
