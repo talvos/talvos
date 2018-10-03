@@ -56,7 +56,7 @@ matrix:
 
 install:
   - if [[ "$DEPLOY_DOCS" == "1" ]]; then
-      pip install --user sphinx==1.7.9;
+      pip install --user Sphinx;
     fi
 
 script:
