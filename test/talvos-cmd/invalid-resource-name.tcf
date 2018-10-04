@@ -1,4 +1,4 @@
 # CHECK: line 4: ERROR: invalid resource identifier
 # EXIT 1
 BUFFER foo 4 FILL INT32 0
-DESCRIPTOR_SET 0 0 bar
+DESCRIPTOR_SET 0 0 0 bar

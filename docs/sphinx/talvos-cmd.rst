@@ -63,10 +63,10 @@ The initializer can be one of the following:
 ~~~~~~~~~~~~~~~~~~
 ::
 
-  DESCRIPTOR_SET <d> <b> <name>
+  DESCRIPTOR_SET <d> <b> <a> <name>
 
-Associate the buffer ``<name>`` with descriptor set ``<d>``, binding ``<b>``
-for the next command dispatched.
+Associate the buffer ``<name>`` with descriptor set ``<d>``, binding ``<b>``,
+array element ``<a>`` for the next command dispatched.
 
 
 ``DISPATCH``
@@ -173,21 +173,21 @@ The SPIR-V assembly file that works with this example can be found
   BUFFER delta         4     DATA FLOAT   50
 
   # Set descriptor set values.
-  DESCRIPTOR_SET 0 2 velocities
-  DESCRIPTOR_SET 0 3 numBodies
-  DESCRIPTOR_SET 0 4 softening
-  DESCRIPTOR_SET 0 5 delta
+  DESCRIPTOR_SET 0 2 0 velocities
+  DESCRIPTOR_SET 0 3 0 numBodies
+  DESCRIPTOR_SET 0 4 0 softening
+  DESCRIPTOR_SET 0 5 0 delta
 
   # Run the shader in a loop.
   # Each loop iteration launches the shader twice, swapping the position
   # buffers each time.
   LOOP 4
-    DESCRIPTOR_SET 0 0 positionsIn
-    DESCRIPTOR_SET 0 1 positionsOut
+    DESCRIPTOR_SET 0 0 0 positionsIn
+    DESCRIPTOR_SET 0 1 0 positionsOut
     DISPATCH 2 1 1
 
-    DESCRIPTOR_SET 0 0 positionsOut
-    DESCRIPTOR_SET 0 1 positionsIn
+    DESCRIPTOR_SET 0 0 0 positionsOut
+    DESCRIPTOR_SET 0 1 0 positionsIn
     DISPATCH 2 1 1
   ENDLOOP
 

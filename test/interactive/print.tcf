@@ -19,15 +19,15 @@ BUFFER numBodies     4     DATA UINT32 8
 BUFFER softening     4     DATA FLOAT 100
 BUFFER delta         4     DATA FLOAT 50
 
-DESCRIPTOR_SET 0 0 positionsIn
-DESCRIPTOR_SET 0 1 positionsOut
-DESCRIPTOR_SET 0 2 velocities
-DESCRIPTOR_SET 0 3 numBodies
-DESCRIPTOR_SET 0 4 softening
-DESCRIPTOR_SET 0 5 delta
+DESCRIPTOR_SET 0 0 0 positionsIn
+DESCRIPTOR_SET 0 1 0 positionsOut
+DESCRIPTOR_SET 0 2 0 velocities
+DESCRIPTOR_SET 0 3 0 numBodies
+DESCRIPTOR_SET 0 4 0 softening
+DESCRIPTOR_SET 0 5 0 delta
 
-DESCRIPTOR_SET 0 0 positionsIn
-DESCRIPTOR_SET 0 1 positionsOut
+DESCRIPTOR_SET 0 0 0 positionsIn
+DESCRIPTOR_SET 0 1 0 positionsOut
 DISPATCH 2 1 1
 
 # CHECK: Usage: print %<id>

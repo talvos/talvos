@@ -194,11 +194,12 @@ void CommandFile::parseDescriptorSet()
 {
   uint32_t Set = get<uint32_t>("descriptor set");
   uint32_t Binding = get<uint32_t>("binding");
+  uint32_t ArrayElement = get<uint32_t>("array element");
   string Name = get<string>("resource name");
   if (!Buffers.count(Name))
     throw "invalid resource identifier";
 
-  DescriptorSets[Set][{Binding, 0}] = Buffers[Name].first;
+  DescriptorSets[Set][{Binding, ArrayElement}] = Buffers[Name].first;
 }
 
 void CommandFile::parseDispatch()
