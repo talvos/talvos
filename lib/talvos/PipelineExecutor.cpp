@@ -1056,7 +1056,7 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
     CurrentInvocation = nullptr;
 
     // Gather output variables.
-    for (auto Var : CurrentStage->getModule()->getVariables())
+    for (auto Var : CurrentStage->getEntryPoint()->getVariables())
     {
       if (Var->getType()->getStorageClass() != SpvStorageClassOutput)
         continue;
