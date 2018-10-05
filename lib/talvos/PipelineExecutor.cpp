@@ -1113,29 +1113,32 @@ void PipelineExecutor::finalizeVariables(const DescriptorSetMap &DSM)
       continue;
 
     assert(V->getType()->getElementType()->getTypeId() == Type::ARRAY);
+    const Type *ArrayTy = V->getType()->getElementType();
 
     // Get descriptor set and binding.
     uint32_t Set = V->getDecoration(SpvDecorationDescriptorSet);
     uint32_t Binding = V->getDecoration(SpvDecorationBinding);
     assert(DSM.count(Set));
 
-    const Type *ArrayType = V->getType()->getElementType();
-    size_t ElemSize = ArrayType->getElementType()->getSize();
-
     uint64_t Address = Objects[V->getId()].get<uint64_t>();
+    const DescriptorElement *DescriptorElements =
+        Objects[V->getId()].getDescriptorElements();
+    assert(DescriptorElements);
 
     // Copy array element values to original buffers.
-    for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
+    for (uint32_t i = 0; i < ArrayTy->getElementCount(); i++)
     {
       if (!DSM.at(Set).count({Binding, i}))
         continue;
 
-      Memory::copy(DSM.at(Set).at({Binding, i}), Dev.getGlobalMemory(),
-                   Address + i * ElemSize, Dev.getGlobalMemory(), ElemSize);
+      Memory::copy(DSM.at(Set).at({Binding, i}).Address, Dev.getGlobalMemory(),
+                   DescriptorElements[i].Address, Dev.getGlobalMemory(),
+                   DescriptorElements[i].NumBytes);
     }
 
     // Release allocation.
     Dev.getGlobalMemory().release(Address);
+    delete[] DescriptorElements;
   }
 }
 
@@ -1163,11 +1166,30 @@ void PipelineExecutor::initializeVariables(const talvos::DescriptorSetMap &DSM,
     if (V->getType()->getElementType()->getTypeId() == Type::ARRAY)
     {
       const Type *ArrayType = V->getType()->getElementType();
-      size_t ElemSize = ArrayType->getElementType()->getSize();
+
+      // Allocate array for descriptor element information.
+      DescriptorElement *DescriptorElements =
+          new DescriptorElement[ArrayType->getElementCount()];
+
+      // Determine offset for each array element and total size.
+      uint64_t NumBytes = 0;
+      for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
+      {
+        if (!DSM.at(Set).count({Binding, i}))
+        {
+          DescriptorElements[i] = {0, 0};
+          continue;
+        }
+
+        size_t ElemSize = DSM.at(Set).at({Binding, i}).NumBytes;
+        DescriptorElements[i] = {NumBytes, ElemSize};
+        NumBytes += (uint64_t)ElemSize;
+      }
 
       // Create new allocation to store whole array.
-      uint64_t Address = Dev.getGlobalMemory().allocate(ArrayType->getSize());
+      uint64_t Address = Dev.getGlobalMemory().allocate(NumBytes);
       Objects[V->getId()] = Object(V->getType(), Address);
+      Objects[V->getId()].setDescriptorElements(DescriptorElements);
 
       // Copy array element values into new allocation.
       for (uint32_t i = 0; i < ArrayType->getElementCount(); i++)
@@ -1175,9 +1197,13 @@ void PipelineExecutor::initializeVariables(const talvos::DescriptorSetMap &DSM,
         if (!DSM.at(Set).count({Binding, i}))
           continue;
 
-        Memory::copy(Address + i * ElemSize, Dev.getGlobalMemory(),
-                     DSM.at(Set).at({Binding, i}), Dev.getGlobalMemory(),
-                     ElemSize);
+        // Set final address for start of array element.
+        DescriptorElements[i].Address = Address + DescriptorElements[i].Address;
+
+        // Perform copy.
+        Memory::copy(DescriptorElements[i].Address, Dev.getGlobalMemory(),
+                     DSM.at(Set).at({Binding, i}).Address,
+                     Dev.getGlobalMemory(), DescriptorElements[i].NumBytes);
       }
     }
     else
@@ -1185,7 +1211,8 @@ void PipelineExecutor::initializeVariables(const talvos::DescriptorSetMap &DSM,
       if (!DSM.at(Set).count({Binding, 0}))
         continue;
 
-      Objects[V->getId()] = Object(V->getType(), DSM.at(Set).at({Binding, 0}));
+      Objects[V->getId()] =
+          Object(V->getType(), DSM.at(Set).at({Binding, 0}).Address);
     }
   }
 }

@@ -23,8 +23,15 @@ class GraphicsPipeline;
 /// Mapping from binding indexes to device memory addresses for vertex buffers.
 typedef std::map<uint32_t, uint64_t> VertexBindingMap;
 
+/// Structure holding information about a descriptor binding.
+struct BindingInfo
+{
+  uint64_t Address;  ///< The memory address of the descriptor resource.
+  uint64_t NumBytes; ///< The number of bytes that have been bound.
+};
+
 /// Mapping from a binding and array element index to an address in memory.
-typedef std::map<std::pair<uint32_t, uint32_t>, uint64_t> DescriptorSet;
+typedef std::map<std::pair<uint32_t, uint32_t>, BindingInfo> DescriptorSet;
 
 /// Mapping from set numbers to descriptor sets.
 typedef std::map<uint32_t, talvos::DescriptorSet> DescriptorSetMap;

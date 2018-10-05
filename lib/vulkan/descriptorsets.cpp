@@ -30,8 +30,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkAllocateDescriptorSets(
       for (uint32_t ArrayElement = 0;
            ArrayElement < Layout->BindingCounts[Binding]; ArrayElement++)
       {
-        pDescriptorSets[i]->DescriptorSet[{Binding, ArrayElement}] =
-            IS.second[ArrayElement]->ObjectAddress;
+        pDescriptorSets[i]->DescriptorSet[{Binding, ArrayElement}] = {
+            IS.second[ArrayElement]->ObjectAddress, sizeof(talvos::Sampler *)};
       }
     }
 
@@ -78,7 +78,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdBindDescriptorSets(
         continue;
 
       assert(OffsetIndex < dynamicOffsetCount);
-      Mapping.second += pDynamicOffsets[OffsetIndex];
+      Mapping.second.Address += pDynamicOffsets[OffsetIndex];
 
       OffsetIndex++;
     }
@@ -303,6 +303,7 @@ void updateDescriptors(VkDevice Device, VkDescriptorSet Set,
 
     // Get the address of the resource.
     uint64_t Address;
+    uint64_t NumBytes;
     switch (Type)
     {
     case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
@@ -313,6 +314,9 @@ void updateDescriptors(VkDevice Device, VkDescriptorSet Set,
       const VkDescriptorBufferInfo *BufferInfo =
           (const VkDescriptorBufferInfo *)GetBufferDescriptorInfo(b);
       Address = BufferInfo->buffer->Address + BufferInfo->offset;
+      NumBytes = BufferInfo->range;
+      if (NumBytes == VK_WHOLE_SIZE)
+        NumBytes = BufferInfo->buffer->NumBytes - BufferInfo->offset;
       break;
     }
     case VK_DESCRIPTOR_TYPE_SAMPLER:
@@ -320,6 +324,7 @@ void updateDescriptors(VkDevice Device, VkDescriptorSet Set,
       const VkDescriptorImageInfo *ImageInfo =
           (const VkDescriptorImageInfo *)GetImageDescriptorInfo(b);
       Address = ImageInfo->sampler->ObjectAddress;
+      NumBytes = sizeof(talvos::Sampler *);
       break;
     }
     case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
@@ -328,6 +333,7 @@ void updateDescriptors(VkDevice Device, VkDescriptorSet Set,
       const VkDescriptorImageInfo *ImageInfo =
           (const VkDescriptorImageInfo *)GetImageDescriptorInfo(b);
       Address = ImageInfo->imageView->ObjectAddress;
+      NumBytes = sizeof(talvos::ImageView *);
       break;
     }
     case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
@@ -353,12 +359,15 @@ void updateDescriptors(VkDevice Device, VkDescriptorSet Set,
       Mem.store(Address, sizeof(talvos::SampledImage), (uint8_t *)&SI);
       Set->CombinedImageSamplers[{Binding, ArrayElement}] = Address;
 
+      NumBytes = sizeof(talvos::SampledImage);
+
       break;
     }
     case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
     {
       const VkBufferView *TexelBuffer = (const VkBufferView *)GetTexelBuffer(b);
       Address = (*TexelBuffer)->ObjectAddress;
+      NumBytes = sizeof(talvos::ImageView *);
       break;
     }
     default:
@@ -367,7 +376,7 @@ void updateDescriptors(VkDevice Device, VkDescriptorSet Set,
     }
 
     // Set address for target binding and array element.
-    Set->DescriptorSet[{Binding, ArrayElement}] = Address;
+    Set->DescriptorSet[{Binding, ArrayElement}] = {Address, NumBytes};
 
     ++ArrayElement;
   }

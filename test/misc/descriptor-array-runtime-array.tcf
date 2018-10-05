@@ -1,0 +1,43 @@
+# Test a descriptor array where each binding has a runtime array with a
+# different size.
+# The shader will add 3 to every element in each runtime array.
+
+MODULE descriptor-array-runtime-array.spvasm
+ENTRY descriptor-array-runtime-array
+
+BUFFER data0 16 DATA INT32
+3 42 -7 6
+
+BUFFER data1 8 DATA INT32
+1 -42
+
+BUFFER data2 24 DATA INT32
+5 3 10 -3 -100 21
+
+DESCRIPTOR_SET 0 0 0 data0
+DESCRIPTOR_SET 0 0 1 data1
+DESCRIPTOR_SET 0 0 2 data2
+
+DISPATCH 3 1 1
+
+DUMP INT32 data0
+DUMP INT32 data1
+DUMP INT32 data2
+
+# CHECK: Buffer 'data0' (16 bytes):
+# CHECK:   data0[0] = 3
+# CHECK:   data0[1] = 45
+# CHECK:   data0[2] = -4
+# CHECK:   data0[3] = 9
+
+# CHECK: Buffer 'data1' (8 bytes):
+# CHECK:   data1[0] = 1
+# CHECK:   data1[1] = -39
+
+# CHECK: Buffer 'data2' (24 bytes):
+# CHECK:   data2[0] = 5
+# CHECK:   data2[1] = 6
+# CHECK:   data2[2] = 13
+# CHECK:   data2[3] = 0
+# CHECK:   data2[4] = -97
+# CHECK:   data2[5] = 24

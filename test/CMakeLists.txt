@@ -11,6 +11,7 @@ foreach(test
   errors/missing-ds-entry
   errors/workgroup-load-invalid
   errors/workgroup-store-invalid
+  misc/descriptor-array-runtime-array
   misc/jacobi
   misc/multiple-entry-points
   misc/nbody

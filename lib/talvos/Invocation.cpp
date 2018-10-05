@@ -267,6 +267,9 @@ void Invocation::executeAccessChain(const Instruction *Inst)
   // Perform initial dereference for element index for OpPtrAccessChain.
   if (Inst->getOpcode() == SpvOpPtrAccessChain)
   {
+    // TODO: Need to handle this?
+    assert(!Base.getDescriptorElements());
+
     FirstIndexOperand = 4;
     switch (Objects[Inst->getOperand(3)].getType()->getSize())
     {
@@ -306,18 +309,34 @@ void Invocation::executeAccessChain(const Instruction *Inst)
       return;
     }
 
-    // Special case for indexing into matrix pointers with non-default layouts.
-    if (Ty->isMatrix() && MatrixLayout)
+    const Type *ElemTy = Ty->getElementType(Index);
+
+    if (Base.getDescriptorElements() && i == FirstIndexOperand)
     {
+      // Special case for arrays of descriptors.
+      if (Index < Ty->getElementCount())
+      {
+        Result = Base.getDescriptorElements()[Index].Address;
+      }
+      else
+      {
+        Dev.reportError("Descriptor array element exceeds array size", false);
+        Result = 0;
+      }
+    }
+    else if (Ty->isMatrix() && MatrixLayout)
+    {
+      // Special case for matrix pointers with non-default layouts.
       if (MatrixLayout.Order == PtrMatrixLayout::COL_MAJOR)
         Result += Index * MatrixLayout.Stride;
       else
-        Result += Index * Ty->getElementType()->getElementType()->getSize();
+        Result += Index * ElemTy->getElementType()->getSize();
     }
     else if (Ty->isVector() && MatrixLayout)
     {
+      // Special case for vector pointers with non-default layouts.
       if (MatrixLayout.Order == PtrMatrixLayout::COL_MAJOR)
-        Result += Index * Ty->getElementType()->getSize();
+        Result += Index * ElemTy->getSize();
       else
         Result += Index * MatrixLayout.Stride;
     }
@@ -346,7 +365,7 @@ void Invocation::executeAccessChain(const Instruction *Inst)
       }
     }
 
-    Ty = Ty->getElementType(Index);
+    Ty = ElemTy;
   }
 
   Objects[Id] = Object(Inst->getResultType(), Result);

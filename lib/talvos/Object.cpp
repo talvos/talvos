@@ -46,6 +46,7 @@ Object::Object(const Object &Src)
     Data = new uint8_t[Ty->getSize()];
     memcpy(Data, Src.Data, Ty->getSize());
     MatrixLayout = Src.MatrixLayout;
+    DescriptorElements = Src.DescriptorElements;
   }
 }
 
@@ -57,6 +58,7 @@ Object &Object::operator=(const Object &Src)
     std::swap(Data, Tmp.Data);
     std::swap(Ty, Tmp.Ty);
     std::swap(MatrixLayout, Tmp.MatrixLayout);
+    std::swap(DescriptorElements, Tmp.DescriptorElements);
   }
   return *this;
 }
@@ -66,6 +68,7 @@ Object::Object(Object &&Src) noexcept
   Ty = Src.Ty;
   Data = Src.Data;
   MatrixLayout = Src.MatrixLayout;
+  DescriptorElements = Src.DescriptorElements;
   Src.Data = nullptr;
 }
 
@@ -98,6 +101,11 @@ template <typename T> T Object::get(uint32_t Element) const
   assert(Ty->isScalar() ? (sizeof(T) == Ty->getSize() && Element == 0)
                         : sizeof(T) == Ty->getElementType()->getSize());
   return ((T *)Data)[Element];
+}
+
+const DescriptorElement *Object::getDescriptorElements() const
+{
+  return DescriptorElements;
 }
 
 const PtrMatrixLayout &Object::getMatrixLayout() const
@@ -291,6 +299,12 @@ template <typename T> void Object::set(T Value, uint32_t Element)
   assert(Ty->isScalar() ? (sizeof(T) == Ty->getSize() && Element == 0)
                         : sizeof(T) == Ty->getElementType()->getSize());
   ((T *)Data)[Element] = Value;
+}
+
+void Object::setDescriptorElements(const DescriptorElement *DAE)
+{
+  assert(Ty->isPointer() && Ty->getElementType()->isArray());
+  DescriptorElements = DAE;
 }
 
 void Object::setMatrixLayout(const PtrMatrixLayout &ML)

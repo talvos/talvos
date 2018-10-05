@@ -1,0 +1,58 @@
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %kernel "descriptor-array-runtime-array" %gidvar
+               OpExecutionMode %kernel LocalSize 1 1 1
+
+               OpDecorate %data DescriptorSet 0
+               OpDecorate %data Binding 0
+               OpDecorate %gidvar BuiltIn GlobalInvocationId
+
+     %voidty = OpTypeVoid
+   %kernelty = OpTypeFunction %voidty
+      %intty = OpTypeInt 32 0
+  %rtarrayty = OpTypeRuntimeArray %intty
+   %structty = OpTypeStruct %intty %rtarrayty
+       %bool = OpTypeBool
+
+       %zero = OpConstant %intty 0
+        %one = OpConstant %intty 1
+      %three = OpConstant %intty 3
+
+    %arrayty = OpTypeArray %structty %three
+     %ssboty = OpTypePointer StorageBuffer %arrayty
+     %intptr = OpTypePointer StorageBuffer %intty
+       %data = OpVariable %ssboty StorageBuffer
+
+      %ivec3 = OpTypeVector %intty 3
+      %gidty = OpTypePointer Input %ivec3
+     %gidvar = OpVariable %gidty Input
+
+     %kernel = OpFunction %voidty None %kernelty
+      %entry = OpLabel
+
+        %gid = OpLoad %ivec3 %gidvar
+          %g = OpCompositeExtract %intty %gid 0
+
+      %szptr = OpAccessChain %intptr %data %g %zero
+         %sz = OpLoad %intty %szptr
+
+               OpBranch %loop_start
+
+ %loop_start = OpLabel
+          %i = OpPhi %intty %zero %entry %inc %loop_body
+         %lt = OpULessThan %bool %i %sz
+               OpLoopMerge %loop_end %loop_body None
+               OpBranchConditional %lt %loop_body %loop_end
+
+  %loop_body = OpLabel
+    %elemptr = OpAccessChain %intptr %data %g %one %i
+       %elem = OpLoad %intty %elemptr
+        %add = OpIAdd %intty %elem %three
+               OpStore %elemptr %add
+        %inc = OpIAdd %intty %i %one
+               OpBranch %loop_start
+
+   %loop_end = OpLabel
+               OpReturn
+               OpFunctionEnd

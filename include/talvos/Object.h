@@ -38,6 +38,13 @@ struct PtrMatrixLayout
   operator bool() const { return Stride != 0; }
 };
 
+/// Structure used to hold information about an element of a descriptor array.
+struct DescriptorElement
+{
+  uint64_t Address;  ///< Address of descriptor element.
+  uint64_t NumBytes; ///< Size of descriptor element.
+};
+
 /// This class represents an instruction result.
 ///
 /// Instances of this class have a Type and a backing data store.
@@ -83,6 +90,9 @@ public:
   /// Returns an immutable pointer to the raw data backing this object.
   const uint8_t *getData() const { return Data; }
 
+  /// Returns the descriptor array element information.
+  const DescriptorElement *getDescriptorElements() const;
+
   /// Get the matrix layout for this object.
   /// Only valid for objects that are pointers to matrix or vector types.
   const PtrMatrixLayout &getMatrixLayout() const;
@@ -104,6 +114,10 @@ public:
   /// The type of this object must be either a scalar or a vector, and the size
   /// of the scalar type must match \p sizeof(T).
   template <typename T> void set(T Value, uint32_t Element = 0);
+
+  /// Set the descriptor array elements for this object.
+  /// Only valid for objects that are pointers to arrays.
+  void setDescriptorElements(const DescriptorElement *DAE);
 
   /// Set the matrix layout for this object.
   /// Only valid for objects that are pointers to matrix or vector types.
@@ -131,6 +145,10 @@ private:
   /// The memory layout of a matrix that this object points to.
   /// Only valid for objects that are pointers to matrix or vector types.
   PtrMatrixLayout MatrixLayout;
+
+  /// Descriptor array element information.
+  /// Only valid for objects that are pointers to descriptor arrays.
+  const DescriptorElement *DescriptorElements = nullptr;
 };
 
 } // namespace talvos
