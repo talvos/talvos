@@ -153,6 +153,12 @@ private:
   /// Helper function to get the position from vertex output builtin data.
   static Vec4 getPosition(const VertexOutput &Out);
 
+  /// Helper function to copy vertex input data to pipeline memory.
+  void loadVertexInput(const PipelineContext &PC, Memory *PipelineMemory,
+                       uint64_t Address, uint32_t VertexIndex,
+                       uint32_t InstanceIndex, uint32_t Location,
+                       uint32_t Component, const Type *ElemTy) const;
+
   /// The device this shader is executing on.
   Device &Dev;
 

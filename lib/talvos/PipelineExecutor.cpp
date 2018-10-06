@@ -827,9 +827,6 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
   CurrentInvocation = nullptr;
 
   const DrawCommandBase *DC = (const DrawCommandBase *)CurrentCommand;
-  const GraphicsPipeline *Pipeline =
-      DC->getPipelineContext().getGraphicsPipeline();
-  assert(Pipeline != nullptr);
 
   // Loop until all vertices are finished.
   while (true)
@@ -904,109 +901,26 @@ void PipelineExecutor::runVertexWorker(struct RenderPipelineState *State,
           if (Var->hasDecoration(SpvDecorationComponent))
             Component = Var->getDecoration(SpvDecorationComponent);
 
-          // Get vertex attribute description.
-          auto &Attributes = Pipeline->getVertexAttributeDescriptions();
-          auto Attr = std::find_if(
-              Attributes.begin(), Attributes.end(),
-              [Location](auto Elem) { return Elem.location == Location; });
-          assert(Attr != Attributes.end() && "invalid attribute location");
-
-          // Get vertex binding description.
-          auto &Bindings = Pipeline->getVertexBindingDescriptions();
-          auto Binding =
-              std::find_if(Bindings.begin(), Bindings.end(), [Attr](auto Elem) {
-                return Elem.binding == Attr->binding;
-              });
-          assert(Binding != Bindings.end() && "invalid binding number");
-
-          // TODO: Handle other formats
-          assert(Attr->format == VK_FORMAT_R32G32B32A32_SFLOAT ||
-                 Attr->format == VK_FORMAT_R32G32B32_SFLOAT ||
-                 Attr->format == VK_FORMAT_R32G32_SFLOAT ||
-                 Attr->format == VK_FORMAT_R32_SFLOAT ||
-                 Attr->format == VK_FORMAT_R32G32B32A32_SINT ||
-                 Attr->format == VK_FORMAT_R32G32B32_SINT ||
-                 Attr->format == VK_FORMAT_R32G32_SINT ||
-                 Attr->format == VK_FORMAT_R32_SINT ||
-                 Attr->format == VK_FORMAT_R32G32B32A32_UINT ||
-                 Attr->format == VK_FORMAT_R32G32B32_UINT ||
-                 Attr->format == VK_FORMAT_R32G32_UINT ||
-                 Attr->format == VK_FORMAT_R32_UINT);
-
-          // Calculate variable address in vertex buffer memory.
-          uint64_t ElemAddr =
-              DC->getPipelineContext().getVertexBindings().at(Attr->binding);
-          switch (Binding->inputRate)
-          {
-          case VK_VERTEX_INPUT_RATE_VERTEX:
-            ElemAddr += VertexIndex * Binding->stride;
-            break;
-          case VK_VERTEX_INPUT_RATE_INSTANCE:
-            ElemAddr += InstanceIndex * Binding->stride;
-            break;
-          default:
-            assert(false && "Unhandled vertex input rate");
-          }
-          ElemAddr += Attr->offset;
-
-          // Add offset for requested component.
-          if (Component)
-          {
-            assert(ElemTy->isScalar() || ElemTy->isVector());
-            ElemAddr += Component * ElemTy->getScalarType()->getSize();
-          }
-
-          // Set default values for the variable.
-          // As per the Vulkan specification, if the G, B, or A components are
-          // missing, they should be filled with (0,0,1) as needed,
-          Object Default(ElemTy);
-          Default.zero();
-          if (ElemTy->isVector() && ElemTy->getElementCount() == 4)
-          {
-            const Type *ScalarTy = ElemTy->getElementType();
-            if (ScalarTy->isFloat() && ScalarTy->getBitWidth() == 32)
-              Default.set<float>(1.f, 3);
-            else if (ScalarTy->isFloat() && ScalarTy->getBitWidth() == 64)
-              Default.set<double>(1.0, 3);
-            else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 16)
-              Default.set<uint16_t>(1, 3);
-            else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 32)
-              Default.set<uint32_t>(1, 3);
-            else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 64)
-              Default.set<uint64_t>(1, 3);
-            else
-              assert(false && "Unhandled vertex input variable type");
-          }
-          Default.store(*PipelineMemory, Address);
-
-          // Copy variable data to pipeline memory.
           if (ElemTy->isMatrix())
           {
+            assert(Component == 0);
+
+            const Type *ColTy = ElemTy->getElementType();
+            size_t ColSize = ColTy->getSize();
+
             // Each matrix column occupies a distinct location.
-            size_t ColSize = ElemTy->getElementType()->getSize();
             for (uint32_t Col = 0; Col < ElemTy->getElementCount(); Col++)
             {
-              // Get the attribute data for the column's location slot.
-              auto ColAttr =
-                  std::find_if(Attributes.begin(), Attributes.end(),
-                               [Location, Col](auto Elem) {
-                                 return Elem.location == (Location + Col);
-                               });
-              assert(ColAttr != Attributes.end() &&
-                     "invalid attribute location");
-
-              // Copy the column data.
-              Memory::copy(
-                  Address + Col * ColSize, *PipelineMemory,
-                  ElemAddr + ColAttr->offset, Dev.getGlobalMemory(),
-                  std::min(ColSize, (size_t)getElementSize(Attr->format)));
+              loadVertexInput(DC->getPipelineContext(), &*PipelineMemory,
+                              Address + Col * ColSize, VertexIndex,
+                              InstanceIndex, Location + Col, 0, ColTy);
             }
           }
           else
           {
-            Memory::copy(
-                Address, *PipelineMemory, ElemAddr, Dev.getGlobalMemory(),
-                std::min(ElemSize, (size_t)getElementSize(Attr->format)));
+            loadVertexInput(DC->getPipelineContext(), &*PipelineMemory, Address,
+                            VertexIndex, InstanceIndex, Location, Component,
+                            ElemTy);
           }
         }
         else if (Var->hasDecoration(SpvDecorationBuiltIn))
@@ -1322,6 +1236,95 @@ Vec4 PipelineExecutor::getPosition(const VertexOutput &Out)
          "Position built-in type must be float4");
   memcpy(&Pos, PosObj.getData(), sizeof(Vec4));
   return Pos;
+}
+
+void PipelineExecutor::loadVertexInput(const PipelineContext &PC,
+                                       Memory *PipelineMemory, uint64_t Address,
+                                       uint32_t VertexIndex,
+                                       uint32_t InstanceIndex,
+                                       uint32_t Location, uint32_t Component,
+                                       const Type *ElemTy) const
+{
+  const GraphicsPipeline *Pipeline = PC.getGraphicsPipeline();
+  assert(Pipeline != nullptr);
+
+  // Get vertex attribute description.
+  auto &Attributes = Pipeline->getVertexAttributeDescriptions();
+  auto Attr =
+      std::find_if(Attributes.begin(), Attributes.end(),
+                   [Location](auto Elem) { return Elem.location == Location; });
+  assert(Attr != Attributes.end() && "invalid attribute location");
+
+  // Get vertex binding description.
+  auto &Bindings = Pipeline->getVertexBindingDescriptions();
+  auto Binding =
+      std::find_if(Bindings.begin(), Bindings.end(),
+                   [Attr](auto Elem) { return Elem.binding == Attr->binding; });
+  assert(Binding != Bindings.end() && "invalid binding number");
+
+  // TODO: Handle other formats
+  assert(Attr->format == VK_FORMAT_R32G32B32A32_SFLOAT ||
+         Attr->format == VK_FORMAT_R32G32B32_SFLOAT ||
+         Attr->format == VK_FORMAT_R32G32_SFLOAT ||
+         Attr->format == VK_FORMAT_R32_SFLOAT ||
+         Attr->format == VK_FORMAT_R32G32B32A32_SINT ||
+         Attr->format == VK_FORMAT_R32G32B32_SINT ||
+         Attr->format == VK_FORMAT_R32G32_SINT ||
+         Attr->format == VK_FORMAT_R32_SINT ||
+         Attr->format == VK_FORMAT_R32G32B32A32_UINT ||
+         Attr->format == VK_FORMAT_R32G32B32_UINT ||
+         Attr->format == VK_FORMAT_R32G32_UINT ||
+         Attr->format == VK_FORMAT_R32_UINT);
+
+  // Calculate variable address in vertex buffer memory.
+  uint64_t ElemAddr = PC.getVertexBindings().at(Attr->binding);
+  switch (Binding->inputRate)
+  {
+  case VK_VERTEX_INPUT_RATE_VERTEX:
+    ElemAddr += VertexIndex * Binding->stride;
+    break;
+  case VK_VERTEX_INPUT_RATE_INSTANCE:
+    ElemAddr += InstanceIndex * Binding->stride;
+    break;
+  default:
+    assert(false && "Unhandled vertex input rate");
+  }
+  ElemAddr += Attr->offset;
+
+  // Add offset for requested component.
+  if (Component)
+  {
+    assert(ElemTy->isScalar() || ElemTy->isVector());
+    ElemAddr += Component * ElemTy->getScalarType()->getSize();
+  }
+
+  // Set default values for the variable.
+  // As per the Vulkan specification, if the G, B, or A components are
+  // missing, they should be filled with (0,0,1) as needed,
+  Object Default(ElemTy);
+  Default.zero();
+  if (ElemTy->isVector() && ElemTy->getElementCount() == 4)
+  {
+    const Type *ScalarTy = ElemTy->getElementType();
+    if (ScalarTy->isFloat() && ScalarTy->getBitWidth() == 32)
+      Default.set<float>(1.f, 3);
+    else if (ScalarTy->isFloat() && ScalarTy->getBitWidth() == 64)
+      Default.set<double>(1.0, 3);
+    else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 16)
+      Default.set<uint16_t>(1, 3);
+    else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 32)
+      Default.set<uint32_t>(1, 3);
+    else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 64)
+      Default.set<uint64_t>(1, 3);
+    else
+      assert(false && "Unhandled vertex input variable type");
+  }
+  Default.store(*PipelineMemory, Address);
+
+  // Copy vertex input data to pipeline memory.
+  Memory::copy(
+      Address, *PipelineMemory, ElemAddr, Dev.getGlobalMemory(),
+      std::min(ElemTy->getSize(), (size_t)getElementSize(Attr->format)));
 }
 
 // Private functions for interactive execution and debugging.
