@@ -7,6 +7,7 @@
                OpExtension "SPV_KHR_variable_pointers"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %1 "spec-constants"
+               OpExecutionMode %1 LocalSize 1 1 1
                OpDecorate %2 DescriptorSet 0
                OpDecorate %2 Binding 0
                OpMemberDecorate %3 0 Offset 0

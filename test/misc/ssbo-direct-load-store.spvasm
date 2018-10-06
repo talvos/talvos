@@ -2,6 +2,7 @@
                OpExtension "SPV_KHR_storage_buffer_storage_class"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %kernel "ssbo-direct-load-store"
+               OpExecutionMode %kernel LocalSize 1 1 1
 
                OpDecorate %input DescriptorSet 0
                OpDecorate %input Binding 0

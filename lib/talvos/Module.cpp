@@ -794,7 +794,7 @@ const Type *Module::getType(uint32_t Id) const
 
 std::shared_ptr<Module> Module::load(const uint32_t *Words, size_t NumWords)
 {
-  spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
+  spvtools::Context SPVContext(SPV_ENV_VULKAN_1_1);
   spv_diagnostic Diagnostic = nullptr;
 
   // Validate binary.
@@ -844,7 +844,7 @@ std::shared_ptr<Module> Module::load(const std::string &FileName)
   // Assemble it to a SPIR-V binary in memory.
   spv_binary Binary;
   spv_diagnostic Diagnostic = nullptr;
-  spvtools::Context SPVContext(SPV_ENV_UNIVERSAL_1_2);
+  spvtools::Context SPVContext(SPV_ENV_VULKAN_1_1);
   spvTextToBinary(SPVContext.CContext(), (const char *)Bytes.data(), NumBytes,
                   &Binary, &Diagnostic);
   if (Diagnostic)
