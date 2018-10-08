@@ -150,6 +150,8 @@ public:
         case SpvCapabilitySampled1D:
         case SpvCapabilityShader:
         case SpvCapabilityStorageBuffer16BitAccess:
+        case SpvCapabilityStorageImageReadWithoutFormat:
+        case SpvCapabilityStorageImageWriteWithoutFormat:
         case SpvCapabilityVariablePointers:
         case SpvCapabilityVariablePointersStorageBuffer:
           break;

@@ -29,6 +29,8 @@ vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
   Device->Features.shaderFloat64 = VK_TRUE;
   Device->Features.shaderInt16 = VK_TRUE;
   Device->Features.shaderInt64 = VK_TRUE;
+  Device->Features.shaderStorageImageReadWithoutFormat = VK_TRUE;
+  Device->Features.shaderStorageImageWriteWithoutFormat = VK_TRUE;
 
   *pInstance = new VkInstance_T;
   (*pInstance)->Device = Device;
