@@ -105,6 +105,21 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpAccessChain, AccessChain);
     DISPATCH(SpvOpAll, All);
     DISPATCH(SpvOpAny, Any);
+    DISPATCH(SpvOpAtomicAnd, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicCompareExchange, AtomicCompareExchange);
+    DISPATCH(SpvOpAtomicExchange, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicIAdd, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicIDecrement, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicIIncrement, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicISub, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicLoad, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicOr, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicSMax, AtomicOp<int32_t>);
+    DISPATCH(SpvOpAtomicSMin, AtomicOp<int32_t>);
+    DISPATCH(SpvOpAtomicStore, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicUMax, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicUMin, AtomicOp<uint32_t>);
+    DISPATCH(SpvOpAtomicXor, AtomicOp<uint32_t>);
     DISPATCH(SpvOpBitcast, Bitcast);
     DISPATCH(SpvOpBitwiseAnd, BitwiseAnd);
     DISPATCH(SpvOpBitwiseOr, BitwiseOr);
@@ -405,6 +420,48 @@ void Invocation::executeAny(const Instruction *Inst)
     }
   }
   Objects[Id] = Result;
+}
+
+template <typename T> void Invocation::executeAtomicOp(const Instruction *Inst)
+{
+  assert(Inst->getOpcode() != SpvOpAtomicCompareExchange);
+
+  // Get index of pointer operand.
+  uint32_t PtrOp = (Inst->getOpcode() == SpvOpAtomicStore) ? 0 : 2;
+
+  Object Pointer = Objects[Inst->getOperand(PtrOp)];
+  uint32_t Scope = Objects[Inst->getOperand(PtrOp + 1)].get<uint32_t>();
+  uint32_t Semantics = Objects[Inst->getOperand(PtrOp + 2)].get<uint32_t>();
+
+  // Get value operand if present.
+  T Value = 0;
+  if (Inst->getNumOperands() > (PtrOp + 3))
+    Value = Objects[Inst->getOperand(PtrOp + 3)].get<T>();
+
+  // Perform atomic operation.
+  Memory &Mem = getMemory(Pointer.getType()->getStorageClass());
+  T Result = Mem.atomic<T>(Pointer.get<uint64_t>(), Inst->getOpcode(), Scope,
+                           Semantics, Value);
+
+  // Create result if necessary.
+  if (PtrOp == 2)
+    Objects[Inst->getOperand(1)] = Object(Inst->getResultType(), Result);
+}
+
+void Invocation::executeAtomicCompareExchange(const Instruction *Inst)
+{
+  Object Pointer = Objects[Inst->getOperand(2)];
+  uint32_t Scope = Objects[Inst->getOperand(3)].get<uint32_t>();
+  uint32_t EqualSemantics = Objects[Inst->getOperand(4)].get<uint32_t>();
+  uint32_t UnequalSemantics = Objects[Inst->getOperand(5)].get<uint32_t>();
+  uint32_t Value = Objects[Inst->getOperand(6)].get<uint32_t>();
+  uint32_t Comparator = Objects[Inst->getOperand(7)].get<uint32_t>();
+
+  Memory &Mem = getMemory(Pointer.getType()->getStorageClass());
+  uint32_t Result =
+      Mem.atomicCmpXchg(Pointer.get<uint64_t>(), Scope, EqualSemantics,
+                        UnequalSemantics, Value, Comparator);
+  Objects[Inst->getOperand(1)] = Object(Inst->getResultType(), Result);
 }
 
 void Invocation::executeBitcast(const Instruction *Inst)

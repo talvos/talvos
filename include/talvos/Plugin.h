@@ -31,6 +31,12 @@ public:
   /// Returns true if the plugin is thread-safe.
   virtual bool isThreadSafe() const { return true; }
 
+  /// Called when memory is atomically accessed by an instruction.
+  virtual void atomicAccess(const Memory *Mem, uint64_t Address,
+                            uint64_t NumBytes, uint32_t Opcode, uint32_t Scope,
+                            uint32_t Semantics, const Invocation *Invoc)
+  {}
+
   /// Called when a command has begun executing.
   virtual void commandBegin(const Command *Cmd) {}
 

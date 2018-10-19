@@ -52,6 +52,18 @@ public:
   /// \returns the virtual base address of the allocation.
   uint64_t allocate(uint64_t NumBytes);
 
+  /// Atomically apply operation defined by \p Opcode to \p Address.
+  /// \returns the original value of the memory location.
+  template <typename T>
+  T atomic(uint64_t Address, uint32_t Opcode, uint32_t Scope,
+           uint32_t Semantics, T Value = 0);
+
+  /// Perform an atomic compare-exchange operation at \p Address.
+  /// \returns the original value of the memory location.
+  uint32_t atomicCmpXchg(uint64_t Address, uint32_t Scope,
+                         uint32_t EqualSemantics, uint32_t UnequalSemantics,
+                         uint32_t Value, uint32_t Comparator);
+
   /// Dump the entire contents of this memory to stdout.
   void dump() const;
 
@@ -103,6 +115,12 @@ private:
   MemoryScope Scope; ///< The scope of this memory instance.
 
   std::mutex Mutex; ///< Mutex for guarding allocate/release operations.
+
+  /// Number of mutexes to use for synchronizing atomic operations.
+  static const uint32_t NUM_ATOMIC_MUTEXES = 100;
+
+  /// Set of mutexes for synchronizing atomic operations.
+  std::mutex AtomicMutexes[NUM_ATOMIC_MUTEXES];
 
   /// An allocation within this memory instance.
   struct Buffer

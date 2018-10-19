@@ -6,10 +6,13 @@
 /// \file Memory.cpp
 /// This file defines the Memory class.
 
+#include <algorithm>
 #include <cassert>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+
+#include <spirv/unified1/spirv.h>
 
 #include "talvos/Device.h"
 #include "talvos/Memory.h"
@@ -21,6 +24,14 @@
 
 /// Number of bits used for the address offset.
 #define OFFSET_BITS (64 - BUFFER_BITS)
+
+// Macros for locking/unlocking atomic mutexes if necessary.
+#define LOCK_ATOMIC_MUTEX(Address)                                             \
+  if (this->Scope == MemoryScope::Device)                                      \
+  AtomicMutexes[Address % NUM_ATOMIC_MUTEXES].lock()
+#define UNLOCK_ATOMIC_MUTEX(Address)                                           \
+  if (this->Scope == MemoryScope::Device)                                      \
+  AtomicMutexes[Address % NUM_ATOMIC_MUTEXES].unlock()
 
 namespace talvos
 {
@@ -64,6 +75,128 @@ uint64_t Memory::allocate(uint64_t NumBytes)
   }
 
   return (Id << OFFSET_BITS);
+}
+
+template <typename T>
+T Memory::atomic(uint64_t Address, uint32_t Opcode, uint32_t Scope,
+                 uint32_t Semantics, T Value)
+{
+  assert(sizeof(T) == 4);
+
+  Dev.reportAtomicAccess(this, Address, 4, Opcode, Scope, Semantics);
+
+  if (!isAccessValid(Address, 4))
+  {
+    std::stringstream Err;
+    Err << "Invalid atomic access of 4 bytes"
+        << " at address 0x" << std::hex << Address << " ("
+        << scopeToString(this->Scope) << " scope) ";
+    Dev.reportError(Err.str());
+
+    return 0;
+  }
+
+  // Get pointer to memory location.
+  uint64_t Id = (Address >> OFFSET_BITS);
+  uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
+  T *Pointer = (T *)(Buffers[Id].Data + Offset);
+
+  LOCK_ATOMIC_MUTEX(Address);
+
+  // Perform atomic operation and store result to memory.
+  T OldValue = *Pointer;
+  switch (Opcode)
+  {
+  case SpvOpAtomicAnd:
+    *Pointer = OldValue & Value;
+    break;
+  case SpvOpAtomicExchange:
+    *Pointer = Value;
+    break;
+  case SpvOpAtomicIAdd:
+    *Pointer = OldValue + Value;
+    break;
+  case SpvOpAtomicIDecrement:
+    *Pointer = OldValue - 1;
+    break;
+  case SpvOpAtomicIIncrement:
+    *Pointer = OldValue + 1;
+    break;
+  case SpvOpAtomicISub:
+    *Pointer = OldValue - Value;
+    break;
+  case SpvOpAtomicLoad:
+    break;
+  case SpvOpAtomicOr:
+    *Pointer = OldValue | Value;
+    break;
+  case SpvOpAtomicSMax:
+  case SpvOpAtomicUMax:
+    *Pointer = std::max(OldValue, Value);
+    break;
+  case SpvOpAtomicSMin:
+  case SpvOpAtomicUMin:
+    *Pointer = std::min(OldValue, Value);
+    break;
+  case SpvOpAtomicStore:
+    *Pointer = Value;
+    break;
+  case SpvOpAtomicXor:
+    *Pointer = OldValue ^ Value;
+    break;
+  default:
+    Dev.reportError("Unhandled atomic operation", true);
+  }
+
+  UNLOCK_ATOMIC_MUTEX(Address);
+
+  return OldValue;
+}
+
+uint32_t Memory::atomicCmpXchg(uint64_t Address, uint32_t Scope,
+                               uint32_t EqualSemantics,
+                               uint32_t UnequalSemantics, uint32_t Value,
+                               uint32_t Comparator)
+{
+  if (!isAccessValid(Address, 4))
+  {
+    // Make sure we still report the access for any plugins to observe.
+    Dev.reportAtomicAccess(this, Address, 4, SpvOpAtomicCompareExchange, Scope,
+                           UnequalSemantics);
+
+    std::stringstream Err;
+    Err << "Invalid atomic access of 4 bytes"
+        << " at address 0x" << std::hex << Address << " ("
+        << scopeToString(this->Scope) << " scope) ";
+    Dev.reportError(Err.str());
+
+    return 0;
+  }
+
+  // Get pointer to memory location.
+  uint64_t Id = (Address >> OFFSET_BITS);
+  uint64_t Offset = (Address & (((uint64_t)-1) >> BUFFER_BITS));
+  uint32_t *Pointer = (uint32_t *)(Buffers[Id].Data + Offset);
+
+  LOCK_ATOMIC_MUTEX(Address);
+
+  // Compare values and exchange if necessary.
+  uint32_t OldValue = *Pointer;
+  if (OldValue == Comparator)
+  {
+    Dev.reportAtomicAccess(this, Address, 4, SpvOpAtomicCompareExchange, Scope,
+                           EqualSemantics);
+    *Pointer = Value;
+  }
+  else
+  {
+    Dev.reportAtomicAccess(this, Address, 4, SpvOpAtomicCompareExchange, Scope,
+                           UnequalSemantics);
+  }
+
+  UNLOCK_ATOMIC_MUTEX(Address);
+
+  return OldValue;
 }
 
 void Memory::dump() const
@@ -212,5 +345,13 @@ void Memory::copy(uint64_t DstAddress, Memory &DstMem, uint64_t SrcAddress,
 
   DstMem.store(DstAddress, NumBytes, SrcMem.Buffers[SrcId].Data + SrcOffset);
 }
+
+// Explicit instantiations for types valid for atomic operations.
+template uint32_t Memory::atomic(uint64_t Address, uint32_t Opcode,
+                                 uint32_t Scope, uint32_t Semantics,
+                                 uint32_t Value);
+template int32_t Memory::atomic(uint64_t Address, uint32_t Opcode,
+                                uint32_t Scope, uint32_t Semantics,
+                                int32_t Value);
 
 } // namespace talvos

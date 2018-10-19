@@ -52,6 +52,9 @@ public:
 
   /// \name Plugin notification functions.
   ///@{
+  void reportAtomicAccess(const Memory *Mem, uint64_t Address,
+                          uint64_t NumBytes, uint32_t Opcode, uint32_t Scope,
+                          uint32_t Semantics);
   void reportCommandBegin(const Command *Cmd);
   void reportCommandComplete(const Command *Cmd);
   void reportInstructionExecuted(const Invocation *Invoc,

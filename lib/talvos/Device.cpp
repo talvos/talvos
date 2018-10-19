@@ -224,6 +224,15 @@ void Device::reportError(const std::string &Error, bool Fatal)
     P.second->func(__VA_ARGS__);                                               \
   }
 
+void Device::reportAtomicAccess(const Memory *Mem, uint64_t Address,
+                                uint64_t NumBytes, uint32_t Opcode,
+                                uint32_t Scope, uint32_t Semantics)
+{
+  const Invocation *Invoc = Executor->getCurrentInvocation();
+  assert(Invoc);
+  REPORT(atomicAccess, Mem, Address, NumBytes, Opcode, Scope, Semantics, Invoc);
+}
+
 void Device::reportCommandBegin(const Command *Cmd)
 {
   REPORT(commandBegin, Cmd);
