@@ -283,6 +283,10 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
 
     finalizeVariables(PC.getGraphicsDescriptors());
 
+    // Discard primitves before rasterization if requested.
+    if (PL->getRasterizationState().rasterizerDiscardEnable)
+      continue;
+
     // Switch to fragment shader for rasterization.
     CurrentStage = PL->getFragmentStage();
     assert(CurrentStage && "rendering without fragment shader not implemented");

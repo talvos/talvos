@@ -140,9 +140,6 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
         VertexInfo.pVertexAttributeDescriptions +
             VertexInfo.vertexAttributeDescriptionCount);
 
-    // TODO: Allow disabling rasterization
-    assert(!pCreateInfos[i].pRasterizationState->rasterizerDiscardEnable);
-
     // TODO: Handle dynamic state
     assert(!pCreateInfos[i].pDynamicState);
 
