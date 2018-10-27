@@ -825,6 +825,40 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
     if (!FrontFacing && RasterizationState.cullMode & VK_CULL_MODE_BACK_BIT)
       continue;
 
+    // Calculate edge vectors.
+    float BCX = C.X - B.X;
+    float BCY = C.Y - B.Y;
+    float CAX = A.X - C.X;
+    float CAY = A.Y - C.Y;
+    float ABX = B.X - A.X;
+    float ABY = B.Y - A.Y;
+    if (!FrontFacing)
+    {
+      BCX = -BCX;
+      BCY = -BCY;
+      CAX = -CAX;
+      CAY = -CAY;
+      ABX = -ABX;
+      ABY = -ABY;
+    }
+
+    // Only fill top-left edges to avoid double-sampling on shared edges.
+    if (a == 0)
+    {
+      if (!((BCY == 0 && BCX < 0) || BCY > 0))
+        continue;
+    }
+    if (b == 0)
+    {
+      if (!((CAY == 0 && CAX < 0) || CAY > 0))
+        continue;
+    }
+    if (c == 0)
+    {
+      if (!((ABY == 0 && ABX < 0) || ABY > 0))
+        continue;
+    }
+
     // Compute fragment depth and 1/w using linear interpolation.
     Frag.Depth = (a * A.Z) + (b * B.Z) + (c * C.Z);
     Frag.InvW = (a / A.W) + (b / B.W) + (c / C.W);
