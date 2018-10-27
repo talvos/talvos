@@ -800,6 +800,16 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
     float b = TriArea2(C, A, DevCoord) / Area2;
     float c = TriArea2(A, B, DevCoord) / Area2;
 
+    // Snap back to the edge for samples that are only just over.
+    // This is nasty hack to deal with cases where two primitives should share
+    // an edge, but rounding errors cause the one that owns it to skip a sample.
+    if (fabs(a) < 1.e-7f)
+      a = 0.f;
+    if (fabs(b) < 1.e-7f)
+      b = 0.f;
+    if (fabs(c) < 1.e-7f)
+      c = 0.f;
+
     // Check if pixel is inside triangle.
     if (!(a >= 0 && b >= 0 && c >= 0))
       continue;
