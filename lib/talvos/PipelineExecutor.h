@@ -114,6 +114,7 @@ private:
 
   /// Worker thread entry point for triangle rasterization.
   void runTriangleFragmentWorker(TrianglePrimitive Primitive,
+                                 const PipelineContext &PC,
                                  const RenderPassInstance &RPI,
                                  const VkViewport &Viewport);
 

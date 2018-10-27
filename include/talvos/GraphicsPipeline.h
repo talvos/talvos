@@ -37,12 +37,14 @@ public:
       PipelineStage *FragmentStage,
       const VertexBindingDescriptionList &VertexBindingDescriptions,
       const VertexAttributeDescriptionList &VertexAttributeDescriptions,
+      const VkPipelineRasterizationStateCreateInfo &RasterizationState,
       const std::vector<VkViewport> &Viewports,
       const std::vector<VkRect2D> &Scissors)
       : Topology(Topology), VertexStage(VertexStage),
         FragmentStage(FragmentStage),
         VertexBindingDescriptions(VertexBindingDescriptions),
         VertexAttributeDescriptions(VertexAttributeDescriptions),
+        RasterizationState(RasterizationState),
         Viewports(Viewports), Scissors(Scissors){};
 
   /// Destroy the pipeline.
@@ -56,6 +58,12 @@ public:
 
   /// Returns the fragment pipeline stage.
   const PipelineStage *getFragmentStage() const { return FragmentStage; }
+
+  /// Returns the rasterization state used by this pipeline.
+  const VkPipelineRasterizationStateCreateInfo &getRasterizationState() const
+  {
+    return RasterizationState;
+  }
 
   /// Returns the static scissor rectangles used by this pipeline.
   const std::vector<VkRect2D> &getScissors() const { return Scissors; }
@@ -96,6 +104,9 @@ private:
 
   /// The vertex attribute descriptions.
   VertexAttributeDescriptionList VertexAttributeDescriptions;
+
+  /// The rasterization state.
+  VkPipelineRasterizationStateCreateInfo RasterizationState;
 
   /// The static viewports used by this pipeline.
   std::vector<VkViewport> Viewports;

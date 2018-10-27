@@ -760,11 +760,16 @@ void PipelineExecutor::runPointFragmentWorker(PointPrimitive Primitive,
 }
 
 void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
+                                                 const PipelineContext &PC,
                                                  const RenderPassInstance &RPI,
                                                  const VkViewport &Viewport)
 {
   IsWorkerThread = true;
   CurrentInvocation = nullptr;
+
+  // Get rasterization state.
+  const VkPipelineRasterizationStateCreateInfo &RasterizationState =
+      PC.getGraphicsPipeline()->getRasterizationState();
 
   // Get vertex positions.
   Vec4 A = Primitive.PosA;
@@ -783,16 +788,41 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
     Frag.X = PendingFragments[WorkIndex].X;
     Frag.Y = PendingFragments[WorkIndex].Y;
 
+    // Compute the area of a triangle (doubled).
+    auto TriArea2 = [](const Vec4 &A, const Vec4 &B, const Vec4 &C) {
+      return (C.X - A.X) * (B.Y - A.Y) - (B.X - A.X) * (C.Y - A.Y);
+    };
+
     // Compute barycentric coordinates using normalized device coordinates.
-    float XD = XFBToDev(Frag.X, Viewport);
-    float YD = YFBToDev(Frag.Y, Viewport);
-    float Div = (B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y);
-    float a = (((B.Y - C.Y) * (XD - C.X)) + ((C.X - B.X) * (YD - C.Y))) / Div;
-    float b = (((C.Y - A.Y) * (XD - C.X)) + ((A.X - C.X) * (YD - C.Y))) / Div;
-    float c = 1.f - a - b;
+    Vec4 DevCoord = {XFBToDev(Frag.X, Viewport), YFBToDev(Frag.Y, Viewport)};
+    float Area2 = TriArea2(A, B, C);
+    float a = TriArea2(B, C, DevCoord) / Area2;
+    float b = TriArea2(C, A, DevCoord) / Area2;
+    float c = TriArea2(A, B, DevCoord) / Area2;
 
     // Check if pixel is inside triangle.
     if (!(a >= 0 && b >= 0 && c >= 0))
+      continue;
+
+    // Determine whether triangle is front-facing.
+    bool FrontFacing;
+    switch (RasterizationState.frontFace)
+    {
+    case VK_FRONT_FACE_COUNTER_CLOCKWISE:
+      FrontFacing = Area2 > 0;
+      break;
+    case VK_FRONT_FACE_CLOCKWISE:
+      FrontFacing = Area2 < 0;
+      break;
+    default:
+      std::cerr << "Invalid front-facing sign value" << std::endl;
+      abort();
+    }
+
+    // Cull triangle if necessary.
+    if (FrontFacing && RasterizationState.cullMode & VK_CULL_MODE_FRONT_BIT)
+      continue;
+    if (!FrontFacing && RasterizationState.cullMode & VK_CULL_MODE_BACK_BIT)
       continue;
 
     // Compute fragment depth and 1/w using linear interpolation.
@@ -1209,7 +1239,7 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
   TrianglePrimitive Primitive = {A, B, C, VA, VB, VC};
   runWorkers([&]() {
     return std::thread(&PipelineExecutor::runTriangleFragmentWorker, this,
-                       Primitive, RPI, Viewport);
+                       Primitive, Cmd.getPipelineContext(), RPI, Viewport);
   });
 
   PendingFragments.clear();

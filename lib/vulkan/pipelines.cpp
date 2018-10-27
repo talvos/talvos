@@ -162,7 +162,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
     pPipelines[i]->GraphicsPipeline = new talvos::GraphicsPipeline(
         pCreateInfos[i].pInputAssemblyState->topology, VertexStage,
         FragmentStage, VertexBindingDescriptions, VertexAttributeDescriptions,
-        Viewports, Scissors);
+        *pCreateInfos[i].pRasterizationState, Viewports, Scissors);
   }
   return VK_SUCCESS;
 }
