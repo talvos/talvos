@@ -776,6 +776,34 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
   Vec4 B = Primitive.PosB;
   Vec4 C = Primitive.PosC;
 
+  // Lambda to compute the area of a triangle (doubled).
+  auto TriArea2 = [](const Vec4 &A, const Vec4 &B, const Vec4 &C) {
+    return (C.X - A.X) * (B.Y - A.Y) - (B.X - A.X) * (C.Y - A.Y);
+  };
+
+  // Compute the area of the triangle (doubled).
+  float Area2 = TriArea2(A, B, C);
+
+  // Determine whether triangle is front-facing.
+  bool FrontFacing;
+  switch (RasterizationState.frontFace)
+  {
+  case VK_FRONT_FACE_COUNTER_CLOCKWISE:
+    FrontFacing = Area2 > 0;
+    break;
+  case VK_FRONT_FACE_CLOCKWISE:
+    FrontFacing = Area2 < 0;
+    break;
+  default:
+    std::cerr << "Invalid front-facing sign value" << std::endl;
+    abort();
+  }
+
+  // Cull triangle if necessary.
+  if ((FrontFacing && RasterizationState.cullMode & VK_CULL_MODE_FRONT_BIT) ||
+      (!FrontFacing && RasterizationState.cullMode & VK_CULL_MODE_BACK_BIT))
+    return;
+
   // Loop until all framebuffer coordinates have been processed.
   while (true)
   {
@@ -788,14 +816,8 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
     Frag.X = PendingFragments[WorkIndex].X;
     Frag.Y = PendingFragments[WorkIndex].Y;
 
-    // Compute the area of a triangle (doubled).
-    auto TriArea2 = [](const Vec4 &A, const Vec4 &B, const Vec4 &C) {
-      return (C.X - A.X) * (B.Y - A.Y) - (B.X - A.X) * (C.Y - A.Y);
-    };
-
     // Compute barycentric coordinates using normalized device coordinates.
     Vec4 DevCoord = {XFBToDev(Frag.X, Viewport), YFBToDev(Frag.Y, Viewport)};
-    float Area2 = TriArea2(A, B, C);
     float a = TriArea2(B, C, DevCoord) / Area2;
     float b = TriArea2(C, A, DevCoord) / Area2;
     float c = TriArea2(A, B, DevCoord) / Area2;
@@ -812,27 +834,6 @@ void PipelineExecutor::runTriangleFragmentWorker(TrianglePrimitive Primitive,
 
     // Check if pixel is inside triangle.
     if (!(a >= 0 && b >= 0 && c >= 0))
-      continue;
-
-    // Determine whether triangle is front-facing.
-    bool FrontFacing;
-    switch (RasterizationState.frontFace)
-    {
-    case VK_FRONT_FACE_COUNTER_CLOCKWISE:
-      FrontFacing = Area2 > 0;
-      break;
-    case VK_FRONT_FACE_CLOCKWISE:
-      FrontFacing = Area2 < 0;
-      break;
-    default:
-      std::cerr << "Invalid front-facing sign value" << std::endl;
-      abort();
-    }
-
-    // Cull triangle if necessary.
-    if (FrontFacing && RasterizationState.cullMode & VK_CULL_MODE_FRONT_BIT)
-      continue;
-    if (!FrontFacing && RasterizationState.cullMode & VK_CULL_MODE_BACK_BIT)
       continue;
 
     // Calculate edge vectors.
