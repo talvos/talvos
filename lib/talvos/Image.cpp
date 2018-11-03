@@ -162,26 +162,47 @@ void Image::read(Texel &T, uint64_t Address) const
   // Load component values.
   switch (Format)
   {
+  case VK_FORMAT_R8_SINT:
+  case VK_FORMAT_R8G8_SINT:
+  case VK_FORMAT_R8G8B8_SINT:
   case VK_FORMAT_R8G8B8A8_SINT:
     T.loadSInt((int8_t *)Data);
     break;
+  case VK_FORMAT_R8_UINT:
+  case VK_FORMAT_R8G8_UINT:
+  case VK_FORMAT_R8G8B8_UINT:
   case VK_FORMAT_R8G8B8A8_UINT:
     T.loadUInt((uint8_t *)Data);
     break;
+  case VK_FORMAT_R16_SINT:
+  case VK_FORMAT_R16G16_SINT:
+  case VK_FORMAT_R16G16B16_SINT:
   case VK_FORMAT_R16G16B16A16_SINT:
     T.loadSInt((int16_t *)Data);
     break;
+  case VK_FORMAT_R16_UINT:
+  case VK_FORMAT_R16G16_UINT:
+  case VK_FORMAT_R16G16B16_UINT:
   case VK_FORMAT_R16G16B16A16_UINT:
     T.loadUInt((uint16_t *)Data);
     break;
   case VK_FORMAT_R32_SFLOAT:
+  case VK_FORMAT_R32G32_SFLOAT:
+  case VK_FORMAT_R32G32B32_SFLOAT:
   case VK_FORMAT_R32G32B32A32_SFLOAT:
   case VK_FORMAT_R32_SINT:
+  case VK_FORMAT_R32G32_SINT:
+  case VK_FORMAT_R32G32B32_SINT:
   case VK_FORMAT_R32G32B32A32_SINT:
   case VK_FORMAT_R32_UINT:
+  case VK_FORMAT_R32G32_UINT:
+  case VK_FORMAT_R32G32B32_UINT:
   case VK_FORMAT_R32G32B32A32_UINT:
     T.setData(Data);
     break;
+  case VK_FORMAT_R8_UNORM:
+  case VK_FORMAT_R8G8_UNORM:
+  case VK_FORMAT_R8G8B8_UNORM:
   case VK_FORMAT_R8G8B8A8_UNORM:
     T.loadUNorm(Data);
     break;
@@ -200,35 +221,51 @@ void Image::write(const Texel &T, uint64_t Address) const
 
   switch (Format)
   {
+  case VK_FORMAT_R8_SINT:
+  case VK_FORMAT_R8G8_SINT:
+  case VK_FORMAT_R8G8B8_SINT:
   case VK_FORMAT_R8G8B8A8_SINT:
     T.storeSInt((int8_t *)TData);
     Data = TData;
     break;
+  case VK_FORMAT_R8_UINT:
+  case VK_FORMAT_R8G8_UINT:
+  case VK_FORMAT_R8G8B8_UINT:
   case VK_FORMAT_R8G8B8A8_UINT:
     T.storeUInt((uint8_t *)TData);
     Data = TData;
     break;
+  case VK_FORMAT_R16_SINT:
   case VK_FORMAT_R16G16_SINT:
+  case VK_FORMAT_R16G16B16_SINT:
   case VK_FORMAT_R16G16B16A16_SINT:
     T.storeSInt((int16_t *)TData);
     Data = TData;
     break;
+  case VK_FORMAT_R16_UINT:
   case VK_FORMAT_R16G16_UINT:
+  case VK_FORMAT_R16G16B16_UINT:
   case VK_FORMAT_R16G16B16A16_UINT:
     T.storeUInt((uint16_t *)TData);
     Data = TData;
     break;
   case VK_FORMAT_R32_SFLOAT:
   case VK_FORMAT_R32G32_SFLOAT:
+  case VK_FORMAT_R32G32B32_SFLOAT:
   case VK_FORMAT_R32G32B32A32_SFLOAT:
   case VK_FORMAT_R32_SINT:
   case VK_FORMAT_R32G32_SINT:
+  case VK_FORMAT_R32G32B32_SINT:
   case VK_FORMAT_R32G32B32A32_SINT:
   case VK_FORMAT_R32_UINT:
   case VK_FORMAT_R32G32_UINT:
+  case VK_FORMAT_R32G32B32_UINT:
   case VK_FORMAT_R32G32B32A32_UINT:
     Data = T.getData();
     break;
+  case VK_FORMAT_R8_UNORM:
+  case VK_FORMAT_R8G8_UNORM:
+  case VK_FORMAT_R8G8B8_UNORM:
   case VK_FORMAT_R8G8B8A8_UNORM:
     T.storeUNorm(TData);
     Data = TData;
