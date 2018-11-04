@@ -155,8 +155,11 @@ uint32_t Image::getWidth(uint32_t Level) const
 
 void Image::read(Texel &T, uint64_t Address) const
 {
+  assert(getElementSize() <= 16);
+
   // Load raw texel data.
-  uint8_t Data[32];
+  uint8_t Data[16];
+  memset(Data, 0, 16);
   Dev.getGlobalMemory().load(Data, Address, getElementSize());
 
   // Load component values.
@@ -213,11 +216,13 @@ void Image::read(Texel &T, uint64_t Address) const
 
 void Image::write(const Texel &T, uint64_t Address) const
 {
+  assert(getElementSize() <= 16);
+
   // Will point to texel data to be written to memory.
   const uint8_t *Data;
 
   // Used as intermediate buffer when conversions need to happen.
-  uint8_t TData[32];
+  uint8_t TData[16];
 
   switch (Format)
   {
