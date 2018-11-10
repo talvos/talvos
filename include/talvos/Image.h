@@ -268,6 +268,9 @@ struct SampledImage
 /// Returns the size in bytes for each element of an image with type \p Format.
 uint32_t getElementSize(VkFormat Format);
 
+/// Returns true if \p Format includes an alpha channel.
+bool hasAlphaChannel(VkFormat Format);
+
 } // namespace talvos
 
 #endif
