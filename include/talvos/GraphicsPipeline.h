@@ -9,6 +9,7 @@
 #ifndef TALVOS_GRAPHICSPIPELINE_H
 #define TALVOS_GRAPHICSPIPELINE_H
 
+#include <array>
 #include <vector>
 
 #include "vulkan/vulkan_core.h"
@@ -26,6 +27,10 @@ typedef std::vector<VkVertexInputAttributeDescription>
 typedef std::vector<VkVertexInputBindingDescription>
     VertexBindingDescriptionList;
 
+/// A list of pipeline color blend attachment states.
+typedef std::vector<VkPipelineColorBlendAttachmentState>
+    BlendAttachmentStateList;
+
 /// This class encapsulates a graphics pipeline.
 class GraphicsPipeline
 {
@@ -38,6 +43,8 @@ public:
       const VertexBindingDescriptionList &VertexBindingDescriptions,
       const VertexAttributeDescriptionList &VertexAttributeDescriptions,
       const VkPipelineRasterizationStateCreateInfo &RasterizationState,
+      const BlendAttachmentStateList &BlendAttachmentStates,
+      const std::array<float, 4> &BlendConstants,
       const std::vector<VkViewport> &Viewports,
       const std::vector<VkRect2D> &Scissors)
       : Topology(Topology), VertexStage(VertexStage),
@@ -45,7 +52,9 @@ public:
         VertexBindingDescriptions(VertexBindingDescriptions),
         VertexAttributeDescriptions(VertexAttributeDescriptions),
         RasterizationState(RasterizationState),
-        Viewports(Viewports), Scissors(Scissors){};
+        BlendAttachmentStates(BlendAttachmentStates),
+        BlendConstants(BlendConstants), Viewports(Viewports),
+        Scissors(Scissors){};
 
   /// Destroy the pipeline.
   ~GraphicsPipeline();
@@ -55,6 +64,18 @@ public:
   GraphicsPipeline(const GraphicsPipeline &) = delete;
   GraphicsPipeline &operator=(const GraphicsPipeline &) = delete;
   ///\}
+
+  /// Returns the list of blend attachment states.
+  const BlendAttachmentStateList &getBlendAttachmentStates() const
+  {
+    return BlendAttachmentStates;
+  }
+
+  /// Returns the blend constants.
+  const std::array<float, 4> &getBlendConstants() const
+  {
+    return BlendConstants;
+  }
 
   /// Returns the fragment pipeline stage.
   const PipelineStage *getFragmentStage() const { return FragmentStage; }
@@ -107,6 +128,12 @@ private:
 
   /// The rasterization state.
   VkPipelineRasterizationStateCreateInfo RasterizationState;
+
+  /// The color blend attachement states.
+  BlendAttachmentStateList BlendAttachmentStates;
+
+  /// The blend constants.
+  std::array<float, 4> BlendConstants;
 
   /// The static viewports used by this pipeline.
   std::vector<VkViewport> Viewports;

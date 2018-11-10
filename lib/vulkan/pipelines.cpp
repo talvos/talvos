@@ -5,6 +5,8 @@
 
 #include "runtime.h"
 
+#include <cstring>
+
 #include "talvos/ComputePipeline.h"
 #include "talvos/GraphicsPipeline.h"
 #include "talvos/Module.h"
@@ -154,12 +156,26 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateGraphicsPipelines(
                                    ViewportInfo.pScissors +
                                        ViewportInfo.scissorCount);
 
+    // Set up blend attachment state list.
+    // TODO: Ignore structure if null?
+    const VkPipelineColorBlendStateCreateInfo &BlendInfo =
+        *pCreateInfos[i].pColorBlendState;
+    talvos::BlendAttachmentStateList BlendAttachmentStates(
+        BlendInfo.pAttachments,
+        BlendInfo.pAttachments + BlendInfo.attachmentCount);
+    std::array<float, 4> BlendConstants;
+    memcpy(BlendConstants.data(), BlendInfo.blendConstants, sizeof(float) * 4);
+
+    assert(BlendInfo.logicOpEnable == VK_FALSE &&
+           "blending with logical operations is not supported");
+
     // Create pipeline.
     pPipelines[i] = new VkPipeline_T;
     pPipelines[i]->GraphicsPipeline = new talvos::GraphicsPipeline(
         pCreateInfos[i].pInputAssemblyState->topology, VertexStage,
         FragmentStage, VertexBindingDescriptions, VertexAttributeDescriptions,
-        *pCreateInfos[i].pRasterizationState, Viewports, Scissors);
+        *pCreateInfos[i].pRasterizationState, BlendAttachmentStates,
+        BlendConstants, Viewports, Scissors);
   }
   return VK_SUCCESS;
 }

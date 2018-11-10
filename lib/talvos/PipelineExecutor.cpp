@@ -585,12 +585,200 @@ float YFBToDev(float Yfb, VkViewport Viewport)
          (Viewport.height / 2.f);
 }
 
+// Blend a texel (NewTexel) against an existing color attachment (OldTexel).
+void blendTexel(Image::Texel &NewTexel, const Image::Texel &OldTexel,
+                const VkPipelineColorBlendAttachmentState &Blend,
+                const std::array<float, 4> &BlendConstants)
+{
+  Image::Texel Src = NewTexel;
+  Image::Texel Dst = OldTexel;
+
+  // Lambda to get color component blend factor.
+  auto GetColorBlendFactor = [BlendConstants, Src, Dst](VkBlendFactor Factor,
+                                                        float &R, float &G,
+                                                        float &B) {
+    switch (Factor)
+    {
+    case VK_BLEND_FACTOR_ZERO:
+      R = G = B = 0.f;
+      break;
+    case VK_BLEND_FACTOR_ONE:
+      R = G = B = 1.f;
+      break;
+    case VK_BLEND_FACTOR_SRC_COLOR:
+      R = Src.get<float>(0);
+      G = Src.get<float>(1);
+      B = Src.get<float>(2);
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR:
+      R = 1.f - Src.get<float>(0);
+      G = 1.f - Src.get<float>(1);
+      B = 1.f - Src.get<float>(2);
+      break;
+    case VK_BLEND_FACTOR_DST_COLOR:
+      R = Dst.get<float>(0);
+      G = Dst.get<float>(1);
+      B = Dst.get<float>(2);
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR:
+      R = 1.f - Dst.get<float>(0);
+      G = 1.f - Dst.get<float>(1);
+      B = 1.f - Dst.get<float>(2);
+      break;
+    case VK_BLEND_FACTOR_SRC_ALPHA:
+      R = G = B = Src.get<float>(3);
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:
+      R = G = B = 1.f - Src.get<float>(3);
+      break;
+    case VK_BLEND_FACTOR_DST_ALPHA:
+      R = G = B = Dst.get<float>(3);
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA:
+      R = G = B = 1.f - Dst.get<float>(3);
+      break;
+    case VK_BLEND_FACTOR_CONSTANT_COLOR:
+      R = BlendConstants[0];
+      G = BlendConstants[1];
+      B = BlendConstants[2];
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR:
+      R = 1.f - BlendConstants[0];
+      G = 1.f - BlendConstants[1];
+      B = 1.f - BlendConstants[2];
+      break;
+    case VK_BLEND_FACTOR_CONSTANT_ALPHA:
+      R = G = B = BlendConstants[3];
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA:
+      R = G = B = 1.f - BlendConstants[3];
+      break;
+    case VK_BLEND_FACTOR_SRC_ALPHA_SATURATE:
+      R = G = B = std::min(Src.get<float>(3), 1.f - Dst.get<float>(3));
+      break;
+    default:
+      std::cerr << "Unhandled color blend factor: " << Factor << std::endl;
+      abort();
+    }
+  };
+
+  // Apply blend operator to color components.
+  float Sr, Sg, Sb;
+  float Dr, Dg, Db;
+  GetColorBlendFactor(Blend.srcColorBlendFactor, Sr, Sg, Sb);
+  GetColorBlendFactor(Blend.dstColorBlendFactor, Dr, Dg, Db);
+  switch (Blend.colorBlendOp)
+  {
+  case VK_BLEND_OP_ADD:
+    NewTexel.set(0, Src.get<float>(0) * Sr + Dst.get<float>(0) * Dr);
+    NewTexel.set(1, Src.get<float>(1) * Sg + Dst.get<float>(1) * Dg);
+    NewTexel.set(2, Src.get<float>(2) * Sb + Dst.get<float>(2) * Db);
+    break;
+  case VK_BLEND_OP_SUBTRACT:
+    NewTexel.set(0, Src.get<float>(0) * Sr - Dst.get<float>(0) * Dr);
+    NewTexel.set(1, Src.get<float>(1) * Sg - Dst.get<float>(1) * Dg);
+    NewTexel.set(2, Src.get<float>(2) * Sb - Dst.get<float>(2) * Db);
+    break;
+  case VK_BLEND_OP_REVERSE_SUBTRACT:
+    NewTexel.set(0, Dst.get<float>(0) * Dr - Src.get<float>(0) * Sr);
+    NewTexel.set(1, Dst.get<float>(1) * Dg - Src.get<float>(1) * Sg);
+    NewTexel.set(2, Dst.get<float>(2) * Db - Src.get<float>(2) * Sb);
+    break;
+  case VK_BLEND_OP_MIN:
+    NewTexel.set(0, std::min(Src.get<float>(0), Dst.get<float>(0)));
+    NewTexel.set(1, std::min(Src.get<float>(1), Dst.get<float>(1)));
+    NewTexel.set(2, std::min(Src.get<float>(2), Dst.get<float>(2)));
+    break;
+  case VK_BLEND_OP_MAX:
+    NewTexel.set(0, std::max(Src.get<float>(0), Dst.get<float>(0)));
+    NewTexel.set(1, std::max(Src.get<float>(1), Dst.get<float>(1)));
+    NewTexel.set(2, std::max(Src.get<float>(2), Dst.get<float>(2)));
+    break;
+  default:
+    std::cerr << "Unhandled color blend operation: " << Blend.colorBlendOp
+              << std::endl;
+    abort();
+  }
+
+  // Lambda to get alpha component blend factor.
+  auto GetAlphaBlendFactor = [BlendConstants, Src, Dst](VkBlendFactor Factor,
+                                                        float &A) {
+    switch (Factor)
+    {
+    case VK_BLEND_FACTOR_ZERO:
+      A = 0.f;
+      break;
+    case VK_BLEND_FACTOR_ONE:
+    case VK_BLEND_FACTOR_SRC_ALPHA_SATURATE:
+      A = 1.f;
+      break;
+    case VK_BLEND_FACTOR_SRC_COLOR:
+    case VK_BLEND_FACTOR_SRC_ALPHA:
+      A = Src.get<float>(3);
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR:
+    case VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:
+      A = 1.f - Src.get<float>(3);
+      break;
+    case VK_BLEND_FACTOR_DST_COLOR:
+    case VK_BLEND_FACTOR_DST_ALPHA:
+      A = Dst.get<float>(3);
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR:
+    case VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA:
+      A = 1.f - Dst.get<float>(3);
+      break;
+    case VK_BLEND_FACTOR_CONSTANT_COLOR:
+    case VK_BLEND_FACTOR_CONSTANT_ALPHA:
+      A = BlendConstants[3];
+      break;
+    case VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR:
+    case VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA:
+      A = 1.f - BlendConstants[3];
+      break;
+    default:
+      std::cerr << "Unhandled alpha blend factor: " << Factor << std::endl;
+      abort();
+    }
+  };
+
+  // Apply blend operator to alpha component.
+  float Sa;
+  float Da;
+  GetAlphaBlendFactor(Blend.srcAlphaBlendFactor, Sa);
+  GetAlphaBlendFactor(Blend.dstAlphaBlendFactor, Da);
+  switch (Blend.alphaBlendOp)
+  {
+  case VK_BLEND_OP_ADD:
+    NewTexel.set(3, Src.get<float>(3) * Sa + Dst.get<float>(3) * Da);
+    break;
+  case VK_BLEND_OP_SUBTRACT:
+    NewTexel.set(3, Src.get<float>(3) * Sa - Dst.get<float>(3) * Da);
+    break;
+  case VK_BLEND_OP_REVERSE_SUBTRACT:
+    NewTexel.set(3, Dst.get<float>(3) * Da - Src.get<float>(3) * Sa);
+    break;
+  case VK_BLEND_OP_MIN:
+    NewTexel.set(3, std::min(Src.get<float>(3), Dst.get<float>(3)));
+    break;
+  case VK_BLEND_OP_MAX:
+    NewTexel.set(3, std::max(Src.get<float>(3), Dst.get<float>(3)));
+    break;
+  default:
+    std::cerr << "Unhandled alpha blend operation: " << Blend.alphaBlendOp
+              << std::endl;
+    abort();
+  }
+}
+
 void PipelineExecutor::processFragment(
     const Fragment &Frag, const RenderPassInstance &RPI,
     std::function<void(uint32_t, uint32_t, const Variable *, const Type *,
                        Memory *, uint64_t)>
         GenLocData)
 {
+  const PipelineContext &PC =
+      ((const DrawCommandBase *)CurrentCommand)->getPipelineContext();
   const Framebuffer &FB = RPI.getFramebuffer();
   const RenderPass &RP = RPI.getRenderPass();
 
@@ -710,6 +898,10 @@ void PipelineExecutor::processFragment(
     OutTexels[Location] = T;
   }
 
+  BlendAttachmentStateList BlendAttachmentStates =
+      PC.getGraphicsPipeline()->getBlendAttachmentStates();
+  assert(BlendAttachmentStates.size() == ColorAttachments.size());
+
   // Write fragment outputs to color attachments.
   for (auto OT : OutTexels)
   {
@@ -717,9 +909,40 @@ void PipelineExecutor::processFragment(
     assert(Ref < RP.getNumAttachments());
     assert(Ref < FB.getAttachments().size());
 
-    // Write pixel color to attachment.
+    // Write texel color to attachment.
     const ImageView *Attach = FB.getAttachments()[Ref];
-    Attach->write(OT.second, Frag.X, Frag.Y);
+
+    Image::Texel NewTexel = OT.second;
+    Image::Texel OldTexel;
+    Attach->read(OldTexel, Frag.X, Frag.Y);
+
+    // Set default value for alpha channel if not present in format.
+    if (!hasAlphaChannel(Attach->getFormat()))
+      OldTexel.set(3, 1.f);
+
+    // Blend texel values if enabled.
+    const VkPipelineColorBlendAttachmentState &Blend =
+        BlendAttachmentStates[OT.first];
+    if (Blend.blendEnable == VK_TRUE)
+    {
+      // TODO: Skip blending for integer formats.
+      // TODO: Get blend constants from PC to allow for dynamic constants.
+      blendTexel(NewTexel, OldTexel, Blend,
+                 PC.getGraphicsPipeline()->getBlendConstants());
+    }
+
+    // Only update components included in the color write mask.
+    if (!(Blend.colorWriteMask & VK_COLOR_COMPONENT_R_BIT))
+      NewTexel.set(0, OldTexel.get<uint32_t>(0));
+    if (!(Blend.colorWriteMask & VK_COLOR_COMPONENT_G_BIT))
+      NewTexel.set(1, OldTexel.get<uint32_t>(1));
+    if (!(Blend.colorWriteMask & VK_COLOR_COMPONENT_B_BIT))
+      NewTexel.set(2, OldTexel.get<uint32_t>(2));
+    if (!(Blend.colorWriteMask & VK_COLOR_COMPONENT_A_BIT))
+      NewTexel.set(3, OldTexel.get<uint32_t>(3));
+
+    // Write texel to attachment.
+    Attach->write(NewTexel, Frag.X, Frag.Y);
   }
 }
 
