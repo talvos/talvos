@@ -70,11 +70,14 @@ void RenderPassInstance::beginSubpass()
     // Store clear value to each pixel in attachment.
     VkClearColorValue Color = ClearValues[AttachRef].color;
     const ImageView *Attach = FB.getAttachments()[AttachRef];
-    for (uint32_t Y = 0; Y < FB.getHeight(); Y++)
+    for (uint32_t Layer = 0; Layer < FB.getNumLayers(); Layer++)
     {
-      for (uint32_t X = 0; X < FB.getWidth(); X++)
+      for (uint32_t Y = 0; Y < FB.getHeight(); Y++)
       {
-        Attach->write(Color, X, Y);
+        for (uint32_t X = 0; X < FB.getWidth(); X++)
+        {
+          Attach->write(Color, X, Y, 0, Layer);
+        }
       }
     }
   }

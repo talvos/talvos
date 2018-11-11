@@ -62,7 +62,8 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateFramebuffer(
   // Create framebuffer.
   *pFramebuffer = new VkFramebuffer_T;
   (*pFramebuffer)->Framebuffer = new talvos::Framebuffer(
-      *device->Device, pCreateInfo->width, pCreateInfo->height, Attachments);
+      *device->Device, pCreateInfo->width, pCreateInfo->height,
+      pCreateInfo->layers, Attachments);
 
   return VK_SUCCESS;
 }

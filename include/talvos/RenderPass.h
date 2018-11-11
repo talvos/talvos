@@ -23,9 +23,10 @@ class Framebuffer
 {
 public:
   /// Create a framebuffer.
-  Framebuffer(Device &Dev, uint32_t Width, uint32_t Height,
+  Framebuffer(Device &Dev, uint32_t Width, uint32_t Height, uint32_t NumLayers,
               const std::vector<ImageView *> &Attachments)
-      : Dev(Dev), Width(Width), Height(Height), Attachments(Attachments){};
+      : Dev(Dev), Width(Width), Height(Height), NumLayers(NumLayers),
+        Attachments(Attachments){};
 
   /// Returns the list of attachments backing this framebuffer.
   const std::vector<ImageView *> &getAttachments() const { return Attachments; }
@@ -36,6 +37,9 @@ public:
   /// Returns the height of this framebuffer in pixels.
   uint32_t getHeight() const { return Height; }
 
+  /// Returns the number of layers in this framebuffer.
+  uint32_t getNumLayers() const { return NumLayers; }
+
   /// Returns the width of this framebuffer in pixels.
   uint32_t getWidth() const { return Width; }
 
@@ -44,6 +48,8 @@ private:
 
   uint32_t Width;  ///< The width of the framebuffer in pixels.
   uint32_t Height; ///< The height of the framebuffer in pixels.
+
+  uint32_t NumLayers; ///< The numbers of layers in the framebuffer.
 
   /// The framebuffer attachments.
   std::vector<ImageView *> Attachments;
