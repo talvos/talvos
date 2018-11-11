@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstring>
+#include <limits>
 
 #include "talvos/Device.h"
 #include "talvos/Image.h"
@@ -67,6 +68,23 @@ template <typename T> void Image::Texel::storeSInt(T *Data) const
   Data[1] = (T)get<int32_t>(1);
   Data[2] = (T)get<int32_t>(2);
   Data[3] = (T)get<int32_t>(3);
+}
+
+template <typename T> void Image::Texel::storeSNorm(T *Data) const
+{
+  // Clamp and normalize each component value.
+  auto convert = [](float v) -> T {
+    if (v < -1.f)
+      return std::numeric_limits<T>::min();
+    else if (v >= 1.f)
+      return std::numeric_limits<T>::max();
+    else
+      return (T)std::round(v * std::numeric_limits<T>::max());
+  };
+  Data[0] = convert(get<float>(0));
+  Data[1] = convert(get<float>(1));
+  Data[2] = convert(get<float>(2));
+  Data[3] = convert(get<float>(3));
 }
 
 template <typename T> void Image::Texel::storeUInt(T *Data) const
@@ -268,11 +286,25 @@ void Image::write(const Texel &T, uint64_t Address) const
   case VK_FORMAT_R32G32B32A32_UINT:
     Data = T.getData();
     break;
+  case VK_FORMAT_R8_SNORM:
+  case VK_FORMAT_R8G8_SNORM:
+  case VK_FORMAT_R8G8B8_SNORM:
+  case VK_FORMAT_R8G8B8A8_SNORM:
+    T.storeSNorm((int8_t *)TData);
+    Data = TData;
+    break;
   case VK_FORMAT_R8_UNORM:
   case VK_FORMAT_R8G8_UNORM:
   case VK_FORMAT_R8G8B8_UNORM:
   case VK_FORMAT_R8G8B8A8_UNORM:
     T.storeUNorm(TData);
+    Data = TData;
+    break;
+  case VK_FORMAT_R16_SNORM:
+  case VK_FORMAT_R16G16_SNORM:
+  case VK_FORMAT_R16G16B16_SNORM:
+  case VK_FORMAT_R16G16B16A16_SNORM:
+    T.storeSNorm((int16_t *)TData);
     Data = TData;
     break;
   case VK_FORMAT_R16_UNORM:

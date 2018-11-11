@@ -76,6 +76,9 @@ public:
     /// Store signed integer texel components, truncating as necessary.
     template <typename T> void storeSInt(T *Data) const;
 
+    /// Store normalized texel components as signed integers.
+    template <typename T> void storeSNorm(T *Data) const;
+
     /// Store unsigned integer texel components, truncating as necessary.
     template <typename T> void storeUInt(T *Data) const;
 
