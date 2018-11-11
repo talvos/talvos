@@ -275,6 +275,13 @@ void Image::write(const Texel &T, uint64_t Address) const
     T.storeUNorm(TData);
     Data = TData;
     break;
+  case VK_FORMAT_R16_UNORM:
+  case VK_FORMAT_R16G16_UNORM:
+  case VK_FORMAT_R16G16B16_UNORM:
+  case VK_FORMAT_R16G16B16A16_UNORM:
+    T.storeUNorm((uint16_t *)TData);
+    Data = TData;
+    break;
   default:
     assert(false && "Unhandled format");
   }
