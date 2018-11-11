@@ -29,25 +29,35 @@ void BeginRenderPassCommand::runImpl(Device &Dev) const { RPI->begin(); }
 
 void ClearColorImageCommand::runImpl(Device &Dev) const
 {
-  // TODO: Handle mip levels and other formats.
-  assert(Ranges[0].baseMipLevel == 0 && Ranges[0].levelCount == 1);
-
   // Loop over ranges in command.
   for (auto &Range : Ranges)
   {
-    // TODO: Handle VK_REMAINING_ARRAY_LAYERS
-    // Loop over array layers in range.
-    for (uint32_t Layer = Range.baseArrayLayer;
-         Layer < Range.baseArrayLayer + Range.layerCount; Layer++)
+    // Compute last mip level in range.
+    uint32_t LastLevel = Range.baseMipLevel + Range.levelCount - 1;
+    if (Range.levelCount == VK_REMAINING_MIP_LEVELS)
+      LastLevel = DstImage.getNumMipLevels() - 1;
+
+    // Compute last array layer in range.
+    uint32_t LastLayer = Range.baseArrayLayer + Range.layerCount - 1;
+    if (Range.layerCount == VK_REMAINING_ARRAY_LAYERS)
+      LastLayer = DstImage.getNumArrayLayers() - 1;
+
+    // Loop over mip levels.
+    for (uint32_t Level = Range.baseMipLevel; Level <= LastLevel; Level++)
     {
-      // Store pixel data to each pixel in image.
-      for (uint32_t Z = 0; Z < DstImage.getDepth(); Z++)
+      // Loop over array layers.
+      for (uint32_t Layer = Range.baseArrayLayer; Layer <= LastLayer; Layer++)
       {
-        for (uint32_t Y = 0; Y < DstImage.getHeight(); Y++)
+        // Store pixel data to each pixel in image.
+        for (uint32_t Z = 0; Z < DstImage.getDepth(Level); Z++)
         {
-          for (uint32_t X = 0; X < DstImage.getWidth(); X++)
+          for (uint32_t Y = 0; Y < DstImage.getHeight(Level); Y++)
           {
-            DstImage.write(Color, DstImage.getTexelAddress(X, Y, Z, Layer));
+            for (uint32_t X = 0; X < DstImage.getWidth(Level); X++)
+            {
+              DstImage.write(Color,
+                             DstImage.getTexelAddress(X, Y, Z, Layer, Level));
+            }
           }
         }
       }
