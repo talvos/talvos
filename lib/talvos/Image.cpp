@@ -41,6 +41,14 @@ template <typename T> void Image::Texel::loadSInt(const T *Data)
   set<int32_t>(3, Data[3]);
 }
 
+template <typename T> void Image::Texel::loadSNorm(const T *Data)
+{
+  set<float>(0, Data[0] / (float)std::numeric_limits<T>::max());
+  set<float>(1, Data[1] / (float)std::numeric_limits<T>::max());
+  set<float>(2, Data[2] / (float)std::numeric_limits<T>::max());
+  set<float>(3, Data[3] / (float)std::numeric_limits<T>::max());
+}
+
 template <typename T> void Image::Texel::loadUInt(const T *Data)
 {
   set<uint32_t>(0, Data[0]);
@@ -220,6 +228,12 @@ void Image::read(Texel &T, uint64_t Address) const
   case VK_FORMAT_R32G32B32_UINT:
   case VK_FORMAT_R32G32B32A32_UINT:
     T.setData(Data);
+    break;
+  case VK_FORMAT_R8_SNORM:
+  case VK_FORMAT_R8G8_SNORM:
+  case VK_FORMAT_R8G8B8_SNORM:
+  case VK_FORMAT_R8G8B8A8_SNORM:
+    T.loadSNorm((int8_t *)Data);
     break;
   case VK_FORMAT_R8_UNORM:
   case VK_FORMAT_R8G8_UNORM:

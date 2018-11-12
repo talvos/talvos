@@ -54,6 +54,9 @@ public:
     /// Load signed integer texel components.
     template <typename T> void loadSInt(const T *Data);
 
+    /// Load normalized texel components from signed integer data.
+    template <typename T> void loadSNorm(const T *Data);
+
     /// Load unsigned integer texel components.
     template <typename T> void loadUInt(const T *Data);
 
