@@ -304,10 +304,7 @@ UpdateBufferCommand::UpdateBufferCommand(uint64_t Base, uint64_t NumBytes,
   memcpy(this->Data, Data, NumBytes);
 }
 
-UpdateBufferCommand::~UpdateBufferCommand()
-{
-  delete[] Data;
-}
+UpdateBufferCommand::~UpdateBufferCommand() { delete[] Data; }
 
 void UpdateBufferCommand::runImpl(Device &Dev) const
 {
