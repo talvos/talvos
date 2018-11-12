@@ -5,6 +5,7 @@ aim of providing an extensible dynamic analysis framework and debugger for
 SPIR-V shaders.
 Talvos provides an implementation of the Vulkan API to enable it to execute
 real Vulkan applications.
+Linux, macOS, and Windows are supported.
 
 Talvos is distributed under a three-clause BSD license. For full license
 terms please see the LICENSE file distributed with this source code.
@@ -16,14 +17,18 @@ Talvos is still in the early stages of development.
 Compute shaders are the current focus, and Talvos is currently capable of
 executing various SPIR-V shaders generated from OpenCL kernels compiled with
 [Clspv](https://github.com/google/clspv).
-Linux, macOS, and Windows are supported.
+Talvos can also handle vertex and fragment shaders, with basic support for
+offscreen rendering currently in progress.
+Talvos currently passes around 15% of the
+[Vulkan conformance test suite](https://github.com/KhronosGroup/VK-GL-CTS).
 
 The codebase is changing relatively quickly as new features are added, so the
 internal and external APIs are all subject to change until we reach the 1.0
 release (suggestions for improvements always welcome).
 
-Future work may involve extending the emulator to support vertex and fragment
-shaders, and implementing missing Vulkan API functions to reach conformance.
+Future work may involve extending the emulator to support tessellation and
+geometry shaders, onscreen rendering, and implementing missing Vulkan API
+functions to reach conformance.
 Contributions in these (or other) areas would be extremely welcome.
 
 
