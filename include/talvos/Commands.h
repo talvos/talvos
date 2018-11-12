@@ -130,7 +130,7 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The image to clear.
+  /// The image to clear.
   const Image &DstImage;
 
   /// The clear color to use.
@@ -156,7 +156,7 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The memory address of the source buffer.
+  /// The memory address of the source buffer.
   uint64_t SrcAddr;
 
   /// The memory address of the destination buffer.
@@ -182,7 +182,7 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The memory address of the source buffer.
+  /// The memory address of the source buffer.
   uint64_t SrcAddr;
 
   /// The destination image.
@@ -234,7 +234,7 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The source image.
+  /// The source image.
   const Image &SrcImage;
 
   /// The memory address of the destination buffer.
@@ -433,7 +433,7 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The memory address to begin filling from.
+  /// The memory address to begin filling from.
   uint64_t Base;
 
   /// The number of bytes to fill.
@@ -508,7 +508,7 @@ protected:
   virtual void runImpl(Device &Dev) const override;
 
 private:
-  // The memory address to begin updating from.
+  /// The memory address to begin updating from.
   uint64_t Base;
 
   /// The number of bytes to update.
