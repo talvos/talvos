@@ -27,6 +27,45 @@ void Command::run(Device &Dev) const
 
 void BeginRenderPassCommand::runImpl(Device &Dev) const { RPI->begin(); }
 
+void ClearAttachmentCommand::runImpl(Device &Dev) const
+{
+  // Loop over attachments.
+  for (auto &Attachment : ClearAttachments)
+  {
+    // TODO: Handle clearing depth/stencil attachments.
+    assert(Attachment.aspectMask == VK_IMAGE_ASPECT_COLOR_BIT);
+
+    // Get target image view.
+    const Subpass &SP = RPI.getRenderPass().getSubpass(RPI.getSubpassIndex());
+    uint32_t AttachIndex = SP.ColorAttachments[Attachment.colorAttachment];
+    ImageView *DstImage = RPI.getFramebuffer().getAttachments()[AttachIndex];
+
+    // Loop over clear regions.
+    for (auto &Rect : ClearRects)
+    {
+      // Compute start and end coordinates.
+      uint32_t XMin = Rect.rect.offset.x;
+      uint32_t XMax = XMin + Rect.rect.extent.width;
+      uint32_t YMin = Rect.rect.offset.y;
+      uint32_t YMax = YMin + Rect.rect.extent.height;
+      uint32_t LastLayer = Rect.baseArrayLayer + Rect.layerCount - 1;
+
+      // Loop over array layers.
+      for (uint32_t Layer = Rect.baseArrayLayer; Layer <= LastLayer; Layer++)
+      {
+        // Store pixel data to each pixel in image.
+        for (uint32_t Y = YMin; Y < YMax; Y++)
+        {
+          for (uint32_t X = XMin; X < XMax; X++)
+          {
+            DstImage->write(Attachment.clearValue.color, X, Y, 0, Layer);
+          }
+        }
+      }
+    }
+  }
+}
+
 void ClearColorImageCommand::runImpl(Device &Dev) const
 {
   // Loop over ranges in command.

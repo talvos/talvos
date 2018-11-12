@@ -35,6 +35,7 @@ public:
   enum Type
   {
     BEGIN_RENDER_PASS,
+    CLEAR_ATTACHMENT,
     CLEAR_COLOR_IMAGE,
     COPY_BUFFER,
     COPY_BUFFER_TO_IMAGE,
@@ -84,6 +85,33 @@ protected:
 private:
   /// The render pass instance.
   std::shared_ptr<RenderPassInstance> RPI;
+};
+
+/// This class encapsulates information about a clear attachment command.
+class ClearAttachmentCommand : public Command
+{
+public:
+  /// Create a new ClearAttachmentCommand.
+  ClearAttachmentCommand(const RenderPassInstance &RPI,
+                         const std::vector<VkClearAttachment> &ClearAttachments,
+                         const std::vector<VkClearRect> &ClearRects)
+      : Command(CLEAR_ATTACHMENT), RPI(RPI), ClearAttachments(ClearAttachments),
+        ClearRects(ClearRects)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  /// The render pass instance this command is operating inside.
+  const RenderPassInstance &RPI;
+
+  /// The attachments to clear.
+  std::vector<VkClearAttachment> ClearAttachments;
+
+  /// The regions to clear.
+  std::vector<VkClearRect> ClearRects;
 };
 
 /// This class encapsulates information about a clear color image command.

@@ -10,7 +10,11 @@ vkCmdClearAttachments(VkCommandBuffer commandBuffer, uint32_t attachmentCount,
                       const VkClearAttachment *pAttachments, uint32_t rectCount,
                       const VkClearRect *pRects)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  std::vector<VkClearAttachment> ClearAttachments(
+      pAttachments, pAttachments + attachmentCount);
+  std::vector<VkClearRect> ClearRects(pRects, pRects + rectCount);
+  commandBuffer->Commands.push_back(new talvos::ClearAttachmentCommand(
+      *commandBuffer->RenderPassInstance, ClearAttachments, ClearRects));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdClearColorImage(
