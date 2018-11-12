@@ -241,6 +241,18 @@ void Image::read(Texel &T, uint64_t Address) const
   case VK_FORMAT_R8G8B8A8_UNORM:
     T.loadUNorm(Data);
     break;
+  case VK_FORMAT_R16_SNORM:
+  case VK_FORMAT_R16G16_SNORM:
+  case VK_FORMAT_R16G16B16_SNORM:
+  case VK_FORMAT_R16G16B16A16_SNORM:
+    T.loadSNorm((int16_t *)Data);
+    break;
+  case VK_FORMAT_R16_UNORM:
+  case VK_FORMAT_R16G16_UNORM:
+  case VK_FORMAT_R16G16B16_UNORM:
+  case VK_FORMAT_R16G16B16A16_UNORM:
+    T.loadUNorm((uint16_t *)Data);
+    break;
   default:
     assert(false && "Unhandled format");
   }
