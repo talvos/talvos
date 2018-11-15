@@ -113,7 +113,7 @@ vkMapMemory(VkDevice device, VkDeviceMemory memory, VkDeviceSize offset,
 {
   VkDeviceSize NumBytes = size;
   if (NumBytes == VK_WHOLE_SIZE)
-    size = memory->NumBytes - offset;
+    NumBytes = memory->NumBytes - offset;
   talvos::Memory &GlobalMemory = device->Device->getGlobalMemory();
   *ppData = GlobalMemory.map(memory->Address, offset, NumBytes);
   return VK_SUCCESS;
