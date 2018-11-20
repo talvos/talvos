@@ -1649,11 +1649,25 @@ void PipelineExecutor::loadVertexInput(const PipelineContext &PC,
     loadNormalizedVertexInput<int8_t>(Result, Attr->format,
                                       Dev.getGlobalMemory(), ElemAddr);
     break;
+  case VK_FORMAT_R16_SNORM:
+  case VK_FORMAT_R16G16_SNORM:
+  case VK_FORMAT_R16G16B16_SNORM:
+  case VK_FORMAT_R16G16B16A16_SNORM:
+    loadNormalizedVertexInput<int16_t>(Result, Attr->format,
+                                      Dev.getGlobalMemory(), ElemAddr);
+    break;
   case VK_FORMAT_R8_UNORM:
   case VK_FORMAT_R8G8_UNORM:
   case VK_FORMAT_R8G8B8_UNORM:
   case VK_FORMAT_R8G8B8A8_UNORM:
     loadNormalizedVertexInput<uint8_t>(Result, Attr->format,
+                                       Dev.getGlobalMemory(), ElemAddr);
+    break;
+  case VK_FORMAT_R16_UNORM:
+  case VK_FORMAT_R16G16_UNORM:
+  case VK_FORMAT_R16G16B16_UNORM:
+  case VK_FORMAT_R16G16B16A16_UNORM:
+    loadNormalizedVertexInput<uint16_t>(Result, Attr->format,
                                        Dev.getGlobalMemory(), ElemAddr);
     break;
   default:
