@@ -13,6 +13,7 @@
 #include <cmath>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <sstream>
 #include <thread>
 
@@ -1540,6 +1541,18 @@ Vec4 PipelineExecutor::getPosition(const VertexOutput &Out)
   return Pos;
 }
 
+// Load normalized vertex input data from memory.
+template <typename T>
+void loadNormalizedVertexInput(Object &Obj, VkFormat Format, const Memory &Mem,
+                               uint64_t Address)
+{
+  assert(getElementSize(Format) <= (sizeof(T) * 4));
+  T Data[4];
+  Mem.load((uint8_t *)Data, Address, getElementSize(Format));
+  for (uint32_t i = 0; i < (getElementSize(Format) / sizeof(T)); i++)
+    Obj.set<float>(Data[i] / (float)std::numeric_limits<T>::max(), i);
+}
+
 void PipelineExecutor::loadVertexInput(const PipelineContext &PC,
                                        Memory *PipelineMemory, uint64_t Address,
                                        uint32_t VertexIndex,
@@ -1564,20 +1577,6 @@ void PipelineExecutor::loadVertexInput(const PipelineContext &PC,
                    [Attr](auto Elem) { return Elem.binding == Attr->binding; });
   assert(Binding != Bindings.end() && "invalid binding number");
 
-  // TODO: Handle other formats
-  assert(Attr->format == VK_FORMAT_R32G32B32A32_SFLOAT ||
-         Attr->format == VK_FORMAT_R32G32B32_SFLOAT ||
-         Attr->format == VK_FORMAT_R32G32_SFLOAT ||
-         Attr->format == VK_FORMAT_R32_SFLOAT ||
-         Attr->format == VK_FORMAT_R32G32B32A32_SINT ||
-         Attr->format == VK_FORMAT_R32G32B32_SINT ||
-         Attr->format == VK_FORMAT_R32G32_SINT ||
-         Attr->format == VK_FORMAT_R32_SINT ||
-         Attr->format == VK_FORMAT_R32G32B32A32_UINT ||
-         Attr->format == VK_FORMAT_R32G32B32_UINT ||
-         Attr->format == VK_FORMAT_R32G32_UINT ||
-         Attr->format == VK_FORMAT_R32_UINT);
-
   // Calculate variable address in vertex buffer memory.
   uint64_t ElemAddr = PC.getVertexBindings().at(Attr->binding);
   switch (Binding->inputRate)
@@ -1600,33 +1599,70 @@ void PipelineExecutor::loadVertexInput(const PipelineContext &PC,
     ElemAddr += Component * ElemTy->getScalarType()->getSize();
   }
 
+  // Create object to hold converted vertex input values.
+  Object Result(ElemTy);
+
   // Set default values for the variable.
   // As per the Vulkan specification, if the G, B, or A components are
   // missing, they should be filled with (0,0,1) as needed,
-  Object Default(ElemTy);
-  Default.zero();
+  Result.zero();
   if (ElemTy->isVector() && ElemTy->getElementCount() == 4)
   {
     const Type *ScalarTy = ElemTy->getElementType();
     if (ScalarTy->isFloat() && ScalarTy->getBitWidth() == 32)
-      Default.set<float>(1.f, 3);
+      Result.set<float>(1.f, 3);
     else if (ScalarTy->isFloat() && ScalarTy->getBitWidth() == 64)
-      Default.set<double>(1.0, 3);
+      Result.set<double>(1.0, 3);
     else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 16)
-      Default.set<uint16_t>(1, 3);
+      Result.set<uint16_t>(1, 3);
     else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 32)
-      Default.set<uint32_t>(1, 3);
+      Result.set<uint32_t>(1, 3);
     else if (ScalarTy->isInt() && ScalarTy->getBitWidth() == 64)
-      Default.set<uint64_t>(1, 3);
+      Result.set<uint64_t>(1, 3);
     else
       assert(false && "Unhandled vertex input variable type");
   }
-  Default.store(*PipelineMemory, Address);
 
-  // Copy vertex input data to pipeline memory.
-  Memory::copy(
-      Address, *PipelineMemory, ElemAddr, Dev.getGlobalMemory(),
-      std::min(ElemTy->getSize(), (size_t)getElementSize(Attr->format)));
+  switch (Attr->format)
+  {
+  case VK_FORMAT_R32_SINT:
+  case VK_FORMAT_R32G32_SINT:
+  case VK_FORMAT_R32G32B32_SINT:
+  case VK_FORMAT_R32G32B32A32_SINT:
+  case VK_FORMAT_R32_UINT:
+  case VK_FORMAT_R32G32_UINT:
+  case VK_FORMAT_R32G32B32_UINT:
+  case VK_FORMAT_R32G32B32A32_UINT:
+  case VK_FORMAT_R32_SFLOAT:
+  case VK_FORMAT_R32G32_SFLOAT:
+  case VK_FORMAT_R32G32B32_SFLOAT:
+  case VK_FORMAT_R32G32B32A32_SFLOAT:
+    // Copy vertex input data unmodified.
+    Dev.getGlobalMemory().load(
+        Result.getData(), ElemAddr,
+        std::min(ElemTy->getSize(), (size_t)getElementSize(Attr->format)));
+    break;
+  case VK_FORMAT_R8_SNORM:
+  case VK_FORMAT_R8G8_SNORM:
+  case VK_FORMAT_R8G8B8_SNORM:
+  case VK_FORMAT_R8G8B8A8_SNORM:
+    loadNormalizedVertexInput<int8_t>(Result, Attr->format,
+                                      Dev.getGlobalMemory(), ElemAddr);
+    break;
+  case VK_FORMAT_R8_UNORM:
+  case VK_FORMAT_R8G8_UNORM:
+  case VK_FORMAT_R8G8B8_UNORM:
+  case VK_FORMAT_R8G8B8A8_UNORM:
+    loadNormalizedVertexInput<uint8_t>(Result, Attr->format,
+                                       Dev.getGlobalMemory(), ElemAddr);
+    break;
+  default:
+    std::cerr << "Unhandled vertex input format" << std::endl;
+    abort();
+  }
+
+  // Store converted vertex data to pipeline memory.
+  Result.store(*PipelineMemory, Address);
 }
 
 // Private functions for interactive execution and debugging.
