@@ -1710,7 +1710,7 @@ void PipelineExecutor::loadVertexInput(const PipelineContext &PC,
   case VK_FORMAT_R16G16B16_SNORM:
   case VK_FORMAT_R16G16B16A16_SNORM:
     loadNormalizedVertexInput<int16_t>(Result, Attr->format,
-                                      Dev.getGlobalMemory(), ElemAddr);
+                                       Dev.getGlobalMemory(), ElemAddr);
     break;
   case VK_FORMAT_R8_UNORM:
   case VK_FORMAT_R8G8_UNORM:
@@ -1724,7 +1724,7 @@ void PipelineExecutor::loadVertexInput(const PipelineContext &PC,
   case VK_FORMAT_R16G16B16_UNORM:
   case VK_FORMAT_R16G16B16A16_UNORM:
     loadNormalizedVertexInput<uint16_t>(Result, Attr->format,
-                                       Dev.getGlobalMemory(), ElemAddr);
+                                        Dev.getGlobalMemory(), ElemAddr);
     break;
   default:
     std::cerr << "Unhandled vertex input format" << std::endl;
