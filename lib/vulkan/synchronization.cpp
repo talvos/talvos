@@ -5,26 +5,9 @@
 
 #include "runtime.h"
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-#include <time.h>
-#else
-#include <sys/time.h>
-#endif
-
 #include "talvos/Commands.h"
+#include "talvos/Device.h"
 #include "talvos/Queue.h"
-
-/// Utility to return the current time in nanoseconds since the epoch.
-double now()
-{
-#if defined(_WIN32) && !defined(__MINGW32__)
-  return time(NULL) * 1e9;
-#else
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  return tv.tv_usec * 1e3 + tv.tv_sec * 1e9;
-#endif
-}
 
 VKAPI_ATTR void VKAPI_CALL vkCmdPipelineBarrier(
     VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStageMask,
@@ -193,19 +176,9 @@ VKAPI_ATTR VkResult VKAPI_CALL vkWaitForFences(VkDevice device,
                                                VkBool32 waitAll,
                                                uint64_t timeout)
 {
-  double Start = now();
-  while (true)
-  {
-    if (Start + timeout <= now())
-      return VK_TIMEOUT;
-
-    uint32_t SignalCount = 0;
-    for (uint32_t i = 0; i < fenceCount; i++)
-    {
-      if (pFences[i]->Signaled)
-        SignalCount++;
-    }
-    if (waitAll ? SignalCount == fenceCount : SignalCount > 0)
-      return VK_SUCCESS;
-  }
+  std::vector<const bool *> Fences;
+  for (uint32_t i = 0; i < fenceCount; i++)
+    Fences.push_back(&pFences[i]->Signaled);
+  return device->Device->waitForFences(Fences, waitAll, timeout) ? VK_SUCCESS
+                                                                 : VK_TIMEOUT;
 }

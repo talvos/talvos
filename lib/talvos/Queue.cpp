@@ -9,6 +9,7 @@
 #include <cassert>
 
 #include "talvos/Commands.h"
+#include "talvos/Device.h"
 #include "talvos/Queue.h"
 
 namespace talvos
@@ -83,6 +84,7 @@ void Queue::run()
         Fences.erase((bool *)Cmd);
         Commands.pop();
         StateChanged.notify_all();
+        Dev.notifyFenceSignaled();
         continue;
       }
     }

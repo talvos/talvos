@@ -9,7 +9,9 @@
 #ifndef TALVOS_DEVICE_H
 #define TALVOS_DEVICE_H
 
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 namespace talvos
@@ -45,6 +47,9 @@ public:
   /// Returns true if all of the loaded plugins are thread-safe.
   bool isThreadSafe() const;
 
+  /// Notify the device that a fence was signaled.
+  void notifyFenceSignaled();
+
   /// Report an error that has occurred during emulation.
   /// This prints \p Error to stderr along with the current execution context.
   /// If \p Fatal is true, abort() will be called after handling the error.
@@ -72,6 +77,14 @@ public:
   void reportWorkgroupComplete(const Workgroup *Group);
   ///@}
 
+  /// Wait for fences to signal.
+  /// If \p WaitAll is \p true, waits for all fences to signal, otherwise waits
+  /// for any single fence to signal.
+  /// Returns \p true on success, or \p false if \p Timeout nanoseconds elapsed
+  /// before the fences signaled.
+  bool waitForFences(const std::vector<const bool *> &Fences, bool WaitAll,
+                     uint64_t Timeout) const;
+
 private:
   Memory *GlobalMemory; ///< The global memory of this device.
 
@@ -83,6 +96,12 @@ private:
 
   /// The maximum number of errors to report.
   size_t MaxErrors;
+
+  /// A mutex for synchronizing threads waiting on fence signals.
+  mutable std::mutex FenceMutex;
+
+  /// Condition variable to notify threads waiting on fence signals.
+  mutable std::condition_variable FenceSignaled;
 };
 
 } // namespace talvos

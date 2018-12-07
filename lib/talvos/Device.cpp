@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <cassert>
+#include <chrono>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
@@ -134,6 +135,12 @@ bool Device::isThreadSafe() const
     if (!P.second->isThreadSafe())
       return false;
   return true;
+}
+
+void Device::notifyFenceSignaled()
+{
+  std::unique_lock<std::mutex> Lock(FenceMutex);
+  FenceSignaled.notify_all();
 }
 
 void Device::reportError(const std::string &Error, bool Fatal)
@@ -318,5 +325,39 @@ void Device::reportWorkgroupComplete(const Workgroup *Group)
 }
 
 #undef REPORT
+
+bool Device::waitForFences(const std::vector<const bool *> &Fences,
+                           bool WaitAll, uint64_t Timeout) const
+{
+  // Loop until fences have signaled or the timeout is exceeded.
+  auto Start = std::chrono::system_clock::now();
+  while (true)
+  {
+    // Lock so that we do not miss a fence signal notification.
+    std::unique_lock<std::mutex> Lock(FenceMutex);
+
+    // Check status of fences.
+    uint32_t SignalCount = 0;
+    for (const auto Fence : Fences)
+    {
+      if (*Fence)
+        SignalCount++;
+    }
+    if (WaitAll ? SignalCount == (uint32_t)(Fences.size()) : SignalCount > 0)
+      return true;
+
+    // Check if timeout has been exceeded.
+    auto Duration = std::chrono::system_clock::now() - Start;
+    auto DurationNanoseconds =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(Duration);
+    uint64_t ElapsedTime = DurationNanoseconds.count();
+    if (ElapsedTime >= Timeout)
+      return false;
+
+    // Wait for another fence to signal.
+    FenceSignaled.wait_for(
+        Lock, std::chrono::nanoseconds((uint64_t)(Timeout - ElapsedTime)));
+  }
+}
 
 } // namespace talvos
