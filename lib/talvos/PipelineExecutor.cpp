@@ -108,7 +108,30 @@ struct PipelineExecutor::TrianglePrimitive
 
 PipelineExecutor::PipelineExecutor(PipelineExecutorKey Key, Device &Dev)
     : Dev(Dev), CurrentCommand(nullptr), CurrentStage(nullptr)
-{}
+{
+  ShutDownWorkers = false;
+
+  Interactive = checkEnv("TALVOS_INTERACTIVE", false);
+
+  // Get number of worker threads to launch.
+  NumThreads = 1;
+  if (!Interactive && Dev.isThreadSafe())
+    NumThreads = (uint32_t)getEnvUInt("TALVOS_NUM_WORKERS",
+                                      std::thread::hardware_concurrency());
+}
+
+PipelineExecutor::~PipelineExecutor()
+{
+  // Signal workers to exit.
+  WorkerMutex.lock();
+  ShutDownWorkers = true;
+  WorkerSignal.notify_all();
+  WorkerMutex.unlock();
+
+  // Wait for workers to complete.
+  for (auto &WT : WorkerThreads)
+    WT.join();
+}
 
 Workgroup *PipelineExecutor::createWorkgroup(Dim3 GroupId) const
 {
@@ -216,7 +239,6 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   assert(RunningGroups.empty());
 
   Continue = false;
-  Interactive = checkEnv("TALVOS_INTERACTIVE", false);
   // TODO: Print info about current command (entry name, dispatch size, etc).
 
   // Build list of pending group IDs.
@@ -227,8 +249,7 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
 
   // Run worker threads to process groups.
   NextWorkIndex = 0;
-  runWorkers(
-      [&]() { return std::thread(&PipelineExecutor::runComputeWorker, this); });
+  doWork([&]() { runComputeWorker(); });
 
   finalizeVariables(PC.getComputeDescriptors());
   GlobalMem.release(PushConstantAddress);
@@ -243,7 +264,6 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
   CurrentCommand = &Cmd;
 
   Continue = false;
-  Interactive = checkEnv("TALVOS_INTERACTIVE", false);
 
   const PipelineContext &PC = Cmd.getPipelineContext();
   const GraphicsPipeline *PL = PC.getGraphicsPipeline();
@@ -277,10 +297,7 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
 
     // Run worker threads to process vertices.
     NextWorkIndex = 0;
-    runWorkers([&]() {
-      return std::thread(&PipelineExecutor::runVertexWorker, this, &State,
-                         InstanceIndex);
-    });
+    doWork([&]() { runVertexWorker(&State, InstanceIndex); });
 
     finalizeVariables(PC.getGraphicsDescriptors());
 
@@ -354,24 +371,6 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
 
   CurrentStage = nullptr;
   CurrentCommand = nullptr;
-}
-
-void PipelineExecutor::runWorkers(std::function<std::thread()> ThreadCreator)
-{
-  // Get number of worker threads to launch.
-  NumThreads = 1;
-  if (!Interactive && Dev.isThreadSafe())
-    NumThreads = (uint32_t)getEnvUInt("TALVOS_NUM_WORKERS",
-                                      std::thread::hardware_concurrency());
-
-  // Create worker threads.
-  std::vector<std::thread> Threads;
-  for (unsigned i = 0; i < NumThreads; i++)
-    Threads.push_back(ThreadCreator());
-
-  // Wait for workers to complete.
-  for (unsigned i = 0; i < NumThreads; i++)
-    Threads[i].join();
 }
 
 void PipelineExecutor::runComputeWorker()
@@ -947,6 +946,66 @@ void PipelineExecutor::processFragment(
   }
 }
 
+void PipelineExecutor::runWorker()
+{
+  uint32_t NextTaskID = 1;
+  while (true)
+  {
+    // Wait to receive work (or shut down).
+    {
+      std::unique_lock<std::mutex> Lock(WorkerMutex);
+      while (true)
+      {
+        if (ShutDownWorkers)
+          return;
+        if (CurrentTaskID == NextTaskID)
+          break;
+        WorkerSignal.wait(Lock);
+      }
+    }
+
+    // Do work.
+    assert(CurrentTask);
+    CurrentTask();
+
+    // If we are last worker to finish, notify master that work is complete.
+    if (++NumWorkersFinished == NumThreads)
+    {
+      WorkerMutex.lock();
+      MasterSignal.notify_one();
+      WorkerMutex.unlock();
+    }
+
+    NextTaskID++;
+  }
+}
+
+void PipelineExecutor::doWork(std::function<void()> Task)
+{
+  // Create worker threads if necessary.
+  if (WorkerThreads.empty())
+  {
+    for (unsigned i = 0; i < NumThreads; i++)
+      WorkerThreads.push_back(std::thread(&PipelineExecutor::runWorker, this));
+  }
+
+  // Signal worker threads to perform task.
+  NumWorkersFinished = 0;
+  CurrentTask = Task;
+  CurrentTaskID++;
+  WorkerMutex.lock();
+  WorkerSignal.notify_all();
+  WorkerMutex.unlock();
+
+  // Wait for worker threads to finish task.
+  {
+    std::unique_lock<std::mutex> Lock(WorkerMutex);
+    MasterSignal.wait(Lock, [&]() { return NumWorkersFinished == NumThreads; });
+  }
+
+  CurrentTask = std::function<void()>();
+}
+
 void PipelineExecutor::runPointFragmentWorker(PointPrimitive Primitive,
                                               const RenderPassInstance &RPI)
 {
@@ -1463,10 +1522,7 @@ void PipelineExecutor::rasterizePoint(const DrawCommandBase &Cmd,
   // Run worker threads to process fragments.
   NextWorkIndex = 0;
   PointPrimitive Primitive = {X, Y, PointSize, Vertex};
-  runWorkers([&]() {
-    return std::thread(&PipelineExecutor::runPointFragmentWorker, this,
-                       Primitive, RPI);
-  });
+  doWork([&]() { runPointFragmentWorker(Primitive, RPI); });
 
   PendingFragments.clear();
 }
@@ -1510,9 +1566,9 @@ void PipelineExecutor::rasterizeTriangle(const DrawCommandBase &Cmd,
   // Run worker threads to process fragments.
   NextWorkIndex = 0;
   TrianglePrimitive Primitive = {A, B, C, VA, VB, VC};
-  runWorkers([&]() {
-    return std::thread(&PipelineExecutor::runTriangleFragmentWorker, this,
-                       Primitive, Cmd.getPipelineContext(), RPI, Viewport);
+  doWork([&]() {
+    runTriangleFragmentWorker(Primitive, Cmd.getPipelineContext(), RPI,
+                              Viewport);
   });
 
   PendingFragments.clear();

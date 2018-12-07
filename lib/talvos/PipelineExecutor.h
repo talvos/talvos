@@ -10,6 +10,7 @@
 #define TALVOS_PIPELINEEXECUTOR_H
 
 #include <atomic>
+#include <condition_variable>
 #include <functional>
 #include <map>
 #include <thread>
@@ -55,6 +56,9 @@ class PipelineExecutor
 public:
   /// Create a pipeline executor on \p Dev.
   PipelineExecutor(PipelineExecutorKey Key, Device &Dev);
+
+  /// Destroy a pipeline executor.
+  ~PipelineExecutor();
 
   // Do not allow PipelineExecutor objects to be copied.
   ///\{
@@ -105,8 +109,11 @@ private:
     float InvW;  ///< Inverse of the interpolated clip w coordinate.
   };
 
-  /// Helper function to launch worker threads (created by \p ThreadCreator).
-  void runWorkers(std::function<std::thread()> ThreadCreator);
+  /// Execute a function on every worker thread.
+  void doWork(std::function<void()> Task);
+
+  /// Worker thread entry point.
+  void runWorker();
 
   /// Worker thread entry point for compute shaders.
   void runComputeWorker();
@@ -174,7 +181,31 @@ private:
   /// The number of worker threads currently executing.
   unsigned NumThreads;
 
-  /// Index of next item of work to execute.
+  /// List of worker threads.
+  std::vector<std::thread> WorkerThreads;
+
+  /// Signal to shut down worker threads.
+  bool ShutDownWorkers;
+
+  /// The function that worker threads should execute.
+  std::function<void()> CurrentTask;
+
+  /// ID used to identify the current task.
+  uint32_t CurrentTaskID = 0;
+
+  /// Mutex used to synchronize with worker threads.
+  std::mutex WorkerMutex;
+
+  /// Condition variable used to wake worker threads.
+  std::condition_variable WorkerSignal;
+
+  /// Condition variable used to notify master thread that work is complete.
+  std::condition_variable MasterSignal;
+
+  /// Tally of the number of workers that have finished the current task.
+  std::atomic<uint32_t> NumWorkersFinished;
+
+  /// Index of next item of work to execute in the current task.
   std::atomic<size_t> NextWorkIndex;
 
   /// Pool of group IDs pending creation and execution.
