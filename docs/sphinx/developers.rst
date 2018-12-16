@@ -32,6 +32,13 @@ There are Travis CI and AppVeyor configurations that will test that each commit
 and pull request builds and passes the test suite for multiple platforms
 and compilers.
 
+In addition, Talvos is run through the `Vulkan Conformance Test Suite
+<https://github.com/KhronosGroup/VK-GL-CTS>`_ daily, via CircleCI.
+The results are stored in the `talvos-vulkan-cts GitHub repository
+<https://github.com/talvos/talvos-vulkan-cts>`_.
+Regressions in the Vulkan CTS will produce a failed CircleCI build for that
+repository.
+
 
 Other information
 -----------------
