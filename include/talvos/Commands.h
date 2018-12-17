@@ -251,10 +251,14 @@ public:
   /// Create a new DispatchCommand.
   ///
   /// \param PC The pipeline context used for the shader launch.
+  /// \param BaseGroup The base workgroup offset.
   /// \param NumGroups The number of groups to launch.
-  DispatchCommand(const PipelineContext &PC, Dim3 NumGroups)
-      : Command(DISPATCH), PC(PC), NumGroups(NumGroups)
+  DispatchCommand(const PipelineContext &PC, Dim3 BaseGroup, Dim3 NumGroups)
+      : Command(DISPATCH), PC(PC), BaseGroup(BaseGroup), NumGroups(NumGroups)
   {}
+
+  /// Returns the base workgroup offset used by this command.
+  Dim3 getBaseGroup() const { return BaseGroup; }
 
   /// Returns the number of workgroups this command launches.
   Dim3 getNumGroups() const { return NumGroups; }
@@ -269,6 +273,7 @@ protected:
 private:
   PipelineContext PC; ///< The pipeline context.
 
+  Dim3 BaseGroup; ///< The base workgroup offset.
   Dim3 NumGroups; ///< The number of workgroups to launch.
 };
 

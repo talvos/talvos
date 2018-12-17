@@ -221,7 +221,7 @@ void CommandFile::parseDispatch()
   talvos::PipelineContext PC;
   PC.bindComputePipeline(&Pipeline);
   PC.bindComputeDescriptors(DescriptorSets);
-  talvos::DispatchCommand(PC, GroupCount).run(*Device);
+  talvos::DispatchCommand(PC, {0, 0, 0}, GroupCount).run(*Device);
 }
 
 void CommandFile::parseDump()

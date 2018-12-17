@@ -242,10 +242,12 @@ void PipelineExecutor::run(const talvos::DispatchCommand &Cmd)
   // TODO: Print info about current command (entry name, dispatch size, etc).
 
   // Build list of pending group IDs.
+  Dim3 BaseGroup = Cmd.getBaseGroup();
   for (uint32_t GZ = 0; GZ < Cmd.getNumGroups().Z; GZ++)
     for (uint32_t GY = 0; GY < Cmd.getNumGroups().Y; GY++)
       for (uint32_t GX = 0; GX < Cmd.getNumGroups().X; GX++)
-        PendingGroups.push_back({GX, GY, GZ});
+        PendingGroups.push_back(
+            {BaseGroup.X + GX, BaseGroup.Y + GY, BaseGroup.Z + GZ});
 
   // Run worker threads to process groups.
   NextWorkIndex = 0;
