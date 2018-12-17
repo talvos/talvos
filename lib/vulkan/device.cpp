@@ -74,6 +74,7 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumeratePhysicalDeviceGroups(
     return VK_INCOMPLETE;
 
   *pPhysicalDeviceGroupCount = 1;
+  pPhysicalDeviceGroupProperties->physicalDevices[0] = instance->Device;
   pPhysicalDeviceGroupProperties->physicalDeviceCount = 1;
   pPhysicalDeviceGroupProperties->subsetAllocation = VK_FALSE;
   return VK_SUCCESS;
