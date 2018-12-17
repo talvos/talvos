@@ -356,7 +356,7 @@ void PipelineExecutor::run(const talvos::DrawCommandBase &Cmd)
       {
         const VertexOutput &A = State.VertexOutputs[v - 1];
         const VertexOutput &B = State.VertexOutputs[v];
-        rasterizeTriangle(Cmd, Viewport, Center, A, B);
+        rasterizeTriangle(Cmd, Viewport, A, B, Center);
       }
       break;
     }
