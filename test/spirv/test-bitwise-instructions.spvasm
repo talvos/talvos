@@ -14,9 +14,6 @@
                  OpDecorate %3 ArrayStride 4
                  OpMemberDecorate %4 0 Offset 0
                  OpDecorate %4 Block
-                 OpDecorate %3 ArrayStride 4
-                 OpMemberDecorate %4 0 Offset 0
-                 OpDecorate %4 Block
                  OpDecorate %12 BuiltIn GlobalInvocationId
                  OpDecorate %16 BuiltIn WorkgroupSize
 
