@@ -32,6 +32,7 @@ vkCreateInstance(const VkInstanceCreateInfo *pCreateInfo,
   Device->Features.shaderInt64 = VK_TRUE;
   Device->Features.shaderStorageImageReadWithoutFormat = VK_TRUE;
   Device->Features.shaderStorageImageWriteWithoutFormat = VK_TRUE;
+  Device->Features.textureCompressionASTC_LDR = VK_TRUE;
   Device->Features.vertexPipelineStoresAndAtomics = VK_TRUE;
 
   *pInstance = new VkInstance_T;
