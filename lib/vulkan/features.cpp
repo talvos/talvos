@@ -355,8 +355,13 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceImageFormatProperties(
     default:
       return VK_ERROR_FORMAT_NOT_SUPPORTED;
     }
-    pImageFormatProperties->maxMipLevels = 13;
+
     pImageFormatProperties->sampleCounts = VK_SAMPLE_COUNT_1_BIT;
+    if ((tiling != VK_IMAGE_TILING_LINEAR) && (type == VK_IMAGE_TYPE_2D) &&
+        !(flags & VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT))
+      pImageFormatProperties->sampleCounts |= VK_SAMPLE_COUNT_4_BIT;
+
+    pImageFormatProperties->maxMipLevels = 13;
     pImageFormatProperties->maxResourceSize = 1 << 31;
     return VK_SUCCESS;
   default:
