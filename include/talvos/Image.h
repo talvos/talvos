@@ -154,8 +154,14 @@ public:
   /// Read a texel from the image at the specified address.
   void read(Texel &T, uint64_t Address) const;
 
+  /// Read a texel from the image at the specified address using \p ReadFormat.
+  void read(Texel &T, uint64_t Address, VkFormat ReadFormat) const;
+
   /// Write a texel to the image at the specified address.
   void write(const Texel &T, uint64_t Address) const;
+
+  /// Write a texel to the image at the specified address using \p WriteFormat.
+  void write(const Texel &T, uint64_t Address, VkFormat WriteFormat) const;
 
 private:
   Device &Dev; ///< The device this image view is created on.

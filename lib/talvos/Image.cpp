@@ -181,7 +181,13 @@ uint32_t Image::getWidth(uint32_t Level) const
 
 void Image::read(Texel &T, uint64_t Address) const
 {
+  read(T, Address, Format);
+}
+
+void Image::read(Texel &T, uint64_t Address, VkFormat ReadFormat) const
+{
   assert(getElementSize() <= 16);
+  assert(getElementSize() == talvos::getElementSize(ReadFormat));
 
   // Load raw texel data.
   uint8_t Data[16];
@@ -189,7 +195,7 @@ void Image::read(Texel &T, uint64_t Address) const
   Dev.getGlobalMemory().load(Data, Address, getElementSize());
 
   // Load component values.
-  switch (Format)
+  switch (ReadFormat)
   {
   case VK_FORMAT_R8_SINT:
   case VK_FORMAT_R8G8_SINT:
@@ -260,7 +266,13 @@ void Image::read(Texel &T, uint64_t Address) const
 
 void Image::write(const Texel &T, uint64_t Address) const
 {
+  write(T, Address, Format);
+}
+
+void Image::write(const Texel &T, uint64_t Address, VkFormat WriteFormat) const
+{
   assert(getElementSize() <= 16);
+  assert(getElementSize() == talvos::getElementSize(WriteFormat));
 
   // Will point to texel data to be written to memory.
   const uint8_t *Data;
@@ -268,7 +280,7 @@ void Image::write(const Texel &T, uint64_t Address) const
   // Used as intermediate buffer when conversions need to happen.
   uint8_t TData[16];
 
-  switch (Format)
+  switch (WriteFormat)
   {
   case VK_FORMAT_R8_SINT:
   case VK_FORMAT_R8G8_SINT:
@@ -413,13 +425,13 @@ bool ImageView::isCube() const
 void ImageView::read(Image::Texel &T, uint32_t X, uint32_t Y, uint32_t Z,
                      uint32_t Layer) const
 {
-  Img.read(T, getTexelAddress(X, Y, Z, Layer));
+  Img.read(T, getTexelAddress(X, Y, Z, Layer), Format);
 }
 
 void ImageView::write(const Image::Texel &T, uint32_t X, uint32_t Y, uint32_t Z,
                       uint32_t Layer) const
 {
-  Img.write(T, getTexelAddress(X, Y, Z, Layer));
+  Img.write(T, getTexelAddress(X, Y, Z, Layer), Format);
 }
 
 void Sampler::sample(const talvos::ImageView *Image, Image::Texel &Texel,
