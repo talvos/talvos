@@ -37,7 +37,7 @@ which is called when a Talvos device is destroyed:
     void talvosDestroyPlugin(talvos::Plugin *P);
   }
 
-If a Plugin is not thread-safe, it should indicate this by override the
+If a Plugin is not thread-safe, it should indicate this by overriding the
 ``isThreadSafe()`` function and returning ``false``.
 
 
