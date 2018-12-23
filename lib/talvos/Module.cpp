@@ -329,7 +329,8 @@ public:
       case SpvOpExtension:
       {
         char *Extension = (char *)(Inst->words + Inst->operands[0].offset);
-        if (strcmp(Extension, "SPV_KHR_16bit_storage") &&
+        if (strcmp(Extension, "SPV_KHR_8bit_storage") &&
+            strcmp(Extension, "SPV_KHR_16bit_storage") &&
             strcmp(Extension, "SPV_KHR_storage_buffer_storage_class") &&
             strcmp(Extension, "SPV_KHR_variable_pointers"))
         {
