@@ -1732,6 +1732,9 @@ void Invocation::executeOpSInt(const Instruction *Inst, const F &&Op)
   assert(OpType->isInt());
   switch (OpType->getBitWidth())
   {
+  case 8:
+    executeOp<int8_t, N, Offset>(Inst, Op);
+    break;
   case 16:
     executeOp<int16_t, N, Offset>(Inst, Op);
     break;
@@ -1773,6 +1776,9 @@ void Invocation::executeOpUInt(const Instruction *Inst, const F &&Op)
   assert(OpType->isInt());
   switch (OpType->getBitWidth())
   {
+  case 8:
+    executeOp<uint8_t, N>(Inst, Op);
+    break;
   case 16:
     executeOp<uint16_t, N>(Inst, Op);
     break;

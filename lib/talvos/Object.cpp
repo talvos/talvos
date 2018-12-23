@@ -373,9 +373,11 @@ void Object::zero() { memset(Data, 0, Ty->getSize()); }
   template TYPE Object::get(uint32_t) const;                                   \
   template void Object::set(TYPE, uint32_t)
 INSTANTIATE(bool);
+INSTANTIATE(int8_t);
 INSTANTIATE(int16_t);
 INSTANTIATE(int32_t);
 INSTANTIATE(int64_t);
+INSTANTIATE(uint8_t);
 INSTANTIATE(uint16_t);
 INSTANTIATE(uint32_t);
 INSTANTIATE(uint64_t);
