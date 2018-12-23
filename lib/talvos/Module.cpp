@@ -153,7 +153,9 @@ public:
         case SpvCapabilityStorageBuffer16BitAccess:
         case SpvCapabilityStorageImageReadWithoutFormat:
         case SpvCapabilityStorageImageWriteWithoutFormat:
+        case SpvCapabilityStorageInputOutput16:
         case SpvCapabilityStoragePushConstant8:
+        case SpvCapabilityStoragePushConstant16:
         case SpvCapabilityStorageUniform16:
         case SpvCapabilityUniformAndStorageBuffer8BitAccess:
         case SpvCapabilityVariablePointers:
