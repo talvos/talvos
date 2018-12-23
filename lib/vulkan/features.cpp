@@ -87,10 +87,10 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2(
     {
       VkPhysicalDevice16BitStorageFeatures *Features =
           (VkPhysicalDevice16BitStorageFeatures *)Ext;
-      Features->storageBuffer16BitAccess = VK_FALSE;
-      Features->uniformAndStorageBuffer16BitAccess = VK_FALSE;
-      Features->storagePushConstant16 = VK_FALSE;
-      Features->storageInputOutput16 = VK_FALSE;
+      Features->storageBuffer16BitAccess = VK_TRUE;
+      Features->uniformAndStorageBuffer16BitAccess = VK_TRUE;
+      Features->storagePushConstant16 = VK_TRUE;
+      Features->storageInputOutput16 = VK_TRUE;
       break;
     }
     case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES:
