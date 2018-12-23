@@ -124,6 +124,15 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceFeatures2(
       Features->variablePointers = VK_TRUE;
       break;
     }
+    case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
+    {
+      VkPhysicalDevice8BitStorageFeaturesKHR *Features =
+          (VkPhysicalDevice8BitStorageFeaturesKHR *)Ext;
+      Features->storageBuffer8BitAccess = VK_TRUE;
+      Features->uniformAndStorageBuffer8BitAccess = VK_TRUE;
+      Features->storagePushConstant8 = VK_TRUE;
+      break;
+    }
     default:
       break;
     }
