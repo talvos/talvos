@@ -352,6 +352,11 @@ void Image::write(const Texel &T, uint64_t Address, VkFormat WriteFormat) const
     T.storeUNorm((uint16_t *)TData);
     Data = TData;
     break;
+  case VK_FORMAT_B8G8R8_UNORM:
+    T.storeUNorm(TData);
+    std::swap(TData[0], TData[2]);
+    Data = TData;
+    break;
   default:
     assert(false && "Unhandled format");
   }
