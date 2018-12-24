@@ -141,5 +141,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetRenderAreaGranularity(VkDevice device,
                                                       VkRenderPass renderPass,
                                                       VkExtent2D *pGranularity)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  pGranularity->width = 1;
+  pGranularity->height = 1;
 }
