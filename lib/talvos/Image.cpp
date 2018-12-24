@@ -179,10 +179,7 @@ uint32_t Image::getWidth(uint32_t Level) const
   return Ret ? Ret : 1;
 }
 
-void Image::read(Texel &T, uint64_t Address) const
-{
-  read(T, Address, Format);
-}
+void Image::read(Texel &T, uint64_t Address) const { read(T, Address, Format); }
 
 void Image::read(Texel &T, uint64_t Address, VkFormat ReadFormat) const
 {
