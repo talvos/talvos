@@ -700,6 +700,9 @@ void Invocation::executeExtInst(const Instruction *Inst)
         Inst, [](auto A, auto B, auto C) -> decltype(A) { return A * B + C; });
     break;
   }
+  case GLSLstd450Floor:
+    executeOpFP<1, 4>(Inst, [](auto X) -> decltype(X) { return floor(X); });
+    break;
   case GLSLstd450InverseSqrt:
     executeOpFP<1, 4>(Inst,
                       [](auto X) -> decltype(X) { return 1.f / sqrt(X); });
