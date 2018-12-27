@@ -68,7 +68,8 @@ vkCmdExecuteCommands(VkCommandBuffer commandBuffer, uint32_t commandBufferCount,
 VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMask(VkCommandBuffer commandBuffer,
                                               uint32_t deviceMask)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  // TODO: Support groups with multiple devices
+  assert(deviceMask == 0x1);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdSetDeviceMaskKHR(VkCommandBuffer commandBuffer,
