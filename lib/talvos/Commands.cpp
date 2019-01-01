@@ -36,9 +36,8 @@ void BlitImageCommand::runImpl(Device &Dev) const
 
   for (const VkImageBlit &Region : Regions)
   {
-    // TODO: Handle mip levels.
-    assert(Region.srcSubresource.mipLevel == 0 &&
-           Region.dstSubresource.mipLevel == 0);
+    uint32_t SrcLevel = Region.srcSubresource.mipLevel;
+    uint32_t DstLevel = Region.dstSubresource.mipLevel;
 
     // TODO: Handle array layers.
     assert(Region.srcSubresource.baseArrayLayer == 0 &&
@@ -82,8 +81,9 @@ void BlitImageCommand::runImpl(Device &Dev) const
 
           // Copy texel from source to destination.
           Image::Texel T;
-          SrcImage.read(T, SrcImage.getTexelAddress(SrcX, SrcY, SrcZ));
-          DstImage.write(T, DstImage.getTexelAddress(X, Y, Z));
+          SrcImage.read(
+              T, SrcImage.getTexelAddress(SrcX, SrcY, SrcZ, 0, SrcLevel));
+          DstImage.write(T, DstImage.getTexelAddress(X, Y, Z, 0, DstLevel));
         }
       }
     }
