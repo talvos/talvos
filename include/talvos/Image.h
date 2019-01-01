@@ -54,6 +54,9 @@ public:
     /// Load signed integer texel components.
     template <typename T> void loadSInt(const T *Data);
 
+    /// Load signed floating point texel components.
+    template <typename T> void loadSFloat(const T *Data);
+
     /// Load normalized texel components from signed integer data.
     template <typename T> void loadSNorm(const T *Data);
 
@@ -71,10 +74,6 @@ public:
       assert(C < 4);
       ((T *)Data)[C] = Value;
     }
-
-    /// Directly set the contents of the raw data backing the texel.
-    /// \p Data must be a pointer to 16 bytes of texel data.
-    void setData(const uint8_t *Data);
 
     /// Store signed integer texel components, truncating as necessary.
     template <typename T> void storeSInt(T *Data) const;

@@ -33,6 +33,14 @@ Image::Texel::Texel(const VkClearColorValue &ClearColor)
   memcpy(Data, ClearColor.float32, 16);
 }
 
+template <typename T> void Image::Texel::loadSFloat(const T *Data)
+{
+  set<float>(0, Data[0]);
+  set<float>(1, Data[1]);
+  set<float>(2, Data[2]);
+  set<float>(3, Data[3]);
+}
+
 template <typename T> void Image::Texel::loadSInt(const T *Data)
 {
   set<int32_t>(0, Data[0]);
@@ -63,11 +71,6 @@ template <typename T> void Image::Texel::loadUNorm(const T *Data)
   set<float>(1, Data[1] / (float)(T)(~0U));
   set<float>(2, Data[2] / (float)(T)(~0U));
   set<float>(3, Data[3] / (float)(T)(~0U));
-}
-
-void Image::Texel::setData(const uint8_t *Data)
-{
-  memcpy(this->Data, Data, 16);
 }
 
 template <typename T> void Image::Texel::storeSInt(T *Data) const
@@ -197,65 +200,91 @@ void Image::read(Texel &T, uint64_t Address, VkFormat ReadFormat) const
   case VK_FORMAT_R8_SINT:
   case VK_FORMAT_R8G8_SINT:
   case VK_FORMAT_R8G8B8_SINT:
+    ((int8_t *)Data)[3] = 1;
   case VK_FORMAT_R8G8B8A8_SINT:
     T.loadSInt((int8_t *)Data);
     break;
+
   case VK_FORMAT_R8_UINT:
   case VK_FORMAT_R8G8_UINT:
   case VK_FORMAT_R8G8B8_UINT:
+    ((uint8_t *)Data)[3] = 1;
   case VK_FORMAT_R8G8B8A8_UINT:
     T.loadUInt((uint8_t *)Data);
     break;
+
   case VK_FORMAT_R16_SINT:
   case VK_FORMAT_R16G16_SINT:
   case VK_FORMAT_R16G16B16_SINT:
+    ((int16_t *)Data)[3] = 1;
   case VK_FORMAT_R16G16B16A16_SINT:
     T.loadSInt((int16_t *)Data);
     break;
+
   case VK_FORMAT_R16_UINT:
   case VK_FORMAT_R16G16_UINT:
   case VK_FORMAT_R16G16B16_UINT:
+    ((uint16_t *)Data)[3] = 1;
   case VK_FORMAT_R16G16B16A16_UINT:
     T.loadUInt((uint16_t *)Data);
     break;
-  case VK_FORMAT_R32_SFLOAT:
-  case VK_FORMAT_R32G32_SFLOAT:
-  case VK_FORMAT_R32G32B32_SFLOAT:
-  case VK_FORMAT_R32G32B32A32_SFLOAT:
+
   case VK_FORMAT_R32_SINT:
   case VK_FORMAT_R32G32_SINT:
   case VK_FORMAT_R32G32B32_SINT:
+    ((int32_t *)Data)[3] = 1;
   case VK_FORMAT_R32G32B32A32_SINT:
+    T.loadSInt((int32_t *)Data);
+    break;
+
   case VK_FORMAT_R32_UINT:
   case VK_FORMAT_R32G32_UINT:
   case VK_FORMAT_R32G32B32_UINT:
+    ((uint32_t *)Data)[3] = 1;
   case VK_FORMAT_R32G32B32A32_UINT:
-    T.setData(Data);
+    T.loadUInt((uint32_t *)Data);
     break;
+
+  case VK_FORMAT_R32_SFLOAT:
+  case VK_FORMAT_R32G32_SFLOAT:
+  case VK_FORMAT_R32G32B32_SFLOAT:
+    ((float *)Data)[3] = 1.f;
+  case VK_FORMAT_R32G32B32A32_SFLOAT:
+    T.loadSFloat((float *)Data);
+    break;
+
   case VK_FORMAT_R8_SNORM:
   case VK_FORMAT_R8G8_SNORM:
   case VK_FORMAT_R8G8B8_SNORM:
+    ((int8_t *)Data)[3] = 1;
   case VK_FORMAT_R8G8B8A8_SNORM:
     T.loadSNorm((int8_t *)Data);
     break;
+
   case VK_FORMAT_R8_UNORM:
   case VK_FORMAT_R8G8_UNORM:
   case VK_FORMAT_R8G8B8_UNORM:
+    ((uint8_t *)Data)[3] = 1;
   case VK_FORMAT_R8G8B8A8_UNORM:
     T.loadUNorm(Data);
     break;
+
   case VK_FORMAT_R16_SNORM:
   case VK_FORMAT_R16G16_SNORM:
   case VK_FORMAT_R16G16B16_SNORM:
+    ((int16_t *)Data)[3] = 1;
   case VK_FORMAT_R16G16B16A16_SNORM:
     T.loadSNorm((int16_t *)Data);
     break;
+
   case VK_FORMAT_R16_UNORM:
   case VK_FORMAT_R16G16_UNORM:
   case VK_FORMAT_R16G16B16_UNORM:
+    ((uint16_t *)Data)[3] = 1;
   case VK_FORMAT_R16G16B16A16_UNORM:
     T.loadUNorm((uint16_t *)Data);
     break;
+
   default:
     assert(false && "Unhandled format");
   }
