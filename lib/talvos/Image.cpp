@@ -75,10 +75,15 @@ template <typename T> void Image::Texel::loadUNorm(const T *Data)
 
 template <typename T> void Image::Texel::storeSInt(T *Data) const
 {
-  Data[0] = (T)get<int32_t>(0);
-  Data[1] = (T)get<int32_t>(1);
-  Data[2] = (T)get<int32_t>(2);
-  Data[3] = (T)get<int32_t>(3);
+  // Clamp each component value to the range of T.
+  auto convert = [](int32_t V) -> T {
+    return (T)std::clamp<int32_t>(V, std::numeric_limits<T>::min(),
+                                  std::numeric_limits<T>::max());
+  };
+  Data[0] = convert(get<int32_t>(0));
+  Data[1] = convert(get<int32_t>(1));
+  Data[2] = convert(get<int32_t>(2));
+  Data[3] = convert(get<int32_t>(3));
 }
 
 template <typename T> void Image::Texel::storeSNorm(T *Data) const
@@ -100,10 +105,14 @@ template <typename T> void Image::Texel::storeSNorm(T *Data) const
 
 template <typename T> void Image::Texel::storeUInt(T *Data) const
 {
-  Data[0] = (T)get<uint32_t>(0);
-  Data[1] = (T)get<uint32_t>(1);
-  Data[2] = (T)get<uint32_t>(2);
-  Data[3] = (T)get<uint32_t>(3);
+  // Clamp each component value to the range of T.
+  auto convert = [](int32_t V) -> T {
+    return (T)std::clamp<uint32_t>(V, 0, std::numeric_limits<T>::max());
+  };
+  Data[0] = convert(get<uint32_t>(0));
+  Data[1] = convert(get<uint32_t>(1));
+  Data[2] = convert(get<uint32_t>(2));
+  Data[3] = convert(get<uint32_t>(3));
 }
 
 template <typename T> void Image::Texel::storeUNorm(T *Data) const
