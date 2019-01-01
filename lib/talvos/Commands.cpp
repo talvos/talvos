@@ -6,7 +6,9 @@
 /// \file Commands.cpp
 /// This file defines the Command base class and its subclasses.
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include "PipelineExecutor.h"
 #include "talvos/Commands.h"
@@ -26,6 +28,67 @@ void Command::run(Device &Dev) const
 }
 
 void BeginRenderPassCommand::runImpl(Device &Dev) const { RPI->begin(); }
+
+void BlitImageCommand::runImpl(Device &Dev) const
+{
+  // TODO: Handle linear filtering.
+  assert(Filter == VK_FILTER_NEAREST);
+
+  for (const VkImageBlit &Region : Regions)
+  {
+    // TODO: Handle mip levels.
+    assert(Region.srcSubresource.mipLevel == 0 &&
+           Region.dstSubresource.mipLevel == 0);
+
+    // TODO: Handle array layers.
+    assert(Region.srcSubresource.baseArrayLayer == 0 &&
+           Region.srcSubresource.layerCount == 1);
+    assert(Region.srcSubresource.baseArrayLayer == 0 &&
+           Region.dstSubresource.layerCount == 1);
+
+    int32_t XMin = std::min(Region.dstOffsets[0].x, Region.dstOffsets[1].x);
+    int32_t XMax = std::max(Region.dstOffsets[0].x, Region.dstOffsets[1].x);
+    int32_t YMin = std::min(Region.dstOffsets[0].y, Region.dstOffsets[1].y);
+    int32_t YMax = std::max(Region.dstOffsets[0].y, Region.dstOffsets[1].y);
+    int32_t ZMin = std::min(Region.dstOffsets[0].z, Region.dstOffsets[1].z);
+    int32_t ZMax = std::max(Region.dstOffsets[0].z, Region.dstOffsets[1].z);
+
+    // Blit region one texel at a time.
+    for (int32_t Z = ZMin; Z < ZMax; Z++)
+    {
+      for (int32_t Y = YMin; Y < YMax; Y++)
+      {
+        for (int32_t X = XMin; X < XMax; X++)
+        {
+          // Generate scaled coordinate for source image.
+          float U = X + 0.5f - Region.dstOffsets[0].x;
+          float V = Y + 0.5f - Region.dstOffsets[0].y;
+          float W = Z + 0.5f - Region.dstOffsets[0].z;
+          U *= (float)(Region.srcOffsets[1].x - Region.srcOffsets[0].x) /
+               (float)(Region.dstOffsets[1].x - Region.dstOffsets[0].x);
+          V *= (float)(Region.srcOffsets[1].y - Region.srcOffsets[0].y) /
+               (float)(Region.dstOffsets[1].y - Region.dstOffsets[0].y);
+          W *= (float)(Region.srcOffsets[1].z - Region.srcOffsets[0].z) /
+               (float)(Region.dstOffsets[1].z - Region.dstOffsets[0].z);
+          U += Region.srcOffsets[0].x;
+          V += Region.srcOffsets[0].y;
+          W += Region.srcOffsets[0].z;
+          int32_t SrcX = std::clamp<int32_t>(std::floor(U), 0,
+                                             SrcImage.getExtent().width - 1);
+          int32_t SrcY = std::clamp<int32_t>(std::floor(V), 0,
+                                             SrcImage.getExtent().height - 1);
+          int32_t SrcZ = std::clamp<int32_t>(std::floor(W), 0,
+                                             SrcImage.getExtent().depth - 1);
+
+          // Copy texel from source to destination.
+          Image::Texel T;
+          SrcImage.read(T, SrcImage.getTexelAddress(SrcX, SrcY, SrcZ));
+          DstImage.write(T, DstImage.getTexelAddress(X, Y, Z));
+        }
+      }
+    }
+  }
+}
 
 void ClearAttachmentCommand::runImpl(Device &Dev) const
 {

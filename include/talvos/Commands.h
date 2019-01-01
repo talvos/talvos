@@ -35,6 +35,7 @@ public:
   enum Type
   {
     BEGIN_RENDER_PASS,
+    BLIT_IMAGE,
     CLEAR_ATTACHMENT,
     CLEAR_COLOR_IMAGE,
     COPY_BUFFER,
@@ -85,6 +86,35 @@ protected:
 private:
   /// The render pass instance.
   std::shared_ptr<RenderPassInstance> RPI;
+};
+
+/// This class encapsulates information about a blit image command.
+class BlitImageCommand : public Command
+{
+public:
+  /// Create a new BlitImageCommand.
+  BlitImageCommand(const Image &SrcImage, const Image &DstImage,
+                   const std::vector<VkImageBlit> &Regions, VkFilter Filter)
+      : Command(BLIT_IMAGE), SrcImage(SrcImage), DstImage(DstImage),
+        Regions(Regions), Filter(Filter)
+  {}
+
+protected:
+  /// Command execution handler.
+  virtual void runImpl(Device &Dev) const override;
+
+private:
+  /// The source image.
+  const Image &SrcImage;
+
+  /// The destination image.
+  const Image &DstImage;
+
+  /// The regions to copy.
+  std::vector<VkImageBlit> Regions;
+
+  /// The filter to use when scaling.
+  VkFilter Filter;
 };
 
 /// This class encapsulates information about a clear attachment command.

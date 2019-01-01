@@ -11,7 +11,9 @@ vkCmdBlitImage(VkCommandBuffer commandBuffer, VkImage srcImage,
                VkImageLayout dstImageLayout, uint32_t regionCount,
                const VkImageBlit *pRegions, VkFilter filter)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  std::vector<VkImageBlit> Regions(pRegions, pRegions + regionCount);
+  commandBuffer->Commands.push_back(new talvos::BlitImageCommand(
+      *srcImage->Image, *dstImage->Image, Regions, filter));
 }
 
 VKAPI_ATTR void VKAPI_CALL vkCmdCopyBuffer(VkCommandBuffer commandBuffer,
