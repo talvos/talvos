@@ -401,7 +401,7 @@ void Image::write(const Texel &T, uint64_t Address, VkFormat WriteFormat) const
     break;
   case VK_FORMAT_B8G8R8_SNORM:
   case VK_FORMAT_B8G8R8A8_SNORM:
-    T.storeSNorm((int8_t*)TData);
+    T.storeSNorm((int8_t *)TData);
     std::swap(TData[0], TData[2]);
     Data = TData;
     break;
