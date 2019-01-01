@@ -294,6 +294,34 @@ void Image::read(Texel &T, uint64_t Address, VkFormat ReadFormat) const
     T.loadUNorm((uint16_t *)Data);
     break;
 
+  case VK_FORMAT_B8G8R8_SINT:
+    ((int8_t *)Data)[3] = 1;
+  case VK_FORMAT_B8G8R8A8_SINT:
+    std::swap(Data[0], Data[2]);
+    T.loadSInt((int8_t *)Data);
+    break;
+
+  case VK_FORMAT_B8G8R8_UINT:
+    ((uint8_t *)Data)[3] = 1;
+  case VK_FORMAT_B8G8R8A8_UINT:
+    std::swap(Data[0], Data[2]);
+    T.loadUInt((uint8_t *)Data);
+    break;
+
+  case VK_FORMAT_B8G8R8_SNORM:
+    ((int8_t *)Data)[3] = 1;
+  case VK_FORMAT_B8G8R8A8_SNORM:
+    std::swap(Data[0], Data[2]);
+    T.loadSNorm((int8_t *)Data);
+    break;
+
+  case VK_FORMAT_B8G8R8_UNORM:
+    ((uint8_t *)Data)[3] = 1;
+  case VK_FORMAT_B8G8R8A8_UNORM:
+    std::swap(Data[0], Data[2]);
+    T.loadUNorm((uint8_t *)Data);
+    break;
+
   default:
     assert(false && "Unhandled format");
   }
