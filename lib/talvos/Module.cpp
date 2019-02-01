@@ -148,6 +148,7 @@ public:
         case SpvCapabilityImageBuffer:
         case SpvCapabilityMatrix:
         case SpvCapabilitySampled1D:
+        case SpvCapabilitySampledBuffer:
         case SpvCapabilityShader:
         case SpvCapabilityStorageBuffer8BitAccess:
         case SpvCapabilityStorageBuffer16BitAccess:

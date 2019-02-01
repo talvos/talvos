@@ -364,6 +364,7 @@ void updateDescriptors(VkDevice Device, VkDescriptorSet Set,
       break;
     }
     case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
+    case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
     {
       const VkBufferView *TexelBuffer = (const VkBufferView *)GetTexelBuffer(b);
       Address = (*TexelBuffer)->ObjectAddress;
