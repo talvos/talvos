@@ -161,6 +161,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpFUnordNotEqual, FUnordNotEqual);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
+    DISPATCH(SpvOpImageFetch, ImageRead);
     DISPATCH(SpvOpImageQuerySize, ImageQuerySize);
     DISPATCH(SpvOpImageRead, ImageRead);
     DISPATCH(SpvOpImageSampleExplicitLod, ImageSampleExplicitLod);
