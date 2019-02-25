@@ -78,7 +78,9 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties(
   pMemoryProperties->memoryTypes[0].propertyFlags =
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+      VK_MEMORY_PROPERTY_HOST_CACHED_BIT |
+      VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
 
   pMemoryProperties->memoryHeapCount = 1;
   pMemoryProperties->memoryHeaps[0].size = 1048576; // TODO: Actual size.
