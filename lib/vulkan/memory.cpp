@@ -53,7 +53,7 @@ VKAPI_ATTR void VKAPI_CALL
 vkGetDeviceMemoryCommitment(VkDevice device, VkDeviceMemory memory,
                             VkDeviceSize *pCommittedMemoryInBytes)
 {
-  TALVOS_ABORT_UNIMPLEMENTED;
+  *pCommittedMemoryInBytes = memory->NumBytes;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkGetMemoryFdKHR(
