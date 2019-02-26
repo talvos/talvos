@@ -73,13 +73,16 @@ VKAPI_ATTR void VKAPI_CALL vkGetPhysicalDeviceMemoryProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties *pMemoryProperties)
 {
-  pMemoryProperties->memoryTypeCount = 1;
+  pMemoryProperties->memoryTypeCount = 2;
   pMemoryProperties->memoryTypes[0].heapIndex = 0;
   pMemoryProperties->memoryTypes[0].propertyFlags =
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
-      VK_MEMORY_PROPERTY_HOST_CACHED_BIT |
+      VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+  pMemoryProperties->memoryTypes[1].heapIndex = 0;
+  pMemoryProperties->memoryTypes[1].propertyFlags =
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
       VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
 
   pMemoryProperties->memoryHeapCount = 1;
