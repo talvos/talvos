@@ -182,9 +182,6 @@ public:
   ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
             VkImageSubresourceRange Range);
 
-  /// Returns the memory address of the start of the image view data.
-  uint64_t getAddress() const { return Address; }
-
   /// Returns the base array layer of the image view.
   uint32_t getBaseArrayLayer() const { return BaseArrayLayer; }
 
@@ -211,7 +208,7 @@ public:
 
   /// Returns the address in memory of the texel at the specified coordinate.
   uint64_t getTexelAddress(uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
-                           uint32_t Layer = 0) const;
+                           uint32_t Layer = 0, uint32_t MipLevel = 0) const;
 
   /// Returns the type of the image view.
   VkImageViewType getType() const { return Type; }
@@ -233,11 +230,11 @@ public:
 
   /// Read a texel from the image view at the specified coordinate.
   void read(Image::Texel &T, uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
-            uint32_t Layer = 0) const;
+            uint32_t Layer = 0, uint32_t MipLevel = 0) const;
 
   /// Write a texel to the image view at the specified coordinate.
   void write(const Image::Texel &T, uint32_t X, uint32_t Y = 0, uint32_t Z = 0,
-             uint32_t Layer = 0) const;
+             uint32_t Layer = 0, uint32_t MipLevel = 0) const;
 
 private:
   const Image &Img; ///< The image that the image corresponds to.
@@ -249,8 +246,6 @@ private:
   uint32_t NumArrayLayers; ///< The number of array layers.
   uint32_t BaseMipLevel;   ///< The base mip level.
   uint32_t NumMipLevels;   ///< The number of mip levels.
-
-  uint64_t Address; ///< The memory address of the image view data.
 };
 
 /// This class represents a sampler object.

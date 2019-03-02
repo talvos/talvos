@@ -179,9 +179,9 @@ uint64_t Image::getMipLevelOffset(uint32_t Level) const
 uint64_t Image::getTexelAddress(uint32_t X, uint32_t Y, uint32_t Z,
                                 uint32_t Layer, uint32_t MipLevel) const
 {
+  assert(Z == 0 || Layer == 0);
   return Address + getMipLevelOffset(MipLevel) +
-         (X + (Y + (Z + (Layer * getDepth(MipLevel))) * getHeight(MipLevel)) *
-                  getWidth(MipLevel)) *
+         (X + (Y + (Z + Layer) * getHeight(MipLevel)) * getWidth(MipLevel)) *
              getElementSize();
 }
 
@@ -460,11 +460,6 @@ ImageView::ImageView(const Image &Img, VkImageViewType Type, VkFormat Format,
   NumMipLevels = Range.levelCount;
   if (NumMipLevels == VK_REMAINING_MIP_LEVELS)
     NumMipLevels = Img.getNumMipLevels() - BaseMipLevel;
-
-  uint32_t LevelWidth = Img.getWidth(BaseMipLevel);
-  uint32_t LevelHeight = Img.getHeight(BaseMipLevel);
-  Address = Img.getAddress() + Img.getMipLevelOffset(BaseMipLevel) +
-            (BaseArrayLayer * LevelWidth * LevelHeight * Img.getElementSize());
 }
 
 uint32_t ImageView::getDepth(uint32_t Level) const
@@ -478,12 +473,10 @@ uint32_t ImageView::getHeight(uint32_t Level) const
 }
 
 uint64_t ImageView::getTexelAddress(uint32_t X, uint32_t Y, uint32_t Z,
-                                    uint32_t Layer) const
+                                    uint32_t Layer, uint32_t MipLevel) const
 {
-  return Address + (X + (Y + (Z + (Layer * Img.getDepth(BaseMipLevel))) *
-                                 Img.getHeight(BaseMipLevel)) *
-                            Img.getWidth(BaseMipLevel)) *
-                       Img.getElementSize();
+  return Img.getTexelAddress(X, Y, Z, BaseArrayLayer + Layer,
+                             BaseMipLevel + MipLevel);
 }
 
 uint32_t ImageView::getWidth(uint32_t Level) const
@@ -510,15 +503,15 @@ bool ImageView::isCube() const
 }
 
 void ImageView::read(Image::Texel &T, uint32_t X, uint32_t Y, uint32_t Z,
-                     uint32_t Layer) const
+                     uint32_t Layer, uint32_t MipLevel) const
 {
-  Img.read(T, getTexelAddress(X, Y, Z, Layer), Format);
+  Img.read(T, getTexelAddress(X, Y, Z, Layer, MipLevel), Format);
 }
 
 void ImageView::write(const Image::Texel &T, uint32_t X, uint32_t Y, uint32_t Z,
-                      uint32_t Layer) const
+                      uint32_t Layer, uint32_t MipLevel) const
 {
-  Img.write(T, getTexelAddress(X, Y, Z, Layer), Format);
+  Img.write(T, getTexelAddress(X, Y, Z, Layer, MipLevel), Format);
 }
 
 void Sampler::sample(const talvos::ImageView *Image, Image::Texel &Texel,
