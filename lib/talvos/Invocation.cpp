@@ -164,6 +164,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpImage, Image);
     DISPATCH(SpvOpImageFetch, ImageRead);
     DISPATCH(SpvOpImageQuerySize, ImageQuerySize);
+    DISPATCH(SpvOpImageQuerySizeLod, ImageQuerySize);
     DISPATCH(SpvOpImageRead, ImageRead);
     DISPATCH(SpvOpImageSampleExplicitLod, ImageSampleExplicitLod);
     DISPATCH(SpvOpImageWrite, ImageWrite);
@@ -931,26 +932,31 @@ void Invocation::executeImageQuerySize(const Instruction *Inst)
   Object Result(Inst->getResultType());
   assert(Result.getType()->getScalarType()->getBitWidth() == 32);
 
+  // Get mip level (if explicit).
+  uint32_t Level = 0;
+  if (Inst->getOpcode() == SpvOpImageQuerySizeLod)
+    Level = Objects[Inst->getOperand(3)].get<uint32_t>();
+
   // Get size in each dimension.
   uint32_t ArraySizeIndex;
   switch (ImageObj.getType()->getDimensionality())
   {
   case SpvDim1D:
   case SpvDimBuffer:
-    Result.set<uint32_t>(Image->getWidth(), 0);
+    Result.set<uint32_t>(Image->getWidth(Level), 0);
     ArraySizeIndex = 1;
     break;
   case SpvDim2D:
   case SpvDimCube:
   case SpvDimRect:
-    Result.set<uint32_t>(Image->getWidth(), 0);
-    Result.set<uint32_t>(Image->getHeight(), 1);
+    Result.set<uint32_t>(Image->getWidth(Level), 0);
+    Result.set<uint32_t>(Image->getHeight(Level), 1);
     ArraySizeIndex = 2;
     break;
   case SpvDim3D:
-    Result.set<uint32_t>(Image->getWidth(), 0);
-    Result.set<uint32_t>(Image->getHeight(), 1);
-    Result.set<uint32_t>(Image->getDepth(), 2);
+    Result.set<uint32_t>(Image->getWidth(Level), 0);
+    Result.set<uint32_t>(Image->getHeight(Level), 1);
+    Result.set<uint32_t>(Image->getDepth(Level), 2);
     ArraySizeIndex = 3;
     break;
   default:
