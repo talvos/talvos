@@ -976,9 +976,6 @@ void Invocation::executeImageRead(const Instruction *Inst)
   const Object &ImageObj = Objects[Inst->getOperand(2)];
   const ImageView *Image = *(const ImageView **)(ImageObj.getData());
 
-  // TODO: Handle additional operands
-  assert(Inst->getNumOperands() == 4);
-
   // TODO: Handle subpass data dimensionality
   assert(ImageObj.getType()->getDimensionality() != SpvDimSubpassData);
 
@@ -998,10 +995,29 @@ void Invocation::executeImageRead(const Instruction *Inst)
   uint32_t X = Coord.get<uint32_t>(0);
   uint32_t Y = (NumCoords > 1) ? Coord.get<uint32_t>(1) : 0;
   uint32_t Z = (NumCoords > 2) ? Coord.get<uint32_t>(2) : 0;
+  uint32_t Level = 0;
+
+  // Handle optional image operands.
+  if (Inst->getNumOperands() > 4)
+  {
+    uint32_t OpIdx = 5;
+    uint32_t OperandMask = Inst->getOperand(4);
+
+    if (OperandMask & SpvImageOperandsLodMask)
+    {
+      Level = Objects[Inst->getOperand(OpIdx++)].get<uint32_t>();
+      OperandMask ^= SpvImageOperandsLodMask;
+    }
+
+    // Check for any remaining values after all supported operands handled.
+    if (OperandMask)
+      Dev.reportError("Unhandled image operand mask", true);
+    assert(OpIdx == Inst->getNumOperands());
+  }
 
   // Read texel from image.
   Image::Texel T;
-  Image->read(T, X, Y, Z, Layer);
+  Image->read(T, X, Y, Z, Layer, Level);
   Objects[Inst->getOperand(1)] = T.toObject(Inst->getResultType());
 }
 
