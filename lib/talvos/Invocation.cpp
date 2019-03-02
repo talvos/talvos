@@ -161,6 +161,7 @@ void Invocation::execute(const talvos::Instruction *Inst)
     DISPATCH(SpvOpFUnordNotEqual, FUnordNotEqual);
     DISPATCH(SpvOpIAdd, IAdd);
     DISPATCH(SpvOpIEqual, IEqual);
+    DISPATCH(SpvOpImage, Image);
     DISPATCH(SpvOpImageFetch, ImageRead);
     DISPATCH(SpvOpImageQuerySize, ImageQuerySize);
     DISPATCH(SpvOpImageRead, ImageRead);
@@ -909,6 +910,16 @@ void Invocation::executeIAdd(const Instruction *Inst)
 void Invocation::executeIEqual(const Instruction *Inst)
 {
   executeOpUInt<2>(Inst, [](auto A, auto B) -> bool { return A == B; });
+}
+
+void Invocation::executeImage(const Instruction *Inst)
+{
+  // Extract image object from a sampled image.
+  const Object &SampledImageObj = Objects[Inst->getOperand(2)];
+  const SampledImage *SI = (const SampledImage *)(SampledImageObj.getData());
+  Objects[Inst->getOperand(1)] =
+      Object(SampledImageObj.getType()->getElementType(),
+             (const uint8_t *)&(SI->Image));
 }
 
 void Invocation::executeImageQuerySize(const Instruction *Inst)
