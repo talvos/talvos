@@ -8,6 +8,14 @@
 #include <algorithm>
 #include <cstring>
 
+// List of supported instance extensions.
+const VkExtensionProperties InstanceExtensions[] = {
+    {VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+     VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_SPEC_VERSION},
+};
+const uint32_t NumInstanceExtensions =
+    sizeof(InstanceExtensions) / sizeof(VkExtensionProperties);
+
 // List of supported device extensions.
 const VkExtensionProperties DeviceExtensions[] = {
     {VK_KHR_8BIT_STORAGE_EXTENSION_NAME, VK_KHR_8BIT_STORAGE_SPEC_VERSION},
@@ -52,9 +60,20 @@ VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceExtensionProperties(
     const char *pLayerName, uint32_t *pPropertyCount,
     VkExtensionProperties *pProperties)
 {
-  // TODO: Return any extensions that are actually supported.
-  *pPropertyCount = 0;
-  return VK_SUCCESS;
+  if (!pProperties)
+  {
+    *pPropertyCount = NumInstanceExtensions;
+    return VK_SUCCESS;
+  }
+
+  // Copy extension properties to output.
+  uint32_t Count = std::min(NumInstanceExtensions, *pPropertyCount);
+  memcpy(pProperties, InstanceExtensions, Count * sizeof(VkExtensionProperties));
+
+  if (Count < NumInstanceExtensions)
+    return VK_INCOMPLETE;
+  else
+    return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateInstanceLayerProperties(
