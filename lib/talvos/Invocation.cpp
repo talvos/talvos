@@ -1394,7 +1394,7 @@ void Invocation::executeSLessThanEqual(const Instruction *Inst)
 void Invocation::executeSMod(const Instruction *Inst)
 {
   executeOpSInt<2>(Inst, [](auto A, auto B) -> decltype(A) {
-    return (abs(A) % B) * (B < 0 ? -1 : 1);
+    return (std::abs(A) % B) * (B < 0 ? -1 : 1);
   });
 }
 
