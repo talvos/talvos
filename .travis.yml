@@ -21,18 +21,18 @@ matrix:
             - g++-7 doxygen
             - clang-5.0
 
-    # Clang 7
+    # Clang 8
     - os: linux
-      env: COMPILER_NAME=clang CC=clang-7 CXX=clang++-7
+      env: COMPILER_NAME=clang CC=clang-8 CXX=clang++-8
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-7 main'
+            - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-8 main'
               key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
           packages:
             - g++-7
-            - clang-7
+            - clang-8
 
     # GCC 7
     - os: linux
@@ -44,15 +44,15 @@ matrix:
           packages:
             - g++-7
 
-    # GCC 8
+    # GCC 9
     - os: linux
-      env: COMPILER_NAME=g++ CC=gcc-8 CXX=g++-8
+      env: COMPILER_NAME=g++ CC=gcc-9 CXX=g++-9
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-8
+            - g++-9
 
 install:
   - if [[ "$DEPLOY_DOCS" == "1" ]]; then

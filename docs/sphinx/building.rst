@@ -12,9 +12,9 @@ The following compilers/platforms are frequently tested via continuous
 integration (Travis CI and AppVeyor):
 
 - GCC 7 (Ubuntu 14.04)
-- GCC 8 (Ubuntu 14.04)
+- GCC 9 (Ubuntu 14.04)
 - Clang 5.0 (Ubuntu 14.04)
-- Clang 7.0 (Ubuntu 14.04)
+- Clang 8.0 (Ubuntu 14.04)
 - AppleClang 9.1 (macOS 10.13 / Xcode 9.4)
 - Visual Studio 2017 (x64)
 
