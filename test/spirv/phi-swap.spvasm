@@ -8,6 +8,7 @@
           %2 = OpString "filename"
                OpDecorate %3 DescriptorSet 0
                OpDecorate %3 Binding 0
+               OpDecorate %4 Block
                OpMemberDecorate %4 0 Offset 0
 
           %5 = OpTypeVoid

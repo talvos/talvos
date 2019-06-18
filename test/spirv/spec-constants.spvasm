@@ -10,6 +10,7 @@
                OpExecutionMode %1 LocalSize 1 1 1
                OpDecorate %2 DescriptorSet 0
                OpDecorate %2 Binding 0
+               OpDecorate %3 Block
                OpMemberDecorate %3 0 Offset 0
                OpDecorate %4 SpecId 0
                OpDecorate %5 SpecId 1

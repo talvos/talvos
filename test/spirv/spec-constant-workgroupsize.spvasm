@@ -14,6 +14,7 @@
                OpDecorate %5 Binding 1
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 2
+               OpDecorate %7 Block
                OpMemberDecorate %7 0 Offset 0
                OpDecorate %8 SpecId 0
                OpDecorate %9 SpecId 1
